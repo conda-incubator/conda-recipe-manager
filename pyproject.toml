@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+namespaces = false
+
+[tool.setuptools.package-data]
+"conda-recipe-manager" = ["py.typed"]
+
+[project]
+name = "conda-recipe-manager"
+version = "0.1.0"
+authors = [
+  { name="Anaconda, Inc.", email="distribution_team@anaconda.com" },
+]
+description = "Fast and rough renderer of conda recipes."
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.8"
+keywords = ["renderer", "conda recipe"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Utilities",
+]
+dependencies = [
+  "click",
+  "jinja2",
+  "pyyaml",
+  "requests",
+  "jsonschema",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+conda_build = ["conda-build"]
+
+[project.scripts]
+convert = "conda_recipe_manager.commands.convert:cli"
+
+[project.urls]
+"Homepage" = "https://github.com/anaconda/conda-recipe-manager"
+"Bug Tracker" = "https://github.com/anaconda/conda-recipe-manager/issues"
+"Repository" = "https://github.com/anaconda/conda-recipe-manager"
+"Documentation" = "https://github.com/anaconda/conda-recipe-manager/blob/main/README.md"
+
+# This causes an error saying that 'packages' is already defined and can't be overwritten.
+#[tool.setuptools]
+#packages = ["conda-recipe-manager"]

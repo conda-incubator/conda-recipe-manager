@@ -1,0 +1,56 @@
+{% set name = "percy" %}
+{% set version = "0.1.5" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/anaconda-distribution/percy/archive/refs/tags/{{ version }}.tar.gz
+  sha256: 6a84e1320651c9925af6a50ea1388018f709ab4caa2fcf1c2436cb1b491b1934
+
+build:
+  number: 0
+  noarch: python
+  script: pip install . --no-deps --no-build-isolation -vv
+  entry_points:
+    - percy = percy.commands.main:cli
+
+requirements:
+  host:
+    - python
+    - pip
+    - setuptools
+    - wheel
+  run:
+    - python >=3.11
+    - click >=8.1.7
+    - conda
+    - jinja2
+    - pyyaml
+    - requests
+    - jsonschema
+
+test:
+  imports:
+    - percy
+  source_files:
+    - percy/tests/
+  requires:
+    - pip
+    - pytest
+    - pytest-xdist
+  commands:
+    - pip check
+    - python -m pytest -n auto percy/tests/
+
+about:
+  home: https://github.com/anaconda-distribution/percy
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: Helper tool for recipes on aggregate.
+  description: |
+    Renders local recipes, provides build orders, find outdated recipes.
+  doc_url: https://github.com/anaconda-distribution/percy
+  dev_url: https://github.com/anaconda-distribution/percy

@@ -1,0 +1,72 @@
+{% set zz_non_alpha_first = 42 %}
+{% set name = "types-toml" %}
+{% set version = "0.10.8.6" %}
+
+package:
+  name: {{ name|lower }}  # [unix]
+  is_cool_name: true
+
+build:
+  number: 0
+  skip: true  # [py<37]
+  is_true: true
+  meaning_of_life: 42
+
+# Comment above a top-level structure
+requirements:
+  empty_field1:
+  host:
+    - setuptools  # [unix]
+    - fakereq  # [unix] selector with comment
+  empty_field2: Not so empty now
+  run:
+    - python  # not a selector
+  empty_field3:
+
+about:
+  summary: 62
+  description: |
+    This is a PEP '561 type stub package for the toml package.
+    It can be used by type-checking tools like mypy, pyright,
+    pytype, PyCharm, etc. to check code that uses toml.
+  license: Apache-2.0 AND MIT
+
+multi_level:
+  list_1:
+    - "There's just one place to go for all your spatula needs!"
+    - ken
+    - foo
+    # Ensure a comment in a list is supported
+    - barbie
+    - bar
+    - Spatula City!
+  list_2:
+    - cat
+    - We got it all on UHF
+    - bat
+    - mat
+  list_3:
+    - ls
+    - sl
+    - cowsay
+
+test_var_usage:
+  foo: {{ version }}
+  bar:
+    - baz
+    - {{ zz_non_alpha_first }}
+    - blah
+    - This {{ name }} is silly
+    - last
+  Stanley:
+    - "Oh, Joel Miller, you've just found the marble in the oatmeal."
+    - "You're a lucky, lucky, lucky little boy."
+    - "'Cause you know why?"
+    - You get to drink from... the FIRE HOOOOOSE!
+
+U62:
+  George:
+    - "How'd you like your own TV show?"
+    - "You're on"
+  Stanley:
+    - Ok

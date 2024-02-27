@@ -1,0 +1,34 @@
+name: Set up environment
+description: Set up an percy environment
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
+      with:
+        python-version: ${{ inputs.python-version }}
+        cache: 'pip'
+    - name: Cache conda env
+      id: cache-conda
+      uses: actions/cache@13aacd865c20de90d75de3b17ebe84f7a17d57d2 # v4.0.0
+      env:
+        cache-name: conda-env-cache
+      with:
+        cache: 'pip'
+        path: '/usr/share/miniconda/envs'
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/environment.yml') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+    - name: Create Environment
+      shell: bash
+      if: ${{ steps.cache-conda.outputs.cache-hit == false }}
+      # NOTE: We use `sed` to force a Python version in the `environment.yaml` file
+      run: |
+        conda update -n base -c defaults conda
+        source $CONDA/etc/profile.d/conda.sh
+        conda init bash
+        sed -i 's/- python >=3.*$/- python ${{ inputs.python-version }}.*/' environment.yaml
+        conda env create -f environment.yaml --name percy --force
+        conda run --name percy pip install .

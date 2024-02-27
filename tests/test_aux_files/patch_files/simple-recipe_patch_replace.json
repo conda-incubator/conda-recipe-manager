@@ -1,0 +1,36 @@
+[
+    {
+        "op": "replace",
+        "path": "/build/number",
+        "value": 42
+    },
+    {
+        "op": "replace",
+        "path": "/build/is_true",
+        "value": false
+    },
+    {
+        "op": "replace",
+        "path": "/about/license",
+        "value": "MIT"
+    },
+    {
+        "op": "replace",
+        "path": "/requirements/run/0",
+        "value": "cpython"
+    },
+    {
+        "op": "replace",
+        "path": "/about/summary",
+        "value": [
+            "The Trial",
+            "Never Ends",
+            "Picard"
+        ]
+    },
+    {
+        "op": "replace",
+        "path": "/about/description",
+        "value": "This is a PEP 561\ntype stub package\nfor the toml package."
+    }
+]

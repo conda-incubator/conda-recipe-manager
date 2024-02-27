@@ -1,0 +1,174 @@
+schema_version: 1
+
+context:
+  version: 8.4.0
+
+recipe:
+  name: curl_split_recipe
+  version: ${{ version }}
+
+source:
+  url: https://curl.se/download/curl-${{ version }}.tar.bz2
+  sha256: e5250581a9c032b1b6ed3cf2f9c114c811fc41881069e9892d115cc73f9e88c6
+
+build:
+  number: 0
+
+requirements:
+  build:
+    - if: unix
+      then: libtool
+    - ${{ compiler('c') }}
+    - if: unix
+      then: make
+    # perl is required to run the tests on UNIX.
+    - if: unix
+      then: perl
+    - if: unix
+      then: pkg-config
+  host:
+    - krb5        1.20.1
+    - if: unix
+      then: libnghttp2  1.57.0
+    - libssh2     1.10.0
+    - if: unix
+      then: openssl     ${{ openssl }}
+    - zlib        ${{ zlib }}
+
+outputs:
+  - package:
+      name: libcurl
+    requirements:
+      build:
+        - ${{ compiler('c') }}
+      host:
+        - krb5        1.20.1
+        - if: unix
+          then: libnghttp2  1.57.0
+        - libssh2     1.10.0
+        - if: unix
+          then: openssl     ${{ openssl }}
+        - zlib        ${{ zlib }}
+      run:
+        - if: unix
+          then: libnghttp2  >=1.57.0
+        - libssh2     >=1.10.0
+        - openssl  # exact pin handled through openssl run_exports
+    build:
+      run_exports:
+        - ${{ pin_subpackage('libcurl') }}
+      ignore_run_exports:  # [win]
+        - if: win
+          then: krb5
+    files:
+      - if: unix
+        then: include/curl
+      - if: linux
+        then: lib/libcurl.so*
+      - if: osx
+        then: lib/libcurl*.dylib
+      - if: unix
+        then: lib/pkgconfig/libcurl*
+      - if: unix
+        then: bin/curl-config
+      - if: win
+        then: Library/bin/libcurl.dll
+      - if: win
+        then: Library/include/curl
+      - if: win
+        then: Library/lib/libcurl.lib
+      - if: win
+        then: Library/lib/libcurl.exp
+    tests:
+      script:
+        - if: not win
+          then: curl-config --features
+        - if: not win
+          then: curl-config --protocols
+        - if: not win
+          then: test -f ${PREFIX}/lib/libcurl${SHLIB_EXT}
+        - if: not win
+          then: test ! -f ${PREFIX}/lib/libcurl.a
+        - if: win
+          then: if exist %LIBRARY_BIN%\curl.exe exit 1
+        - if: win
+          then: if exist %LIBRARY_LIB%\libcurl_a.lib exit 1
+        - if: win
+          then: if not exist %LIBRARY_BIN%\libcurl.dll exit 1
+      python:
+        pip-check: false
+  - package:
+      name: libcurl-static
+    requirements:
+      build:
+        - ${{ compiler('c') }}
+      host:
+        - krb5     1.20.1
+        - libssh2  1.10.0
+        - if: win
+          then: openssl  ${{ openssl }}
+        - zlib     ${{ zlib }}
+        - ${{ pin_subpackage('libcurl', exact=True) }}
+      run:
+        - ${{ pin_subpackage('libcurl', exact=True) }}
+    files:
+      - if: unix
+        then: lib/libcurl.a*
+      - if: win
+        then: Library/lib/libcurl_a.lib
+    tests:
+      script:
+        - if: not win
+          then: test -f $PREFIX/lib/libcurl.a
+        - if: win
+          then: if not exist %LIBRARY_LIB%\libcurl_a.lib exit 1
+      python:
+        pip-check: false
+  - package:
+      name: curl
+    files:
+      - if: unix
+        then: bin/curl
+      - if: win
+        then: Library/bin/curl.exe*
+    build:
+      ignore_run_exports:
+        # Ignoring the run export since we use openssl in the host section
+        # as a means to produce the right variants only. We don't need the dependency
+        # since it's already on libcurl.
+        - openssl
+    requirements:
+      build:
+        - ${{ compiler('c') }}
+      host:
+        - openssl ${{ openssl }}
+        - ${{ pin_subpackage('libcurl', exact=True) }}
+      run:
+        - ${{ pin_subpackage('libcurl', exact=True) }}
+    tests:
+      script:
+        - curl --help
+        - curl https://raw.githubusercontent.com/conda-forge/curl-feedstock/master/LICENSE.txt
+        - if: win
+          then: if not exist %LIBRARY_BIN%\curl.exe exit 1
+      python:
+        pip-check: false
+
+about:
+  license: curl
+  license_url: https://curl.se/docs/copyright.html
+  summary: tool and library for transferring data with URL syntax
+  description: |
+    Curl is an open source command line tool and library for transferring data
+    with URL syntax. It is used in command lines or scripts to transfer data.
+  homepage: https://curl.se/
+  repository: https://github.com/curl/curl
+  documentation: https://curl.se/docs/
+
+extra:
+  recipe-maintainers:
+    - msarahan
+    - jakirkham
+    - ocefpaf
+    - mingwandroid
+    - xylar

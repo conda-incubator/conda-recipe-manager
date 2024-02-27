@@ -1,0 +1,72 @@
+--------------------
+RecipeParser Instance
+- Variables Table:
+{
+  "zz_non_alpha_first": 42,
+  "name": "types-toml",
+  "version": "0.10.8.6"
+}
+- Selectors Table:
+  [unix]
+    - name -> /package/name
+    - {{ name|lower }} -> /package/name
+    - setuptools -> /requirements/host/0
+    - fakereq -> /requirements/host/1
+  [py<37]
+    - skip -> /build/skip
+    - True -> /build/skip
+  [unix and win]
+    - empty_field2 -> /requirements/empty_field2
+- is_modified?: False
+- Tree:
+/
+  |- package
+    |- name
+      |- {{ name|lower }}
+  |- build
+    |- number
+      |- 0
+    |- skip
+      |- True
+    |- is_true
+      |- True
+  |- <Comment: # Comment above a top-level structure>
+  |- requirements
+    |- empty_field1
+    |- host
+      |- setuptools
+      |- fakereq
+    |- empty_field2
+    |- run
+      |- python
+    |- empty_field3
+  |- about
+    |- summary
+      |- This is a small recipe for testing
+    |- description
+      |- ["This is a PEP '561 type stub package for the toml package.", 'It can be used by type-checking tools like mypy, pyright,', 'pytype, PyCharm, etc. to check code that uses toml.']
+    |- license
+      |- Apache-2.0 AND MIT
+  |- multi_level
+    |- list_1
+      |- foo
+      |- <Comment: # Ensure a comment in a list is supported>
+      |- bar
+    |- list_2
+      |- cat
+      |- bat
+      |- mat
+    |- list_3
+      |- ls
+      |- sl
+      |- cowsay
+  |- test_var_usage
+    |- foo
+      |- {{ version }}
+    |- bar
+      |- baz
+      |- {{ zz_non_alpha_first }}
+      |- blah
+      |- This {{ name }} is silly
+      |- last
+--------------------

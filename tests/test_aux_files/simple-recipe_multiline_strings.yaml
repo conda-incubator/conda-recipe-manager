@@ -1,0 +1,61 @@
+{% set zz_non_alpha_first = 42 %}
+{% set name = "types-toml" %}
+{% set version = "0.10.8.6" %}
+{% set fox = "tiger" %}
+
+package:
+  name: {{ name|lower }}  # [unix]
+
+build:
+  number: 0
+  skip: true  # [py<37]
+  is_true: true
+
+about:
+  summary: This is a small recipe for testing
+  description0: |
+    The quick brown
+    {{fox}}
+
+    jumped over the lazy dog
+
+  description1: |+
+    The quick brown
+    {{fox}}
+
+    jumped over the lazy dog
+
+  description2: |-
+    The quick brown
+    {{fox}}
+
+    jumped over the lazy dog
+
+  description3: >
+    The quick brown
+    {{fox}}
+
+    jumped over the lazy dog
+
+  description4: >+
+    The quick brown
+    {{fox}}
+
+    jumped over the lazy dog
+
+  description5: >-
+    The quick brown
+    {{fox}}
+
+    jumped over the lazy dog
+
+  license: Apache-2.0 AND MIT
+
+test_var_usage:
+  foo: {{ version }}
+  bar:
+    - baz
+    - {{ zz_non_alpha_first }}
+    - blah
+    - This {{ name }} is silly
+    - last

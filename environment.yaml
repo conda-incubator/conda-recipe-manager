@@ -1,0 +1,26 @@
+name: conda-recipe-manager
+channels:
+  - defaults
+
+dependencies:
+  - black
+  - isort
+  - make
+  - mypy
+  - python >=3.11
+  - pytest
+  - pytest-cov
+  - pytest-xdist
+  - pylint
+  - pip
+  - click>=8.1.7
+  - conda
+  - jinja2
+  - pyyaml
+  - types-pyyaml
+  - requests
+  - types-requests
+  - conda-build
+  - jsonschema
+  - types-jsonschema
+  - pre-commit

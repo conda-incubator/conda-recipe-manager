@@ -1,0 +1,74 @@
+# Apply to all files without committing:
+#   pre-commit run --all-files
+# Update this file:
+#   pre-commit autoupdate
+# This prevents `pre-commit` from using a newer version of Python, which may cause `pylint` to emit extra errors.
+default_language_version:
+    python: python3.11
+exclude: |
+  (?x)^(
+    .*/versioneer\.py|.*/_version\.py|.*/.*\.svg|tests/test_aux_files/.*
+  )$
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.5.0
+  hooks:
+  - id: check-added-large-files
+    exclude_types: ["json", "yaml", "pdf"]
+  - id: check-ast
+  - id: fix-byte-order-marker
+  - id: check-case-conflict
+  - id: check-executables-have-shebangs
+  - id: check-merge-conflict
+  - id: check-shebang-scripts-are-executable
+  - id: check-yaml
+  - id: debug-statements
+  - id: detect-private-key
+  - id: end-of-file-fixer
+  - id: mixed-line-ending
+  - id: trailing-whitespace
+- repo: https://github.com/python-jsonschema/check-jsonschema
+  rev: 0.28.0
+  hooks:
+  - id: check-github-actions
+  - id: check-github-workflows
+  - id: check-renovate
+# Notes:
+# - By default, `black` uses a line-length of 88.
+# - `isort` will conflict with `black`, if not properly configured
+- repo: https://github.com/pycqa/isort
+  rev: 5.13.2
+  hooks:
+  - id: isort
+    args: ["--profile", "black", --line-length=120]
+- repo: https://github.com/psf/black
+  rev: 23.12.1
+  hooks:
+  - id: black
+    args: [--line-length=120]
+- repo: https://github.com/PyCQA/pylint
+  rev: v3.0.3
+  hooks:
+  - id: pylint
+    args: ["--rcfile=.pylintrc"]
+# `pre-commit` no longer provides a hook for `pytest`, by design
+- repo: local
+  hooks:
+  # TODO Future: enable `mypy` on the full project. `make analyze` only checks some modules.
+  - id: mypy
+    language: system
+    name: mypy-parser
+    pass_filenames: false
+    entry: make analyze
+  - id: pytest
+    language: system
+    name: pytest
+    always_run: true
+    pass_filenames: false
+    entry: make test
+  - id: pytest-cov
+    language: system
+    name: pytest-cov
+    always_run: true
+    pass_filenames: false
+    entry: make test-cov
