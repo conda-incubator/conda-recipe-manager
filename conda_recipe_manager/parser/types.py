@@ -7,7 +7,7 @@ from __future__ import annotations
 from enum import StrEnum, auto
 from typing import Final
 
-from percy.types import Primitives, SchemaType
+from conda_recipe_manager.types import Primitives, SchemaType
 
 #### Types ####
 

@@ -6,8 +6,8 @@ from __future__ import annotations
 
 from typing import Callable, Final, Optional
 
-from percy.parser._node import Node
-from percy.parser._types import ROOT_NODE_VALUE, StrStack, StrStackImmutable
+from conda_recipe_manager.parser._node import Node
+from conda_recipe_manager.parser._types import ROOT_NODE_VALUE, StrStack, StrStackImmutable
 
 # Indicates an array index that is not valid
 INVALID_IDX: Final[int] = -1

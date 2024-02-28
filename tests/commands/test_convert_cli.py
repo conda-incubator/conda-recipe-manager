@@ -4,7 +4,7 @@ Description:    Tests the `convert` CLI
 """
 from click.testing import CliRunner
 
-from percy.commands.convert import convert
+from conda_recipe_manager.commands.convert import convert
 
 
 def test_usage() -> None:

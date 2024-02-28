@@ -11,8 +11,8 @@ from typing import Final
 
 import click
 
-from percy.parser.recipe_parser import RecipeParser
-from percy.parser.types import MessageCategory, MessageTable
+from conda_recipe_manager.parser.recipe_parser import RecipeParser
+from conda_recipe_manager.parser.types import MessageCategory, MessageTable
 
 # Required file name for the recipe, specified in CEP-13
 NEW_FORMAT_RECIPE_FILE_NAME: Final[str] = "recipe.yaml"

@@ -4,7 +4,7 @@ Description:    Tests the recipe CLI
 """
 from click.testing import CliRunner
 
-from percy.commands.recipe import recipe
+from conda_recipe_manager.commands.recipe import recipe
 
 
 def test_usage() -> None:

@@ -18,7 +18,7 @@ jobs:
         # Executes `pre-commit` with the `make` directive to ensure all dependencies are found
         - run: |
             source $CONDA/bin/activate
-            conda activate percy
+            conda activate conda-recipe-manager
             make pre-commit
   test:
       runs-on: ubuntu-latest
@@ -33,16 +33,12 @@ jobs:
             python-version: ${{ matrix.python-version }}
         - run: |
             source $CONDA/bin/activate
-            conda activate percy
+            conda activate conda-recipe-manager
             make test
   build-recipe:
       runs-on: ubuntu-latest
       steps:
         - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-        - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-          with:
-            repository: AnacondaRecipes/percy-feedstock
-            path: ./feedstock
         - name: Cache conda env
           id: cache-conda
           uses: actions/cache@13aacd865c20de90d75de3b17ebe84f7a17d57d2 # v4.0.0
@@ -57,7 +53,6 @@ jobs:
               ${{ runner.os }}-
         - name: Build package
           run: |
-            cp -r ./feedstock/abs.yaml ./feedstock/recipe .
             source $CONDA/bin/activate
             conda install conda-build
             conda-build -c distro-tooling .

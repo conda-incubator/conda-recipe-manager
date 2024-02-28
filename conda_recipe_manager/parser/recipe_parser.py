@@ -24,17 +24,17 @@ from typing import Callable, Final, Optional, TypeGuard, cast, no_type_check
 import yaml
 from jsonschema import validate as schema_validate
 
-from percy.parser._node import Node
-from percy.parser._selector_info import SelectorInfo
-from percy.parser._traverse import (
+from conda_recipe_manager.parser._node import Node
+from conda_recipe_manager.parser._selector_info import SelectorInfo
+from conda_recipe_manager.parser._traverse import (
     INVALID_IDX,
     remap_child_indices_virt_to_phys,
     traverse,
     traverse_all,
     traverse_with_index,
 )
-from percy.parser._types import (
-    PERCY_SUB_MARKER,
+from conda_recipe_manager.parser._types import (
+    RECIPE_MANAGER_SUB_MARKER,
     ROOT_NODE_VALUE,
     TOP_LEVEL_KEY_SORT_ORDER,
     V1_TEST_SECTION_KEY_SORT_ORDER,
@@ -42,7 +42,7 @@ from percy.parser._types import (
     Regex,
     StrStack,
 )
-from percy.parser._utils import (
+from conda_recipe_manager.parser._utils import (
     dedupe_and_preserve_order,
     normalize_multiline_strings,
     num_tab_spaces,
@@ -51,9 +51,9 @@ from percy.parser._utils import (
     stringify_yaml,
     substitute_markers,
 )
-from percy.parser.enums import SelectorConflictMode
-from percy.parser.exceptions import JsonPatchValidationException
-from percy.parser.types import (
+from conda_recipe_manager.parser.enums import SelectorConflictMode
+from conda_recipe_manager.parser.exceptions import JsonPatchValidationException
+from conda_recipe_manager.parser.types import (
     CURRENT_RECIPE_SCHEMA_FORMAT,
     JSON_PATCH_SCHEMA,
     TAB_AS_SPACES,
@@ -62,7 +62,7 @@ from percy.parser.types import (
     MessageTable,
     MultilineVariant,
 )
-from percy.types import PRIMITIVES_TUPLE, JsonPatchType, JsonType, Primitives, SentinelType
+from conda_recipe_manager.types import PRIMITIVES_TUPLE, JsonPatchType, JsonType, Primitives, SentinelType
 
 
 class RecipeParser:
@@ -121,7 +121,7 @@ class RecipeParser:
             # all Jinja substitutions as string values, so we don't have to worry about the type of the actual
             # substitution.
             sub_list: list[str] = Regex.JINJA_SUB.findall(s)
-            s = Regex.JINJA_SUB.sub(PERCY_SUB_MARKER, s)
+            s = Regex.JINJA_SUB.sub(RECIPE_MANAGER_SUB_MARKER, s)
             output = _parse_yaml_recursive_sub(
                 cast(JsonType, yaml.safe_load(s)), lambda d: substitute_markers(d, sub_list)
             )

@@ -4,7 +4,7 @@ Description:    Tests the `aggregate` CLI
 """
 from click.testing import CliRunner
 
-from percy.commands.aggregate import aggregate
+from conda_recipe_manager.commands.aggregate import aggregate
 
 
 def test_usage() -> None:

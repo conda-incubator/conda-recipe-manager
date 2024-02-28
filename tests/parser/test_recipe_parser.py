@@ -9,14 +9,14 @@ from typing import Final
 
 import pytest
 
-from percy.parser.enums import SelectorConflictMode
-from percy.parser.exceptions import JsonPatchValidationException
-from percy.parser.recipe_parser import RecipeParser
-from percy.parser.types import MessageCategory
-from percy.types import JsonType
+from conda_recipe_manager.parser.enums import SelectorConflictMode
+from conda_recipe_manager.parser.exceptions import JsonPatchValidationException
+from conda_recipe_manager.parser.recipe_parser import RecipeParser
+from conda_recipe_manager.parser.types import MessageCategory
+from conda_recipe_manager.types import JsonType
 
 # Path to supplementary files used in test cases
-TEST_FILES_PATH: Final[str] = "percy/tests/test_aux_files"
+TEST_FILES_PATH: Final[str] = "tests/test_aux_files"
 
 # Long multi-line description string found in the `simple-recipe.yaml` test file
 SIMPLE_DESCRIPTION: Final[

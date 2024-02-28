@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import json
 
-from percy.types import JsonPatchType
+from conda_recipe_manager.types import JsonPatchType
 
 
 class JsonPatchValidationException(Exception):

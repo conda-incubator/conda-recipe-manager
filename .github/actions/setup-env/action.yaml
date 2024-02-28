@@ -1,5 +1,5 @@
 name: Set up environment
-description: Set up an percy environment
+description: Set up a conda-recipe-manager environment
 
 runs:
   using: "composite"
@@ -30,5 +30,5 @@ runs:
         source $CONDA/etc/profile.d/conda.sh
         conda init bash
         sed -i 's/- python >=3.*$/- python ${{ inputs.python-version }}.*/' environment.yaml
-        conda env create -f environment.yaml --name percy --force
-        conda run --name percy pip install .
+        conda env create -f environment.yaml --name conda-recipe-manager --force
+        conda run --name conda-recipe-manager pip install .

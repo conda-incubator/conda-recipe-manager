@@ -1,12 +1,12 @@
-{% set name = "percy" %}
-{% set version = "0.1.5" %}
+{% set name = "conda-recipe-manager" %}
+{% set version = "0.1.0" %}
 
 package:
   name: {{ name|lower }}
   version: {{ version }}
 
 source:
-  url: https://github.com/anaconda-distribution/percy/archive/refs/tags/{{ version }}.tar.gz
+  url: https://github.com/anaconda/conda-recipe-manager/archive/refs/tags/{{ version }}.tar.gz
   sha256: 6a84e1320651c9925af6a50ea1388018f709ab4caa2fcf1c2436cb1b491b1934
 
 build:
@@ -14,7 +14,7 @@ build:
   noarch: python
   script: pip install . --no-deps --no-build-isolation -vv
   entry_points:
-    - percy = percy.commands.main:cli
+    - convert = conda_recipe_manager.commands.convert:cli
 
 requirements:
   host:
@@ -33,24 +33,24 @@ requirements:
 
 test:
   imports:
-    - percy
+    - conda-recipe-manager
   source_files:
-    - percy/tests/
+    - tests/
   requires:
     - pip
     - pytest
     - pytest-xdist
   commands:
     - pip check
-    - python -m pytest -n auto percy/tests/
+    - python -m pytest -n auto tests/
 
 about:
-  home: https://github.com/anaconda-distribution/percy
+  home: https://github.com/anaconda/conda-recipe-manager
   license: BSD-3-Clause
   license_family: BSD
   license_file: LICENSE
   summary: Helper tool for recipes on aggregate.
   description: |
     Renders local recipes, provides build orders, find outdated recipes.
-  doc_url: https://github.com/anaconda-distribution/percy
-  dev_url: https://github.com/anaconda-distribution/percy
+  doc_url: https://github.com/anaconda/conda-recipe-manager
+  dev_url: https://github.com/anaconda/conda-recipe-manager

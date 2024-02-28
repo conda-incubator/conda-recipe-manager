@@ -6,9 +6,9 @@ from __future__ import annotations
 
 from typing import Optional
 
-from percy.parser._types import ROOT_NODE_VALUE
-from percy.parser.types import MultilineVariant, NodeValue
-from percy.types import SentinelType
+from conda_recipe_manager.parser._types import ROOT_NODE_VALUE
+from conda_recipe_manager.parser.types import MultilineVariant, NodeValue
+from conda_recipe_manager.types import SentinelType
 
 
 class Node:

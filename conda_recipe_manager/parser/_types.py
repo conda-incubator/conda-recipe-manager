@@ -21,7 +21,7 @@ StrStackImmutable = tuple[str, ...]
 # String that represents a root node in our path.
 ROOT_NODE_VALUE: Final[str] = "/"
 # Marker used to temporarily work around some Jinja-template parsing issues
-PERCY_SUB_MARKER: Final[str] = "__PERCY_SUBSTITUTION_MARKER__"
+RECIPE_MANAGER_SUB_MARKER: Final[str] = "__RECIPE_MANAGER_SUBSTITUTION_MARKER__"
 
 # Ideal sort-order of the top-level YAML keys for human readability and traditionally how we organize our files. This
 # should work on both old and new recipe formats.

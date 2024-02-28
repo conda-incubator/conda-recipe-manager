@@ -1,6 +1,6 @@
 """
 File:           types.py
-Description:    Provides public types, type aliases, constants, and small classes used by all percy modules.
+Description:    Provides public types, type aliases, constants, and small classes used by all modules.
 """
 from __future__ import annotations
 

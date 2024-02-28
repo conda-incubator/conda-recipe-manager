@@ -7,9 +7,9 @@ from __future__ import annotations
 import json
 from typing import cast
 
-from percy.parser._types import PERCY_SUB_MARKER, ROOT_NODE_VALUE, Regex, StrStack, StrStackImmutable
-from percy.parser.types import TAB_AS_SPACES, MultilineVariant, NodeValue
-from percy.types import H, SentinelType
+from conda_recipe_manager.parser._types import RECIPE_MANAGER_SUB_MARKER, ROOT_NODE_VALUE, Regex, StrStack, StrStackImmutable
+from conda_recipe_manager.parser.types import TAB_AS_SPACES, MultilineVariant, NodeValue
+from conda_recipe_manager.types import H, SentinelType
 
 
 def str_to_stack_path(path: str) -> StrStack:
@@ -82,8 +82,8 @@ def substitute_markers(s: str, subs: list[str]) -> str:
     :param subs: List of substitutions to make, in order of appearance
     :returns: New string, with substitutions removed
     """
-    while s.find(PERCY_SUB_MARKER) >= 0 and len(subs):
-        s = s.replace(PERCY_SUB_MARKER, subs[0], 1)
+    while s.find(RECIPE_MANAGER_SUB_MARKER) >= 0 and len(subs):
+        s = s.replace(RECIPE_MANAGER_SUB_MARKER, subs[0], 1)
         subs.pop(0)
     return s
 

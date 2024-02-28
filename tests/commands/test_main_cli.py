@@ -1,10 +1,10 @@
 """
 File:           test_main_cli.py
-Description:    Tests the primary CLI interface, found under `percy.commands.main`
+Description:    Tests the primary CLI interface, found under `conda_recipe_manager.commands.main`
 """
 from click.testing import CliRunner
 
-from percy.commands.main import cli
+from conda_recipe_manager.commands.main import cli
 
 
 def test_usage() -> None:
