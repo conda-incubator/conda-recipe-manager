@@ -4,10 +4,11 @@ Description:    CLI for converting an old recipe file to the "new" format.
 """
 from __future__ import annotations
 
+import io
 import os
 import sys
 from enum import IntEnum
-from typing import Final
+from typing import Final, Optional
 
 import click
 
@@ -33,18 +34,18 @@ class ExitCode(IntEnum):
     RENDER_EXCEPTION = 103
 
 
-def print_out(*args, **kwargs) -> None:
+def print_out(*args, **kwargs) -> None:  # type: ignore
     """
     Convenience wrapper that prints to STDOUT
     """
-    print(*args, file=sys.stdout, **kwargs)
+    print(*args, file=sys.stdout, **kwargs)  # type: ignore
 
 
-def print_err(*args, **kwargs) -> None:
+def print_err(*args, **kwargs) -> None:  # type: ignore
     """
     Convenience wrapper that prints to STDERR
     """
-    print(*args, file=sys.stderr, **kwargs)
+    print(*args, file=sys.stderr, **kwargs)  # type: ignore
 
 
 def print_messages(category: MessageCategory, msg_tbl: MessageTable) -> None:
@@ -61,7 +62,7 @@ def print_messages(category: MessageCategory, msg_tbl: MessageTable) -> None:
 @click.command(short_help="Converts a `meta.yaml` formatted-recipe file to the new `recipe.yaml` format")
 @click.argument("file", type=click.File("r", encoding="utf-8"))
 @click.option("--output", "-o", type=click.Path(exists=False), default=None, help="File to dump a new recipe to.")
-def convert(file: click.File, output: click.Path) -> None:  # pylint: disable=redefined-outer-name
+def convert(file: io.TextIOWrapper, output: Optional[str]) -> None:  # pylint: disable=redefined-outer-name
     """
     Recipe conversion CLI utility. By default, recipes print to STDOUT. Messages always print to STDERR.
     """
