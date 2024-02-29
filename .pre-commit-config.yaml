@@ -57,7 +57,7 @@ repos:
   # TODO Future: enable `mypy` on the full project. `make analyze` only checks some modules.
   - id: mypy
     language: system
-    name: mypy-parser
+    name: mypy
     pass_filenames: false
     entry: make analyze
   - id: pytest

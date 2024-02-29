@@ -160,3 +160,8 @@ cython_debug/
 #.idea/
 
 .DS_Store
+
+# To ensure we are eating our own dog food, this project should exclusively use
+# rattler-build with a recipe file converted from the v0-formatted recipe
+# format.
+recipe/recipe.yaml

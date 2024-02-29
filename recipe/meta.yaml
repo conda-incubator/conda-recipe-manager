@@ -6,8 +6,7 @@ package:
   version: {{ version }}
 
 source:
-  url: https://github.com/anaconda/conda-recipe-manager/archive/refs/tags/{{ version }}.tar.gz
-  sha256: 6a84e1320651c9925af6a50ea1388018f709ab4caa2fcf1c2436cb1b491b1934
+  path: ../
 
 build:
   number: 0
@@ -28,12 +27,12 @@ requirements:
     - conda
     - jinja2
     - pyyaml
-    - requests
     - jsonschema
 
 test:
   imports:
-    - conda-recipe-manager
+    - conda_recipe_manager.parser
+    - conda_recipe_manager.commands
   source_files:
     - tests/
   requires:

@@ -35,7 +35,7 @@ jobs:
             source $CONDA/bin/activate
             conda activate conda-recipe-manager
             make test
-  build-recipe:
+  build-recipe-conda:
       runs-on: ubuntu-latest
       steps:
         - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
@@ -51,8 +51,36 @@ jobs:
               ${{ runner.os }}-build-${{ env.cache-name }}-
               ${{ runner.os }}-build-
               ${{ runner.os }}-
-        - name: Build package
+        - name: Build package in conda build
           run: |
             source $CONDA/bin/activate
-            conda install conda-build
-            conda-build -c distro-tooling .
+            conda install -y conda-build
+            conda build .
+  # Eat our own dog food and build this project with rattler-build by converting our existing recipe.
+  build-recipe-rattler:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        - uses: ./.github/actions/setup-env
+          with:
+            python-version: "3.11"
+        - name: Cache conda env
+          id: cache-conda
+          uses: actions/cache@13aacd865c20de90d75de3b17ebe84f7a17d57d2 # v4.0.0
+          env:
+            cache-name: conda-env-cache
+          with:
+            path: '/usr/share/miniconda/envs'
+            key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/environment.yml') }}
+            restore-keys: |
+              ${{ runner.os }}-build-${{ env.cache-name }}-
+              ${{ runner.os }}-build-
+              ${{ runner.os }}-
+        - name: Build package in rattler-build (experimental)
+          # NOTE: Conversion warnings/errors are ignored for now
+          run: |
+            source $CONDA/bin/activate
+            conda activate conda-recipe-manager
+            conda install -y -c conda-forge rattler-build
+            convert -o recipe/recipe.yaml recipe/meta.yaml || true
+            rattler-build build -r recipe/

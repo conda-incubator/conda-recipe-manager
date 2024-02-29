@@ -13,13 +13,11 @@ dependencies:
   - pytest-xdist
   - pylint
   - pip
-  - click>=8.1.7
+  - click >=8.1.7
   - conda
   - jinja2
   - pyyaml
   - types-pyyaml
-  - requests
-  - types-requests
   - conda-build
   - jsonschema
   - types-jsonschema
