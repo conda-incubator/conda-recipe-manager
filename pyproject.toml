@@ -36,7 +36,6 @@ dependencies = [
   "click",
   "jinja2",
   "pyyaml",
-  "requests",
   "jsonschema",
 ]
 

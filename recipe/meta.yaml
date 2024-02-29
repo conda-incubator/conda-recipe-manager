@@ -22,17 +22,17 @@ requirements:
     - setuptools
     - wheel
   run:
-    - python >=3.11
+    - python ==3.11
     - click >=8.1.7
     - conda
     - jinja2
     - pyyaml
-    - requests
     - jsonschema
 
 test:
   imports:
-    - conda_recipe_manager
+    - conda_recipe_manager.parser
+    - conda_recipe_manager.commands
   source_files:
     - tests/
   requires:
