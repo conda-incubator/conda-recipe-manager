@@ -25,7 +25,7 @@ jobs:
       name: Test on ${{ matrix.python-version }}
       strategy:
         matrix:
-          python-version: ["3.11"] # TODO: Bump this to 3.12 when supported and drop 3.11 (covered in pre-commit)
+          python-version: ["3.11", "3.12"] # TODO: Bump this to 3.12 when supported and drop 3.11 (covered in pre-commit)
       steps:
         - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         - uses: ./.github/actions/setup-env
@@ -51,10 +51,10 @@ jobs:
               ${{ runner.os }}-build-${{ env.cache-name }}-
               ${{ runner.os }}-build-
               ${{ runner.os }}-
-        - name: Build package
+        - name: Build package in conda build
           run: |
             source $CONDA/bin/activate
-            conda install conda-build
+            conda install -y conda-build
             conda build .
   # Eat our own dog food and build this project with rattler-build by converting our existing recipe.
   build-recipe-rattler:
@@ -73,9 +73,9 @@ jobs:
               ${{ runner.os }}-build-${{ env.cache-name }}-
               ${{ runner.os }}-build-
               ${{ runner.os }}-
-        - name: Build package
+        - name: Build package in rattler-build (experimental)
           run: |
             source $CONDA/bin/activate
-            conda install -c conda-forge rattler-build .
+            conda install -y -c conda-forge rattler-build
             convert -o recipe/recipe.yaml recipe/meta.yaml
-            rattler-build
+            rattler-build build -r recipe/

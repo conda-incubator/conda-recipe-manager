@@ -22,7 +22,7 @@ requirements:
     - setuptools
     - wheel
   run:
-    - python ==3.11
+    - python >=3.11
     - click >=8.1.7
     - conda
     - jinja2
