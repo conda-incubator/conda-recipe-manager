@@ -33,21 +33,21 @@ class ExitCode(IntEnum):
     RENDER_EXCEPTION = 103
 
 
-def print_out(*args, **kwargs):
+def print_out(*args, **kwargs) -> None:
     """
     Convenience wrapper that prints to STDOUT
     """
     print(*args, file=sys.stdout, **kwargs)
 
 
-def print_err(*args, **kwargs):
+def print_err(*args, **kwargs) -> None:
     """
     Convenience wrapper that prints to STDERR
     """
     print(*args, file=sys.stderr, **kwargs)
 
 
-def print_messages(category: MessageCategory, msg_tbl: MessageTable):
+def print_messages(category: MessageCategory, msg_tbl: MessageTable) -> None:
     """
     Convenience function for dumping a series of messages of a certain category
     :param category: Category of messages to print

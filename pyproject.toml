@@ -6,10 +6,10 @@ build-backend = "setuptools.build_meta"
 namespaces = false
 
 [tool.setuptools.package-data]
-"conda-recipe-manager" = ["py.typed"]
+"conda_recipe_manager" = ["py.typed"]
 
 [project]
-name = "conda-recipe-manager"
+name = "conda_recipe_manager"
 version = "0.1.0"
 authors = [
   { name="Anaconda, Inc.", email="distribution_team@anaconda.com" },
@@ -17,7 +17,7 @@ authors = [
 description = "Fast and rough renderer of conda recipes."
 readme = "README.md"
 license = {file = "LICENSE"}
-requires-python = ">=3.8"
+requires-python = ">=3.11"
 keywords = ["renderer", "conda recipe"]
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
@@ -26,10 +26,6 @@ classifiers = [
     "License :: OSI Approved :: BSD License",
     "Natural Language :: English",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: Implementation :: CPython",
@@ -49,7 +45,7 @@ dev = ["pytest"]
 conda_build = ["conda-build"]
 
 [project.scripts]
-convert = "conda_recipe_manager.commands.convert:cli"
+convert = "conda_recipe_manager.commands.convert:convert"
 
 [project.urls]
 "Homepage" = "https://github.com/anaconda/conda-recipe-manager"

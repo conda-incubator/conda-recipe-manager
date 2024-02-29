@@ -7,7 +7,13 @@ from __future__ import annotations
 import json
 from typing import cast
 
-from conda_recipe_manager.parser._types import RECIPE_MANAGER_SUB_MARKER, ROOT_NODE_VALUE, Regex, StrStack, StrStackImmutable
+from conda_recipe_manager.parser._types import (
+    RECIPE_MANAGER_SUB_MARKER,
+    ROOT_NODE_VALUE,
+    Regex,
+    StrStack,
+    StrStackImmutable,
+)
 from conda_recipe_manager.parser.types import TAB_AS_SPACES, MultilineVariant, NodeValue
 from conda_recipe_manager.types import H, SentinelType
 

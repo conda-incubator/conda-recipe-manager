@@ -7,7 +7,7 @@ default_language_version:
     python: python3.11
 exclude: |
   (?x)^(
-    .*/versioneer\.py|.*/_version\.py|.*/.*\.svg|tests/test_aux_files/.*
+    .*/versioneer\.py|.*/_version\.py|.*/.*\.svg|tests/test_aux_files/.*|recipe/meta.yaml
   )$
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks

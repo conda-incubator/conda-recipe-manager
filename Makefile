@@ -12,7 +12,7 @@ PYTHON3 := "$(CONDA_PREFIX)/bin/python3"
 .DEFAULT_GOAL := help
 
 CONDA_ENV_NAME ?= conda-recipe-manager
-SRC_DIRECTORY = conda_recipe_manager
+SRC_DIR = conda_recipe_manager
 TEST_DIR = tests/
 
 define BROWSER_PYSCRIPT
