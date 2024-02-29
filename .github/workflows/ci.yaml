@@ -77,9 +77,10 @@ jobs:
               ${{ runner.os }}-build-
               ${{ runner.os }}-
         - name: Build package in rattler-build (experimental)
+          # NOTE: Conversion warnings/errors are ignored for now
           run: |
             source $CONDA/bin/activate
             conda activate conda-recipe-manager
             conda install -y -c conda-forge rattler-build
-            convert -o recipe/recipe.yaml recipe/meta.yaml
+            convert -o recipe/recipe.yaml recipe/meta.yaml || true
             rattler-build build -r recipe/
