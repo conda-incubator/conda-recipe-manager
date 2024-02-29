@@ -25,7 +25,7 @@ jobs:
       name: Test on ${{ matrix.python-version }}
       strategy:
         matrix:
-          python-version: ["3.11", "3.12"] # TODO: Bump this to 3.12 when supported and drop 3.11 (covered in pre-commit)
+          python-version: ["3.11"] # TODO: Bump this to 3.12 when supported and drop 3.11 (covered in pre-commit)
       steps:
         - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         - uses: ./.github/actions/setup-env
@@ -61,6 +61,9 @@ jobs:
       runs-on: ubuntu-latest
       steps:
         - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        - uses: ./.github/actions/setup-env
+          with:
+            python-version: "3.11"
         - name: Cache conda env
           id: cache-conda
           uses: actions/cache@13aacd865c20de90d75de3b17ebe84f7a17d57d2 # v4.0.0
@@ -76,6 +79,7 @@ jobs:
         - name: Build package in rattler-build (experimental)
           run: |
             source $CONDA/bin/activate
+            conda activate conda-recipe-manager
             conda install -y -c conda-forge rattler-build
             convert -o recipe/recipe.yaml recipe/meta.yaml
             rattler-build build -r recipe/
