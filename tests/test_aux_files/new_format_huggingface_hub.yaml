@@ -15,9 +15,10 @@ source:
 build:
   number: 0
   skip: ${{ true if py<37 }}
-  entry_points:
-    - huggingface-cli=huggingface_hub.commands.huggingface_cli:main
   script: ${{ PYTHON }} -m pip install . --no-deps --no-build-isolation -vv
+  python:
+    entry_points:
+      - huggingface-cli=huggingface_hub.commands.huggingface_cli:main
 
 requirements:
   host:

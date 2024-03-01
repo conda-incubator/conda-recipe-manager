@@ -37,6 +37,7 @@ from conda_recipe_manager.parser._types import (
     RECIPE_MANAGER_SUB_MARKER,
     ROOT_NODE_VALUE,
     TOP_LEVEL_KEY_SORT_ORDER,
+    V1_BUILD_SECTION_KEY_SORT_ORDER,
     V1_TEST_SECTION_KEY_SORT_ORDER,
     ForceIndentDumper,
     Regex,
@@ -779,14 +780,16 @@ class RecipeParser:
                 _patch_and_log(patch)
                 new_recipe.remove_selector(selector_path)
 
-        # TODO Complete
-        # Scan and alert removed fields
-        # build/
-        # about/
+        # Cached copy of all of the "outputs" in a recipe. This is useful for easily handling multi and single output
+        # recipes in 1 loop construct.
+        base_package_paths: Final[list[str]] = new_recipe.get_package_paths()
+
+        # TODO Fix: comments are not preserved with patch operations (add a flag to `patch()`?)
+
+        ## `build` section changes and validation ##
 
         # Move `run_exports` and `ignore_run_exports` from `build` to `requirements`
-        # TODO Fix: comments are not preserved with patch operations (add a flag to `patch()`?)
-        for base_path in new_recipe.get_package_paths():
+        for base_path in base_package_paths:
             # `run_exports`
             old_re_path = RecipeParser.append_to_path(base_path, "/build/run_exports")
             if new_recipe.contains_value(old_re_path):
@@ -795,7 +798,6 @@ class RecipeParser:
                 if not new_recipe.contains_value(requirements_path):
                     _patch_and_log({"op": "add", "path": requirements_path, "value": None})
                 _patch_and_log({"op": "move", "from": old_re_path, "path": new_re_path})
-
             # `ignore_run_exports`
             old_ire_path = RecipeParser.append_to_path(base_path, "/build/ignore_run_exports")
             if new_recipe.contains_value(old_re_path):
@@ -805,7 +807,23 @@ class RecipeParser:
                     _patch_and_log({"op": "add", "path": requirements_path, "value": None})
                 _patch_and_log({"op": "move", "from": old_ire_path, "path": new_ire_path})
 
+        build_paths: Final[map[str]] = map(
+            cast(Callable[[str], str], lambda s: RecipeParser.append_to_path(s, "/build")), base_package_paths
+        )
+        for build_path in build_paths:
+            if not new_recipe.contains_value(build_path):
+                continue
+
+            # `build/entry_points` -> `build/python/entry_points`
+            if new_recipe.contains_value(RecipeParser.append_to_path(build_path, "/entry_points")):
+                _patch_add_missing_path(build_path, "/python")
+            _patch_move_base_path(build_path, "/entry_points", "/python/entry_points")
+
+            # Canonically sort this section
+            _sort_subtree_keys(build_path, V1_BUILD_SECTION_KEY_SORT_ORDER)
+
         ## `about` section changes and validation ##
+
         # Warn if "required" fields are missing
         about_required: Final[list[str]] = [
             "summary",
@@ -844,11 +862,8 @@ class RecipeParser:
             if new_recipe.contains_value(path):
                 _patch_and_log({"op": "remove", "path": path})
 
-        # Cached copy of all of the "outputs" in a recipe. This is useful for easily handling multi and single output
-        # recipes in 1 loop construct.
-        base_package_paths: Final[list[str]] = new_recipe.get_package_paths()
+        ## `test` section changes and upgrades ##
 
-        ## Upgrade the testing section(s) ##
         test_paths: Final[map[str]] = map(
             cast(Callable[[str], str], lambda s: RecipeParser.append_to_path(s, "/test")), base_package_paths
         )

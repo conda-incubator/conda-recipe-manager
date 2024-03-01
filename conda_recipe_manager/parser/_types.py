@@ -41,6 +41,22 @@ TOP_LEVEL_KEY_SORT_ORDER: Final[dict[str, int]] = {
     "extra": 120,
 }
 
+# Canonical sort order for the new "v1" recipe format's `build` block
+V1_BUILD_SECTION_KEY_SORT_ORDER: Final[dict[str, int]] = {
+    "number": 0,
+    "string": 10,
+    "skip": 20,
+    "noarch": 30,
+    "script": 40,
+    "merge_build_and_host_envs": 50,
+    "always_include_files": 60,
+    "always_copy_files": 70,
+    "variant": 80,
+    "python": 90,
+    "prefix_detection": 100,
+    "dynamic_linking": 110,
+}
+
 # Canonical sort order for the new "v1" recipe format's `tests` block
 V1_TEST_SECTION_KEY_SORT_ORDER: Final[dict[str, int]] = {
     "script": 0,
