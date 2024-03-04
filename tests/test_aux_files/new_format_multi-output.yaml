@@ -10,13 +10,13 @@ outputs:
       run_exports:
         - bar
     tests:
-      script:
-        - if: unix
-          then: test -f ${PREFIX}/lib/libdb${SHLIB_EXT}
-        - if: win
-          then: if not exist %LIBRARY_BIN%\libdb%SHLIB_EXT%
-      python:
-        pip-check: false
+      - python:
+          pip-check: false
+        script:
+          - if: unix
+            then: test -f ${PREFIX}/lib/libdb${SHLIB_EXT}
+          - if: win
+            then: if not exist %LIBRARY_BIN%\libdb%SHLIB_EXT%
   # metapackage for old anaconda name (only available on linux/mac)
   - package:
       name: db
@@ -30,7 +30,7 @@ outputs:
       run:
         - foo
     tests:
-      script:
-        - db_archive -m hello
-      python:
-        pip-check: false
+      - python:
+          pip-check: false
+        script:
+          - db_archive -m hello

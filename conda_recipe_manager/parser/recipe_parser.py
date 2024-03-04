@@ -327,8 +327,8 @@ class RecipeParser:
 
             new_indent = num_tab_spaces(line)
             new_node = RecipeParser._parse_line_node(clean_line)
-            # If the last node ended (pre-comments) with a |, reset the value to be a list of the following,
-            # extra-indented strings
+            # If the last node ended (pre-comments) with a |, >, or other multi-line character, reset the value to be a
+            # list of the following extra-indented strings
             multiline_re_match = Regex.MULTILINE.match(line)
             if multiline_re_match:
                 # Calculate which multiline symbol is used. The first character must be matched, the second is optional.
@@ -358,6 +358,10 @@ class RecipeParser:
                 new_node.children = [multiline_node]
             if new_indent > cur_indent:
                 node_stack.append(last_node)
+                # Edge case: The first element of a list of objects that is NOT a 1-line key-value pair needs
+                # to be added to the stack to maintain composition
+                if last_node.is_collection_element() and not last_node.children[0].is_single_key():
+                    node_stack.append(last_node.children[0])
             elif new_indent < cur_indent:
                 # Multiple levels of depth can change from line to line, so multiple stack nodes must be pop'd. Example:
                 # foo:
@@ -788,8 +792,9 @@ class RecipeParser:
 
         ## `build` section changes and validation ##
 
-        # Move `run_exports` and `ignore_run_exports` from `build` to `requirements`
         for base_path in base_package_paths:
+            # Move `run_exports` and `ignore_run_exports` from `build` to `requirements`
+
             # `run_exports`
             old_re_path = RecipeParser.append_to_path(base_path, "/build/run_exports")
             if new_recipe.contains_value(old_re_path):
@@ -807,10 +812,8 @@ class RecipeParser:
                     _patch_and_log({"op": "add", "path": requirements_path, "value": None})
                 _patch_and_log({"op": "move", "from": old_ire_path, "path": new_ire_path})
 
-        build_paths: Final[map[str]] = map(
-            cast(Callable[[str], str], lambda s: RecipeParser.append_to_path(s, "/build")), base_package_paths
-        )
-        for build_path in build_paths:
+            # Perform internal section changes per `build/` section
+            build_path = RecipeParser.append_to_path(base_path, "/build")
             if not new_recipe.contains_value(build_path):
                 continue
 
@@ -864,10 +867,10 @@ class RecipeParser:
 
         ## `test` section changes and upgrades ##
 
-        test_paths: Final[map[str]] = map(
-            cast(Callable[[str], str], lambda s: RecipeParser.append_to_path(s, "/test")), base_package_paths
-        )
-        for test_path in test_paths:
+        # NOTE: For now, we assume that the existing test section comprises of a single test entity. Developers will
+        # have to use their best judgement to manually break-up the test into multiple tests as they see fit.
+        for base_path in base_package_paths:
+            test_path = RecipeParser.append_to_path(base_path, "/test")
             if not new_recipe.contains_value(test_path):
                 continue
 
@@ -902,9 +905,14 @@ class RecipeParser:
             _patch_move_base_path(test_path, "/imports", "/python/imports")
             _patch_move_base_path(test_path, "/downstreams", "/downstream")
 
-            # Sort test section for "canonical order" and rename `test` to `tests`. This effectively invalidates
-            # the `test_path` variable from this point on.
-            _sort_subtree_keys(test_path, V1_TEST_SECTION_KEY_SORT_ORDER, rename="tests")
+            # Move `test` to `tests` and encapsulate the pre-existing object into a list
+            new_test_path = f"{test_path}s"
+            test_element = new_recipe.get_value(test_path)
+            _patch_and_log({"op": "add", "path": new_test_path, "value": [test_element]})
+            _patch_and_log({"op": "remove", "path": test_path})
+
+            # Sort the new section in the canonical ordering
+            _sort_subtree_keys(new_test_path, V1_TEST_SECTION_KEY_SORT_ORDER)
 
         ## Upgrade the multi-output section(s) ##
         # TODO Complete
@@ -1623,7 +1631,7 @@ class RecipeParser:
         except KeyError:
             return False
 
-        # Validate that `add`` will succeed before we `remove` anything
+        # Validate that `add` will succeed before we `remove` anything
         node, virt_idx, _, _, _ = self._patch_add_find_target(path_stack.copy())
         if not RecipeParser._is_valid_patch_node(node, virt_idx):
             return False

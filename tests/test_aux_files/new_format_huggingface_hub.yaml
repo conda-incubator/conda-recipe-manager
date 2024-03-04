@@ -43,16 +43,16 @@ requirements:
     - InquirerPy ==0.3.4
 
 tests:
-  script:
-    - huggingface-cli --help
-  requirements:
-    run:
-      - pip
-  python:
-    pip-check: true
-    imports:
-      - huggingface_hub
-      - huggingface_hub.commands
+  - python:
+      imports:
+        - huggingface_hub
+        - huggingface_hub.commands
+      pip-check: true
+    requirements:
+      run:
+        - pip
+    script:
+      - huggingface-cli --help
 
 about:
   summary: Client library to download and publish models, datasets and other repos on the huggingface.co hub
