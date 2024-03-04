@@ -47,8 +47,8 @@ tests:
       imports:
         - huggingface_hub
         - huggingface_hub.commands
-      pip-check: true
-    requirements:
+      pip_check: true
+  - requirements:
       run:
         - pip
     script:

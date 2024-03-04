@@ -11,8 +11,8 @@ outputs:
         - bar
     tests:
       - python:
-          pip-check: false
-        script:
+          pip_check: false
+      - script:
           - if: unix
             then: test -f ${PREFIX}/lib/libdb${SHLIB_EXT}
           - if: win
@@ -31,6 +31,6 @@ outputs:
         - foo
     tests:
       - python:
-          pip-check: false
-        script:
+          pip_check: false
+      - script:
           - db_archive -m hello

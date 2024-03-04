@@ -38,7 +38,6 @@ from conda_recipe_manager.parser._types import (
     ROOT_NODE_VALUE,
     TOP_LEVEL_KEY_SORT_ORDER,
     V1_BUILD_SECTION_KEY_SORT_ORDER,
-    V1_TEST_SECTION_KEY_SORT_ORDER,
     ForceIndentDumper,
     Regex,
     StrStack,
@@ -484,7 +483,10 @@ class RecipeParser:
         if node.is_single_key():
             # Edge case: Handle a list containing 1 member
             if node.children[0].list_member_flag:
-                lines.append(f"{spaces}{node.value}:  {node.comment}".rstrip())
+                if is_first_collection_child:
+                    lines.append(f"{TAB_AS_SPACES * (depth-1)}- {node.value}:  {node.comment}".rstrip())
+                else:
+                    lines.append(f"{spaces}{node.value}:  {node.comment}".rstrip())
                 lines.append(
                     f"{spaces}{TAB_AS_SPACES}- "
                     f"{stringify_yaml(node.children[0].value, multiline_variant=node.children[0].multiline_variant)}  "
@@ -898,7 +900,7 @@ class RecipeParser:
                 break
             _patch_add_missing_path(test_path, "/python")
             _patch_and_log(
-                {"op": "add", "path": RecipeParser.append_to_path(test_path, "/python/pip-check"), "value": pip_check}
+                {"op": "add", "path": RecipeParser.append_to_path(test_path, "/python/pip_check"), "value": pip_check}
             )
 
             _patch_move_base_path(test_path, "/commands", "/script")
@@ -907,12 +909,21 @@ class RecipeParser:
 
             # Move `test` to `tests` and encapsulate the pre-existing object into a list
             new_test_path = f"{test_path}s"
-            test_element = new_recipe.get_value(test_path)
-            _patch_and_log({"op": "add", "path": new_test_path, "value": [test_element]})
+            test_element = cast(dict[str, JsonType], new_recipe.get_value(test_path))
+            test_array: list[JsonType] = []
+            # There are 3 types of test elements. We break them out of the original object, if they exist.
+            # `Python` Test Element
+            if "python" in test_element:
+                test_array.append({"python": test_element["python"]})
+                del test_element["python"]
+            # `Downstream` Test Element
+            if "downstream" in test_element:
+                test_array.append({"downstream": test_element["downstream"]})
+                del test_element["downstream"]
+            # What remains should be the `Command` Test Element type
+            test_array.append(test_element)
+            _patch_and_log({"op": "add", "path": new_test_path, "value": test_array})
             _patch_and_log({"op": "remove", "path": test_path})
-
-            # Sort the new section in the canonical ordering
-            _sort_subtree_keys(new_test_path, V1_TEST_SECTION_KEY_SORT_ORDER)
 
         ## Upgrade the multi-output section(s) ##
         # TODO Complete
