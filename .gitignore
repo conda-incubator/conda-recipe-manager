@@ -167,5 +167,3 @@ cython_debug/
 recipe/recipe.yaml
 # pixi environments
 .pixi
-# pixi environments
-.pixi
