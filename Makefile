@@ -79,11 +79,11 @@ install: clean	## install the package to the active Python's site-packages
 	pip install .
 
 environment:    ## handles environment creation
-	conda env create -f environment.yaml --name $(CONDA_ENV_NAME) --force
+	conda env create -f environment.yaml --name $(CONDA_ENV_NAME) --yes
 	conda run --name $(CONDA_ENV_NAME) pip install .
 
 dev: clean		## install the package's development version to a fresh environment
-	conda env create -f environment.yaml --name $(CONDA_ENV_NAME) --force
+	conda env create -f environment.yaml --name $(CONDA_ENV_NAME) --yes
 	conda run --name $(CONDA_ENV_NAME) pip install -e .
 	$(CONDA_ACTIVATE) $(CONDA_ENV_NAME) && pre-commit install
 
