@@ -123,6 +123,7 @@ def test_loading_obj_in_list() -> None:
         "multi-output.yaml",  # Contains a multi-output recipe
         "huggingface_hub.yaml",  # Contains a blank lines in a multiline string
         "simple-recipe_multiline_strings.yaml",  # Contains multiple multiline strings, using various operators
+        "curl.yaml",  # Complex, multi-output recipe
     ],
 )
 def test_round_trip(file: str) -> None:
@@ -342,6 +343,13 @@ def test_render_to_object_multi_output() -> None:
         ),
         (
             "huggingface_hub.yaml",
+            [],
+            [
+                "Required field missing: /about/license_url",
+            ],
+        ),
+        (
+            "types-toml.yaml",
             [],
             [
                 "Required field missing: /about/license_url",
@@ -1622,6 +1630,18 @@ def test_patch_add() -> None:
             "value": {
                 "George": ["How'd you like your own TV show?", "You're on"],
                 "Stanley": ["Ok"],
+            },
+        }
+    )
+
+    # Add an object to a list
+    assert parser.patch(
+        {
+            "op": "add",
+            "path": "/multi_level/list_3/1",
+            "value": {
+                "George": {"role": "owner", "has_mop": False},
+                "Stanley": {"role": "janitor", "has_mop": True},
             },
         }
     )

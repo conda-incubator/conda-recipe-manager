@@ -13,12 +13,12 @@ build:
 
 requirements:
   build:
-    - libtool        # [unix]
+    - libtool  # [unix]
     - {{ compiler('c') }}
-    - make           # [unix]
+    - make  # [unix]
     # perl is required to run the tests on UNIX.
-    - perl           # [unix]
-    - pkg-config     # [unix]
+    - perl  # [unix]
+    - pkg-config  # [unix]
   host:
     - krb5        1.20.1
     - libnghttp2  1.57.0  # [unix]
@@ -45,27 +45,26 @@ outputs:
       run_exports:
         - {{ pin_subpackage('libcurl') }}
       ignore_run_exports:  # [win]
-        - krb5             # [win]
+        - krb5  # [win]
     files:
-      - include/curl             # [unix]
-      - lib/libcurl.so*          # [linux]
-      - lib/libcurl*.dylib       # [osx]
-      - lib/pkgconfig/libcurl*   # [unix]
-      - bin/curl-config          # [unix]
+      - include/curl  # [unix]
+      - lib/libcurl.so*  # [linux]
+      - lib/libcurl*.dylib  # [osx]
+      - lib/pkgconfig/libcurl*  # [unix]
+      - bin/curl-config  # [unix]
       - Library/bin/libcurl.dll  # [win]
-      - Library/include/curl     # [win]
+      - Library/include/curl  # [win]
       - Library/lib/libcurl.lib  # [win]
       - Library/lib/libcurl.exp  # [win]
     test:
       commands:
-        - curl-config --features       # [not win]
-        - curl-config --protocols      # [not win]
+        - curl-config --features  # [not win]
+        - curl-config --protocols  # [not win]
         - test -f ${PREFIX}/lib/libcurl${SHLIB_EXT}  # [not win]
-        - test ! -f ${PREFIX}/lib/libcurl.a          # [not win]
-        - if exist %LIBRARY_BIN%\curl.exe exit 1     # [win]
-        - if exist %LIBRARY_LIB%\libcurl_a.lib exit 1     # [win]
-        - if not exist %LIBRARY_BIN%\libcurl.dll exit 1   # [win]
-
+        - test ! -f ${PREFIX}/lib/libcurl.a  # [not win]
+        - if exist %LIBRARY_BIN%\curl.exe exit 1  # [win]
+        - if exist %LIBRARY_LIB%\libcurl_a.lib exit 1  # [win]
+        - if not exist %LIBRARY_BIN%\libcurl.dll exit 1  # [win]
   - name: libcurl-static
     requirements:
       build:
@@ -79,17 +78,16 @@ outputs:
       run:
         - {{ pin_subpackage('libcurl', exact=True) }}
     files:
-      - lib/libcurl.a*             # [unix]
+      - lib/libcurl.a*  # [unix]
       - Library/lib/libcurl_a.lib  # [win]
     test:
       commands:
-        - test -f $PREFIX/lib/libcurl.a                    # [not win]
+        - test -f $PREFIX/lib/libcurl.a  # [not win]
         - if not exist %LIBRARY_LIB%\libcurl_a.lib exit 1  # [win]
-
   - name: curl
     files:
-      - bin/curl                # [unix]
-      - Library/bin/curl.exe*   # [win]
+      - bin/curl  # [unix]
+      - Library/bin/curl.exe*  # [win]
     build:
       ignore_run_exports:
         # Ignoring the run export since we use openssl in the host section
@@ -100,11 +98,10 @@ outputs:
       build:
         - {{ compiler('c') }}
       host:
-        - openssl {{ openssl }} # Only required to produce all openssl variants.
+        - openssl {{ openssl }}  # Only required to produce all openssl variants.
         - {{ pin_subpackage('libcurl', exact=True) }}
       run:
         - {{ pin_subpackage('libcurl', exact=True) }}
-
     test:
       commands:
         # curl help commands on Windows have non-zero status codes.  Need other test.
@@ -119,7 +116,6 @@ about:
   license_url: https://curl.se/docs/copyright.html
   license_family: MIT
   summary: tool and library for transferring data with URL syntax
-
   description: |
     Curl is an open source command line tool and library for transferring data
     with URL syntax. It is used in command lines or scripts to transfer data.

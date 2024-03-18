@@ -716,6 +716,8 @@ class RecipeParser:
                 node.value = rename
             node.children.sort(key=_comparison)
 
+        ## JINJA -> `context` object ##
+
         # Convert the JINJA variable table to a `context` section. Empty tables still add the `context` section for
         # future developers' convenience.
         _patch_and_log({"op": "add", "path": "/context", "value": None})
@@ -742,7 +744,7 @@ class RecipeParser:
             value = value.replace("{{", "${{")
             _patch_and_log({"op": "replace", "path": path, "value": value})
 
-        # Convert selectors into ternary statements or `if` blocks
+        ## Convert selectors into ternary statements or `if` blocks ##
         for selector, instances in new_recipe._selector_tbl.items():
             for info in instances:
                 # Selectors can be applied to the parent node if they appear on the same line. We'll ignore these when
@@ -764,7 +766,6 @@ class RecipeParser:
                     "value": "${{ true if " + bool_expression + " }}",
                 }
                 if not isinstance(info.node.value, bool):
-                    # TODO: This logic from CEP-13 may be mis-guided
                     # CEP-13 states that ONLY list members may use the `if/then/else` blocks
                     if not info.node.list_member_flag:
                         msg_tbl.add_message(
@@ -778,9 +779,7 @@ class RecipeParser:
                     patch = {
                         "op": "replace",
                         "path": selector_path,
-                        # Hack: Surround the patched value in a list to render as a list member.
-                        # TODO: Figure out if this is a bug in the patch code.
-                        "value": cast(JsonType, [bool_object]),
+                        "value": cast(JsonType, bool_object),
                     }
                 # Apply the patch
                 _patch_and_log(patch)
@@ -1049,7 +1048,7 @@ class RecipeParser:
             parsed_value = RecipeParser._parse_yaml(return_value, parser)
             # Lists containing 1 value will drop the surrounding list by the YAML parser. To ensure greater consistency
             # and provide better type-safety, we will re-wrap such values.
-            if len(node.children) == 1 and node.children[0].list_member_flag:
+            if not isinstance(parsed_value, list) and len(node.children) == 1 and node.children[0].list_member_flag:
                 return [parsed_value]
             return parsed_value
         return return_value
@@ -1546,14 +1545,18 @@ class RecipeParser:
         if path_to_create:
             value = {path_to_create: value}
 
-        new_children: Final[list[Node]] = RecipeParser._generate_subtree(value)
+        new_children: list[Node] = RecipeParser._generate_subtree(value)
         # Mark children as list members if they are list members
-        if append_to_list or phys_idx >= 0:
-            for child in new_children:
-                child.list_member_flag = True
+        if append_to_list or phys_idx > INVALID_IDX:
+            # Adding an object to a list requires the children to be wrapped in a collection node
+            if not isinstance(value, PRIMITIVES_TUPLE):
+                new_children = [Node(list_member_flag=True, children=new_children)]
+            else:
+                for child in new_children:
+                    child.list_member_flag = True
 
         # Insert members if an index is specified. Otherwise, extend the list of child nodes from the existing list.
-        if phys_idx >= 0:
+        if phys_idx > INVALID_IDX:
             node.children[phys_idx:phys_idx] = new_children
         # Extend the list of children if we're appending or adding a new key.
         elif append_to_list or path_to_create:
@@ -1586,7 +1589,7 @@ class RecipeParser:
         if not RecipeParser._is_valid_patch_node(node, node_idx):
             return False
 
-        if node_idx >= 0:
+        if node_idx > INVALID_IDX:
             # Pop the "physical" index, not the "virtual" one to ensure comments have been accounted for.
             node.children.pop(remap_child_indices_virt_to_phys(node.children)[node_idx])
             return True
@@ -1609,12 +1612,16 @@ class RecipeParser:
         if not RecipeParser._is_valid_patch_node(node, virt_idx):
             return False
 
-        new_children: Final[list[Node]] = RecipeParser._generate_subtree(value)
+        new_children: list[Node] = RecipeParser._generate_subtree(value)
         # Lists inject all children at the target position.
-        if phys_idx >= 0:
-            # Ensure all children are marked as list members
-            for child in new_children:
-                child.list_member_flag = True
+        if phys_idx > INVALID_IDX:
+            # Adding an object to a list requires the children to be wrapped in a collection node
+            if not isinstance(value, PRIMITIVES_TUPLE):
+                new_children = [Node(list_member_flag=True, children=new_children)]
+            else:
+                # Ensure all children are marked as list members
+                for child in new_children:
+                    child.list_member_flag = True
             node.children[phys_idx:phys_idx] = new_children
             # Evict the old child, which is now behind the new children
             node.children.pop(phys_idx + len(new_children))
