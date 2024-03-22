@@ -117,6 +117,7 @@ class MessageCategory(StrEnum):
     Categories to classify `RecipeParser` messages into.
     """
 
+    EXCEPTION = auto()
     ERROR = auto()
     WARNING = auto()
 

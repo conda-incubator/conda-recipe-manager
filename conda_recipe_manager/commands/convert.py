@@ -51,6 +51,8 @@ class ConversionResult:
     content: str
     file_path: Path
     msg_tbl: MessageTable
+    # Extracted out of the path for bulk operations
+    project_name: str
 
 
 def print_out(*args, **kwargs) -> None:  # type: ignore
@@ -87,7 +89,9 @@ def convert_file(file_path: Path, output: Optional[Path], print_output: bool) ->
     :param print_output: Prints the recipe to STDOUT if the output file is not specified and this flag is `True`.
     :returns: A struct containing the results of the conversion process, including debugging metadata.
     """
-    conversion_result = ConversionResult(code=ExitCode.SUCCESS, content="", file_path=file_path, msg_tbl=MessageTable())
+    conversion_result = ConversionResult(
+        code=ExitCode.SUCCESS, content="", file_path=file_path, msg_tbl=MessageTable(), project_name=""
+    )
 
     recipe_content = None
     try:
@@ -98,22 +102,31 @@ def convert_file(file_path: Path, output: Optional[Path], print_output: bool) ->
 
     if recipe_content is None:
         conversion_result.code = ExitCode.READ_EXCEPTION
+        e_msg = f"EXCEPTION: Failed to read: {file_path}"
+        print_err(e_msg)
+        conversion_result.msg_tbl.add_message(MessageCategory.EXCEPTION, e_msg)
         return conversion_result
 
     parser: RecipeParser
     try:
         parser = RecipeParser(recipe_content)
     except Exception as e:  # pylint: disable=broad-exception-caught
-        print_err("An exception occurred while parsing the recipe file:")
-        print_err(e)
+        e_msg = "EXCEPTION: An exception occurred while parsing the recipe file"
+        if print_output:
+            print_err(e_msg)
+            print_err(e)
+        conversion_result.msg_tbl.add_message(MessageCategory.EXCEPTION, e_msg)
         conversion_result.code = ExitCode.PARSE_EXCEPTION
         return conversion_result
 
     try:
         conversion_result.content, conversion_result.msg_tbl = parser.render_to_new_recipe_format()
     except Exception as e:  # pylint: disable=broad-exception-caught
-        print_err("An exception occurred while converting to the new recipe file:")
-        print_err(e)
+        e_msg = "EXCEPTION: An exception occurred while converting to the new recipe file"
+        if print_output:
+            print_err(e_msg)
+            print_err(e)
+        conversion_result.msg_tbl.add_message(MessageCategory.EXCEPTION, e_msg)
         conversion_result.code = ExitCode.RENDER_EXCEPTION
         return conversion_result
 
@@ -145,8 +158,9 @@ def process_recipe(file: Path, path: Path, output: Optional[Path]) -> tuple[str,
     :returns: Tuple containing the key/value pairing that tracks the result of the conversion operation
     """
     out_file: Optional[Path] = None if output is None else file.parent / output
-    project_name = file.relative_to(path).parts[0]
-    return project_name, convert_file(file, out_file, False)
+    conversion_result = convert_file(file, out_file, False)
+    conversion_result.project_name = file.relative_to(path).parts[0]
+    return str(file.relative_to(path)), conversion_result
 
 
 @click.command(short_help="Converts a `meta.yaml` formatted-recipe file to the new `recipe.yaml` format.")
@@ -203,6 +217,7 @@ def convert(path: Path, output: Optional[Path]) -> None:  # pylint: disable=rede
     recipes_with_except: list[str] = []
     recipes_with_errors: list[str] = []
     recipes_with_warnings: list[str] = []
+    except_histogram: dict[str, int] = {}
     errors_histogram: dict[str, int] = {}
     warnings_histogram: dict[str, int] = {}
     # Stats from bulk operation
@@ -217,6 +232,11 @@ def convert(path: Path, output: Optional[Path]) -> None:  # pylint: disable=rede
     for project_name, result in results.items():
         if result.code in {ExitCode.PARSE_EXCEPTION, ExitCode.READ_EXCEPTION, ExitCode.RENDER_EXCEPTION}:
             recipes_with_except.append(project_name)
+            exceptions = result.msg_tbl.get_messages(MessageCategory.EXCEPTION)
+            for exception in exceptions:
+                if exception not in except_histogram:
+                    except_histogram[exception] = 0
+                except_histogram[exception] += 1
 
         errors = result.msg_tbl.get_messages(MessageCategory.ERROR)
         warnings = result.msg_tbl.get_messages(MessageCategory.WARNING)
@@ -243,6 +263,9 @@ def convert(path: Path, output: Optional[Path]) -> None:  # pylint: disable=rede
         if result.code in {ExitCode.SUCCESS, ExitCode.RENDER_WARNINGS} and not errors:
             num_recipe_success += 1
 
+    # Self-check metric. This should be the same as the other calculated success metric.
+    num_theoretical_recipe_success: Final[int] = total_recipes - (len(recipes_with_except) + len(recipes_with_errors))
+
     stats = {
         "total_recipe_files": total_recipes,
         "total_recipes_processed": len(results),
@@ -252,10 +275,12 @@ def convert(path: Path, output: Optional[Path]) -> None:  # pylint: disable=rede
         "num_recipe_errors": len(recipes_with_errors),
         "num_recipe_warnings": len(recipes_with_warnings),
         "num_recipe_success": num_recipe_success,
+        "num_theoretical_recipe_success": num_theoretical_recipe_success,
         "percent_recipe_exceptions": round(len(recipes_with_except) / total_recipes, 2),
         "percent_recipe_errors": round(len(recipes_with_errors) / total_recipes, 2),
         "percent_recipe_warnings": round(len(recipes_with_warnings) / total_recipes, 2),
         "percent_recipe_success": round(num_recipe_success / total_recipes, 2),
+        "percent_recipe_theoretical_success": round(num_theoretical_recipe_success / total_recipes, 2),
         "timings": {
             "total_exec_time": round(total_time, 2),
             "avg_recipe_time": round(total_time / total_recipes, 2),
@@ -267,6 +292,7 @@ def convert(path: Path, output: Optional[Path]) -> None:  # pylint: disable=rede
         "recipes_with_exceptions": recipes_with_except,
         "recipes_with_errors": recipes_with_errors,
         "recipes_with_warnings": recipes_with_warnings,
+        "exception_histogram": except_histogram,
         "error_histogram": errors_histogram,
         "warnings_histogram": warnings_histogram,
         "statistics": stats,
