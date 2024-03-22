@@ -5,7 +5,7 @@ Description:    Provides private utility functions only used by the parser.
 from __future__ import annotations
 
 import json
-from typing import cast
+from typing import Final, cast
 
 from conda_recipe_manager.parser._types import (
     RECIPE_MANAGER_SUB_MARKER,
@@ -16,6 +16,9 @@ from conda_recipe_manager.parser._types import (
 )
 from conda_recipe_manager.parser.types import TAB_AS_SPACES, MultilineVariant, NodeValue
 from conda_recipe_manager.types import H, SentinelType
+
+# Commonly used special characters that we need to ensure get quoted when rendered as a YAML string.
+_TO_QUOTE_SPECIAL_CASES: Final[set[str]] = {"*"}
 
 
 def str_to_stack_path(path: str) -> StrStack:
@@ -120,8 +123,10 @@ def stringify_yaml(
     # quoting all YAML strings. Although not wrong, it does not follow our common practices. Quote escaping is not
     # required for multiline strings. We do not escape quotes for Jinja value statements. We make an exception for
     # strings containing the NEW recipe format syntax, ${{ }}, which is valid YAML.
+    #
+    # In addition, there are a handful of special cases that need to be quoted in order to produce valid YAML.
     if multiline_variant == MultilineVariant.NONE and isinstance(val, str) and not Regex.JINJA_SUB.match(val):
-        if "${{" not in val and ("'" in val or '"' in val):
+        if val in _TO_QUOTE_SPECIAL_CASES or ("${{" not in val and ("'" in val or '"' in val)):
             # The PyYaml equivalent function injects newlines, hence why we abuse the JSON library to write our YAML
             return json.dumps(val)
     return val

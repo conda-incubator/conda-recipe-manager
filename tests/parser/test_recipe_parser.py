@@ -124,6 +124,7 @@ def test_loading_obj_in_list() -> None:
         "huggingface_hub.yaml",  # Contains a blank lines in a multiline string
         "simple-recipe_multiline_strings.yaml",  # Contains multiple multiline strings, using various operators
         "curl.yaml",  # Complex, multi-output recipe
+        "gsm-amzn2-aarch64.yaml",  # Regression test: Contains `- '*'` string that failed to parse
     ],
 )
 def test_round_trip(file: str) -> None:
