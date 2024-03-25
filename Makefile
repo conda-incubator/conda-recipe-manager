@@ -101,14 +101,14 @@ test-cov:		## checks test coverage requirements
 		$(TEST_DIR) --cov-fail-under=45 --cov-report term-missing
 
 lint:			## runs the linter against the project
-	pylint --rcfile=.pylintrc $(SRC_DIR)
+	pylint --rcfile=.pylintrc $(SRC_DIR) $(TEST_DIR)
 
 format:			## runs the code auto-formatter
-	isort --profile black --line-length=120 $(SRC_DIR)
-	black --line-length=120 $(SRC_DIR)
+	isort --profile black --line-length=120 $(SRC_DIR) $(TEST_DIR)
+	black --line-length=120 $(SRC_DIR) $(TEST_DIR)
 
 format-docs:	## runs the docstring auto-formatter. Note this requires manually installing `docconvert`
-	docconvert --in-place --config .docconvert.json $(SRC_DIR)
+	docconvert --in-place --config .docconvert.json $(SRC_DIR) $(TEST_DIR)
 
 analyze:		## runs static analyzer on the project
-	mypy --config-file=.mypy.ini --cache-dir=/dev/null $(SRC_DIR)
+	mypy --config-file=.mypy.ini --cache-dir=/dev/null $(SRC_DIR) $(TEST_DIR)

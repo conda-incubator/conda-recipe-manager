@@ -125,6 +125,7 @@ def test_loading_obj_in_list() -> None:
         "simple-recipe_multiline_strings.yaml",  # Contains multiple multiline strings, using various operators
         "curl.yaml",  # Complex, multi-output recipe
         "gsm-amzn2-aarch64.yaml",  # Regression test: Contains `- '*'` string that failed to parse
+        "pytest-pep8.yaml",
     ],
 )
 def test_round_trip(file: str) -> None:
@@ -351,6 +352,15 @@ def test_render_to_object_multi_output() -> None:
         ),
         (
             "types-toml.yaml",
+            [],
+            [
+                "Required field missing: /about/license_url",
+            ],
+        ),
+        # Regression test: Contains a `test` section that caused an empty dictionary to be inserted in the conversion
+        # process, causing an index-out-of-range exception.
+        (
+            "pytest-pep8.yaml",
             [],
             [
                 "Required field missing: /about/license_url",
@@ -625,11 +635,11 @@ def test_find_value() -> None:
     assert not parser.find_value("")
     # Values that are not supported for searching
     with pytest.raises(ValueError):
-        parser.find_value(["foo", "bar"])
+        parser.find_value(["foo", "bar"])  # type: ignore[arg-type]
     with pytest.raises(ValueError):
-        parser.find_value(("foo", "bar"))
+        parser.find_value(("foo", "bar"))  # type: ignore[arg-type]
     with pytest.raises(ValueError):
-        parser.find_value({"foo": "bar"})
+        parser.find_value({"foo": "bar"})  # type: ignore[arg-type]
     # Find does not modify the parser
     assert not parser.is_modified()
 
@@ -675,7 +685,7 @@ def test_get_package_paths(file: str, expected: list[str]) -> None:
         ("/foo/bar", "/baz", "/foo/bar/baz"),
     ],
 )
-def test_append_to_path(base: str, ext: str, expected) -> None:
+def test_append_to_path(base: str, ext: str, expected: str) -> None:
     """
     :param base: Base string path
     :param ext: Path to extend the base path with
@@ -898,7 +908,7 @@ def test_contains_selector_at_path(file: str, path: str, expected: bool) -> None
         ("simple-recipe.yaml", "/requirements/empty_field2", "[unix and win]"),
     ],
 )
-def test_get_selector_at_path_exists(file: str, path: str, expected: bool) -> None:
+def test_get_selector_at_path_exists(file: str, path: str, expected: str) -> None:
     """
     Tests cases where a selector exists on a path
     :param file: File to run against
@@ -1083,7 +1093,7 @@ def test_add_comment(file: str, ops: list[tuple[str, str]], expected: str) -> No
         ("simple-recipe.yaml", "/build/number", "    ", ValueError),
     ],
 )
-def test_add_comment_raises(file: str, path: str, comment: str, exception: Exception) -> None:
+def test_add_comment_raises(file: str, path: str, comment: str, exception: BaseException) -> None:
     """
     Tests scenarios where `add_comment()` should raise an exception
     :param file: File to test against
@@ -1092,7 +1102,7 @@ def test_add_comment_raises(file: str, path: str, comment: str, exception: Excep
     :param exception: Exception expected to be raised
     """
     parser = load_recipe(file)
-    with pytest.raises(exception):
+    with pytest.raises(exception):  # type: ignore
         parser.add_comment(path, comment)
 
 
