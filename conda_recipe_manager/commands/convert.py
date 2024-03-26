@@ -23,6 +23,9 @@ from conda_recipe_manager.parser.types import MessageCategory, MessageTable
 OLD_FORMAT_RECIPE_FILE_NAME: Final[str] = "meta.yaml"
 # Required file name for the recipe, specified in CEP-13
 NEW_FORMAT_RECIPE_FILE_NAME: Final[str] = "recipe.yaml"
+# When performing a bulk operation, overall "success" is indicated by the % of recipe files that were converted
+# "successfully"
+BULK_SUCCESS_PASS_THRESHOLD: Final[float] = 0.80
 
 
 class ExitCode(IntEnum):
@@ -33,6 +36,8 @@ class ExitCode(IntEnum):
     SUCCESS = 0
     CLICK_ERROR = 1  # Controlled by the `click` library
     CLICK_USAGE = 2  # Controlled by the `click` library
+    # In bulk operation mode, this indicates that the % success threshold was not met
+    MISSED_SUCCESS_THRESHOLD = 42
     # Errors are roughly ordered by increasing severity
     RENDER_WARNINGS = 100
     RENDER_ERRORS = 101
@@ -265,6 +270,7 @@ def convert(path: Path, output: Optional[Path]) -> None:  # pylint: disable=rede
 
     # Self-check metric. This should be the same as the other calculated success metric.
     num_theoretical_recipe_success: Final[int] = total_recipes - (len(recipes_with_except) + len(recipes_with_errors))
+    percent_recipe_success: Final[float] = round(num_recipe_success / total_recipes, 2)
 
     stats = {
         "total_recipe_files": total_recipes,
@@ -279,7 +285,7 @@ def convert(path: Path, output: Optional[Path]) -> None:  # pylint: disable=rede
         "percent_recipe_exceptions": round(len(recipes_with_except) / total_recipes, 2),
         "percent_recipe_errors": round(len(recipes_with_errors) / total_recipes, 2),
         "percent_recipe_warnings": round(len(recipes_with_warnings) / total_recipes, 2),
-        "percent_recipe_success": round(num_recipe_success / total_recipes, 2),
+        "percent_recipe_success": percent_recipe_success,
         "percent_recipe_theoretical_success": round(num_theoretical_recipe_success / total_recipes, 2),
         "timings": {
             "total_exec_time": round(total_time, 2),
@@ -299,4 +305,6 @@ def convert(path: Path, output: Optional[Path]) -> None:  # pylint: disable=rede
     }
 
     print_out(json.dumps(final_output, indent=2))
-    sys.exit(ExitCode.SUCCESS)
+    sys.exit(
+        ExitCode.SUCCESS if percent_recipe_success > BULK_SUCCESS_PASS_THRESHOLD else ExitCode.MISSED_SUCCESS_THRESHOLD
+    )

@@ -83,3 +83,35 @@ jobs:
             conda install -y -c conda-forge rattler-build
             convert -o recipe/recipe.yaml recipe/meta.yaml
             rattler-build build -r recipe/
+  ## Integration tests ##
+  # TODO: Add rattler-build to process
+  integration-rattler:
+      runs-on: ubuntu-latest
+      name: Test on ${{ matrix.test-directory }}
+      strategy:
+        matrix:
+          test-directory:
+            - anaconda_recipes
+      steps:
+        - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        - uses: ./.github/actions/setup-env
+          with:
+            python-version: "3.11"
+        - name: Cache conda env
+          id: cache-conda
+          uses: actions/cache@13aacd865c20de90d75de3b17ebe84f7a17d57d2 # v4.0.0
+          env:
+            cache-name: conda-env-cache
+          with:
+            path: '/usr/share/miniconda/envs'
+            key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/environment.yml') }}
+            restore-keys: |
+              ${{ runner.os }}-build-${{ env.cache-name }}-
+              ${{ runner.os }}-build-
+              ${{ runner.os }}-
+        - name: Build package in rattler-build (experimental)
+          run: |
+            source $CONDA/bin/activate
+            conda activate conda-recipe-manager
+            conda install -y -c conda-forge rattler-build
+            convert tests/test_aux_files/integration/${{ matrix.test-directory }}
