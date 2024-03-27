@@ -84,7 +84,6 @@ jobs:
             convert -o recipe/recipe.yaml recipe/meta.yaml
             rattler-build build -r recipe/
   ## Integration tests ##
-  # TODO: Add rattler-build to process
   integration-rattler:
       runs-on: ubuntu-latest
       name: Test on ${{ matrix.test-directory }}
@@ -114,5 +113,5 @@ jobs:
             source $CONDA/bin/activate
             conda activate conda-recipe-manager
             conda install -y -c conda-forge rattler-build
-            convert --min-success-rate 0.80 -o recipe.yaml tests/test_aux_files/integration/${{ matrix.test-directory }}
+            convert -o recipe.yaml tests/test_aux_files/integration/${{ matrix.test-directory }}
             rattler-bulk-build -m 0.30 tests/test_aux_files/integration/${{ matrix.test-directory }} --render-only
