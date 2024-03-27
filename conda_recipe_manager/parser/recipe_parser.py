@@ -920,7 +920,8 @@ class RecipeParser:
                 test_array.append({"downstream": test_element["downstream"]})
                 del test_element["downstream"]
             # What remains should be the `Command` Test Element type
-            test_array.append(test_element)
+            if test_element:
+                test_array.append(test_element)
             _patch_and_log({"op": "add", "path": new_test_path, "value": test_array})
             _patch_and_log({"op": "remove", "path": test_path})
 
