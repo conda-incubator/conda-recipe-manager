@@ -1,0 +1,65 @@
+{% set version = "2.38.0" %}
+{% set name = "PhenStat" %}
+{% set bioc = "3.18" %}
+
+package:
+  name: 'bioconductor-{{ name|lower }}'
+  version: '{{ version }}'
+source:
+  url:
+    - 'https://bioconductor.org/packages/{{ bioc }}/bioc/src/contrib/{{ name }}_{{ version }}.tar.gz'
+    - 'https://bioconductor.org/packages/{{ bioc }}/bioc/src/contrib/Archive/{{ name }}/{{ name }}_{{ version }}.tar.gz'
+    - 'https://bioarchive.galaxyproject.org/{{ name }}_{{ version }}.tar.gz'
+    - 'https://depot.galaxyproject.org/software/bioconductor-{{ name|lower }}/bioconductor-{{ name|lower }}_{{ version }}_src_all.tar.gz'
+  md5: f28cba815b5f6e8b3350c926d1d05907
+build:
+  number: 0
+  rpaths:
+    - lib/R/lib/
+    - lib/
+  run_exports: '{{ pin_subpackage("bioconductor-phenstat", max_pin="x.x") }}'
+  noarch: generic
+# Suggests: RUnit, BiocGenerics
+requirements:
+  host:
+    - 'bioconductor-graph >=1.80.0,<1.81.0'
+    - r-base
+    - r-car
+    - r-corrplot
+    - r-ggplot2
+    - r-knitr
+    - r-lme4
+    - r-logistf
+    - r-mass
+    - r-msgps
+    - r-nlme
+    - r-nortest
+    - r-pingr
+    - r-reshape
+    - r-smoothwin
+  run:
+    - 'bioconductor-graph >=1.80.0,<1.81.0'
+    - r-base
+    - r-car
+    - r-corrplot
+    - r-ggplot2
+    - r-knitr
+    - r-lme4
+    - r-logistf
+    - r-mass
+    - r-msgps
+    - r-nlme
+    - r-nortest
+    - r-pingr
+    - r-reshape
+    - r-smoothwin
+test:
+  commands:
+    - '$R -e "library(''{{ name }}'')"'
+about:
+  home: 'https://bioconductor.org/packages/{{ bioc }}/bioc/html/{{ name }}.html'
+  license: 'file LICENSE'
+  summary: 'Statistical analysis of phenotypic data'
+  description: 'Package contains methods for statistical analysis of phenotypic data.'
+  license_file: LICENSE
+

@@ -1,0 +1,38 @@
+{% set version = "2.27" %}
+
+package:
+  name: minimap2
+  version: {{ version }}
+
+source:
+  url: https://github.com/lh3/minimap2/archive/v{{ version }}.tar.gz
+  sha256: ca9ceb07e3b388858ebc2d7d91a6c74e996659402d16aa759ecedd63588b1ef7
+
+build:
+  number: 1
+  run_exports:
+    - {{ pin_subpackage('minimap2', max_pin="x") }}
+
+requirements:
+  build:
+    - make
+    - {{ compiler('c') }}
+  host:
+    - zlib
+  run:
+    - k8
+    - zlib
+
+test:
+  commands:
+    - minimap2 2>&1 | grep 'Usage'
+    - paftools.js version | grep {{ version }}
+    - sdust  2>&1 | grep 'Usage'
+    - test -e $PREFIX/lib/libminimap2.a
+    - test -e $PREFIX/include/minimap.h
+
+about:
+  home: https://github.com/lh3/minimap2
+  license: MIT
+  license_file: LICENSE.txt
+  summary: 'A versatile pairwise aligner for genomic and spliced nucleotide sequences.'

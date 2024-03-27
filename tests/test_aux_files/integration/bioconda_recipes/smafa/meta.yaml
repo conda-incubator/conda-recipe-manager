@@ -1,0 +1,30 @@
+{% set version = "0.7.1" %}
+{% set name = "smafa" %}
+{% set sha256 = "b7642e162da558a384c3e2980a5175c2899a7e261f869fc711f45371a9297686" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+build:
+  number: 0
+  skip: True # [osx]
+
+source:
+  url: https://github.com/wwood/{{ name }}/archive/v{{version}}.tar.gz
+  sha256: {{ sha256 }}
+
+requirements:
+  build:
+    - rust >=1.19
+    - {{ compiler('c') }}
+
+test:
+  commands:
+    - smafa --version | grep {{ version }}
+
+about:
+  home: https://github.com/wwood/smafa
+  license: GPL3
+  license_file: LICENCE.txt
+  summary: smafa is a tool for querying and clustering pre-aligned small pre-aligned sequences.

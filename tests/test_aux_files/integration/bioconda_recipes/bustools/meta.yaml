@@ -1,0 +1,35 @@
+{% set version = "0.43.2" %}
+
+package:
+  name: bustools
+  version: {{ version }}
+
+source:
+  url: https://github.com/BUStools/bustools/archive/v{{ version }}.tar.gz
+  sha256: ad5816152644ee615316daecf5883183994bd7cc96e6c008439123f4cd750b1f
+
+build:
+  number: 0
+  run_exports:
+    - {{ pin_subpackage('bustools', max_pin="x.x") }}
+
+requirements:
+  build:
+    - make
+    - {{ compiler('cxx') }}
+    - cmake
+  host:
+    - hdf5
+    - zlib
+
+test:
+  commands:
+    - bustools sort
+
+about:
+  home: https://github.com/BUStools/bustools
+  license: BSD-2-Clause "Simplified" License
+  license_family: BSD
+  license_file: LICENSE
+  summary: |
+    bustools is a program for manipulating BUS files for single cell RNA-Seq datasets.

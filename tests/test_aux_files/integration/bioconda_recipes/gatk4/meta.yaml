@@ -1,0 +1,78 @@
+{% set name = "GATK4" %}
+{% set version = "4.5.0.0" %}
+{% set sha256 = "dc1a4471e8bb566397db9894ca18acbf8f40f3fc312c8fad9a8c5390c218e916" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/broadinstitute/gatk/releases/download/{{ version }}/gatk-{{ version }}.zip
+  sha256: {{ sha256 }}
+
+build:
+  noarch: generic
+  number: 0
+  run_exports:
+     - {{ pin_subpackage('gatk4', max_pin="x") }}
+
+requirements:
+  host:
+    - r-base =3.6
+    - r-gplots
+    - r-ggplot2
+    - r-gsalib
+    - r-reshape
+    - gcnvkernel =0.8
+  run:
+    - openjdk >=17,<18
+    - python
+    - r-base =3.6
+    - r-gplots
+    - r-ggplot2
+    - r-gsalib
+    - r-reshape
+    - gcnvkernel =0.8
+
+test:
+  commands:
+    - gatk -h
+    - gatk --list
+    - gatk HaplotypeCaller --help
+    - gatk DetermineGermlineContigPloidy --help
+
+outputs:
+  - name: gatk4
+    script: build_main.sh
+    requirements:
+      run:
+        - openjdk >=17,<18
+        - python
+    test:
+      commands:
+        - gatk -h
+        - gatk --list
+        - gatk HaplotypeCaller --help
+        - gatk DetermineGermlineContigPloidy --help
+  - name: gatk4-spark
+    script: build_spark.sh
+    build:
+      noarch: generic
+    requirements:
+      run:
+        - openjdk >=17,<18
+        - python
+        - {{ pin_subpackage("gatk4", exact=True) }}
+    test:
+      commands:
+        - gatk -h
+        - gatk --list
+        - gatk MarkDuplicatesSpark --help
+        - gatk DetermineGermlineContigPloidy --help
+
+about:
+  home: https://www.broadinstitute.org/gatk/
+  license: BSD-3-Clause
+  license_family: BSD
+  summary: Genome Analysis Toolkit (GATK4)
+  dev_url: https://github.com/broadinstitute/gatk

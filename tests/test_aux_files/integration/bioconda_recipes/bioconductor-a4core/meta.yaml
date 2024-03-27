@@ -1,0 +1,49 @@
+{% set version = "1.50.0" %}
+{% set name = "a4Core" %}
+{% set bioc = "3.18" %}
+
+package:
+  name: 'bioconductor-{{ name|lower }}'
+  version: '{{ version }}'
+source:
+  url:
+    - 'https://bioconductor.org/packages/{{ bioc }}/bioc/src/contrib/{{ name }}_{{ version }}.tar.gz'
+    - 'https://bioconductor.org/packages/{{ bioc }}/bioc/src/contrib/Archive/{{ name }}/{{ name }}_{{ version }}.tar.gz'
+    - 'https://bioarchive.galaxyproject.org/{{ name }}_{{ version }}.tar.gz'
+    - 'https://depot.galaxyproject.org/software/bioconductor-{{ name|lower }}/bioconductor-{{ name|lower }}_{{ version }}_src_all.tar.gz'
+  md5: fdca418afe3a74d9114d8d28afca2037
+build:
+  number: 0
+  rpaths:
+    - lib/R/lib/
+    - lib/
+  run_exports: '{{ pin_subpackage("bioconductor-a4core", max_pin="x.x") }}'
+  noarch: generic
+# Suggests: knitr, rmarkdown
+requirements:
+  host:
+    - 'bioconductor-biobase >=2.62.0,<2.63.0'
+    - r-base
+    - r-glmnet
+  run:
+    - 'bioconductor-biobase >=2.62.0,<2.63.0'
+    - r-base
+    - r-glmnet
+test:
+  commands:
+    - '$R -e "library(''{{ name }}'')"'
+about:
+  home: 'https://bioconductor.org/packages/{{ bioc }}/bioc/html/{{ name }}.html'
+  license: GPL-3
+  summary: 'Automated Affymetrix Array Analysis Core Package'
+  description: 'Utility functions for the Automated Affymetrix Array Analysis set of packages.'
+  license_file: '{{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-3'
+extra:
+  identifiers:
+    - biotools:a4core
+    - doi:10.1038/nmeth.3252
+  parent_recipe:
+    name: bioconductor-a4core
+    path: recipes/bioconductor-a4core
+    version: 1.28.0
+

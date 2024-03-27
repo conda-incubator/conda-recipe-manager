@@ -1,0 +1,56 @@
+{% set version="1.19" %}
+
+package:
+  name: bcftools
+  version: {{ version }}
+
+build:
+  number: 1
+  run_exports:
+    - {{ pin_subpackage("bcftools", max_pin="x") }}
+
+source:
+  url: https://github.com/samtools/bcftools/releases/download/{{ version }}/bcftools-{{ version }}.tar.bz2
+  sha256: 782b5f1bc690415192231e82213b3493b047f45e630dc8ef6f154d6126ab3e68
+
+requirements:
+  build:
+    - make
+    - {{ compiler('c') }}
+  host:
+    - htslib
+    - zlib
+    - gsl
+  run:
+    # Currently removed due to size and dependency issues
+    #- matplotlib # for plot-vcfstats
+    #- tectonic # for plot-vcfstats
+    - perl
+
+test:
+  commands:
+    - bcftools -h
+    - bcftools --version
+    - bcftools plugin -lv
+    - bcftools -h | grep polysomy
+    - vcfutils.pl 2>&1 | grep vcfutils
+    #- plot-vcfstats -h 2>&1 | grep -q "Plots output of "
+
+about:
+  home: https://github.com/samtools/bcftools
+  license: GPL
+  license_file: LICENSE
+  summary: BCFtools is a set of utilities that manipulate variant calls in the Variant
+    Call Format (VCF) and its binary counterpart BCF. All commands work transparently
+    with both VCFs and BCFs, both uncompressed and BGZF-compressed.  Most commands
+    accept VCF, bgzipped VCF and BCF with filetype detected automatically even when
+    streaming from a pipe. Indexed VCF and BCF will work in all situations. Un-indexed
+    VCF and BCF and streams will work in most, but not all situations.
+
+extra:
+  additional-platforms:
+    - linux-aarch64
+  identifiers:
+    - biotools:bcftools
+    - usegalaxy-eu:bcftools_merge
+    - doi:10.1093/bioinformatics/btp352

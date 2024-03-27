@@ -1,0 +1,68 @@
+{% set name = "bx-python" %}
+{% set version = "0.11.0" %}
+{% set sha256 = "2cf8872572817e0d36145cc2711889df5729987ffed4e51280da1e3c2ccb9429" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/bx-python-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  number: 1
+  skip: True  # [py < 38]
+  script: {{ PYTHON }} -m pip install . --no-deps --no-build-isolation --no-cache-dir -vvv
+  run_exports:
+    - {{ pin_subpackage(name|lower, max_pin='x.x') }}
+
+requirements:
+  build:
+    - {{ compiler('cxx') }}
+  host:
+    - python
+    - cython
+    - pip
+    - numpy
+    - zlib
+  run:
+    - python
+    - {{ pin_compatible('numpy') }}
+
+test:
+  imports:
+    - bx
+    - bx.align
+    - bx.align.sitemask
+    - bx.align.tools
+    - bx.arrays
+    - bx.bbi
+    - bx.cookbook
+    - bx.intervals
+    - bx.intervals.operations
+    - bx.intseq
+    - bx.misc
+    - bx.motif
+    - bx.motif.io
+    - bx.motif.logo
+    - bx.phylo
+    - bx.pwm
+    - bx.seq
+    - bx.tabular
+    - bx_extras
+
+about:
+  home: 'https://github.com/bxlab/bx-python'
+  summary: 'Tools for manipulating biological data, particularly multiple sequence alignments'
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  doc_url: 'https://buildmedia.readthedocs.org/media/pdf/bx-python/latest/bx-python.pdf'
+  dev_url: 'https://github.com/bxlab/bx-python'
+
+extra:
+  identifiers:
+    - biotools:bx-python
+  additional-platforms:
+    - linux-aarch64
