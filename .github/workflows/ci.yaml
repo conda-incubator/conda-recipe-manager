@@ -39,18 +39,6 @@ jobs:
       runs-on: ubuntu-latest
       steps:
         - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-        - name: Cache conda env
-          id: cache-conda
-          uses: actions/cache@13aacd865c20de90d75de3b17ebe84f7a17d57d2 # v4.0.0
-          env:
-            cache-name: conda-env-cache
-          with:
-            path: '/usr/share/miniconda/envs'
-            key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/environment.yml') }}
-            restore-keys: |
-              ${{ runner.os }}-build-${{ env.cache-name }}-
-              ${{ runner.os }}-build-
-              ${{ runner.os }}-
         - name: Build package in conda build
           run: |
             source $CONDA/bin/activate
@@ -64,18 +52,6 @@ jobs:
         - uses: ./.github/actions/setup-env
           with:
             python-version: "3.11"
-        - name: Cache conda env
-          id: cache-conda
-          uses: actions/cache@13aacd865c20de90d75de3b17ebe84f7a17d57d2 # v4.0.0
-          env:
-            cache-name: conda-env-cache
-          with:
-            path: '/usr/share/miniconda/envs'
-            key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/environment.yml') }}
-            restore-keys: |
-              ${{ runner.os }}-build-${{ env.cache-name }}-
-              ${{ runner.os }}-build-
-              ${{ runner.os }}-
         - name: Build package in rattler-build (experimental)
           run: |
             source $CONDA/bin/activate
@@ -101,5 +77,5 @@ jobs:
             source $CONDA/bin/activate
             conda activate conda-recipe-manager
             conda install -y -c conda-forge rattler-build
-            convert -o recipe.yaml tests/test_aux_files/integration/${{ matrix.test-directory }}
+            convert -m 0.80 -o recipe.yaml tests/test_aux_files/integration/${{ matrix.test-directory }}
             rattler-bulk-build -m 0.30 tests/test_aux_files/integration/${{ matrix.test-directory }} --render-only

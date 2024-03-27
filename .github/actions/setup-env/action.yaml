@@ -8,19 +8,6 @@ runs:
       with:
         python-version: ${{ inputs.python-version }}
         cache: 'pip'
-    - name: Cache conda env
-      id: cache-conda
-      uses: actions/cache@13aacd865c20de90d75de3b17ebe84f7a17d57d2 # v4.0.0
-      env:
-        cache-name: conda-env-cache
-      with:
-        cache: 'pip'
-        path: '/usr/share/miniconda/envs'
-        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/environment.yml') }}
-        restore-keys: |
-          ${{ runner.os }}-build-${{ env.cache-name }}-
-          ${{ runner.os }}-build-
-          ${{ runner.os }}-
     - name: Create Environment
       shell: bash
       if: ${{ steps.cache-conda.outputs.cache-hit == false }}
