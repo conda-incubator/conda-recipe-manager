@@ -14,7 +14,8 @@ source:
 
 build:
   number: 0
-  skip: ${{ true if py<37 }}
+  skip:
+    - py<37
   script: ${{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
 
 requirements:
