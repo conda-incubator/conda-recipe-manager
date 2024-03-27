@@ -759,12 +759,14 @@ class RecipeParser:
 
                 # For now, if a selector lands on a boolean value, use a ternary statement. Otherwise use the
                 # conditional logic.
-                # TODO `skip` is special and now can be a list of boolean expressions.
                 patch: JsonPatchType = {
                     "op": "replace",
                     "path": selector_path,
                     "value": "${{ true if " + bool_expression + " }}",
                 }
+                # `skip` is special and needs to be a list of boolean expressions.
+                if selector_path.endswith("/build/skip"):
+                    patch["value"] = [bool_expression]
                 if not isinstance(info.node.value, bool):
                     # CEP-13 states that ONLY list members may use the `if/then/else` blocks
                     if not info.node.list_member_flag:

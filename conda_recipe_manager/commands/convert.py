@@ -25,12 +25,12 @@ OLD_FORMAT_RECIPE_FILE_NAME: Final[str] = "meta.yaml"
 NEW_FORMAT_RECIPE_FILE_NAME: Final[str] = "recipe.yaml"
 # When performing a bulk operation, overall "success" is indicated by the % of recipe files that were converted
 # "successfully"
-BULK_SUCCESS_PASS_THRESHOLD: Final[float] = 0.80
+DEFAULT_BULK_SUCCESS_PASS_THRESHOLD: Final[float] = 0.80
 
 
 class ExitCode(IntEnum):
     """
-    Error codes
+    Error codes to return upon script completion
     """
 
     SUCCESS = 0
@@ -180,7 +180,16 @@ def process_recipe(file: Path, path: Path, output: Optional[Path]) -> tuple[str,
         f" For bulk operations, specify the file basename only (i.e. {NEW_FORMAT_RECIPE_FILE_NAME})."
     ),
 )
-def convert(path: Path, output: Optional[Path]) -> None:  # pylint: disable=redefined-outer-name
+@click.option(
+    "--min-success-rate",
+    "-m",
+    type=click.FloatRange(0, 1),
+    default=DEFAULT_BULK_SUCCESS_PASS_THRESHOLD,
+    help="Sets a minimum passing success rate for bulk operations.",
+)
+def convert(
+    path: Path, output: Optional[Path], min_success_rate: float
+) -> None:  # pylint: disable=redefined-outer-name
     """
     Recipe conversion CLI utility. By default, recipes print to STDOUT. Messages always print to STDERR. Takes 1 file or
     a directory containing multiple feedstock repositories. If the `PATH` provided is a directory, the script will
@@ -305,6 +314,4 @@ def convert(path: Path, output: Optional[Path]) -> None:  # pylint: disable=rede
     }
 
     print_out(json.dumps(final_output, indent=2))
-    sys.exit(
-        ExitCode.SUCCESS if percent_recipe_success > BULK_SUCCESS_PASS_THRESHOLD else ExitCode.MISSED_SUCCESS_THRESHOLD
-    )
+    sys.exit(ExitCode.SUCCESS if percent_recipe_success >= min_success_rate else ExitCode.MISSED_SUCCESS_THRESHOLD)

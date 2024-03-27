@@ -11,7 +11,8 @@ package:
 
 build:
   number: 0
-  skip: ${{ true if py<37 }}
+  skip:
+    - py<37
   is_true: true
 
 requirements:

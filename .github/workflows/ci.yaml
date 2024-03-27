@@ -109,9 +109,10 @@ jobs:
               ${{ runner.os }}-build-${{ env.cache-name }}-
               ${{ runner.os }}-build-
               ${{ runner.os }}-
-        - name: Build package in rattler-build (experimental)
+        - name: Convert recipes and dry-run rattler-build
           run: |
             source $CONDA/bin/activate
             conda activate conda-recipe-manager
             conda install -y -c conda-forge rattler-build
-            convert tests/test_aux_files/integration/${{ matrix.test-directory }}
+            convert -m 0.80 -o recipe.yaml tests/test_aux_files/integration/${{ matrix.test-directory }}
+            rattler-bulk-build -m 0.30 tests/test_aux_files/integration/${{ matrix.test-directory }} --render-only
