@@ -1,0 +1,34 @@
+{% set name = "vg" %}
+{% set version = "1.55.0" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/vgteam/vg/releases/download/v{{ version }}/vg
+  sha256: 2c602084b4eab7b50147fba31f51e126135d7ceaaf405632445bff96d68ba6c7
+
+build:
+  number: 0
+  skip: true  # [osx]
+  script:
+    - mkdir -p ${PREFIX}/bin
+    - cp vg ${PREFIX}/bin/
+    - chmod +x ${PREFIX}/bin/vg
+  run_exports:
+    - {{ pin_subpackage('vg', max_pin="x") }}
+
+test:
+  commands:
+    - vg help
+
+about:
+  home: https://github.com/vgteam/vg
+  license: MIT
+  license_family: MIT
+  summary: Variation graph data structures, interchange formats, alignment, genotyping, and variant calling methods
+
+extra:
+  skip-lints:
+    - should_be_noarch_generic

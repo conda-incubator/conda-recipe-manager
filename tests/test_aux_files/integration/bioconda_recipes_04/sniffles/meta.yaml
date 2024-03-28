@@ -1,0 +1,35 @@
+{% set version = "2.2" %}
+{% set sha256 = "744ee05017e0e95a4b2e21020d7a7277d8fabae2c2c20cd982287bb7775d8ecf" %}
+
+package:
+  name: sniffles
+  version: '{{version}}'
+
+source:
+  url: https://pypi.io/packages/source/s/sniffles/sniffles-{{version}}.tar.gz
+  sha256: '{{sha256}}'
+
+build:
+  number: 0
+  noarch: python
+  script: "{{ PYTHON }} -m pip install . --no-deps --ignore-installed -vvv"
+
+requirements:
+  host:
+    - python >=3.7
+    - setuptools
+  run:
+    - python >=3.7
+    - pysam
+
+test:
+  commands:
+    - sniffles --help
+
+about:
+  home: https://github.com/fritzsedlazeck/Sniffles
+  license: MIT
+  license_file: LICENSE
+  license_family: MIT
+  summary: Sniffles is a structural variation caller using third generation sequencing
+    (PacBio or Oxford Nanopore)

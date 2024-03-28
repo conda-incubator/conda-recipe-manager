@@ -1,0 +1,29 @@
+package:
+  name: plink2
+  version: "2.00a5.10"
+
+build:
+  number: 0
+  run_exports:
+      - {{ pin_subpackage('plink2', max_pin=None) }}
+
+source:
+  url: https://s3.amazonaws.com/plink2-assets/alpha5/plink2_linux_x86_64_20240105.zip # [linux]
+  sha256: d841fe0b3fcc42d76b2b08bcfeb95e315156b0b883b353807014a69b4867dc47     # [linux]
+  url: https://s3.amazonaws.com/plink2-assets/alpha5/plink2_mac_20240105.zip   # [osx]
+  sha256: 75d78b9a94a570804a9ab130dd0dd29ff8d1c7851c386239505798cd2126c0f9     # [osx]
+
+requirements:
+  build:
+    - {{ compiler('cxx') }}
+
+test:
+  commands:
+    - plink2 --help | grep "PLINK v2.00a5.10"
+
+about:
+  home: https://www.cog-genomics.org/plink2
+  license: GPL-3
+  license_file: LICENSE
+  summary: Whole genome association analysis toolset
+  description: Whole genome association analysis toolset, designed to perform a range of basic, large-scale analyses in a computationally efficient manner.

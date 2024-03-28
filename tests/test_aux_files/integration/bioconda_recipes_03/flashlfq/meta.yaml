@@ -1,0 +1,35 @@
+{% set version = "1.2.6" %}
+{% set sha256 = "4b5bede68303d3073c9884280c9e4215be0b08a1c7f6c2e90dd726845a41cec0" %}
+
+source:
+  url: https://github.com/smith-chem-wisc/FlashLFQ/releases/download/{{version}}/FlashLFQ.zip
+  sha256: '{{sha256}}'
+
+package:
+  name: flashlfq
+  version: '{{version}}'
+
+build:
+  noarch: generic
+  number: 0
+  run_exports:
+    - {{ pin_subpackage('flashlfq', max_pin="x") }}
+
+requirements:
+  run:
+    - openssl =1.1
+    - dotnet-runtime =6.0
+
+test:
+  commands:
+    - FlashLFQ --help
+
+about:
+  home: https://github.com/smith-chem-wisc/FlashLFQ
+  license: LGPL-3.0
+  summary: ultrafast label-free quantification algorithm for mass-spectrometry proteomics
+  license_family: GPL
+
+extra:
+  identifiers:
+   - doi:10.1021/acs.jproteome.7b00608

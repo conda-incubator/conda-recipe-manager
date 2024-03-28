@@ -1,0 +1,44 @@
+{% set version = "2.5.5" %}
+{% set sha256 = "43d034a66a13adba8872a0d4a76e32c25305a7fae638754adb61c37a3f957bd9" %}
+
+package:
+  name: orthofinder
+  version: {{ version }}
+
+build:
+  noarch: generic
+  number: 2
+  run_exports:
+    - {{ pin_subpackage('orthofinder', max_pin="x") }}
+
+source:
+  url: https://github.com/davidemms/OrthoFinder/releases/download/{{ version }}/OrthoFinder_source.tar.gz
+  sha256: {{ sha256 }}
+
+requirements:
+  run:
+    - python >=3.7
+    - scipy
+    - blast
+    # https://github.com/davidemms/OrthoFinder/issues/826 https://github.com/bbuchfink/diamond/issues/707
+    - diamond <2.1|>=2.1.7
+    - mcl
+    - fastme
+    - mafft
+    - fasttree
+    - muscle <5
+    - raxml
+    - raxml-ng
+    - iqtree
+    - bzip2
+    - mmseqs2
+
+test:
+  commands:
+    - orthofinder > /dev/null
+
+about:
+  home: https://github.com/davidemms/OrthoFinder
+  summary: Accurate inference of orthogroups, orthologues, gene trees and rooted species tree made easy!
+  license: GPLv3
+  license_file: License.md

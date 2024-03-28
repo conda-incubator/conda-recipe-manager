@@ -1,0 +1,48 @@
+{% set name = "recentrifuge" %}
+{% set version = "1.14.0" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install --no-deps --no-build-isolation . -vvv
+  run_exports:
+    - {{ pin_subpackage('recentrifuge', max_pin="x") }}
+
+source:
+  url: https://github.com/khyox/{{ name }}/archive/v{{ version }}.tar.gz
+  sha256: 8151fe3f7d6581f487eb10fab61ef211b132b0774128ed7d060b5fe389d69674
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+  run:
+    - python >=3.6
+    - biopython 1.79
+    - numpy >=1.19.5
+    - matplotlib-base >=3.3.4
+    - openpyxl >=3.1
+    - pandas <2.0.0
+
+test:
+  commands:
+    - rcf --version
+
+about:
+  home: https://github.com/khyox/recentrifuge
+  license: 'AGPL-3.0-or-later'
+  license_family: AGPL
+  license_file: LICENSE.txt
+  summary: 'Robust comparative analysis and contamination removal for metagenomics'
+  doc_url: https://github.com/khyox/recentrifuge/wiki
+
+extra:
+  recipe-maintainers:
+    - thanhleviet
+    - khyox
+  doi:
+    - 10.1371/journal.pcbi.1006967

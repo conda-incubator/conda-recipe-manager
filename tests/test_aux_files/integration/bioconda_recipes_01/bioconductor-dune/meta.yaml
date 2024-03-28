@@ -1,0 +1,57 @@
+{% set version = "1.14.0" %}
+{% set name = "Dune" %}
+{% set bioc = "3.18" %}
+
+package:
+  name: 'bioconductor-{{ name|lower }}'
+  version: '{{ version }}'
+source:
+  url:
+    - 'https://bioconductor.org/packages/{{ bioc }}/bioc/src/contrib/{{ name }}_{{ version }}.tar.gz'
+    - 'https://bioconductor.org/packages/{{ bioc }}/bioc/src/contrib/Archive/{{ name }}/{{ name }}_{{ version }}.tar.gz'
+    - 'https://bioarchive.galaxyproject.org/{{ name }}_{{ version }}.tar.gz'
+    - 'https://depot.galaxyproject.org/software/bioconductor-{{ name|lower }}/bioconductor-{{ name|lower }}_{{ version }}_src_all.tar.gz'
+  md5: afc7d133de0af7ccdc64a9a7a3722ccb
+build:
+  number: 0
+  rpaths:
+    - lib/R/lib/
+    - lib/
+  run_exports: '{{ pin_subpackage("bioconductor-dune", max_pin="x.x") }}'
+  noarch: generic
+# Suggests: knitr, rmarkdown, testthat (>= 2.1.0)
+requirements:
+  host:
+    - 'bioconductor-biocparallel >=1.36.0,<1.37.0'
+    - 'bioconductor-summarizedexperiment >=1.32.0,<1.33.0'
+    - r-aricode
+    - r-base
+    - r-dplyr
+    - r-gganimate
+    - r-ggplot2
+    - r-magrittr
+    - r-purrr
+    - r-rcolorbrewer
+    - r-tidyr
+  run:
+    - 'bioconductor-biocparallel >=1.36.0,<1.37.0'
+    - 'bioconductor-summarizedexperiment >=1.32.0,<1.33.0'
+    - r-aricode
+    - r-base
+    - r-dplyr
+    - r-gganimate
+    - r-ggplot2
+    - r-magrittr
+    - r-purrr
+    - r-rcolorbrewer
+    - r-tidyr
+test:
+  commands:
+    - '$R -e "library(''{{ name }}'')"'
+about:
+  home: 'https://bioconductor.org/packages/{{ bioc }}/bioc/html/{{ name }}.html'
+  license: 'MIT + file LICENSE'
+  summary: 'Improving replicability in single-cell RNA-Seq cell type discovery'
+  description: 'Given a set of clustering labels, Dune merges pairs of clusters to increase mean ARI between labels, improving replicability.'
+  license_file: LICENSE
+

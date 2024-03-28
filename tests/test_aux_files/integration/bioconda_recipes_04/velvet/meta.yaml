@@ -1,0 +1,32 @@
+{% set version = "1.2.10" %}
+
+package:
+  name: velvet
+  version: {{ version }}
+build:
+  number: 6
+  skip: True  # [osx]
+source:
+  url: https://github.com/dzerbino/velvet/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: 4615e52dc2e8a05f1009daf2c0978c218860be364afa044f73677cd298f10c7b
+requirements:
+  build:
+    - make
+    - {{ compiler('c') }}
+  run:
+    - zlib
+  host:
+    - zlib
+test:
+  commands:
+    - velvetg | grep velvetg > /dev/null
+    - velveth | grep velveth > /dev/null
+about:
+  home: https://www.ebi.ac.uk/~zerbino/velvet/
+  license: GPL
+  license_file: LICENSE.txt
+  summary: Sequence Assembler for short reads
+
+extra:
+  identifiers:
+    - biotools:velvet

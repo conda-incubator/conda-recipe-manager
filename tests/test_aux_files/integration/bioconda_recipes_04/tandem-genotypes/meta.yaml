@@ -1,0 +1,37 @@
+{% set version = "1.9.1" %}
+
+package:
+  name: tandem-genotypes
+  version: {{ version }}
+
+source:
+  url: https://github.com/mcfrith/tandem-genotypes/archive/{{ version }}.tar.gz
+  sha256: e0322c1adb59d152d6dd2bc0305f1da9f7ae1769f9c5016e1cfc1cbbc459b9f4
+
+build:
+  number: 0
+  noarch: python
+  run_exports:
+    - {{ pin_subpackage('tandem-genotypes', max_pin="x") }}
+  script: python setup.py install --single-version-externally-managed --record=record.txt
+
+requirements:
+  host:
+    - python
+    - setuptools
+  run:
+    - python
+    - r-base
+    - lamassemble
+
+test:
+  commands:
+    - tandem-genotypes --help
+    - tandem-genotypes-join --help
+    - tandem-genotypes-plot --help
+
+about:
+  home: https://github.com/mcfrith/tandem-genotypes
+  summary: Find tandem repeat length changes, from "long" DNA reads aligned to a genome
+  license: GPL-3.0-or-later
+  license_file: LICENSE

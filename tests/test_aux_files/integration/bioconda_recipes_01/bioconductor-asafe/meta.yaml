@@ -1,0 +1,44 @@
+{% set version = "1.28.0" %}
+{% set name = "ASAFE" %}
+{% set bioc = "3.18" %}
+
+package:
+  name: 'bioconductor-{{ name|lower }}'
+  version: '{{ version }}'
+source:
+  url:
+    - 'https://bioconductor.org/packages/{{ bioc }}/bioc/src/contrib/{{ name }}_{{ version }}.tar.gz'
+    - 'https://bioconductor.org/packages/{{ bioc }}/bioc/src/contrib/Archive/{{ name }}/{{ name }}_{{ version }}.tar.gz'
+    - 'https://bioarchive.galaxyproject.org/{{ name }}_{{ version }}.tar.gz'
+    - 'https://depot.galaxyproject.org/software/bioconductor-{{ name|lower }}/bioconductor-{{ name|lower }}_{{ version }}_src_all.tar.gz'
+  md5: e054d986c3b6f2574c26498eaf6e4f7c
+build:
+  number: 0
+  rpaths:
+    - lib/R/lib/
+    - lib/
+  run_exports: '{{ pin_subpackage("bioconductor-asafe", max_pin="x.x") }}'
+  noarch: generic
+# Suggests: knitr, testthat
+requirements:
+  host:
+    - r-base
+  run:
+    - r-base
+test:
+  commands:
+    - '$R -e "library(''{{ name }}'')"'
+about:
+  home: 'https://bioconductor.org/packages/{{ bioc }}/bioc/html/{{ name }}.html'
+  license: Artistic-2.0
+  summary: 'Ancestry Specific Allele Frequency Estimation'
+  description: 'Given admixed individuals'' bi-allelic SNP genotypes and ancestry pairs (where each ancestry can take one of three values) for multiple SNPs, perform an EM algorithm to deal with the fact that SNP genotypes are unphased with respect to ancestry pairs, in order to estimate ancestry-specific allele frequencies for all SNPs.'
+extra:
+  identifiers:
+    - biotools:asafe
+    - doi:10.1093/bioinformatics/btw220
+  parent_recipe:
+    name: bioconductor-asafe
+    path: recipes/bioconductor-asafe
+    version: 1.6.0
+

@@ -1,0 +1,45 @@
+{% set version = "2.2.2" %}
+
+package:
+  name: forgi
+  version: {{ version  }}
+
+source:
+  url: https://github.com/ViennaRNA/forgi/archive/v{{ version }}.tar.gz
+  sha256: d1798d0aab18052dcbc0d0186241324d750781ca5af58fe7ef94b1804827aa63
+
+build:
+  number: 1
+  script: python -m pip install --no-deps --ignore-installed .
+  skip: True  # [py < 36 or py > 39]
+
+requirements:
+  build:
+    - {{ compiler('cxx') }}
+  host:
+    - python
+    - pip
+    - numpy
+    - cython
+  run:
+    - python
+    - numpy >=1.10.0
+    - scipy >=0.19.1
+    - future
+    - networkx >=2.0
+    - biopython >=1.70
+    - logging_exceptions >=0.1.6
+    - beautifulsoup4 >=4.6
+    - matplotlib-base >=2
+    - pandas >=0.20
+    - appdirs >=1.4.3
+
+test:
+  imports:
+    - forgi
+
+about:
+  home: https://viennarna.github.io/forgi/
+  license: GPL 3.0
+  license_file: LICENSE
+  summary: RNA Graph Library

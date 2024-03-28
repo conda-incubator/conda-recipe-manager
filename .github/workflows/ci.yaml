@@ -64,9 +64,25 @@ jobs:
       runs-on: ubuntu-latest
       name: Test on ${{ matrix.test-directory }}
       strategy:
+        fail-fast: false
         matrix:
-          test-directory:
-            - anaconda_recipes
+          test-directory: [anaconda_recipes, bioconda_recipes_01, bioconda_recipes_02, bioconda_recipes_03, bioconda_recipes_04]
+          include:
+            - test-directory: anaconda_recipes
+              convert-success: 0.80
+              rattler-success: 0.50
+            - test-directory: bioconda_recipes_01
+              convert-success: 0.55
+              rattler-success: 0.50
+            - test-directory: bioconda_recipes_02
+              convert-success: 0.55
+              rattler-success: 0.50
+            - test-directory: bioconda_recipes_03
+              convert-success: 0.55
+              rattler-success: 0.50
+            - test-directory: bioconda_recipes_04
+              convert-success: 0.55
+              rattler-success: 0.50
       steps:
         - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         - uses: ./.github/actions/setup-env
@@ -77,5 +93,5 @@ jobs:
             source $CONDA/bin/activate
             conda activate conda-recipe-manager
             conda install -y -c conda-forge rattler-build
-            convert -m 0.80 -o recipe.yaml tests/test_aux_files/integration/${{ matrix.test-directory }}
-            rattler-bulk-build -m 0.30 tests/test_aux_files/integration/${{ matrix.test-directory }} --render-only
+            convert -t -m ${{ matrix.convert-success }} -o recipe.yaml tests/test_aux_files/integration/${{ matrix.test-directory }}
+            rattler-bulk-build -t -m ${{ matrix.rattler-success }} tests/test_aux_files/integration/${{ matrix.test-directory }} --render-only

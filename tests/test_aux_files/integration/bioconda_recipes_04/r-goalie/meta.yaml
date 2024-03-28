@@ -1,0 +1,39 @@
+{% set version = "0.7.7" %}
+{% set github = "https://github.com/acidgenomics/r-goalie" %}
+
+package:
+  name: r-goalie
+  version: "{{ version }}"
+
+source:
+  url: "{{ github }}/archive/v{{ version }}.tar.gz"
+  sha256: 58e751134e5b0431a3a8fee58eefdef2b169e782f1a6eea623c6c9e7fadcd937
+  
+build:
+  number: 1
+  noarch: generic
+  run_exports:
+    - {{ pin_subpackage('r-goalie', max_pin="x.x") }}
+
+requirements:
+  host:
+    - r-base
+  run:
+    - r-base
+
+test:
+  commands:
+    - $R -e "library('goalie')"
+
+about:
+  home: https://r.acidgenomics.com/packages/goalie/
+  dev_url: "{{ github }}"
+  license: AGPL-3
+  license_file: LICENSE
+  license_family: GPL
+  summary: Assertive check functions for defensive R programming.
+
+extra:
+  recipe-maintainers:
+    - acidgenomics
+    - mjsteinbaugh

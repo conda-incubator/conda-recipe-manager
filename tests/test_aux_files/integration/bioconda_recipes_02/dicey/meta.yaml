@@ -1,0 +1,62 @@
+{% set version = "0.2.8" %}
+{% set sha256 = "63ca4bc5579023de12a0495fe0989ed3ddf7e0eb06bfde15c7bbaa2894c6844e" %}
+
+package:
+  name: dicey
+  version: '{{ version }}'
+
+source:
+  - url: https://github.com/gear-genomics/dicey/archive/v{{ version }}.tar.gz
+    sha256: '{{ sha256 }}'
+  - folder: src/xxsds
+    git_url: https://github.com/xxsds/sdsl-lite.git
+    git_rev: a654b57
+
+
+build:
+  number: 0
+  run_exports:
+    - {{ pin_subpackage("dicey", max_pin="x.x") }}
+
+requirements:
+  build:
+    - make
+    - {{ compiler('cxx') }}
+    - cmake >=3.10
+    - autoconf
+    - automake
+    - pkg-config
+    - clangdev
+    - llvm-openmp
+  host:
+    - zlib
+    - bzip2
+    - libdeflate
+    - boost-cpp
+    - htslib
+    - clangdev
+    - llvm-openmp
+  run:
+    - zlib
+    - bzip2
+    - libdeflate
+    - boost-cpp
+    - htslib
+
+test:
+  commands:
+    - dicey --help
+
+about:
+  home: https://github.com/gear-genomics/dicey
+  license: GPL-3
+  license_family: GPL
+  license_file: LICENSE
+  summary: In-silico PCR and variant primer design
+
+extra:
+  skip-lints:
+    - uses_vcs_url
+    - missing_hash
+  identifiers:
+    - biotools:Gear-Genomics

@@ -1,0 +1,40 @@
+{% set version = "2.9.3" %}
+
+package:
+  name: flye
+  version: {{ version }}
+
+source:
+  url: https://github.com/fenderglass/Flye/archive/{{ version }}.tar.gz
+  sha256: 09580390ed0558c131ca0b836a2374d3cc7993cba2a6500024c2ee1d96666edc
+
+build:
+  number: 0
+  run_exports:
+    - {{ pin_subpackage("flye", max_pin="x.x") }}
+requirements:
+  build:
+    - {{ compiler('cxx') }}
+    - make
+  host:
+    - python
+    - setuptools
+    - zlib
+  run:
+    - python
+    - setuptools
+
+extra:
+  skip-lints:
+    - uses_setuptools  #uses pkg_resources
+
+test:
+  commands:
+    - flye -h | grep Assembly
+      #skip failing tests for now, some kind of trouble with minimap2
+    - python -c "import flye.tests.test_toy as t; t.main()"
+
+about:
+  home: https://github.com/fenderglass/Flye/
+  license: BSD-3-Clause
+  summary: Fast and accurate de novo assembler for single molecule sequencing reads
