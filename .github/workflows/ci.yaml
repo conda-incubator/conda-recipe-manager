@@ -65,12 +65,21 @@ jobs:
       name: Test on ${{ matrix.test-directory }}
       strategy:
         matrix:
-          test-directory: [anaconda_recipes, bioconda_recipes]
+          test-directory: [anaconda_recipes, bioconda_recipes_01, bioconda_recipes_02, bioconda_recipes_03, bioconda_recipes_04]
           include:
             - test-directory: anaconda_recipes
               convert-success: 0.80
               rattler-success: 0.50
-            - test-directory: bioconda_recipes
+            - test-directory: bioconda_recipes_01
+              convert-success: 0.70
+              rattler-success: 0.50
+            - test-directory: bioconda_recipes_02
+              convert-success: 0.70
+              rattler-success: 0.50
+            - test-directory: bioconda_recipes_03
+              convert-success: 0.70
+              rattler-success: 0.50
+            - test-directory: bioconda_recipes_04
               convert-success: 0.70
               rattler-success: 0.50
       steps:
