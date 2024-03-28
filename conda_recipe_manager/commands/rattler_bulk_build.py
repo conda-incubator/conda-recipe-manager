@@ -7,6 +7,7 @@ from __future__ import annotations
 import json
 import multiprocessing as mp
 import re
+import signal
 import subprocess
 import sys
 import time
@@ -34,6 +35,7 @@ class ExitCode(IntEnum):
     NO_FILES_FOUND = 1
     # In bulk operation mode, this indicates that the % success threshold was not met
     MISSED_SUCCESS_THRESHOLD = 42
+    TIMEOUT = 43
 
 
 @dataclass
@@ -44,6 +46,24 @@ class BuildResult:
 
     code: ExitCode
     errors: list[str]
+
+
+
+class Timeout:
+    """
+    Adapted from:
+    https://stackoverflow.com/questions/2281850/timeout-function-if-it-takes-too-long-to-finish
+    """
+    def __init__(self, seconds, error_message="Timeout"):
+        self.seconds = seconds
+        self.error_message = error_message
+    def handle_timeout(self, signum, frame):
+        raise TimeoutError(self.error_message)
+    def __enter__(self):
+        signal.signal(signal.SIGALRM, self.handle_timeout)
+        signal.alarm(self.seconds)
+    def __exit__(self, type, value, traceback):
+        signal.alarm(0)
 
 
 def print_err(*args, **kwargs) -> None:  # type: ignore
@@ -64,13 +84,21 @@ def build_recipe(file: Path, path: Path, args: list[str]) -> tuple[str, BuildRes
     """
     cmd: list[str] = ["rattler-build", "build", "-r", str(file)]
     cmd.extend(args)
-    output: Final[subprocess.CompletedProcess[str]] = subprocess.run(
-        " ".join(cmd),
-        encoding="utf-8",
-        capture_output=True,
-        shell=True,
-        check=False,
-    )
+    try:
+        with Timeout(seconds=120):
+            output: Final[subprocess.CompletedProcess[str]] = subprocess.run(
+                " ".join(cmd),
+                encoding="utf-8",
+                capture_output=True,
+                shell=True,
+                check=False,
+            )
+    except TimeoutError:
+        return str(file.relative_to(path)), BuildResult(
+            code=ExitCode.TIMEOUT,
+            errors=["Recipe build dry-run timed out."],
+        )
+
 
     return str(file.relative_to(path)), BuildResult(
         code=ExitCode(output.returncode),
