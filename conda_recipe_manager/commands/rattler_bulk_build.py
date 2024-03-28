@@ -24,7 +24,7 @@ NEW_FORMAT_RECIPE_FILE_NAME: Final[str] = "recipe.yaml"
 DEFAULT_BULK_SUCCESS_PASS_THRESHOLD: Final[float] = 0.80
 RATTLER_ERROR_REGEX = re.compile(r"Error:\s+.*")
 # Timeout to halt operation
-DEFAULT_RATTLER_BUILD_TIMEOUT: Final[int] = 300
+DEFAULT_RATTLER_BUILD_TIMEOUT: Final[int] = 120
 
 
 class ExitCode(IntEnum):
