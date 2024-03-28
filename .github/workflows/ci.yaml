@@ -72,8 +72,17 @@ jobs:
             - test-directory: anaconda_recipes
               convert-success: 0.80
               rattler-success: 0.50
-            - test-directory: bioconda_recipes
-              convert-success: 0.70
+            - test-directory: bioconda_recipes_01
+              convert-success: 0.55
+              rattler-success: 0.50
+            - test-directory: bioconda_recipes_02
+              convert-success: 0.55
+              rattler-success: 0.50
+            - test-directory: bioconda_recipes_03
+              convert-success: 0.55
+              rattler-success: 0.50
+            - test-directory: bioconda_recipes_04
+              convert-success: 0.55
               rattler-success: 0.50
       steps:
         - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
