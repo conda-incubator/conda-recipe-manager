@@ -7,7 +7,6 @@ from __future__ import annotations
 import json
 import multiprocessing as mp
 import re
-import signal
 import subprocess
 import sys
 import time
@@ -24,6 +23,8 @@ NEW_FORMAT_RECIPE_FILE_NAME: Final[str] = "recipe.yaml"
 # "successfully"
 DEFAULT_BULK_SUCCESS_PASS_THRESHOLD: Final[float] = 0.80
 RATTLER_ERROR_REGEX = re.compile(r"Error:\s+.*")
+# Timeout to halt operation
+DEFAULT_RATTLER_BUILD_TIMEOUT: Final[int] = 300
 
 
 class ExitCode(IntEnum):
@@ -48,24 +49,6 @@ class BuildResult:
     errors: list[str]
 
 
-
-class Timeout:
-    """
-    Adapted from:
-    https://stackoverflow.com/questions/2281850/timeout-function-if-it-takes-too-long-to-finish
-    """
-    def __init__(self, seconds, error_message="Timeout"):
-        self.seconds = seconds
-        self.error_message = error_message
-    def handle_timeout(self, signum, frame):
-        raise TimeoutError(self.error_message)
-    def __enter__(self):
-        signal.signal(signal.SIGALRM, self.handle_timeout)
-        signal.alarm(self.seconds)
-    def __exit__(self, type, value, traceback):
-        signal.alarm(0)
-
-
 def print_err(*args, **kwargs) -> None:  # type: ignore
     """
     Convenience wrapper that prints to STDERR
@@ -85,20 +68,19 @@ def build_recipe(file: Path, path: Path, args: list[str]) -> tuple[str, BuildRes
     cmd: list[str] = ["rattler-build", "build", "-r", str(file)]
     cmd.extend(args)
     try:
-        with Timeout(seconds=120):
-            output: Final[subprocess.CompletedProcess[str]] = subprocess.run(
-                " ".join(cmd),
-                encoding="utf-8",
-                capture_output=True,
-                shell=True,
-                check=False,
-            )
-    except TimeoutError:
+        output: Final[subprocess.CompletedProcess[str]] = subprocess.run(
+            " ".join(cmd),
+            encoding="utf-8",
+            capture_output=True,
+            shell=True,
+            check=False,
+            timeout=DEFAULT_RATTLER_BUILD_TIMEOUT,
+        )
+    except subprocess.TimeoutExpired:
         return str(file.relative_to(path)), BuildResult(
             code=ExitCode.TIMEOUT,
             errors=["Recipe build dry-run timed out."],
         )
-
 
     return str(file.relative_to(path)), BuildResult(
         code=ExitCode(output.returncode),
