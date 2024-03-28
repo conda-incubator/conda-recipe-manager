@@ -64,6 +64,7 @@ jobs:
       runs-on: ubuntu-latest
       name: Test on ${{ matrix.test-directory }}
       strategy:
+        fail-fast: false
         matrix:
           test-directory: [anaconda_recipes, bioconda_recipes_01, bioconda_recipes_02, bioconda_recipes_03, bioconda_recipes_04]
           include:
