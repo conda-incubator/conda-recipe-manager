@@ -93,5 +93,5 @@ jobs:
             source $CONDA/bin/activate
             conda activate conda-recipe-manager
             conda install -y -c conda-forge rattler-build
-            convert -m ${{ matrix.convert-success }} -o recipe.yaml tests/test_aux_files/integration/${{ matrix.test-directory }}
-            rattler-bulk-build -m ${{ matrix.rattler-success }} tests/test_aux_files/integration/${{ matrix.test-directory }} --render-only
+            convert -t -m ${{ matrix.convert-success }} -o recipe.yaml tests/test_aux_files/integration/${{ matrix.test-directory }}
+            rattler-bulk-build -t -m ${{ matrix.rattler-success }} tests/test_aux_files/integration/${{ matrix.test-directory }} --render-only

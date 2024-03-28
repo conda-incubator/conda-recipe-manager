@@ -96,8 +96,14 @@ def build_recipe(file: Path, path: Path, args: list[str]) -> tuple[str, BuildRes
     default=DEFAULT_BULK_SUCCESS_PASS_THRESHOLD,
     help="Sets a minimum passing success rate for bulk operations.",
 )
+@click.option(
+    "--truncate",
+    "-t",
+    is_flag=True,
+    help="Truncates logging. On large tests in a GitHub CI environment, this can eliminate log buffering issues.",
+)
 @click.pass_context
-def rattler_bulk_build(ctx: click.Context, path: Path, min_success_rate: float) -> None:
+def rattler_bulk_build(ctx: click.Context, path: Path, min_success_rate: float, truncate: bool) -> None:
     """
     Given a directory of feedstock repositories, performs multiple recipe builds using rattler-build.
     All unknown options and arguments for this script are passed directly to `rattler-build build`.
@@ -153,10 +159,11 @@ def rattler_bulk_build(ctx: click.Context, path: Path, min_success_rate: float) 
         },
     }
     final_output = {
-        "recipes_with_build_error_code": recipes_with_errors,
         "error_histogram": error_histogram,
         "stats": stats,
     }
+    if not truncate:
+        final_output["recipes_with_build_error_code"] = recipes_with_errors
 
     print(json.dumps(final_output, indent=2))
     sys.exit(ExitCode.SUCCESS if percent_success >= min_success_rate else ExitCode.MISSED_SUCCESS_THRESHOLD)
