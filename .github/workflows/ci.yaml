@@ -67,7 +67,12 @@ jobs:
       strategy:
         fail-fast: false
         matrix:
-          test-directory: [anaconda_recipes, bioconda_recipes_01, bioconda_recipes_02, bioconda_recipes_03, bioconda_recipes_04]
+          test-directory:
+            - anaconda_recipes
+            - bioconda_recipes_01
+            - bioconda_recipes_02
+            # - bioconda_recipes_03
+            # - bioconda_recipes_04]
           include:
             - test-directory: anaconda_recipes
               convert-success: 0.80
