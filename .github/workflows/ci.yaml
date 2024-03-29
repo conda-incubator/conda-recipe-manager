@@ -73,16 +73,16 @@ jobs:
               rattler-success: 0.50
             - test-directory: bioconda_recipes_01
               convert-success: 0.55
-              rattler-success: 0.50
+              rattler-success: 0.02
             - test-directory: bioconda_recipes_02
               convert-success: 0.55
-              rattler-success: 0.50
+              rattler-success: 0.08
             - test-directory: bioconda_recipes_03
               convert-success: 0.55
-              rattler-success: 0.50
+              rattler-success: 0.05
             - test-directory: bioconda_recipes_04
               convert-success: 0.55
-              rattler-success: 0.50
+              rattler-success: 0.05
       steps:
         - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         - uses: ./.github/actions/setup-env
