@@ -39,7 +39,7 @@ def fetch_repo(org_repo: str, out_dir: Path) -> str:
             response = requests.get(url, timeout=HTTP_GET_TIMEOUT)
             if response.status_code == 200:
                 file_path.parent.mkdir(exist_ok=True, parents=True)
-                file_path.write_text(str(response.content))
+                file_path.write_text(response.text)
                 return org_repo
         except requests.exceptions.RequestException:  # type: ignore[misc]
             continue
