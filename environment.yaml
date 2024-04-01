@@ -21,4 +21,6 @@ dependencies:
   - conda-build
   - jsonschema
   - types-jsonschema
+  - requests
+  - types-requests
   - pre-commit
