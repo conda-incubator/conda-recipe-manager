@@ -1,0 +1,46 @@
+{% set name = "asdf-coordinates-schemas" %}
+{% set version = "0.3.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/asdf_coordinates_schemas-{{ version }}.tar.gz
+  sha256: c98b6015dcec87a158fcde7798583f0615d08125fa6e1e9de16c4eb03fcd604e
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.9
+    - setuptools
+    - setuptools-scm
+  run:
+    - asdf >=2.12.1
+    - asdf-standard >=1.1.0
+    - python >=3.8
+
+test:
+  imports:
+    - asdf_coordinates_schemas
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/asdf-format/asdf-coordinates-schemas
+  summary: ASDF coordinates schemas
+  license: BSD-3-Clause
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - jhunkeler
+    - WilliamJamieson
+    - braingram

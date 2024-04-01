@@ -1,0 +1,65 @@
+{% set name = "openai" %}
+{% set version = "1.14.3" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/openai/openai-python/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: f9acead581edd4ae9a79e1425ff9ba36b35da13237abebca7cc6581c164ce4c9
+
+build:
+  number: 0
+  noarch: python
+  entry_points:
+    - openai=openai.cli:main
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - hatchling
+    - pip
+    - python >=3.7.1
+  run:
+    - sniffio
+    - anyio >=3.5.0,<5
+    - distro >=1.7.0,<2
+    - httpx >=0.23.0,<1
+    - pydantic >=1.9.0,<3
+    - typing-extensions >=4.7,<5
+    - python >=3.7.1
+    - tqdm >4
+
+test:
+  imports:
+    - openai
+  commands:
+    - openai api -h
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://beta.openai.com
+  summary: Python client library for the OpenAI API
+  description: |
+    The OpenAI Python library provides convenient access to the OpenAI API
+    from applications written in the Python language.
+    It includes a pre-defined set of classes for API resources that initialize
+    themselves dynamically from API responses which makes it compatible with
+    a wide range of versions of the OpenAI API.
+
+    This library additionally provides an `openai` command-line utility which
+    makes it easy to interact with the API from your terminal.
+    Run `openai api -h` for usage.
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  doc_url: https://platform.openai.com/docs/api-reference?lang=python
+  dev_url: https://github.com/openai/openai-python
+
+extra:
+  recipe-maintainers:
+    - BastianZim

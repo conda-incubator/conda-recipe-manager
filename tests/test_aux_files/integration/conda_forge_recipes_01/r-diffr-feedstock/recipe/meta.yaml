@@ -1,0 +1,74 @@
+{% set version = '0.1' %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-diffr
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/diffr_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/diffr/diffr_{{ version }}.tar.gz
+  sha256: e82ec76b4eadee8ec682f83a8a9d3ffe6309fc31e6c66db573d6e7f8fdb5bc79
+
+build:
+  merge_build_host: True  # [win]
+  number: 1006
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+    - cross-r-base {{ r_base }}    # [build_platform != target_platform]
+  host:
+    - r-base
+    - r-htmlwidgets
+  run:
+    - r-base
+    - r-htmlwidgets
+
+test:
+  commands:
+    - $R -e "library('diffr')"           # [not win]
+    - "\"%R%\" -e \"library('diffr')\""  # [win]
+
+about:
+  home: https://CRAN.R-project.org/package=diffr
+  license: GPL-2.0-only
+  summary: An R interface to the 'codediff' JavaScript library (a copy of which is included in
+    the package, see <https://github.com/danvk/codediff.js> for information). Allows
+    for visualization of the difference between 2 files, usually text files or R scripts,
+    in a browser.
+  license_family: GPL2
+  license_file:
+    - '{{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-2'
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+    - FrodePedersen
+    - ArneKr
+    - MathiasHaudgaard
+
+# Package: diffr
+# Title: Display Differences Between Two Files using Codediff Library
+# Version: 0.1
+# Authors@R: person("John", "Muschelli", email = "muschellij2@gmail.com", role = c("aut", "cre"))
+# Description: An R interface to the 'codediff' JavaScript library (a copy of which is included in the package, see <https://github.com/danvk/codediff.js> for information). Allows for visualization of the difference between 2 files, usually text files or R scripts, in a browser.
+# Depends: R (>= 3.0)
+# Imports: htmlwidgets
+# License: GPL-2
+# LazyData: true
+# RoxygenNote: 6.0.1
+# Suggests: shiny
+# BugReports: https://github.com/muschellij2/diffr/issues
+# NeedsCompilation: no
+# Packaged: 2017-02-27 19:33:24 UTC; johnmuschelli
+# Author: John Muschelli [aut, cre]
+# Maintainer: John Muschelli <muschellij2@gmail.com>
+# Repository: CRAN
+# Date/Publication: 2017-02-27 21:44:54

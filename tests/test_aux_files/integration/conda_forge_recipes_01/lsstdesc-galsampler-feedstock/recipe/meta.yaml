@@ -1,0 +1,59 @@
+{% set name = "lsstdesc-galsampler" %}
+{% set version = "0.1.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/LSSTDESC/galsampler/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: 1f04206d8035b9fe2570211a3150110b45832d3f0c54e01f56520dbca12a3a2f
+
+build:
+  number: 0
+  noarch: python
+
+test:
+  imports:
+    - galsampler
+
+outputs:
+  - name: {{ name }}
+    script: build_it.sh
+    build:
+      noarch: python
+    requirements:
+      host:
+        - python >=3.7,<3.12
+        - pip
+        - setuptools_scm
+      run:
+        - python >=3.7,<3.12
+        - numpy
+        - scipy
+        - numba    
+  
+  - name: galsampler
+    build:
+      noarch: python
+    requirements:
+      host:
+        - python >=3.7,<3.12
+      run:
+        - {{ pin_subpackage("lsstdesc-galsampler", exact=True) }}
+        - python >=3.7,<3.12
+    test:
+      script: do_tests.py
+
+about:
+  home: https://github.com/LSSTDESC/galsampler
+  summary: 'Tools for generating synthetic cosmological data'
+  description: |
+    Tools for generating synthetic cosmological data
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE.rst
+
+extra:
+  recipe-maintainers:
+    - beckermr

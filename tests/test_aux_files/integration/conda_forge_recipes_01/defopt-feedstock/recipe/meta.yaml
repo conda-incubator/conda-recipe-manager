@@ -1,0 +1,47 @@
+{% set name = "defopt" %}
+{% set version = "6.4.0" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/defopt-{{ version }}.tar.gz
+  sha256: 359a56137b4b7dcbc051d2157e6591a09c35c4297cfc00f1ef8dbcd192d19a34
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.8
+    - setuptools-scm >=3.3
+  run:
+    - python >=3.8
+    - typing_inspect >=0.5.0
+    - docutils >=0.12
+    - sphinxcontrib-napoleon >=0.7.0
+    - colorama >=0.3.4
+
+test:
+  imports:
+    - defopt
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/anntzer/defopt
+  summary: Effortless argument parser
+  license: MIT
+  license_file: LICENSE.txt
+
+extra:
+  recipe-maintainers:
+    - ickc
+    - nh13

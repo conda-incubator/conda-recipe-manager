@@ -1,0 +1,54 @@
+{% set name = "sphinx-autobuild" %}
+{% set version = "2024.2.4" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name.replace('-', '_') }}-{{ version }}.tar.gz
+  sha256: cb9d2121a176d62d45471624872afc5fad7755ad662738abe400ecf4a7954303
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install --no-deps --ignore-installed .
+  entry_points:
+    - sphinx-autobuild=sphinx_autobuild.__main__:main
+
+requirements:
+  host:
+    - python >=3.9
+    - flit-core >=3.7
+    - pip
+  run:
+    - python >=3.9
+    - sphinx
+    - livereload
+    - colorama
+
+test:
+  imports:
+    - sphinx_autobuild
+  commands:
+    - pip check
+    - sphinx-autobuild --help
+    - pytest tests
+  requires:
+    - pip
+    - pytest
+    - mock
+  source_files:
+    - tests
+
+about:
+  home: https://github.com/executablebooks/sphinx-autobuild
+  summary: Rebuild Sphinx documentation on changes, with live-reload in the browser.
+  dev_url: https://github.com/sphinx-doc/sphinx-autobuild
+  license: MIT
+  license_file: LICENSE.rst
+
+extra:
+  recipe-maintainers:
+    - jrderuiter
+    - xhochy

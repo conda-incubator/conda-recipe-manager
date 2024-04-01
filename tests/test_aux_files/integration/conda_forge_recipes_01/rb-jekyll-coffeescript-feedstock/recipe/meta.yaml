@@ -1,0 +1,45 @@
+{% set name = "jekyll-coffeescript" %}
+{% set version = "2.0.0" %}
+
+package:
+  name: rb-{{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://rubygems.org/downloads/{{ name }}-{{ version }}.gem
+  sha256: 329c72fb62843056a5d6711514d4ff7f17a799169e88167d1d3a83ea1698d29d
+
+build:
+  noarch: generic
+  number: 0
+  script:
+    - gem install -N -l -V --norc --ignore-dependencies {{ name }}-{{ version }}.gem
+  skip: {{ win }}
+
+requirements:
+  host:
+    - ruby
+  run:
+    - ruby
+    - rb-coffee-script >=2.2,<3
+    - rb-coffee-script-source >=1.12,<2
+
+test:
+  requires:
+    - rb-jekyll >=3,<4
+  commands:
+    - ruby -r jekyll -r {{ name }} -e 'exit 0'
+
+about:
+  home: https://rubygems.org/gems/{{ name }}
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE.txt
+  summary: A CoffeeScript converter for Jekyll
+
+  doc_url: https://www.rubydoc.info/gems/{{ name }}
+  dev_url: https://github.com/jekyll/{{ name }}
+
+extra:
+  recipe-maintainers:
+    - sodre

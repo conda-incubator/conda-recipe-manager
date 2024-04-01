@@ -1,0 +1,56 @@
+{% set version = "4.7-1.1" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-randomforest
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/randomForest_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/randomForest/randomForest_{{ version }}.tar.gz
+  sha256: f59ea87534480edbcd6baf53d7ec57e8c69f4532c2d2528eacfd48924efa2cd6
+
+build:
+  merge_build_host: true  # [win]
+  number: 2
+  skip: true  # [r_base == "4.0"]
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - cross-r-base {{ r_base }}  # [build_platform != target_platform]
+    - {{ compiler('c') }}        # [not win]
+    - {{ compiler('fortran') }}  # [not win]
+    - {{ compiler('m2w64_c') }}        # [win]
+    - {{ compiler('m2w64_fortran') }}        # [win]
+    - {{ posix }}filesystem        # [win]
+    - {{ posix }}make
+    - {{ posix }}sed               # [win]
+    - {{ posix }}coreutils         # [win]
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+  run:
+    - r-base
+    - {{ native }}gcc-libs         # [win]
+
+test:
+  commands:
+    - $R -e "library('randomForest')"           # [not win]
+    - "\"%R%\" -e \"library('randomForest')\""  # [win]
+
+about:
+  home: https://www.stat.berkeley.edu/~breiman/RandomForests/
+  license: GPL-2.0-or-later
+  summary: Classification and regression based on a forest of trees using random inputs, based on Breiman (2001) <DOI:10.1023/A:1010933404324>.
+  license_family: GPL3
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-3
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r

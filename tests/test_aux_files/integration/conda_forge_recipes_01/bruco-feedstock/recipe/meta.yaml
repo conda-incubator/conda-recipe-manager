@@ -1,0 +1,55 @@
+{% set name = "bruco" %}
+{% set version = "0.2.3" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 75b14827d07ad57b4c5dcaa1f48d7bdb912e21d596a1ce4a209cbb3cebfc6add
+
+build:
+  number: 1
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  build:
+    # extras for cross-compilation
+    - cross-python_{{ target_platform }}  # [build_platform != target_platform]
+    - python                              # [build_platform != target_platform]
+  host:
+    - pip
+    - python
+    - setuptools
+  run:
+    - gpstime
+    - gwdatafind
+    - gwpy
+    - matplotlib-base
+    - numpy
+    - python
+    - scipy
+
+test:
+  requires:
+    - pip
+  imports:
+    - bruco
+  commands:
+    # check requirements
+    - python -m pip check
+    # check command-line interface
+    - python -m bruco --help
+    - bruco --help  # [unix]
+
+about:
+  home: https://git.ligo.org/gabriele-vajente/bruco
+  license: GPL-3.0-or-later
+  license_family: GPL
+  license_file: LICENSE
+  summary: Brute force coherence
+
+extra:
+  recipe-maintainers:
+    - duncanmmacleod

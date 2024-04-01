@@ -1,0 +1,62 @@
+{% set version = "0.10.0" %}
+
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-duckdb
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/duckdb_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/duckdb/duckdb_{{ version }}.tar.gz
+  sha256: a5158ca55b23113ca0676a57c6ab336e8f7768af67a8a7667fc972bcec3c199e
+
+build:
+  merge_build_host: true  # [win]
+  skip: true  # [win]
+  number: 0
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ compiler('c') }}          # [not win]
+    - {{ compiler('m2w64_c') }}    # [win]
+    - {{ compiler('cxx') }}        # [not win]
+    - {{ compiler('m2w64_cxx') }}  # [win]
+    - {{ posix }}filesystem        # [win]
+    - {{ posix }}make
+    - {{ posix }}sed               # [win]
+    - {{ posix }}coreutils         # [win]
+    - {{ posix }}zip               # [win]
+    - cross-r-base {{ r_base }}    # [build_platform != target_platform]
+
+  host:
+    - r-base
+    - r-dbi
+
+  run:
+    - r-base
+    - {{ native }}gcc-libs         # [win]
+    - r-dbi
+
+test:
+  commands:
+    - $R -e "library('duckdb')"           # [not win]
+    - "\"%R%\" -e \"library('duckdb')\""  # [win]
+
+about:
+  home: https://duckdb.org
+  dev_url: https://github.com/cwida/duckdb
+  license: MPL-2.0
+  summary: The DuckDB project is an embedded analytical data management system with support for the Structured Query Language (SQL). This package includes all of DuckDB and a R Database Interface (DBI) connector.
+  license_family: MOZILLA
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+    - izahn

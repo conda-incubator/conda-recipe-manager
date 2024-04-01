@@ -1,0 +1,55 @@
+{% set version = "1.1.8" %}
+
+package:
+  name: seapy
+  version: {{ version }}
+
+source:
+  url: https://github.com/powellb/seapy/archive/{{ version }}.tar.gz
+  sha256: 3a66138fee42d9ffa3813d08844a2526f70d6e271688dda32b813777103f1c2d
+
+build:
+  number: 0
+  skip: true  # [py<37]
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  build:
+    - {{ compiler('fortran') }}
+    - {{ compiler('c') }}
+  host:
+    - python
+    - pip
+    - numpy
+    - flang  # [win and py3k]
+  run:
+    - python
+    - {{ pin_compatible('numpy') }}
+    - libflang  # [win and py3k]
+    - cartopy
+    - h5py
+    - joblib
+    - netcdf4
+    - numpy
+    - numpy_groupies
+    - rich
+    - scipy
+
+test:
+  imports:
+    - seapy
+    - seapy.seawater
+    - seapy.roms
+    - seapy.model
+    - seapy.external.oalib
+    - seapy.external.hindices
+
+about:
+  home: https://github.com/powellb/seapy/
+  license: MIT
+  license_file: LICENSE.txt
+  summary: State Estimation and Analysis in PYthon
+
+extra:
+  recipe-maintainers:
+    - ocefpaf

@@ -1,0 +1,44 @@
+{% set version = "4.0.1" %}
+
+package:
+  name: statsd
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/s/statsd/statsd-{{ version }}.tar.gz
+  sha256: 99763da81bfea8daf6b3d22d11aaccb01a8d0f52ea521daab37e758a4ca7d128
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - python >=3.7
+    - pip
+  run:
+    - python >=3.7
+
+test:
+  requires:
+    - nose2
+    - python
+    - mock
+    - pip
+  commands:
+    - pip check
+    - nose2 statsd
+
+about:
+  home: https://github.com/jsocol/pystatsd
+  license_family: MIT
+  license: MIT
+  summary: A Python client for statsd
+  license_file: LICENSE
+  doc_url: https://statsd.readthedocs.io
+  dev_url: https://github.com/jsocol/pystatsd
+
+extra:
+  recipe-maintainers:
+    - bollwyvl

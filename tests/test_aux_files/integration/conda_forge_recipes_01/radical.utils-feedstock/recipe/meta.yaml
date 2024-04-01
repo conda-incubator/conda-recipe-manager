@@ -1,0 +1,53 @@
+{% set name = "radical.utils" %}
+{% set version = "1.48.0" %}
+{% set sha256 = "7cf0e25226f9f087cc3d32a4215e353231ada82b0ae86aa874063cdc94833c98" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  number: 0
+  script: {{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv
+  skip: true  # [py2k or win]
+
+requirements:
+  host:
+    - python
+    - pip
+  run:
+    - python
+    - colorama
+    - msgpack-python
+    - netifaces
+    - ntplib
+    - pyzmq
+    - regex
+    - setproctitle
+
+test:
+  imports:
+    - radical.utils
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/radical-cybertools/radical.utils
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE.md
+  summary: Shared code and tools for various RADICAL-Cybertools projects
+  description: |
+    This Python package contains shared code and tools for various RADICAL-Cybertools projects.
+  dev_url: https://github.com/radical-cybertools/radical.utils
+
+extra:
+  recipe-maintainers:
+    - andre-merzky
+    - mtitov

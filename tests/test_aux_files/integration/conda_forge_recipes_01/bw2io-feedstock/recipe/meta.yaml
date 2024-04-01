@@ -1,0 +1,58 @@
+{% set name = "bw2io" %}
+{% set version = "0.8.12" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 410fdac7d3a4273750861cc65166b026813e23dfa0ee59c77a8a412ea1dbbaea
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+    - setuptools
+  run:
+    - bw_migrations
+    - bw2calc >=1.7.4,<2
+    - bw2data >=3.5.1,<4
+    - ecoinvent_interface
+    - lxml
+    - mrio_common_metadata
+    - numpy
+    - openpyxl
+    - psutil
+    - pyprind
+    - python >=3.6
+    - scipy
+    - stats_arrays
+    - tqdm
+    - unidecode
+    - voluptuous
+    - xlrd
+    - xlsxwriter
+
+test:
+  imports:
+    - bw2io
+
+about:
+  home: https://github.com/brightway-lca/brightway2-io
+  summary: 'Tools for importing and export life cycle inventory databases'
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE.txt
+  dev_url: https://github.com/brightway-lca/brightway2-io
+
+extra:
+  recipe-maintainers:
+    - michaelweinold
+    - cmutel
+    - m-rossi

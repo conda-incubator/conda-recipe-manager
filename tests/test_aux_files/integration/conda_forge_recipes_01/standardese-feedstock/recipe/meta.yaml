@@ -1,0 +1,50 @@
+{% set name = "standardese" %}
+{% set version = "0.5.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/{{ name }}/{{ name }}/releases/download/{{ version }}/{{ name }}-{{ version }}.tgz
+  sha256: 04a791479b9c881290bce2b4a2ce44e30f17e8c79ef6acc75c15b85ccfd54c12
+  patches:
+    - 0001-fix-compile-error-on-windows.patch 
+
+build:
+  number: 2
+  skip: true  # [win and vc<14]
+  run_exports:
+    # standardese uses semantic versioning
+    - {{ pin_subpackage("standardese") }}
+
+requirements:
+  build:
+    - {{ compiler('cxx') }}
+    - cmake
+    - make                   # [unix]
+  host:
+    - libboost-devel
+    - clangdev
+  run:
+    - {{ pin_compatible('libclang') }}
+    - {{ pin_compatible('clangxx') }}
+
+test:
+  files:
+    - sample.h
+  commands:
+    - standardese sample.h
+
+about:
+  home: https://standardese.github.io/
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: The nextgen Doxygen for C++
+  doc_url: https://standardese.github.io/
+  dev_url: https://github.com/standardese/standardese
+
+extra:
+  recipe-maintainers:
+    - saraedum

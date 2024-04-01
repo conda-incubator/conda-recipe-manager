@@ -1,0 +1,54 @@
+{% set name = "graphbrain" %}
+{% set version = "0.5.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: cf34eaf54225bebffa4f5981e8a4fa8135a53efb1f0e3089eef0432aaf437333
+  patches:
+    - utf8_encoding.patch
+
+build:
+  number: 1
+  skip: true  # [py>37]
+  script: {{ PYTHON }} -m pip install . -vv
+  entry_points:
+    - graphbrain = graphbrain.__main__:cli
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+  host:
+    - pip
+    - python
+  run:
+    - asciitree
+    - ipython
+    - numpy
+    - plyvel
+    - progressbar2
+    - python
+    - python-igraph
+    - spacy
+    - termcolor
+    - unidecode
+
+test:
+  imports:
+    - graphbrain
+
+about:
+  home: https://pypi.org/project/graphbrain/
+  summary: Knowledge System and Natural Language Understanding.
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - rluria14
+    - oblute
+    - ndmaxar
+    - mxr-conda

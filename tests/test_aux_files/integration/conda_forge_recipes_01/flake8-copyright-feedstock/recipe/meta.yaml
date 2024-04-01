@@ -1,0 +1,44 @@
+{% set name = "flake8-copyright" %}
+{% set version = "0.2.4" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: b78491fcf575266d7e78dcfa899c876edd1c29929d247de3408bf4e3f971bf1c
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+    - setuptools
+  run:
+    - python >=3.6
+    - setuptools
+    - flake8
+
+test:
+  commands:
+    - 'flake8 --version | grep flake8-copyright:'
+
+about:
+  home: https://github.com/savoirfairelinux/flake8-copyright
+  license: LGPL-3.0-or-later
+  license_family: LGPL
+  license_file:
+    - COPYING
+    - COPYING.LESSER
+  summary: Flake8 plugin to check for copyright notices in all python files.
+  dev_url: https://github.com/savoirfairelinux/flake8-copyright
+
+extra:
+  recipe-maintainers:
+    - dopplershift

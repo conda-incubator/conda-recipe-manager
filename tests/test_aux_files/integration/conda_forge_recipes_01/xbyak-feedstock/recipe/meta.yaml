@@ -1,0 +1,47 @@
+{% set name = "xbyak" %}
+{% set version = "7.06" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/herumi/xbyak/archive/v{{ version }}.tar.gz
+  sha256: 686c710a67c7fb8e99d8e326cf22aea310a29db27a9db8ba19a9fee44f8ec097
+
+build:
+  number: 0
+  ignore_run_exports_from:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - cmake
+    - make
+
+test:
+  commands:
+    - test -f ${PREFIX}/include/xbyak/xbyak.h  # [unix]
+    - test -f ${PREFIX}/include/xbyak/xbyak_mnemonic.h  # [unix]
+    - test -f ${PREFIX}/include/xbyak/xbyak_util.h  # [unix]
+    - test -f ${PREFIX}/include/xbyak/xbyak_bin2hex.h  # [unix]
+    - if not exist %LIBRARY_INC%\xbyak\xbyak.h exit 1  # [win]
+    - if not exist %LIBRARY_INC%\xbyak\xbyak_mnemonic.h exit 1  # [win]
+    - if not exist %LIBRARY_INC%\xbyak\xbyak_util.h exit 1  # [win]
+    - if not exist %LIBRARY_INC%\xbyak\xbyak_bin2hex.h exit 1  # [win]
+
+about:
+  home: https://github.com/herumi/xbyak
+  summary: JIT assembler for x86(IA32), x64(AMD64, x86-64) by C++
+  dev_url: https://github.com/herumi/xbyak
+  license: BSD-3-Clause
+  license_file: COPYRIGHT
+
+extra:
+  recipe-maintainers:
+    - marcelotrevisani
+    - ilya-lavrenov

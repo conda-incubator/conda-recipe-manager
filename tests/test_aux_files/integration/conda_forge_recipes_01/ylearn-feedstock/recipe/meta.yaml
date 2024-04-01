@@ -1,0 +1,60 @@
+{% set name = "YLearn" %}
+{% set version = "0.2.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/DataCanvasIO/{{ name }}/archive/refs/tags/{{ version }}.tar.gz
+  sha256: 91e9c8158a52d87c14030406d25bbab495cdf1665305000ec6934251060a6810
+ 
+build:
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  build:
+    - {{ compiler('cxx') }}
+  host:
+    - python
+    - numpy
+    - pip
+    - cython
+    - urllib3
+  run:
+    - python
+    - {{ pin_compatible('numpy') }}
+    - pandas >=0.25.3
+    - scikit-learn >=0.22.1
+    - scipy
+    - networkx
+    - ipython
+    - joblib
+    - pydot
+    - graphviz
+    - tqdm
+    - pytorch  # [not win]
+
+test:
+  imports:
+    - ylearn
+  requires:
+    - pip
+  commands:
+    - pip check
+
+about:
+  home: https://github.com/DataCanvasIO/YLearn
+  license: Apache-2.0
+  license_file: LICENSE
+  summary: 'YLearn is a python package for causal inference.'
+  description: |
+    YLearn, a pun of "learn why", is a python package for causal inference 
+    which supports various aspects of causal inference ranging from causal 
+    effect identification, estimation, and causal graph discovery, etc.
+  doc_url: https://ylearn.readthedocs.io/
+  dev_url: https://github.com/DataCanvasIO/YLearn
+extra:
+  recipe-maintainers:
+    - lixfz

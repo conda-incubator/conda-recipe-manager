@@ -1,0 +1,48 @@
+{% set name = "napari-griottes" %}
+{% set version = "0.4.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/napari_griottes-{{ version }}.tar.gz
+  sha256: 7fefccb63fd1f2247e220ad60bd0e83ff14a54af51f09111bbb9844dbdd2ec2f
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.8
+    - setuptools-scm
+  run:
+    - griottes
+    - napari
+    - networkx
+    - numpy
+    - pandas <2.0.0a0
+    - python >=3.8
+
+test:
+  imports:
+    - napari_griottes
+  commands:
+    - pip list
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/aaristov/napari-griottes
+  summary: Create graphs
+  license: BSD-3-Clause
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - goanpeca
+    - jaimergp

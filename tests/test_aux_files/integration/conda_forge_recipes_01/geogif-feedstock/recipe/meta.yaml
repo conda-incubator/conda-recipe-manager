@@ -1,0 +1,47 @@
+{% set name = "geogif" %}
+{% set version = "0.1.5" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/geogif-{{ version }}.tar.gz
+  sha256: 508dc902a6ecba86ca40297428da37202551acccfd2237290c324ac8fd21a075
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.8,<4.0
+    - poetry-core >=1.0.0
+    - pip
+  run:
+    - python >=3.8.0,<4.0.0
+    - dask-core >=2021.4.1
+    - numpy >=1.20.2,<2.0.0
+    - pillow >=10.0.0,<11.0.0
+    - matplotlib-base >=3.4.1,<4.0.0
+    - xarray >=0.18
+    - typing_extensions
+
+test:
+  imports:
+    - geogif
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://geogif.readthedocs.io/en/latest/index.html
+  summary: Render xarray timestacks into GIFs
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - ocefpaf

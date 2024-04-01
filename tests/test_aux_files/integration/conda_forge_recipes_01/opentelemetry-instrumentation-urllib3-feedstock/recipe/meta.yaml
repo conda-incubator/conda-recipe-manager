@@ -1,0 +1,80 @@
+{% set name = "opentelemetry-instrumentation-urllib3" %}
+{% set version = "0.45b0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/opentelemetry_instrumentation_urllib3-{{ version }}.tar.gz
+  sha256: 7e6654423615c0099ab436e9f1f54900a6675da568492e04f1f26169f59bceda
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.7
+    - pip
+    - hatchling
+  run:
+    - python >=3.7
+    - opentelemetry-api ~=1.12
+    - opentelemetry-instrumentation ==0.45b0
+    - opentelemetry-semantic-conventions ==0.45b0
+    - opentelemetry-util-http ==0.45b0
+    - wrapt <2.0.0,>=1.0.0
+    # - urllib3 <2.0.0,>=1.0.0
+    # - opentelemetry-test-utils ==0.37b0
+    # - opentelemetry-instrumentation-urllib3 
+    # - httpretty ~=1.0
+    # - urllib3 <2.0.0,>=1.0.0
+    # - opentelemetry-test-utils ==0.38b0
+    # - opentelemetry-instrumentation-urllib3 
+    # - httpretty ~=1.0
+    # - urllib3 <2.0.0,>=1.0.0
+    # - opentelemetry-test-utils ==0.39b0
+    # - opentelemetry-instrumentation-urllib3 
+    # - httpretty ~=1.0
+    # - urllib3 <3.0.0,>=1.0.0
+    # - opentelemetry-test-utils ==0.40b0
+    # - opentelemetry-instrumentation-urllib3 
+    # - httpretty ~=1.0
+    # - urllib3 <3.0.0,>=1.0.0
+    # - opentelemetry-test-utils ==0.41b0
+    # - opentelemetry-instrumentation-urllib3 
+    # - httpretty ~=1.0
+    # - urllib3 <3.0.0,>=1.0.0
+    # - opentelemetry-test-utils ==0.42b0
+    # - opentelemetry-instrumentation-urllib3 
+    # - httpretty ~=1.0
+    # - urllib3 <3.0.0,>=1.0.0
+    # - opentelemetry-test-utils ==0.43b0
+    # - opentelemetry-instrumentation-urllib3 
+    # - httpretty ~=1.0
+    # - urllib3 <3.0.0,>=1.0.0
+    # - opentelemetry-test-utils ==0.44b0
+    # - opentelemetry-instrumentation-urllib3 
+    # - httpretty ~=1.0
+    # - urllib3 <3.0.0,>=1.0.0
+
+test:
+  imports:
+    - opentelemetry
+    - opentelemetry.instrumentation
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation/opentelemetry-instrumentation-urllib3
+  summary: OpenTelemetry urllib3 instrumentation
+  license: Apache-2.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - mariusvniekerk

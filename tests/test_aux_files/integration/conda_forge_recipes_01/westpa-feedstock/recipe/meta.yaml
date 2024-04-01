@@ -1,0 +1,95 @@
+{% set name = "westpa" %}
+{% set version = "2022.06" %}
+{% set sha256 = "b7859d8d9f58190da47ca1ba3f7facee8f5c6873d4e8e03c015e9abdae3a6214" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://github.com/westpa/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  number: 1
+  skip: True  # [win or py2k]
+  script: "{{ PYTHON }} -m pip install . -vv --no-deps"
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - cython >=0.29.16                       # [build_platform != target_platform]
+    - numpy >=1.16                           # [build_platform != target_platform]
+    - {{ compiler('c') }}
+  host:
+    - setuptools >=40.8.0
+    - python
+    - wheel
+    - cython >=0.29.16                       # [py >=39]
+    - cython <3.0.3, >=0.29.16               # [py <=38]
+    - numpy >=1.16
+    - scipy >=0.19.1
+    - versioneer-518
+    - pip
+  run:
+    - python
+    - {{ pin_compatible('numpy') }}
+    - scipy >=0.19.1
+    - h5py >=2.10
+    - mdtraj >=1.9.5
+    - pyyaml >=5.3.*
+    - pyzmq >=19.0.*
+    - matplotlib-base
+    - blessings 1.7.*
+    - ipykernel
+    - tqdm
+    - pandas
+    - pytables
+
+test:
+  imports:
+    - westpa
+    - westpa.core.propagators
+    - westpa.core.binning
+    - westpa.core.kinetics
+    - westpa.core.reweight
+    - westpa.work_managers
+    - westpa.tools
+    - westpa.fasthist
+    - westpa.mclib
+    # Currently blocked by https://github.com/westpa/westpa/issues/70
+    #- westpa.trajtree
+    # Skipping the following so it'll pass on macs 
+    #source_files:
+    #- tests/*.py
+    #- tests/test_tools
+    #- tests/refs
+    #- tests/fixtures
+    #requires:
+    #- pytest
+    #- nose
+    #commands:
+    #- pytest -v tests/
+
+about:
+  home: https://westpa.github.io/westpa
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: 'Interoperable, highly-scalable software for weighted ensemble simulation.'
+
+  description: |
+    WESTPA is a package for constructing and running stochastic simulations
+    using the "weighted ensemble" approach of Huber and Kim (1996).
+  doc_url: https://westpa.readthedocs.io/en/latest/
+  dev_url: https://github.com/westpa
+
+extra:
+  recipe-maintainers:
+    - mczwier
+    - synapticarbors
+    - burntyellow
+    - ltchong
+    - jeremyleung521

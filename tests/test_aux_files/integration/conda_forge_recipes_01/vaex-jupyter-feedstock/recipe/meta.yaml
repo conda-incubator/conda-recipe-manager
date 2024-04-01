@@ -1,0 +1,50 @@
+{% set name = "vaex-jupyter" %}
+{% set version = "0.8.1" %}
+{% set sha256 = "8fe9fd5a8bc0955ca899da9160c5bac3d24f07d2922514b40d1819237d3026e4" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - python >=3.6
+    - setuptools
+    - pip
+  run:
+    - python >=3.6
+    - vaex-core >=4.0.0,<5
+    - vaex-viz
+    - bqplot >=0.12.0
+    - ipyvolume >=0.4
+    - ipyleaflet
+    - ipympl
+    - ipyvuetify >=1.2.2,<2
+    - xarray
+
+test:
+  imports:
+    - vaex.jupyter
+
+about:
+  home: https://www.github.com/maartenbreddels/vaex
+  doc_url: https://docs.vaex.io/
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE.txt
+  summary: Jupyter notebook and Jupyter lab support for vaex
+
+extra:
+  recipe-maintainers:
+    - maartenbreddels
+    - JovanVeljanoski

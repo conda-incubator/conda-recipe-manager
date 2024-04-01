@@ -1,0 +1,45 @@
+{% set name = "hippynn" %}
+{% set version = "0.0.3" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/hippynn-{{ version }}.tar.gz
+  sha256: 8962c66c89bcabf15bcf8d4640b308cd42f8da47979284f2a4a64a5f8aacff83
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.8,<3.12
+    - pip
+  run:
+    - python >=3.8,<3.12
+    - numpy
+    - numba
+    - pytorch
+    - scipy
+
+test:
+  imports:
+    - hippynn
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/lanl/hippynn
+  summary: The hippynn python package - a modular library for atomistic machine learning with pytorch
+  license: LicenseRef-US-Government OR BSD-3-Clause
+  license_file: LICENSE.txt
+
+extra:
+  recipe-maintainers:
+    - lubbersnick
+    - jan-janssen

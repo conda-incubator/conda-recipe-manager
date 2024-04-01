@@ -1,0 +1,49 @@
+{% set name = "napari-workflow-inspector" %}
+{% set version = "0.2.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/napari-workflow-inspector-{{ version }}.tar.gz
+  sha256: c7f1709ab537fc3b7c51bf353da305b4fe0adb025ec066df2cbaa4764810ec4f
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.7
+  run:
+    - matplotlib-base
+    - napari-plugin-engine >=0.1.4
+    - napari-tools-menu
+    - napari-workflows
+    - numpy
+    - python >=3.7
+    - networkx
+
+test:
+  imports:
+    - napari_workflow_inspector
+  commands:
+    - pip list
+    # - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/haesleinhuepf/napari-workflow-inspector
+  summary: Inspect relationships between napari-plugins in active workflows
+  license: BSD-3-Clause
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - goanpeca
+    - jaimergp
+    - haesleinhuepf

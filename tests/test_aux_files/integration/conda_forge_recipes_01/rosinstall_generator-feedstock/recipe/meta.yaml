@@ -1,0 +1,47 @@
+{% set name = "rosinstall_generator" %}
+{% set version = "0.1.23" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/ros-infrastructure/{{ name }}/archive/{{ version }}.tar.gz
+  sha256: 48ab6704f5393bf400b02f775c40302edfa2fd58f7cfa7c2702c74f23f150edc
+
+build:
+  noarch: python
+  number: 0
+  entry_points:
+    - rosinstall_generator=rosinstall_generator.cli:main
+  script: '{{ PYTHON }} -m pip install . --no-deps --ignore-installed -vv '
+
+requirements:
+  host:
+    - pip
+    - python
+  run:
+    - catkin_pkg >=0.1.28
+    - python >=3.6
+    - pyyaml
+    - rosdistro >=0.7.3
+    - rospkg
+    - setuptools
+
+test:
+  imports:
+    - rosinstall_generator
+  commands:
+    - rosinstall_generator --help
+
+about:
+  home: http://wiki.ros.org/rosinstall_generator
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE.txt
+  summary: A tool for generating rosinstall files
+
+extra:
+  recipe-maintainers:
+    - seanyen
+    - wolfv

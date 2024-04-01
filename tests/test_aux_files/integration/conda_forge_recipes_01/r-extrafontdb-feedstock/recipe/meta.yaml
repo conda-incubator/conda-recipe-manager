@@ -1,0 +1,46 @@
+{% set version = '1.0' %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-extrafontdb
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/extrafontdb_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/extrafontdb/extrafontdb_{{ version }}.tar.gz
+  sha256: faa1bafee5d4fbc24d03ed237f29f1179964ebac6e3a46ac25b0eceda020b684
+
+build:
+  merge_build_host: True  # [win]
+  number: 1005
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+  run:
+    - r-base
+
+test:
+  commands:
+    - $R -e "library('extrafontdb')"           # [not win]
+    - "\"%R%\" -e \"library('extrafontdb')\""  # [win]
+
+about:
+  home: https://github.com/wch/extrafontdb
+  license: GPL-2.0-only
+  summary: Package for holding the database for the extrafont package
+  license_family: GPL2
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-2
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r

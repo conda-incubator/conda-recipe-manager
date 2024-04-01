@@ -1,0 +1,46 @@
+{% set name = "sos-python" %}
+{% set version = "0.20.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: cddcb80cfc997743a895c53bbd49fe0c4adc4641157cd08ffcaa590f80d188db
+
+build:
+  noarch: python
+  number: 0
+  script:
+    - {{ PYTHON }} -m pip install . --no-deps --ignore-installed -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - python >=3.6
+    - sos-notebook >=0.19.4
+    - sos >=0.19.8
+
+test:
+  requires:
+    - nose
+    - pytest
+    - selenium
+  imports:
+    - sos_python
+
+about:
+  home: https://github.com/vatlab/sos-python
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: SoS language module for Python2 and Python3
+  doc_url: https://vatlab.github.io/sos-docs/
+  dev_url: https://github.com/vatlab/sos-python
+
+extra:
+  recipe-maintainers:
+    - BoPeng

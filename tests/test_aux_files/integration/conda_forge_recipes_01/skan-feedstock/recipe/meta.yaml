@@ -1,0 +1,54 @@
+{% set version = "0.11.1" %}
+
+package:
+  name: skan
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/s/skan/skan-{{ version }}.tar.gz
+  sha256: d5439c17fbf5f86386a7548acb6ab11482961164a6284047b9bdc6652a0d1faf
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - python >=3.8
+    - pip
+  run:
+    - python >=3.8
+    - numpy >=1.21
+    - scipy >=1.7
+    - networkx >=2.7
+    - pandas >=2.0.2
+    - openpyxl >=2.6
+    - numba >=0.53
+    - matplotlib-base >=3.4
+    - scikit-image >=0.17.1
+    - imageio >=2.10.1
+    - tqdm >=4.57.0
+    - toolz >=0.10.0
+
+test:
+  imports:
+    - skan
+
+about:
+  home: http://github.com/jni/skan
+  license: BSD-3-Clause
+  license_file: LICENSE
+  summary: 'skan: skeleton analysis in Python'
+
+  description: |
+    skan: skeleton analysis in Python.
+
+    Inspired by the "Analyze skeletons" Fiji plugin by
+    Ignacio Arganda-Carreras.
+  doc_url: https://jni.github.io/skan
+  dev_url: https://github.com/jni/skan
+
+extra:
+  recipe-maintainers:
+    - jni

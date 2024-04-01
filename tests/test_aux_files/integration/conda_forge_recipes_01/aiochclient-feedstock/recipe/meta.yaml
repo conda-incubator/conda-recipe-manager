@@ -1,0 +1,49 @@
+{% set name = "aiochclient" %}
+{% set version = "2.6.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: c8f7b846cea0792489b3ad981e2b2678a0c4f0ab5555c648367e33008aba28e4
+
+build:
+  number: 0
+  skip: true  # [win]
+  skip: true  # [py<36]
+  script: '{{ PYTHON }} -m pip install . -vv '
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+  host:
+    - cython
+    - pip
+    - python
+  run:
+    - aiohttp >=3.0.1
+    - sqlparse >=0.3.0
+    - python
+    - ciso8601  # [py<37]
+
+test:
+  imports:
+    - aiochclient
+  requires:
+    - pip
+  commands:
+    - pip check
+
+about:
+  home: https://github.com/maximdanilchenko/aiochclient
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: Async http clickhouse client for python 3.6+
+  doc_url: https://aiochclient.readthedocs.io/
+
+extra:
+  recipe-maintainers:
+    - xhochy

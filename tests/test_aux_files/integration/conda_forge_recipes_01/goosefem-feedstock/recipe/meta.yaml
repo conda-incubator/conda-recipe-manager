@@ -1,0 +1,100 @@
+{% set org = "tdegeus" %}
+{% set name = "GooseFEM" %}
+{% set version = "1.4.0" %}
+
+package:
+  name: {{ name|lower }}-split
+  version: {{ version }}
+
+source:
+  url: https://github.com/{{ org }}/{{ name }}/archive/v{{ version }}.tar.gz
+  sha256: c6969fd1c466d3368014e7572a82f7e082ed5c906f2186a87ce8eeb186bb4e18
+
+build:
+  number: 1
+
+outputs:
+
+  - name: {{ name|lower }}
+
+    script: install.sh  # [unix]
+    script: install.bat  # [win]
+
+    build:
+      script_env: SETUPTOOLS_SCM_PRETEND_VERSION={{ version }}
+
+    requirements:
+      build:
+        - {{ compiler('cxx') }}
+        - cmake
+        - make  # [unix]
+      host:
+        - xtensor
+      run:
+        - eigen
+        - xtensor
+
+    test:
+      commands:
+        - test -d ${PREFIX}/include/{{ name }}  # [unix]
+        - test -f ${PREFIX}/include/{{ name }}/{{ name }}.h  # [unix]
+        - test -f ${PREFIX}/lib/cmake/{{ name }}/{{ name }}Config.cmake  # [unix]
+        - if exist %LIBRARY_PREFIX%\include\{{ name }}\{{ name }}.h (exit 0) else (exit 1)  # [win]
+        - if exist %LIBRARY_PREFIX%\lib\cmake\{{ name }}Config.cmake (exit 0) else (exit 1)  # [win]
+
+  - name: python-{{ name|lower }}
+
+    script: install_python.sh  # [unix]
+    script: install_python.bat  # [win]
+
+    build:
+      script_env: SETUPTOOLS_SCM_PRETEND_VERSION={{ version }}
+      skip: true  # [python_impl == 'pypy']
+
+    requirements:
+      build:
+        - python                              # [build_platform != target_platform]
+        - cross-python_{{ target_platform }}  # [build_platform != target_platform]
+        - numpy *                             # [build_platform != target_platform]
+        - setuptools_scm                      # [build_platform != target_platform]
+        - {{ compiler('cxx') }}
+        - cmake
+        - make  # [unix]
+        - ninja
+      host:
+        - eigen
+        - numpy *
+        - pip
+        - pybind11
+        - pybind11-abi
+        - python
+        - scikit-build
+        - setuptools_scm
+        - xtensor
+        - xtensor-python
+      run:
+        - numpy *
+        - python
+
+    test:
+      imports:
+        - {{ name }}
+      commands:
+        - pip check
+        - python -c "import {{ name }}; assert {{ name }}.version() == '{{ version }}'"
+      requires:
+        - pip
+
+about:
+  home: https://github.com/{{ org }}/{{ name }}
+  license: GPL-3.0-or-later
+  license_family: GPL
+  license_file: LICENSE
+  summary: Finite element simulations.
+  description: Finite element simulations.
+  doc_url: https://goosefem.rtfd.io
+  dev_url: https://github.com/{{ org }}/{{ name }}
+
+extra:
+  recipe-maintainers:
+    - tdegeus

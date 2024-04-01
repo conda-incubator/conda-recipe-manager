@@ -1,0 +1,49 @@
+{% set name = "pyglotaran-extras" %}
+{% set version = "0.7.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/pyglotaran_extras-{{ version }}.tar.gz
+  sha256: ce1a0b55112de919116eeb14643f7933e0af451501839a5f9b1bc0fb72bd46ea
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - hatchling
+    - python >=3.10
+  run:
+    - cycler >=0.10
+    - matplotlib-base >=3.3.0
+    - numpy >=1.21.2
+    - pyglotaran >=0.7.0
+    - python >=3.10
+    - tabulate >=0.8.9
+    - xarray >=2022.3.0
+
+test:
+  imports:
+    - pyglotaran_extras
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/glotaran/pyglotaran-extras
+  summary: Supplementary package for pyglotaran with (example) plotting code.
+  dev_url: https://github.com/glotaran/pyglotaran-extras
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - s-weigand
+    - jsnel

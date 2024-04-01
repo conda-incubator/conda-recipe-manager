@@ -1,0 +1,40 @@
+{% set name = "types-pyvmomi" %}
+{% set version = "8.0.0.6" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/types-pyvmomi-{{ version }}.tar.gz
+  sha256: 494114a0ff30fa9cfe80dbd940308757586c836717803d8cb8af90f4f3190932
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - python >=3.6
+    - types-enum34
+
+test:
+  commands:
+    - test -f $SP_DIR/pyVmomi-stubs/__init__.pyi
+
+
+about:
+  home: https://github.com/python/typeshed
+  summary: Typing stubs for pyvmomi
+  license: Apache-2.0 AND MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - fhoehle
+    - conda-forge/mypy

@@ -1,0 +1,54 @@
+{% set name = "conftrak" %}
+{% set version = "0.0.9" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  # TODO: update the MANIFEST.in file to include the missing files in the sdist
+  # distribution, e.g.  `requirements.txt` and `LICENSE` and then the PyPI
+  # sources can be used.
+  # url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/conftrak-{{ version }}.tar.gz
+  url: https://github.com/NSLS-II/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: 66e890c68c98fb6beff62790156f31ed2f9e35d1ac2fc5e77656bd7c4e29980a
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+  run:
+    - python >=3.6
+    - doct
+    - jsonschema
+    - pymongo
+    - pyyaml
+    - requests
+    - tornado >=5
+    - ujson
+
+test:
+  imports:
+    - conftrak
+    - conftrak.client
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/hhslepicka/conftrak.git
+  summary: A light-weight beamline configuration and parameters storage and tracker
+  license: BSD-3-Clause
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - JunAishima
+    - mrakitin

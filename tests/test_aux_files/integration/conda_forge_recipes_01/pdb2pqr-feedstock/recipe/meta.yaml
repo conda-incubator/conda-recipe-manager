@@ -1,0 +1,60 @@
+{% set name = "pdb2pqr" %}
+{% set version = "3.6.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: c056a4e6d28eb0f6117e5056f2f89612333a0a4bb9264581ea6595c883588758
+
+build:
+  noarch: python
+  number: 0
+  entry_points:
+    - pdb2pqr30=pdb2pqr.main:main
+    - dx2cube=pdb2pqr.main:dx_to_cube
+    - psize=pdb2pqr.psize:main
+    - inputgen=pdb2pqr.inputgen:main
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.8
+  run:
+    - mmcif_pdbx >=1.1.2
+    - pandas >=1.0
+    - propka >=3.5
+    - python >=3.8
+    - numpy
+    - requests
+    - setuptools  # for pkg_resources
+
+test:
+  imports:
+    - pdb2pqr
+    - pdb2pqr.hydrogens
+    - pdb2pqr.ligand
+  commands:
+    - pdb2pqr30 --help
+    - dx2cube --help
+    - inputgen --help
+  requires:
+    - pytest
+    - testfixtures
+
+about:
+  home: http://www.poissonboltzmann.org
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: Automates many of the common tasks of preparing structures for continuum solvation calculations as well as many other types of biomolecular structure modeling, analysis, and simulation.
+  doc_url: https://pdb2pqr.readthedocs.io/en/latest/
+  dev_url: https://github.com/Electrostatics/pdb2pqr
+
+extra:
+  recipe-maintainers:
+    - tsenapathi
+    - sobolevnrm

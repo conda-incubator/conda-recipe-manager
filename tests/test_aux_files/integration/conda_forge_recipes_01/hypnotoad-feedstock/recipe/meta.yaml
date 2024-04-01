@@ -1,0 +1,73 @@
+{% set name = "hypnotoad" %}
+{% set version = "0.5.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 597177879abff9fb678f376db4053068971c94565c14c06953ccd65773ca30da
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+  entry_points:
+    - hypnotoad_circular = hypnotoad.scripts.hypnotoad_circular:main
+    - hypnotoad_geqdsk = hypnotoad.scripts.hypnotoad_geqdsk:main
+    - hypnotoad_torpex = hypnotoad.scripts.hypnotoad_torpex:main
+    - hypnotoad-gui = hypnotoad.gui:main
+    - hypnotoad-plot-equilibrium = hypnotoad.scripts.hypnotoad_plot_equilibrium:main
+    - hypnotoad-plot-grid-cells = hypnotoad.scripts.hypnotoad_plot_grid_cells:main
+    - hypnotoad-recreate-inputs = hypnotoad.scripts.hypnotoad_recreate_inputs:main
+    - hypnotoad-get-flux-surfaces = hypnotoad.scripts.hypnotoad_get_flux_surfaces:main
+
+requirements:
+  host:
+    - python >=3.8
+    - pip
+    - versioneer
+  run:
+    - python >=3.8
+    - boututils >=0.1.7
+    - dill >=0.3,!=0.3.5,!=0.3.5.1
+    - func_timeout >=4.3
+    - matplotlib-base >=3.2
+    - netcdf4 >=1.5
+    - numpy >=1.18
+    - optionsfactory >=1.0.11
+    - pyyaml >=5.1
+    - scipy >=1.6
+    - qt.py >=1.2
+  run_constrained:
+    - pyside2 >=5.13
+    - pyqt >=5.12
+
+test:
+  requires:
+    - pytest
+    - pyside2
+  commands:
+    - pytest --pyargs hypnotoad
+    - hypnotoad_circular -h
+    - hypnotoad_geqdsk -h
+    - hypnotoad_torpex -h
+    - hypnotoad-gui -h
+    - hypnotoad-plot-equilibrium -h
+    - hypnotoad-plot-grid-cells -h
+    - hypnotoad-recreate-inputs -h
+    - hypnotoad-get-flux-surfaces -h
+
+about:
+  home: https://github.com/boutproject/hypnotoad
+  license: GPL-3.0-or-later
+  license_family: GPL
+  license_file: LICENCE
+  summary: Python grid generator for BOUT++
+  dev_url: https://github.com/boutproject/hypnotoad
+
+extra:
+  recipe-maintainers:
+    - johnomotani
+    - ZedThree

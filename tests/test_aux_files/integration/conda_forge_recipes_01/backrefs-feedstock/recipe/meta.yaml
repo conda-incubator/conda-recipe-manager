@@ -1,0 +1,42 @@
+{% set name = "backrefs" %}
+{% set version = "5.2" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/backrefs-{{ version }}.tar.gz
+  sha256: 16879df9aa48b5a6cb7829d5aa3a39c10c964094e5ac8603904dbfe1e469561d
+
+build:
+  noarch: python
+  number: 2
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python  >=3.6
+  run:
+    - python  >=3.6
+
+test:
+  imports:
+    - backrefs
+    - backrefs.uniprops
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/facelessuser/backrefs
+  summary: A wrapper around re and regex that adds additional back references.
+  license: MIT
+  license_file: LICENSE.md
+
+extra:
+  recipe-maintainers:
+    - asford

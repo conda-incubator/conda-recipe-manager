@@ -1,0 +1,76 @@
+{% set name = "ligo.em-bright" %}
+{% set version = "1.1.6" %}
+{% set pypi_name = name|replace('.', '-') %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ pypi_name[0] }}/{{ pypi_name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 8d5026057e9fa09f295555d728156b89ec56bad3bfc702a5db32e9f577ebc70d
+  patches:
+    # see https://git.ligo.org/duncanmmacleod/em-bright/-/commits/conda-patches/
+    - 0001-pyproject.toml-update-requirements.patch
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+  entry_points:
+    - em_bright_categorize = ligo.em_bright.categorize:main
+    - em_bright_categorize_all_eos = ligo.em_bright.categorize:main_all
+    - em_bright_create_param_sweep_plot = ligo.em_bright.utils:param_sweep_plot
+    - em_bright_dag_writer = ligo.em_bright.dag_writer:main
+    - em_bright_extract = ligo.em_bright.utils:extract
+    - em_bright_join = ligo.em_bright.utils:join
+    - em_bright_train = ligo.em_bright.utils:train
+
+requirements:
+  host:
+    - pip
+    - poetry-core >=1.0.0
+    - python >=3.9,<4.0
+  run:
+    - astropy >=5.2.1
+    - h5py >=3.7.0
+    - pandas >=1.5.2
+    - python >=3.8,<4.0
+    - python-htcondor >=9.0.6
+    - python-lal >=7.1.3
+    - python-lalsimulation >=3.0.0
+    - scikit-learn ==1.2.1
+
+test:
+  requires:
+    - matplotlib-base
+    - pip
+    - pytest
+  commands:
+    # check requirements
+    - python -m pip check ligo.em-bright
+    - python -m pip show ligo.em-bright
+    # run test suite
+    - python -m pytest -ra --pyargs ligo.em_bright
+    # check console scripts
+    - em_bright_categorize --help
+    - em_bright_categorize_all_eos --help
+    - em_bright_create_param_sweep_plot --help
+    - em_bright_dag_writer --help
+    - em_bright_extract --help
+    - em_bright_join --help
+    - em_bright_train --help
+
+about:
+  home: https://pypi.org/project/ligo.em-bright/
+  dev_url: https://git.ligo.org/emfollow/em-properties/em-bright.git
+  doc_url: https://emfollow.docs.ligo.org/em-properties/em-bright
+  summary: Possibility and properties of Electromagnetically-bright sources of gravitational-wave events
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - atoivonen13
+    - deepchatterjeeligo
+    - duncanmmacleod

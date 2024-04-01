@@ -1,0 +1,56 @@
+{% set version = "2.9.0" %}
+
+package:
+  name: traffic
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/t/traffic/traffic-{{ version }}.tar.gz
+  sha256: 38418344a03993d6b0d2d907e65b80770d5f1795e628c5c654f6e1c851168ff4
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.8,<4.0
+    - poetry-core >=1.0.0
+    - poetry-dynamic-versioning
+    - pip
+  run:
+    - python >=3.8,<4.0
+    - impunity >=1.0.4
+    - pitot >=0.3.1
+    - cartes >=0.7.4
+    - pyopensky >=2.0
+    - requests >=2.27
+    - ipywidgets >=7.6
+    - ipyleaflet >=0.17
+    - pymodes >=2.17
+    - openap >=1.1
+    - metar >=1.8
+    - click >=8.1
+    - typing-extensions >=4.2
+    - pyarrow >=11.0.0
+    - onnxruntime >=1.12
+
+test:
+  imports:
+    - traffic
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/xoolive/traffic
+  license: MIT
+  license_file: license.md
+  summary: A toolbox for processing and analysing air traffic data
+  doc_url: https://traffic-viz.github.io/
+
+extra:
+  recipe-maintainers:
+    - xoolive

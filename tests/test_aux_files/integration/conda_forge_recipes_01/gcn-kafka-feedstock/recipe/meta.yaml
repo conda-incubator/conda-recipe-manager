@@ -1,0 +1,52 @@
+{% set name = "gcn-kafka" %}
+{% set version = "0.3.3" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 9a0a165fa6446676d7d785c46b1a0bb6097dffd19d7975fcbc4e58098522d60a
+
+build:
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 1
+  noarch: python
+
+requirements:
+  host:
+    - setuptools >=45
+    - setuptools_scm >=6.2
+    - wheel
+    - python >=3.7
+    - pip
+  run:
+    - authlib
+    - certifi
+    - python-confluent-kafka >=2.2.0
+    - requests
+    - python >=3.7
+    - typing_extensions
+
+test:
+  imports:
+    - gcn_kafka
+  requires:
+    - pip
+  commands:
+    - pip check
+
+about:
+  home: https://github.com/nasa-gcn/gcn-kafka-python
+  summary: Official Python client for the General Coordinates Network (GCN)
+  description: |
+    This is the official Python client for the General Coordinates Network (GCN).
+    It is a very lightweight wrapper around confluent-kafka-python.
+  license: CC0-1.0
+  license_file: LICENSE.txt
+
+extra:
+  recipe-maintainers:
+    - lpsinger
+    - dakota002

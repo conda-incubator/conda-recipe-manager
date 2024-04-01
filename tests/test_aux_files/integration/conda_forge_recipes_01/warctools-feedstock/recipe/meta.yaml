@@ -1,0 +1,61 @@
+{% set version = "4.10.0" %}
+
+package:
+  name: warctools
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/w/warctools/warctools-{{ version }}.tar.gz
+  sha256: ce0c6e274db8ac8810f7c97b3943e8e8deadbc3f5c982db77cddaae2d2ae6170
+
+build:
+  number: 1
+  noarch: python
+  script: "{{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv"
+  entry_points:
+    - warcdump=hanzo.warcdump:run
+    - arc2warc=hanzo.arc2warc:run
+    - warcextract=hanzo.warcextract:run
+    - warcfilter=hanzo.warcfilter:run
+    - warcindex=hanzo.warcindex:run
+    - warclinks=hanzo.warclinks:run
+    - warcvalid=hanzo.warcvalid:run
+    - warc2warc=hanzo.warc2warc:run
+    - warcpayload=hanzo.warcpayload:run
+
+requirements:
+  host:
+    - python >=3.4,<3.5
+    - pip
+  run:
+    - python >=3.4,<3.5
+    - setuptools
+
+test:
+  imports:
+    - hanzo
+    - hanzo.httptools
+    - hanzo.warctools
+
+  commands:
+    - warcdump --help
+    - arc2warc --help
+    - warcextract --help
+    - warcfilter --help
+    - warcindex --help
+    - warclinks --help
+    - warcvalid --help
+    - warc2warc --help
+    - warcpayload --help
+
+about:
+  home: https://github.com/internetarchive/warctools
+  license: MIT
+  #license_file: No MANIFEST.in in source
+  license_family: MIT
+  summary: 'Command line tools and libraries for handling and manipulating WARC files (and HTTP contents)'
+  dev_url: https://github.com/internetarchive/warctools
+
+extra:
+  recipe-maintainers:
+    - pmlandwehr

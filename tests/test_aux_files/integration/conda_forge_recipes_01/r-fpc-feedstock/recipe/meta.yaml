@@ -1,0 +1,83 @@
+{% set version = "2.2-11" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-fpc
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/fpc_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/fpc/fpc_{{ version }}.tar.gz
+  sha256: 825590b90813c04c26d2507602fcbcb7f19a1354b154f470540c9be4e86f411a
+
+build:
+  merge_build_host: true  # [win]
+  number: 0
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+    - r-mass
+    - r-class
+    - r-cluster
+    - r-diptest
+    - r-flexmix
+    - r-kernlab
+    - r-mclust
+    - r-prabclus
+    - r-robustbase
+  run:
+    - r-base
+    - r-mass
+    - r-class
+    - r-cluster
+    - r-diptest
+    - r-flexmix
+    - r-kernlab
+    - r-mclust
+    - r-prabclus
+    - r-robustbase
+
+test:
+  commands:
+    - $R -e "library('fpc')"           # [not win]
+    - "\"%R%\" -e \"library('fpc')\""  # [win]
+
+about:
+  home: https://www.unibo.it/sitoweb/christian.hennig/en/
+  license: GPL-2.0-or-later
+  summary: "Various methods for clustering and cluster validation. Fixed point clustering. Linear regression clustering. Clustering by  merging Gaussian mixture components. Symmetric  and asymmetric discriminant projections for visualisation of the  separation of groupings. Cluster validation statistics for distance based
+    clustering including corrected Rand index.  Standardisation of cluster validation statistics by random clusterings and  comparison between many clustering methods and numbers of clusters based on this.   Cluster-wise cluster stability assessment. Methods for estimation of  the number of clusters: Calinski-Harabasz, Tibshirani
+    and Walther's  prediction strength, Fang and Wang's bootstrap stability.  Gaussian/multinomial mixture fitting for mixed  continuous/categorical variables. Variable-wise statistics for cluster interpretation. DBSCAN clustering. Interface functions for many  clustering methods implemented in R, including estimating the
+    number of clusters with kmeans, pam and clara. Modality diagnosis for Gaussian mixtures. For an overview see package?fpc."
+  license_family: GPL
+  license_file: {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-3
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+
+# Package: fpc
+# Title: Flexible Procedures for Clustering
+# Version: 2.2-3
+# Date: 2019-06-28
+# Author: Christian Hennig <christian.hennig@unibo.it>
+# Depends: R (>= 2.0)
+# Imports: MASS, cluster, mclust, flexmix, prabclus, class, diptest, robustbase, kernlab, grDevices, graphics, methods, stats, utils, parallel
+# Suggests: tclust, pdfCluster, EMMIXskew, mvtnorm
+# Description: Various methods for clustering and cluster validation. Fixed point clustering. Linear regression clustering. Clustering by  merging Gaussian mixture components. Symmetric  and asymmetric discriminant projections for visualisation of the  separation of groupings. Cluster validation statistics for distance based clustering including corrected Rand index.  Standardisation of cluster validation statistics by random clusterings and  comparison between many clustering methods and numbers of clusters based on this.   Cluster-wise cluster stability assessment. Methods for estimation of  the number of clusters: Calinski-Harabasz, Tibshirani and Walther's  prediction strength, Fang and Wang's bootstrap stability.  Gaussian/multinomial mixture fitting for mixed  continuous/categorical variables. Variable-wise statistics for cluster interpretation. DBSCAN clustering. Interface functions for many  clustering methods implemented in R, including estimating the number of clusters with kmeans, pam and clara. Modality diagnosis for Gaussian mixtures. For an overview see package?fpc.
+# Maintainer: Christian Hennig <christian.hennig@unibo.it>
+# License: GPL
+# URL: https://www.unibo.it/sitoweb/christian.hennig/en/
+# NeedsCompilation: no
+# Packaged: 2019-06-28 15:09:31 UTC; christian_hennig
+# Repository: CRAN
+# Date/Publication: 2019-06-28 16:20:13 UTC

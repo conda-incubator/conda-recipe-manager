@@ -1,0 +1,39 @@
+{% set name = "configurable-http-proxy" %}
+{% set version = "4.6.1" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  url: https://registry.npmjs.org/{{ name }}/-/{{ name }}-{{ version }}.tgz
+  sha256: 6d80bc45daedca7e69355ac691c33bbc9d313c3a72a7ad41594752c569c78177
+
+build:
+  number: 0
+
+requirements:
+  build:
+    - nodejs
+  host:
+    - nodejs
+    - yarn <2
+  run:
+    - nodejs
+
+test:
+  commands:
+    - configurable-http-proxy -h
+    - test -f $PREFIX/bin/configurable-http-proxy  # [not win]
+    - if not exist %PREFIX%\\configurable-http-proxy exit 1    # [win]
+
+about:
+  home: https://github.com/jupyterhub/configurable-http-proxy
+  license: BSD-3-Clause
+  license_file: LICENSE
+  summary: node-http-proxy plus a REST API
+
+extra:
+  recipe-maintainers:
+    - minrk
+    - willingc

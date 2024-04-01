@@ -1,0 +1,64 @@
+{% set name = "optimade" %}
+{% set version = "1.0.4" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/optimade-{{ version }}.tar.gz
+  sha256: 802e5c83b6c855da62d75fb94c9ebbba5b289b4b3f0dc2370ee27395ccff1e48
+
+build:
+  entry_points:
+    - optimade-validator = optimade.validator:validate
+    - optimade-get = optimade.client.cli:get
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  number: 0
+
+requirements:
+  host:
+    - python >=3.9
+    - setuptools >=61.0.0
+    - wheel
+    - pip
+  run:
+    - python >=3.9
+    - email_validator >=2.0,<3.dev0
+    - lark >=1.1,<2.dev0
+    - pydantic >=2.2,<3.dev0
+    - pydantic-settings >=2.0,<3.dev0
+    - requests >=2.28,<3.dev0
+
+test:
+  imports:
+    - optimade
+  commands:
+    - pip check
+    - optimade-validator --help
+    - optimade-get --help
+  requires:
+    - pip
+    - httpx
+    - rich
+    - click
+
+about:
+  home: http://www.optimade.org
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: Tools for implementing and consuming OPTIMADE APIs.
+  description: |
+    The aim of OPTIMADE is to develop a common API, compliant with the
+    JSON API 1.0 specification. This is to enable interoperability among
+    databases that contain calculated properties of existing and
+    hypothetical materials.
+  doc_url: https://www.optimade.org/optimade-python-tools/
+  dev_url: https://github.com/Materials-Consortia/optimade-python-tools
+
+extra:
+  recipe-maintainers:
+    - jan-janssen
+    - ml-evs

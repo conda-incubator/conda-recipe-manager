@@ -1,0 +1,91 @@
+{% set name = "freud" %}
+{% set version = "3.0.0" %}
+{% set sha256 = "425a1372da7d94baa075b051554a0da0a263a965a0f5a15c31383dfd30cc536e" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://pypi.io/packages/source/f/freud-analysis/freud-analysis-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  number: 0
+  skip: true  # [python_impl == 'pypy']
+  script: bash ${RECIPE_DIR}/build_osx_arm64.sh  # [target_platform == 'osx-arm64']
+  script: {{ PYTHON }} -m pip install . --ignore-installed --no-cache-dir -vv  # [target_platform != 'osx-arm64']
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - cython                                 # [build_platform != target_platform]
+    - numpy                                  # [build_platform != target_platform]
+    - {{ compiler('cxx') }}
+    - cmake
+    - make  # [not win]
+    - scikit-build                           # [build_platform != target_platform]
+
+  host:
+    - python
+    - pip
+    - cython
+    - scikit-build
+    - tbb
+    - tbb-devel
+    - numpy
+
+  run:
+    - python
+    - tbb
+    - {{ pin_compatible('numpy') }}
+    - rowan >=1.2
+    - scipy >=1.1
+
+test:
+  requires:
+    - pytest
+    - matplotlib
+    - garnett
+    - ase
+    - gsd
+    - sympy
+  imports:
+    - freud
+
+  # tests are not present in the pypi tarball
+  # source_files:
+  #   - tests
+  # commands:
+    # tests fail on aarch64: https://github.com/glotzerlab/freud/issues/961
+    # - python -m  pytest tests -v  # [not aarch64 and not ppc64le]
+
+about:
+  home: https://github.com/glotzerlab/freud
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: Powerful, efficient particle trajectory analysis in scientific Python.
+  description: |
+    The freud Python library provides a simple, flexible, powerful set of tools
+    for analyzing trajectories obtained from molecular dynamics or Monte Carlo
+    simulations. High performance, parallelized C++ is used to compute standard
+    tools such as radial distribution functions, correlation functions, order
+    parameters, and clusters, as well as original analysis methods including
+    potentials of mean force and torque (PMFTs) and local environment matching.
+    The freud library uses NumPy arrays for input and output, enabling
+    integration with the scientific Python ecosystem for many typical materials
+    science workflows.
+  doc_url: https://freud.readthedocs.io/
+  dev_url: https://github.com/glotzerlab/freud
+
+extra:
+  recipe-maintainers:
+    - bdice
+    - vyasr
+    - joaander
+    - tommy-waltmann
+    - klywang
+    - b-butler

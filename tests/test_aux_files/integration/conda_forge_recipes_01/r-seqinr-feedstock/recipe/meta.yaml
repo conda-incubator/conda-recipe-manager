@@ -1,0 +1,82 @@
+{% set version = "4.2-36" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-seqinr
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/seqinr_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/seqinr/seqinr_{{ version }}.tar.gz
+  sha256: 931a62a091a7aaaa5efadb1fe85f29e861e2506b75710ba3a6be9b58cb14b225
+
+build:
+  merge_build_host: true  # [win]
+  number: 0
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ compiler('c') }}              # [not win]
+    - {{ compiler('m2w64_c') }}        # [win]
+    - {{ posix }}filesystem        # [win]
+    - {{ posix }}make
+    - {{ posix }}sed               # [win]
+    - {{ posix }}coreutils         # [win]
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+    - r-ade4
+    - r-segmented
+  run:
+    - r-base
+    - {{ native }}gcc-libs         # [win]
+    - r-ade4
+    - r-segmented
+
+test:
+  commands:
+    - $R -e "library('seqinr')"           # [not win]
+    - "\"%R%\" -e \"library('seqinr')\""  # [win]
+
+about:
+  home: http://seqinr.r-forge.r-project.org/
+  license: GPL-2.0-or-later
+  summary: Exploratory data analysis and data visualization for biological sequence (DNA and protein) data. Seqinr includes  utilities for sequence data management under the ACNUC system described in Gouy, M. et al. (1984) Nucleic Acids Res. 12:121-127 <doi:10.1093/nar/12.1Part1.121>.
+  license_family: GPL2
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-2
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+    - MathiasHaudgaard
+    - FrodePedersen
+    - ArneKr
+
+# Encoding: UTF-8
+# Package: seqinr
+# Version: 3.6-1
+# Date: 2019-09-04
+# Title: Biological Sequences Retrieval and Analysis
+# Authors@R: c(person("Delphine", "Charif", role = "aut"), person("Olivier", "Clerc", role = "ctb"), person("Carolin", "Frank", role = "ctb"), person(c("Jean","R."), "Lobry", role = c("aut", "cph")), person("Anamaria", "Necsulea", role = "ctb"), person("Leonor", "Palmeira", role = "ctb"), person("Simon", "Penel", role = "cre", email = "simon.penel@univ-lyon1.fr"), person("Guy", "Perriere", role = "ctb"))
+# Author: Delphine Charif [aut], Olivier Clerc [ctb], Carolin Frank [ctb], Jean R. Lobry [aut, cph], Anamaria Necsulea [ctb], Leonor Palmeira [ctb], Simon Penel [cre], Guy Perriere [ctb]
+# Maintainer: Simon Penel <simon.penel@univ-lyon1.fr>
+# BugReports: http://lists.r-forge.r-project.org/cgi-bin/mailman/listinfo/seqinr-forum
+# Imports: ade4,segmented
+# Depends: R (>= 2.10.0)
+# Description: Exploratory data analysis and data visualization for biological sequence (DNA and protein) data. Seqinr includes  utilities for sequence data management under the ACNUC system described in Gouy, M. et al. (1984) Nucleic Acids Res. 12:121-127 <doi:10.1093/nar/12.1Part1.121>.
+# License: GPL (>= 2)
+# SystemRequirements: zlib headers and library.
+# URL: http://seqinr.r-forge.r-project.org/
+# NeedsCompilation: yes
+# Repository: CRAN
+# Repository/R-Forge/Project: seqinr
+# Repository/R-Forge/Revision: 2100
+# Repository/R-Forge/DateTimeStamp: 2019-09-04 11:36:47
+# Date/Publication: 2019-09-07 17:30:06 UTC
+# Packaged: 2019-09-04 12:10:08 UTC; rforge

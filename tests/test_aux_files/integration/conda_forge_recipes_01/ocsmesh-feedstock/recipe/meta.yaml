@@ -1,0 +1,66 @@
+{% set name = "ocsmesh" %}
+{% set version = "1.5.3" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/ocsmesh-{{ version }}.tar.gz
+  sha256: 47df84682f92ea7572f52d18fb30b18841492f1e5f872aa3b869726ec39b1412
+
+build:
+  entry_points:
+    - ocsmesh = ocsmesh.__main__:main
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.9
+    - setuptools >=45
+    - setuptools-scm >=7
+    - wheel
+    - numpy
+    - pip
+  run:
+    - python >=3.9
+    - colored-traceback
+    - fiona
+    - geopandas
+    - jigsawpy
+    - matplotlib-base
+    - netcdf4
+    - numba
+    - numpy >=1.21
+    - pyarrow
+    - rtree
+    - pyproj >=3.0
+    - rasterio
+    - scipy
+    - shapely
+    - typing-extensions
+    - utm
+    - pandas
+    - py-triangle
+
+test:
+  imports:
+    - ocsmesh
+  commands:
+    - pip check
+    - ocsmesh --help
+  requires:
+    - pip
+
+about:
+  home: https://github.com/noaa-ocs-modeling/OCSMesh/
+  summary: Package to generate computational unstructured meshes from planetary modeling.
+  license: CC0-1.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - saeed-moghimi-noaa
+    - SorooshMani-NOAA

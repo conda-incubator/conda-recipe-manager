@@ -1,0 +1,49 @@
+{% set name = "lilio" %}
+{% set version = "0.4.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/lilio-{{ version }}.tar.gz
+  sha256: 52ff1003e23436e48bcb134993298e2a74ba0f98fed8bebcfbebb4336ce9ec34
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.9,<3.12
+    - hatchling >=1.8.0
+    - hatch-vcs
+    - pip
+  run:
+    - python >=3.9,<3.12
+    - netcdf4
+    - numpy
+    - pandas
+    - matplotlib-base
+    - xarray
+    - scikit-learn
+
+test:
+  imports:
+    - lilio
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  summary: python package for generating calendars for machine learning timeseries analysis.
+  license: Apache-2.0
+  license_file: LICENSE
+  home: https://github.com/AI4S2S/lilio
+
+extra:
+  recipe-maintainers:
+    - BSchilperoort
+    - ClaireDons

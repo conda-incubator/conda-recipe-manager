@@ -1,0 +1,77 @@
+{% set version = "0.3.7" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-textshaping
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/textshaping_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/textshaping/textshaping_{{ version }}.tar.gz
+  sha256: fa924dbe1fb4138b80d6c26ee42f4203843f1d34f77e2a5e42514e6fcc97ec42
+
+build:
+  merge_build_host: true  # [win]
+  number: 0
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - cross-r-base {{ r_base }}    # [build_platform != target_platform]
+    - r-cpp11                      # [build_platform != target_platform]
+    - r-systemfonts                # [build_platform != target_platform]
+    - {{ compiler('c') }}          # [not win]
+    - {{ compiler('m2w64_c') }}    # [win]
+    - {{ compiler('cxx') }}        # [not win]
+    - {{ compiler('m2w64_cxx') }}  # [win]
+    - {{ posix }}filesystem        # [win]
+    - {{ posix }}sed               # [win]
+    - {{ posix }}grep              # [win]
+    - {{ posix }}autoconf
+    - {{ posix }}automake          # [not win]
+    - {{ posix }}automake-wrapper  # [win]
+    - {{ posix }}pkg-config
+    - {{ posix }}make
+    - {{ posix }}coreutils         # [win]
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+    - freetype
+    - harfbuzz
+    - fribidi
+    - glib     # [osx]
+    - libglib  # [osx]
+    - r-cpp11 >=0.2.1
+    - r-systemfonts >=1.0.0
+  run:
+    - r-base
+    - {{ native }}gcc-libs           # [win]
+    - {{ native }}libwinpthread-git  # [win]
+    - freetype
+    - harfbuzz
+    - fribidi
+    - r-cpp11 >=0.2.1
+    - r-systemfonts >=1.0.0
+
+test:
+  commands:
+    - $R -e "library('textshaping')"           # [not win]
+    - "\"%R%\" -e \"library('textshaping')\""  # [win]
+
+about:
+  home: https://github.com/r-lib/textshaping
+  license: MIT
+  summary: Provides access to the text shaping functionality in the 'HarfBuzz' library and the bidirectional algorithm in the 'Fribidi' library. 'textshaping' is a low-level utility package mainly for graphic devices that expands upon the font tool-set provided by the 'systemfonts' package.
+  license_family: MIT
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/MIT
+    - LICENSE
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+    - izahn

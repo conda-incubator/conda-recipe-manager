@@ -1,0 +1,60 @@
+{% set name = "datamol" %}
+{% set version = "0.12.4" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/datamol-{{ version }}.tar.gz
+  sha256: 475ead22441f1758a8961c4ef63ee152e48248ae5059677ea717620fc4e63678
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.8
+    - setuptools_scm
+  run:
+    - python >=3.8
+    - pip
+    - tqdm
+    - loguru
+    - joblib
+    - platformdirs
+    - fsspec >=2021.9
+    - packaging
+    - typing_extensions
+    - importlib_resources
+
+    # Scientific
+    - pandas
+    - numpy
+    - scipy
+    - pillow
+    - matplotlib-base
+    - scikit-learn
+
+    # Chemistry
+    - rdkit >=2021.09
+    - selfies
+
+test:
+  imports:
+    - datamol
+
+about:
+  home: https://github.com/datamol-io/datamol
+  summary: A python library to work with molecules. Built on top of RDKit.
+  license: Apache-2.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - hadim
+    - maclandrol

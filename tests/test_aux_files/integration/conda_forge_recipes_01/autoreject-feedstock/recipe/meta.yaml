@@ -1,0 +1,52 @@
+{% set name = "autoreject" %}
+{% set version = "0.4.3" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: bd977ea3c88dc68550fbd5dbb98515b3b811907ba78afe8e412632edde6c8fc5
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.8
+    - pip
+  run:
+    - python >=3.8
+    - numpy >=1.20.2
+    - scipy >=1.6.3
+    - mne-base >=1.0
+    - scikit-learn >=0.24.2
+    - joblib
+    - matplotlib-base >=3.4
+    - tqdm
+    - h5io
+
+test:
+  imports:
+    - autoreject
+  requires:
+    - pip
+  commands:
+    - pip check
+
+about:
+  home: https://autoreject.github.io
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: Automatically reject bad trials and repair bad sensors in M/EEG data.
+  dev_url: https://github.com/autoreject/autoreject
+
+extra:
+  recipe-maintainers:
+    - sappelhoff
+    - hoechenberger
+    - larsoner

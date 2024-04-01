@@ -1,0 +1,44 @@
+{% set name = "libsvmdata" %}
+{% set version = "0.4.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/libsvmdata-{{ version }}.tar.gz
+  sha256: a5e97193e73d5c1aed6180d17f7f2a09b8537a04d8062979d7b1b887d30bf9d5
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - download
+    - numpy >=1.12
+    - python >=3.6
+    - scikit-learn
+    - scipy
+
+test:
+  imports:
+    - libsvmdata
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://pypi.org/project/libsvmdata/
+  summary: Fetcher for LIBSVM datasets
+  license: BSD-3-Clause
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - mfansler

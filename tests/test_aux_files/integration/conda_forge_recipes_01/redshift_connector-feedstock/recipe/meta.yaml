@@ -1,0 +1,51 @@
+{% set name = "redshift_connector" %}
+{% set version = "2.1.0" %}
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/aws/amazon-redshift-python-driver/archive/v{{ version }}.tar.gz
+  sha256: a6b9bdecc66f1fae9d10d309f43e63dc8fc23feabb54d9efbf807500fb16cbf6
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+  run:
+    - python >=3.6
+    - scramp >=1.2.0,<1.5.0
+    - pytz >=2020.1
+    - beautifulsoup4 >=4.7.0,<5.0.0
+    - boto3 >=1.9.201,<2.0.0
+    - requests >=2.23.0,<3.0.0
+    - lxml >=4.6.5
+    - botocore >=1.12.201,<2.0.0
+    - packaging
+    - setuptools
+
+test:
+  imports:
+    - redshift_connector
+
+about:
+  home: https://github.com/aws/amazon-redshift-python-driver/
+  license: Apache-2.0
+  license_family: Apache
+  license_file: LICENSE
+  summary: Pure Python connector for Amazon Redshift
+  description: |
+    redshift_connector is the Amazon Redshift connector for Python. Easy integration with 
+    pandas and numpy, as well as support for numerous Amazon Redshift specific features 
+    help you get you the most out of your data.
+  doc_url: https://github.com/aws/amazon-redshift-python-driver/
+  dev_url: https://github.com/aws/amazon-redshift-python-driver/
+
+extra:
+  recipe-maintainers:
+    - Brooke-white

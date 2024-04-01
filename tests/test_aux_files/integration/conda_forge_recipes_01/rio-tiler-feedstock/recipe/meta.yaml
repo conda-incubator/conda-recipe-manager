@@ -1,0 +1,58 @@
+{% set name = "rio-tiler" %}
+{% set version = "6.4.3" %}
+
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/rio_tiler-{{ version }}.tar.gz
+  sha256: 1613d24044e95670fdd15119cb42d95118f87c4ac36602bea10f6cd730cb9625
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.8
+    - hatchling
+    - pip
+  run:
+    - python >=3.8
+    - affine
+    - attrs
+    - cachetools
+    - httpx
+    - numexpr
+    - numpy
+    - morecantile >=5.0,<6.0
+    - pydantic ~=2.0
+    - pystac >=0.5.4
+    - rasterio >=1.3.0
+    - color-operations
+    - importlib-resources >=1.1.0
+
+test:
+  imports:
+    - rio_tiler
+    - rio_tiler.cmap_data
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/cogeotiff/rio-tiler
+  summary: User friendly Rasterio plugin to read raster datasets.
+  license: BSD-3-Clause
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - jsignell
+    - lsetiawan
+    - nrweir

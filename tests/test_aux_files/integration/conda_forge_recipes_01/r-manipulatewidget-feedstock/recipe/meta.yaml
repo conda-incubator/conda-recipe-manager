@@ -1,0 +1,65 @@
+{% set version = "0.11.1" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-manipulatewidget
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/manipulateWidget_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/manipulateWidget/manipulateWidget_{{ version }}.tar.gz
+  sha256: 5b73728d7d6dcc32f32d861375074cd65112c03a01e4ee4fa94e21b063fdefb6
+
+build:
+  merge_build_host: true  # [win]
+  number: 2
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+    - cross-r-base {{ r_base }}    # [build_platform != target_platform]
+  host:
+    - r-base
+    - r-base64enc
+    - r-codetools
+    - r-htmltools
+    - r-htmlwidgets
+    - r-knitr
+    - r-miniui
+    - r-shiny >=1.0.3
+    - r-shinyjs
+    - r-webshot
+  run:
+    - r-base
+    - r-base64enc
+    - r-codetools
+    - r-htmltools
+    - r-htmlwidgets
+    - r-knitr
+    - r-miniui
+    - r-shiny >=1.0.3
+    - r-shinyjs
+    - r-webshot
+
+test:
+  commands:
+    - $R -e "library('manipulateWidget')"           # [not win]
+    - "\"%R%\" -e \"library('manipulateWidget')\""  # [win]
+
+about:
+  home: https://github.com/rte-antares-rpackage/manipulateWidget
+  license: GPL-2.0-or-later
+  summary: Like package 'manipulate' does for static graphics, this package helps to easily add controls like sliders, pickers, checkboxes, etc. that  can be used to modify the input data or the parameters of an interactive  chart created with package 'htmlwidgets'.
+  license_family: GPL3
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-3
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r

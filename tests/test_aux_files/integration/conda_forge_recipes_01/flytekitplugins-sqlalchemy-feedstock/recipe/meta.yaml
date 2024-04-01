@@ -1,0 +1,52 @@
+{% set name = "flytekitplugins-sqlalchemy" %}
+{% set version = "1.2.6" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/flytekitplugins-sqlalchemy-{{ version }}.tar.gz
+  sha256: 9629248471882b2636855b193a71e31236dc59691c665f74c96ee52ff33b72b5
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.7
+  run:
+    - python >=3.7
+    - flytekit >=1.0.0b3,<1.2.0
+    - sqlalchemy >=1.4.7
+
+test:
+  imports:
+    - flytekitplugins.sqlalchemy
+  # commands:
+  #   - pip check
+  requires:
+    - pip
+
+about:
+  home: https://pypi.org/project/flytekitplugins-sqlalchemy/
+  summary: SQLAlchemy plugin for flytekit
+  license: Apache-2.0
+  license_file:
+    - LICENSE
+    - NOTICE
+  description: |
+    SQLAlchemy plugin for Flytekit: `{{ name }}`
+
+    PyPI: [https://pypi.org/project/flytekitplugins-sqlalchemy/](https://pypi.org/project/flytekitplugins-sqlalchemy/)
+
+  doc_url: https://github.com/flyteorg/flytekit/tree/master/plugins
+  dev_url: https://github.com/flyteorg/flytekit/tree/master/plugins/flytekit-sqlalchemy
+
+extra:
+  recipe-maintainers:
+    - sugatoray

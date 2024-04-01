@@ -1,0 +1,52 @@
+{% set name = "pydruid" %}
+{% set version = "0.6.6" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/pydruid-{{ version }}.tar.gz
+  sha256: d175ba103fc8361f643075301dc9bc43a6dcefdaa8293dc47136082d307fa3c2
+
+build:
+  entry_points:
+    - pydruid = pydruid.console:main
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  number: 1
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+  run:
+    - python >=3.6
+    - requests
+
+test:
+  imports:
+    - pydruid
+    - pydruid.utils
+  commands:
+    - pip check
+    # - pydruid --help
+  requires:
+    - pip
+    - prompt_toolkit
+    - pygments
+    - tabulate
+
+about:
+  home: https://github.com/druid-io/pydruid
+  license_file: LICENSE
+  license: Apache-2.0
+  license_family: Apache
+  summary: A Python connector for Druid.
+  dev_url: https://github.com/druid-io/pydruid
+  doc_url: https://pythonhosted.org/pydruid/
+
+extra:
+  recipe-maintainers:
+    - pmlandwehr
+    - jan-janssen

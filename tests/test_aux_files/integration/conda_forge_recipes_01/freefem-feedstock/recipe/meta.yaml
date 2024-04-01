@@ -1,0 +1,111 @@
+{% set name = "FreeFem" %}
+{% set version = "4.13" %}
+{% set build = 6 %}
+
+# ensure mpi is defined (needed for conda-smithy recipe-lint)
+{% set mpi = mpi or 'nompi' %}
+
+{% if mpi == 'nompi' %}
+# prioritize nompi variant via build number
+{% set build = build + 100 %}
+{% endif %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/{{ name }}/{{ name }}-sources/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: aefd4ff02333209f7433abef2e74acb621b6946063ff27e81cf2da43120b6ae4
+  patches:
+    - Makefile.am_conda.patch
+
+build:
+  number: {{ build }}
+  skip: true  # [win]
+  # Per https://conda-forge.org/docs/maintainer/knowledge_base.html#preferring-a-provider-usually-nompi
+  # add build string so packages can depend on
+  # mpi or nompi variants explicitly:
+  # `pkg * mpi_mpich_*` for mpich
+  # `pkg * mpi_*` for any mpi
+  # `pkg * nompi_*` for no mpi
+
+  {% if mpi != 'nompi' %}
+  {% set mpi_prefix = "mpi_" + mpi %}
+  {% else %}
+  {% set mpi_prefix = "nompi" %}
+  {% endif %}
+  string: "{{ mpi_prefix }}_h{{ PKG_HASH }}_{{ build }}"
+  run_exports:
+    - {{ pin_subpackage('freefem', max_pin='x.x') }} {{ mpi_prefix }}_*  
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - {{ compiler('fortran') }}
+    - autoconf
+    - automake
+    - bison
+    - flex
+    - m4
+    - make
+    - patch
+    - unzip
+  host:
+    - arpack
+    - fftw
+    - gmm
+    - gsl
+    - freeglut  # [linux]
+    - ipopt  # [not osx]
+    - nlopt
+    - metis
+    - mumps  # [not osx and mpi == 'nompi']
+    - mumps-mpi  # [mpi != 'nompi']
+    - petsc  # [not osx]
+    - parmetis
+    - mmgsuite
+    - scalapack
+    - scotch
+    - hdf5
+    - lapack
+    - openblas
+    - suitesparse
+    - superlu
+    - tetgen
+    - zlib
+    - zstd
+    - {{ mpi }}  # [mpi != 'nompi']
+  run:
+    - {{ mpi }}  # [mpi != 'nompi']
+    - {{ pin_compatible('hdf5', max_pin='x.x') }}
+    - {{ pin_compatible('lapack', max_pin='x.x') }}
+
+test:
+  commands:
+    - test -f $PREFIX/bin/FreeFem++  # [unix]
+    - test -f $PREFIX/bin/FreeFem++-nw  # [unix]
+    - test -f $PREFIX/bin/ff-c++  # [unix]
+    - test -f $PREFIX/bin/ff-get-dep  # [unix]
+    - test -f $PREFIX/bin/ff-pkg-download  # [unix]
+    - FreeFem++ $PREFIX/share/FreeFEM/${PKG_VERSION}/examples/tutorial/beam.edp  # [linux]
+    - FreeFem++ $PREFIX/share/FreeFEM/${PKG_VERSION}/examples/3dSurf/buildMeshSfromMesh3.edp  # [osx]
+
+about:
+  home: https://freefem.org/
+  license: LGPL-3.0-only
+  license_family: LGPL
+  license_file: LICENSE.txt
+  summary: 'FreeFem : A high level multiphysics finite element software'
+  description: >
+    FreeFEM is a popular 2D and 3D partial differential equations (PDE) solver used by thousands of researchers across the world. It allows you to easily implement your own physics modules using the provided FreeFEM language. FreeFEM offers a large list of finite elements, like the Lagrange, Taylor-Hood, etc., usable in
+    the continuous and discontinuous Galerkin method framework.
+  doc_url: https://doc.freefem.org
+  dev_url: https://github.com/FreeFem
+
+extra:
+  recipe-maintainers:
+    - ldallolio
+    - cnrdn
+    - fbordeu

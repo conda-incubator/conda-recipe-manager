@@ -1,0 +1,50 @@
+{% set name = "docxcompose" %}
+{% set version = "1.4.0" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/docxcompose-{{ version }}.tar.gz
+  sha256: bcf2799a0b63c29eb77a3d799a2f28443ae0f69f8691ff3d753f706be515c3e9
+
+build:
+  number: 0
+  noarch: python
+  entry_points:
+    - docxcompose = docxcompose.command:main
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python =2.7|>3.5
+  run:
+    - lxml
+    - python =2.7|>3.5
+    - python-docx >=0.8.8
+    - setuptools
+    - six
+    - babel
+
+test:
+  imports:
+    - docxcompose
+  commands:
+    - pip check
+    - docxcompose --help
+  requires:
+    - pip
+
+about:
+  home: https://github.com/4teamwork/docxcompose
+  summary: Compose .docx documents
+  license: MIT
+  # manually package license file. See https://github.com/4teamwork/docxcompose/pull/74
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - synapticarbors

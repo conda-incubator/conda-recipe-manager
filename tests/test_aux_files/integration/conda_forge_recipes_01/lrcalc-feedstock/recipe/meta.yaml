@@ -1,0 +1,72 @@
+{% set version = "2.1" %}
+{% set name = "lrcalc" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  - url: http://www.math.rutgers.edu/~asbuch/lrcalc/{{ name }}-{{ version }}.tar.gz
+    sha256: 996ac00e6ea8321ef09b34478f5379f613933c3254aeba624b6419b8afa5df57
+
+  - url: https://pypi.io/packages/source/l/lrcalc/lrcalc-{{ version }}.tar.gz
+    sha256: e3a0509aeda487b412b391a52e817ca36b5c063a8305e09fd54d53259dd6aaa9
+    folder: pypi
+
+build:
+  number: 6
+  skip: true  # [win]
+
+requirements:
+  build:
+    - libtool
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - make
+    - autoconf
+    - automake
+    - m4
+  host:
+  run:
+
+test:
+  commands:
+    - test -f ${PREFIX}/include/lrcalc/lrcoef.h
+    - test ! -f ${PREFIX}/lib/liblrcalc.a
+    - test -f ${PREFIX}/lib/liblrcalc.dylib  # [osx]
+    - test -f ${PREFIX}/lib/liblrcalc.so     # [linux]
+
+outputs:
+  - name: lrcalc
+
+  - name: python-lrcalc
+    script: build-python.sh
+    requirements:
+      build:
+        - {{ compiler('c') }}
+        - {{ compiler('cxx') }}
+        - python                               # [build_platform != target_platform]
+        - cython                               # [build_platform != target_platform]
+        - cross-python_{{ target_platform }}   # [build_platform != target_platform]
+      host:
+        - python
+        - cython
+        - pip
+        - {{ pin_subpackage("lrcalc", exact=True) }}
+      run:
+        - python
+        - {{ pin_subpackage("lrcalc", exact=True) }}
+    test:
+      imports:
+        - lrcalc
+
+about:
+  home: http://www.math.rutgers.edu/~asbuch/lrcalc/
+  license: GPL-2.0-or-later
+  license_file: COPYING
+  summary: The Littlewood-Richardson Calculator is a program designed to compute Littlewood-Richardson coefficients
+  dev_url: https://bitbucket.org/asbuch/lrcalc
+
+extra:
+  recipe-maintainers:
+    - isuruf

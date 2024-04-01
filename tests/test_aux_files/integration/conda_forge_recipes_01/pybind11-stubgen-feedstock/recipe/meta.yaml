@@ -1,0 +1,43 @@
+{% set name = "pybind11-stubgen" %}
+{% set version = "2.4.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/sizmailov/pybind11-stubgen/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: 0bf519c6622d67187552c775e7a3318a5ceb052c5b21db97809ba65c831816a1
+
+build:
+  number: 0
+  noarch: python
+  entry_points:
+    - pybind11-stubgen = pybind11_stubgen.__init__:main
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.4
+  run:
+    - python >=3.4
+
+test:
+  imports:
+    - pybind11_stubgen
+  commands:
+    - pip check
+    - pybind11-stubgen --help
+  requires:
+    - pip
+
+about:
+  home: https://github.com/sizmailov/pybind11-stubgen
+  summary: PEP 561 type stubs generator for pybind11 modules
+  license: BSD-Protection
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - allanleal

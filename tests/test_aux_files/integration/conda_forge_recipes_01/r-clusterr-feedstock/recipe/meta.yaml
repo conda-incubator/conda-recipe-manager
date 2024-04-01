@@ -1,0 +1,95 @@
+{% set version = "1.3.2" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-clusterr
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/ClusterR_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/ClusterR/ClusterR_{{ version }}.tar.gz
+  sha256: d739817a72adcc2d6d2a7500913689462bf7776c1b52102de91f24ef07d541af
+
+build:
+  merge_build_host: true  # [win]
+  number: 0
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ compiler('c') }}                # [not win]
+    - {{ compiler('m2w64_c') }}          # [win]
+    - {{ compiler('cxx') }}              # [not win]
+    - {{ compiler('m2w64_cxx') }}        # [win]
+    - {{ posix }}filesystem        # [win]
+    - {{ posix }}make
+    - {{ posix }}sed               # [win]
+    - {{ posix }}coreutils         # [win]
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+    - llvm-openmp                # [osx]
+    - r-rcpp >=0.12.5
+    - r-rcpparmadillo >=0.9.1
+    - r-ggplot2
+    - r-gmp
+    - r-lifecycle
+    - libblas
+    - liblapack
+  run:
+    - r-base
+    - {{ native }}gcc-libs         # [win]
+    - llvm-openmp                # [osx]
+    - r-rcpp >=0.12.5
+    - r-rcpparmadillo >=0.9.1
+    - r-ggplot2
+    - r-gmp
+    - r-lifecycle
+
+test:
+  commands:
+    - $R -e "library('ClusterR')"           # [not win]
+    - "\"%R%\" -e \"library('ClusterR')\""  # [win]
+
+about:
+  home: https://github.com/mlampros/ClusterR
+  license: GPL-3.0-only
+  summary: "Gaussian mixture models, k-means, mini-batch-kmeans, k-medoids and affinity propagation clustering with the option to plot, validate, predict (new data) and estimate the optimal number of clusters. The package takes advantage of 'RcppArmadillo' to speed up the computationally intensive parts of the functions.
+    For more information, see (i) \"Clustering in an Object-Oriented Environment\" by Anja Struyf, Mia Hubert, Peter Rousseeuw (1997), Journal of Statistical Software, <doi:10.18637/jss.v001.i04>; (ii) \"Web-scale k-means clustering\" by D. Sculley (2010), ACM Digital Library, <doi:10.1145/1772690.1772862>; (iii) \"Armadillo:
+    a template-based C++ library for linear algebra\" by Sanderson et al (2016), The Journal of Open Source Software, <doi:10.21105/joss.00026>; (iv) \"Clustering by Passing Messages Between Data Points\" by Brendan J. Frey and Delbert Dueck, Science 16 Feb 2007: Vol. 315, Issue 5814, pp. 972-976, <doi:10.1126/science.1136800>."
+  license_family: GPL3
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-3
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+
+# Package: ClusterR
+# Type: Package
+# Title: Gaussian Mixture Models, K-Means, Mini-Batch-Kmeans, K-Medoids and Affinity Propagation Clustering
+# Version: 1.2.0
+# Date: 2019-07-16
+# Authors@R: c( person("Lampros", "Mouselimis", email = "mouselimislampros@gmail.com", role = c("aut", "cre")), person("Conrad", "Sanderson", role = "cph", comment = "Author of the C++ Armadillo library"), person("Ryan", "Curtin", role = "cph", comment = "Author of the C++ Armadillo library"), person("Siddharth", "Agrawal", role = "cph", comment = "Author of the C code of the Mini-Batch-Kmeans algorithm (https://github.com/siddharth-agrawal/Mini-Batch-K-Means)"), person("Brendan", "Frey", email = "frey@psi.toronto.edu", role = "cph", comment = "Author of the matlab code of the Affinity propagation algorithm (for commercial use please contact the author of the matlab code)"), person("Delbert", "Dueck", role = "cph", comment = "Author of the matlab code of the Affinity propagation algorithm") )
+# Maintainer: Lampros Mouselimis <mouselimislampros@gmail.com>
+# BugReports: https://github.com/mlampros/ClusterR/issues
+# URL: https://github.com/mlampros/ClusterR
+# Description: Gaussian mixture models, k-means, mini-batch-kmeans, k-medoids and affinity propagation clustering with the option to plot, validate, predict (new data) and estimate the optimal number of clusters. The package takes advantage of 'RcppArmadillo' to speed up the computationally intensive parts of the functions. For more information, see (i) "Clustering in an Object-Oriented Environment" by Anja Struyf, Mia Hubert, Peter Rousseeuw (1997), Journal of Statistical Software, <doi:10.18637/jss.v001.i04>; (ii) "Web-scale k-means clustering" by D. Sculley (2010), ACM Digital Library, <doi:10.1145/1772690.1772862>; (iii) "Armadillo: a template-based C++ library for linear algebra" by Sanderson et al (2016), The Journal of Open Source Software, <doi:10.21105/joss.00026>; (iv) "Clustering by Passing Messages Between Data Points" by Brendan J. Frey and Delbert Dueck, Science 16 Feb 2007: Vol. 315, Issue 5814, pp. 972-976, <doi:10.1126/science.1136800>.
+# License: GPL-3
+# Encoding: UTF-8
+# LazyData: TRUE
+# Depends: R(>= 3.2), gtools
+# Imports: Rcpp (>= 0.12.5), graphics, grDevices, utils, gmp, FD, stats, ggplot2
+# LinkingTo: Rcpp, RcppArmadillo (>= 0.9.1)
+# Suggests: OpenImageR, testthat, covr, knitr, rmarkdown
+# VignetteBuilder: knitr
+# RoxygenNote: 6.1.0
+# NeedsCompilation: yes
+# Packaged: 2019-07-16 05:59:27 UTC; lampros
+# Author: Lampros Mouselimis [aut, cre], Conrad Sanderson [cph] (Author of the C++ Armadillo library), Ryan Curtin [cph] (Author of the C++ Armadillo library), Siddharth Agrawal [cph] (Author of the C code of the Mini-Batch-Kmeans algorithm (https://github.com/siddharth-agrawal/Mini-Batch-K-Means)), Brendan Frey [cph] (Author of the matlab code of the Affinity propagation algorithm (for commercial use please contact the author of the matlab code)), Delbert Dueck [cph] (Author of the matlab code of the Affinity propagation algorithm)
+# Repository: CRAN
+# Date/Publication: 2019-07-18 06:35:38 UTC

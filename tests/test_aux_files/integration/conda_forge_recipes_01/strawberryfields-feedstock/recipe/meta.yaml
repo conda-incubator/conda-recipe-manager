@@ -1,0 +1,57 @@
+{% set name = "strawberryfields" %}
+{% set version = "0.23.0" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/StrawberryFields-{{ version }}.tar.gz
+  sha256: bfe94867cdee8e2904752573f1ff46b78d9f373da16a1cfa31e1bd6cdf2e3cb0
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - networkx >=2.0
+    - numba
+    - numpy >=1.17.4
+    - python >=3.6
+    - python-dateutil >=2.8.0
+    - quantum-blackbird >=0.3.0
+    - quantum-xir >=0.1.1
+    - requests >=2.22.0
+    - scipy >=1.0.0
+    - sympy >=1.5
+    - thewalrus >=0.18.0
+    - toml
+    - urllib3 >=1.25.3
+    - xanadu-cloud-client >=0.2.1
+
+test:
+  imports:
+    - strawberryfields
+    - strawberryfields.apps
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://strawberryfields.ai
+  summary: Open source library for continuous-variable quantum computation
+  license: Apache-2.0
+  license_file: LICENSE
+  dev_url: https://github.com/XanaduAI/StrawberryFields
+  doc_url: https://strawberryfields.readthedocs.io
+
+extra:
+  recipe-maintainers:
+    - BastianZim

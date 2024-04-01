@@ -1,0 +1,63 @@
+{% set version = "1.1.6" %}
+
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-spikeslab
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/spikeslab_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/spikeslab/spikeslab_{{ version }}.tar.gz
+  sha256: b34606bead4645ef910c1d00da901df1a59a2e8d948c81871b71b77ef47597ea
+
+build:
+  merge_build_host: true  # [win]
+  number: 2
+
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ compiler('c') }}          # [not win]
+    - {{ compiler('m2w64_c') }}    # [win]
+    - {{ posix }}filesystem        # [win]
+    - {{ posix }}make
+    - {{ posix }}sed               # [win]
+    - {{ posix }}coreutils         # [win]
+    - {{ posix }}zip               # [win]
+    - cross-r-base {{ r_base }}    # [build_platform != target_platform]
+
+  host:
+    - r-base
+    - r-lars
+    - r-randomforest
+
+  run:
+    - r-base
+    - {{ native }}gcc-libs         # [win]
+    - r-lars
+    - r-randomforest
+
+test:
+  commands:
+    - $R -e "library('spikeslab')"           # [not win]
+    - "\"%R%\" -e \"library('spikeslab')\""  # [win]
+
+about:
+  home: http://web.ccs.miami.edu/~hishwaran http://www.kogalur.com
+
+  license: GPL-3.0-or-later
+  summary: Spike and slab for prediction and variable selection in linear regression models. Uses a generalized elastic net for variable selection.
+
+  license_family: GPL3
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-3
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r

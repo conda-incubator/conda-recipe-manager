@@ -1,0 +1,48 @@
+{% set version = "0.2.0" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-wheatmap
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/wheatmap_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/wheatmap/wheatmap_{{ version }}.tar.gz
+  sha256: b76dff6f668874d08acb5f6d3849288645470ab2e3be34b6eabda065336d9118
+
+build:
+  merge_build_host: true  # [win]
+  number: 2
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  host:
+    - r-base
+    - r-rcolorbrewer
+    - r-colorspace
+  run:
+    - r-base
+    - r-rcolorbrewer
+    - r-colorspace
+
+test:
+  commands:
+    - $R -e "library('wheatmap')"           # [not win]
+    - "\"%R%\" -e \"library('wheatmap')\""  # [win]
+
+about:
+  home: https://github.com/zwdzwd/wheatmap
+  license: GPL-3.0-only
+  summary: Builds complex plots, heatmaps in particular, using natural semantics. Bigger plots can be assembled using directives such as 'LeftOf', 'RightOf', 'TopOf', and 'Beneath' and more. Other features include clustering, dendrograms and integration with 'ggplot2' generated grid objects. This package is particularly
+    designed for bioinformaticians to assemble complex plots for publication.
+  license_family: GPL3
+  license_file: {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-3
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r

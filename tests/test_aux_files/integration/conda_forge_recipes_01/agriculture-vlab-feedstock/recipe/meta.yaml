@@ -1,0 +1,58 @@
+{% set name = "agriculture-vlab" %}
+{% set version = "0.3.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/agriculture-vlab/{{ name }}/archive/v{{ version }}.tar.gz
+  sha256: a25fb2f51a02d1e5760e51f218e3ab05cf1dd15c120a0d7a8191f5f87c259cf0
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+  entry_points:
+    - avl = avl.cli:main
+
+requirements:
+  host:
+    - python >=3.8
+    - pip
+  run:
+    - boto3 >=1.20.24
+    - cartopy >=0.21.1
+    - click >=8.0
+    - matplotlib-base >=3.0
+    - numpy >=1.17
+    - pandas >=1.3
+    - pyproj
+    - python >=3.8
+    - tenacity >=8.2.2
+    - xarray >=0.18.2
+    - xcube >=0.10.1
+    - zarr >=2.8
+
+test:
+  imports:
+    - avl
+
+about:
+  home: https://github.com/agriculture-vlab/agriculture-vlab
+  summary: An environment for analysis of agricultural earth observation data
+  description: |
+    The Agriculture Virtual Laboratory (AVL) is an online environment for the
+    analysis of agricultural earth observation data. This package provides
+    Python and command-line interfaces for various AVL user and administrator
+    funtions.
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE.md
+  doc_url: https://docs.agriculturevlab.eu/
+  dev_url: https://github.com/agriculture-vlab/agriculture-vlab
+
+extra:
+  recipe-maintainers:
+    - pont-us
+    - forman

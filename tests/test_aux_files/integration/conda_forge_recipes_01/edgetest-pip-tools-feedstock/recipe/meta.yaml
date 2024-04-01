@@ -1,0 +1,47 @@
+{% set name = "edgetest-pip-tools" %}
+{% set version = "2023.8.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: f8d276b1db4d198d1bde9ecf85752b3a9a784d29bfc5c19f68a5b02431261c9b
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install -vv --no-deps .
+
+requirements:
+  host:
+    - python >=3.7
+    - pip
+  run:
+    - edgetest >=2021.12.3
+    - pip-tools >=6.0.0,<=7.3.0
+    - python >=3.8
+
+test:
+  imports:
+    - edgetest_pip_tools.plugin
+
+about:
+  home: https://github.com/capitalone/edgetest-pip-tools
+  license: Apache-2.0
+  license_family: APACHE
+  license_file: LICENSE
+  summary: edgetest-pip-tools is a pip-tools plugin for edgetest
+  description: |
+    This plugin will refresh requirements.txt using pip-tools when using edgetest
+  doc_url: https://capitalone.github.io/edgetest-pip-tools/
+  dev_url: https://github.com/capitalone/edgetest-pip-tools
+
+extra:
+  recipe-maintainers:
+    - jdawang
+    - gladysteh99
+    - NikhilJArora
+    - fdosani
+    - ak-gupta

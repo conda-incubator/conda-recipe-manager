@@ -1,0 +1,44 @@
+{% set name = "nengo" %}
+{% set version = "4.0.0" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/nengo-{{ version }}.tar.gz
+  sha256: d84c1886ba4049ee8285d2a038e11d57198dc2fdb1ed14e69a6b407eef777e1f
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - numpy >=1.13
+    - python >=3.6
+    - scipy >=0.13
+    - scikit-learn
+
+test:
+  imports:
+    - nengo
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://www.nengo.ai/nengo
+  summary: Tools for building and simulating large-scale neural models
+  license: LicenseRef-NENGO
+  license_file: LICENSE.rst
+
+extra:
+  recipe-maintainers:
+    - Tobias-Fischer

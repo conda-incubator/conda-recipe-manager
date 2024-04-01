@@ -1,0 +1,51 @@
+{% set version = "0.57.0" %}
+
+package:
+  name: containers-common
+  version: {{ version }}
+
+source:
+  - url: https://github.com/containers/common/archive/v{{ version }}.tar.gz
+    sha256: bfa87a6a0737c0ffd2860608a150f20da0a2944e4cdb7d6a5ed9a84ea30b47f0
+    folder: common
+  # NOTE: Due to historic reasons, some configs are from the skopeo project.
+  #       When updating, please
+  #        1. check if those were added to containers-common in the meantime,
+  #        2. be sure to update to a newer skopeo source if there are new changes!
+  - url: https://github.com/containers/skopeo/archive/v1.13.3.tar.gz
+    sha256: 0b788fc5725ac79327f7c29797821a2bafc1c3c87bbfcb2998c2a1be949e314d
+    folder: skopeo
+
+build:
+  number: 0
+  skip: true  # [win]
+
+test:
+  commands:
+    # Package does not include empty directory due to conda-build issue:
+    #   https://github.com/conda/conda-build/issues/1014
+    # - test -d "${PREFIX}/etc/containers/registries.conf.d"
+    - grep -qF quay.io "${PREFIX}/etc/containers/registries.conf"
+    - grep -qF docker.io "${PREFIX}/etc/containers/registries.conf"
+    - |
+      grep -qF 'docker:' "${PREFIX}/etc/containers/registries.d/default.yaml"
+    - grep -qF docker-daemon "${PREFIX}/etc/containers/policy.json"
+    - |
+      grep -qF '"defaultAction": "SCMP_ACT_ERRNO",' "${PREFIX}/share/containers/seccomp.json"  # [linux]
+    - |
+      test 4 -eq "$( grep -cF "${PREFIX}" "${PREFIX}/share/containers/containers.conf" )"  # [linux]
+
+about:
+  home: https://github.com/containers/common
+  dev_url: https://github.com/containers/common
+  doc_url: https://github.com/containers/common
+  license: Apache-2.0
+  license_file: common/LICENSE
+  summary: Location for shared common files in github.com/containers repos.
+
+extra:
+  recipe-maintainers:
+    - mbargull
+    - ngam
+    - pavelzw
+    - AndreasAlbertQC

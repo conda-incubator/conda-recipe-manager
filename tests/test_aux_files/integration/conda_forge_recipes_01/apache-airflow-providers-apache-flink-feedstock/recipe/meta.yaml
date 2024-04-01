@@ -1,0 +1,47 @@
+{% set name = "apache-airflow-providers-apache-flink" %}
+{% set version = "1.3.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/apache_airflow_providers_apache_flink-{{ version }}.tar.gz
+  sha256: 3137e208b3d03fb4f4dc73e3802473cae8effd96ebd3203a1c2c569e52b80268
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.8,<4.dev0
+    - flit-core >=3.2,<4
+    - pip
+  run:
+    - python >=3.8
+    - apache-airflow-providers-cncf-kubernetes >=5.1.0
+    - apache-airflow >=2.6.0
+    - cryptography >=2.0.0
+
+test:
+  imports:
+    - airflow.providers.apache.flink
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/apache/airflow/
+  summary: Provider package apache-airflow-providers-apache-flink for Apache Airflow
+  license: Apache-2.0
+  license_file: airflow/providers/apache/flink/LICENSE
+  license_family: Apache
+  doc_url: https://airflow.apache.org/docs/apache-airflow-providers-apache-flink/stable/index.html
+  dev_url: https://github.com/apache/airflow/
+
+extra:
+  recipe-maintainers:
+    - xylar

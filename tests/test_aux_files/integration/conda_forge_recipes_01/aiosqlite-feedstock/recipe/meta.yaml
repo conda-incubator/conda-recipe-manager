@@ -1,0 +1,47 @@
+{% set name = "aiosqlite" %}
+{% set version = "0.19.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 95ee77b91c8d2808bd08a59fbebf66270e9090c3d92ffbf260dc0db0b979577d
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+    - flit-core >=2,<4
+    - typing-extensions >=3.7.2
+  run:
+    - python >=3.6
+    - typing-extensions >=3.7.2
+
+test:
+  requires:
+    - pip
+  commands:
+    - pip check
+  imports:
+    - aiosqlite
+
+about:
+  home: https://github.com/omnilib/aiosqlite
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: asyncio bridge to the standard sqlite3 module
+  description: |
+    AsyncIO bridge to the standard sqlite3 module for Python 3.5+.
+  dev_url: https://github.com/omnilib/aiosqlite
+
+extra:
+  recipe-maintainers:
+    - carlodri

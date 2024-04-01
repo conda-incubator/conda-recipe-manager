@@ -1,0 +1,48 @@
+{% set name = "cmdstanpy" %}
+{% set version = "1.2.2" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/stan-dev/cmdstanpy/archive/v{{ version }}.tar.gz
+  sha256: 58ac5d651a60f8d5c5f8336b7eb64bac3b1ee011917a90a14165a0a8ff1bd7a0
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  entry_points:
+    - install_cmdstan = cmdstanpy.install_cmdstan:main
+    - install_cxx_toolchain = cmdstanpy.install_cxx_toolchain:main
+
+requirements:
+  host:
+    - pip
+    - python >=3.8
+  run:
+    - python >=3.8
+    - pandas
+    - numpy >=1.21
+    - cmdstan
+    - tqdm
+    - stanio >=0.4.0,<2.0.0
+
+
+about:
+  home: https://mc-stan.org/users/interfaces/cmdstan.html
+  dev_url: https://github.com/stan-dev/cmdstanpy
+  doc_url: https://cmdstanpy.readthedocs.io
+  summary: |
+    CmdStanPy is a lightweight interface to Stan for Python users which
+    provides the necessary objects and functions to compile a Stan program
+    and fit the model to data using CmdStan.
+  license: BSD-3-Clause
+  license_file: LICENSE.md
+
+extra:
+  recipe-maintainers:
+    - maresb
+    - WardBrian

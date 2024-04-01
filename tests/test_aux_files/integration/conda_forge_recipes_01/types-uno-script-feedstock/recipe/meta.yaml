@@ -1,0 +1,43 @@
+{% set name = "types-uno-script" %}
+{% set version = "0.1.1" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/types-uno-script-{{ version }}.tar.gz
+  sha256: 0ec3adf5567b289b0e922a3b046593a374206f73a8ed3230a72afc7de5fdb7c2
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.7
+  run:
+    - python >=3.7
+    - typing-extensions >=3.7.4.3
+
+test:
+  imports:
+    - uno
+    - unohelper
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/Amourspirit/python-types-uno-script
+  summary: Type annotations for LibreOffice UNO Script
+  license: Apache-2.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - Amourspirit

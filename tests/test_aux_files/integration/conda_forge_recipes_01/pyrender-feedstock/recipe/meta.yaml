@@ -1,0 +1,72 @@
+{% set name = "pyrender" %}
+{% set version = "0.1.45" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/mmatl/{{ name }}/archive/refs/tags/{{ version }}.tar.gz
+  sha256: cfdf0f681f7763247623c751606e7d3417e3472d5b0f32cfd0389abd207e0a4f
+  patches:
+    - unpin_pyopengl.patch
+
+build:
+  number: 3
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - freetype-py
+    - imageio
+    - networkx
+    - numpy
+    - pillow
+    - pip
+    - pyglet >=1.4.10
+    - pyopengl >=3.1.0
+    - python  >=3.6
+    - scipy
+    - six
+    - trimesh
+    - dataclasses
+  run:
+    - freetype-py
+    - imageio
+    - networkx
+    - numpy
+    - pillow
+    - pyglet >=1.4.10
+    - pyopengl >=3.1.0
+    - python  >=3.6
+    - scipy
+    - six
+    - trimesh
+    - dataclasses
+
+test:
+  imports:
+    - pyrender
+    - pyrender.platforms
+  commands:
+    - pip check
+    # Disabled due to https://github.com/mmatl/pyrender/issues/203
+    - pytest -k "not (test_meshes or test_offscreen)" tests
+  requires:
+    - pip
+    - pytest
+  source_files:
+    - tests
+    - examples
+
+about:
+  home: https://github.com/mmatl/pyrender
+  summary: Easy-to-use Python renderer for 3D visualization
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - traversaro

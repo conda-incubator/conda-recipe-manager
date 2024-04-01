@@ -1,0 +1,65 @@
+{% set version = "1.7.1" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-msm
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/msm_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/msm/msm_{{ version }}.tar.gz
+  sha256: d134782b966eed33742819595119ab1a61bec4416cc3fa7630a0f34c4e7f785b
+
+build:
+  merge_build_host: true  # [win]
+  number: 0
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - cross-r-base {{ r_base }}  # [build_platform != target_platform]
+    - r-mvtnorm                  # [build_platform != target_platform]
+    - r-survival                 # [build_platform != target_platform]
+    - r-expm                     # [build_platform != target_platform]
+    - {{ compiler('c') }}        # [unix]
+    - {{ compiler('m2w64_c') }}        # [win]
+    - {{ posix }}filesystem        # [win]
+    - {{ posix }}make
+    - {{ posix }}sed               # [win]
+    - {{ posix }}coreutils         # [win]
+    - {{ posix }}zip               # [win]
+  host:
+    - libblas
+    - liblapack
+    - r-base
+    - r-expm
+    - r-mvtnorm
+    - r-survival
+  run:
+    - r-base
+    - {{ native }}gcc-libs         # [win]
+    - r-expm
+    - r-mvtnorm
+    - r-survival
+
+test:
+  commands:
+    - $R -e "library('msm')"           # [unix]
+    - "\"%R%\" -e \"library('msm')\""  # [win]
+
+about:
+  home: https://github.com/chjackson/msm
+  license: GPL-2.0-or-later
+  summary: Functions for fitting continuous-time Markov and hidden Markov multi-state models to longitudinal data.  Designed for processes observed at arbitrary times in continuous time (panel data) but some other observation schemes are supported. Both Markov transition rates and the hidden Markov output process can be
+    modelled in terms of covariates, which may be constant or piecewise-constant in time.
+  license_family: GPL3
+  license_file: {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-2
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+    - npavlovikj

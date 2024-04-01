@@ -1,0 +1,43 @@
+{% set name = "pygments-style-solarized" %}
+{% set version = "0.2.0" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/pygments-style-solarized-{{ version }}.tar.gz
+  sha256: 4867d8903d8d065c42ed37219eb5e13a6e091f11f1b3cd4f9fab016ec737b97a
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6,<4.0
+    - poetry >=1,<2
+  run:
+    - pygments >=1.5
+    - python >=3.6,<4.0
+
+test:
+  imports:
+    - pygments_style_solarized
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/shkumagai/pygments-style-solarized
+  summary: Pygments version of the Solarized theme.
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - ickc

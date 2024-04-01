@@ -1,0 +1,54 @@
+{% set name = "libdrs" %}
+{% set version = "3.1.2" %}
+{% set build = 120 %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/CDAT/libdrs/archive/v{{ version }}.tar.gz
+  sha256: 90e10191116a78228739276078a0ddcf0d6458516f192e9e79fecb2beeceb3fa
+  patches:
+    - 0001-remove-mtune-option.patch
+    - 0002-remove-lgfortran.patch  # [linux & (ppc64le | aarch64)]
+    - 0003-remove-lgrib2c.patch  # [osx] 
+
+build:
+  number: {{ build }}
+  skip: True  # [win]
+
+requirements:
+  build:
+    - {{ compiler('c') }}         # need gcc7 to link library
+    - {{ compiler('fortran') }}   # (_gmalloc_fortran) issue without gfortran7
+    - make
+  host:
+    - libnetcdf * nompi_*
+    - g2clib
+  run:
+    - libnetcdf
+
+test:
+  commands:
+    - test -f $PREFIX/lib/libdrs.a
+
+about:
+  home:  http://cdat.llnl.gov
+  summary: 'Data Retrieval and Storage DRS software Fortran library'
+  license: BSD-3-Clause
+  license_file: bsd-3-clause.txt
+  description: |
+    libdrs is suitable for the data generated and used in climate model research.
+    It is oriented toward use with models generating very large datasets on
+    supercomputers, as well as with graphics workstations used for analysis and
+    display of smaller subsets of data.
+  dev_url: http://github.com/CDAT/libdrs
+
+extra:
+  recipe-maintainers:
+    - dnadeau4
+    - doutriaux1
+    - downiec
+    - jasonb5
+    - xylar

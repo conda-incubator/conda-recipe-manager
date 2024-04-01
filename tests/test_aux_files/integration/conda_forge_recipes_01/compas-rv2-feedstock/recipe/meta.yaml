@@ -1,0 +1,48 @@
+{% set name = "compas-RV2" %}
+{% set version = "1.4.7" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 4c4e823625c05d2ed30712aa9e6394a077b531c27058274c689fcfb417355a1b
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . --ignore-installed --no-cache-dir -vvv
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+  run:
+    - python >=3.6
+    - compas >=1.14.1
+    - compas_cloud >=0.3.0
+    - compas_tna >=0.1.5
+    - compas_skeleton >=1.1.4
+
+test:
+  imports:
+    - compas_rv2
+  requires:
+    - pip
+  commands:
+    - pip check
+
+about:
+  home: https://github.com/BlockResearchGroup/compas-RV2
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: RV2 (RhinoVAULT 2) is an implementation of RhinVAULT for Rhino 6+, based on the COMPAS framework.
+  doc_url: https://blockresearchgroup.gitbook.io/rv2/
+  dev_url: https://github.com/BlockResearchGroup/compas-RV2
+
+extra:
+  recipe-maintainers:
+    - brgcode
+    - licini

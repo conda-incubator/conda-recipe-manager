@@ -1,0 +1,49 @@
+{% set name = "seaduck" %}
+{% set version = "1.0.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/seaduck-{{ version }}.tar.gz
+  sha256: ffefe3c5566d157f53af6e776d2ef4d841b5bfaf433719bc1255ada2cc65b596
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.6
+    - setuptools >=45
+    - setuptools-scm >=6.2
+    - pip
+  run:
+    - python >=3.6
+    - numpy
+    - pandas
+    - scipy
+    - dask-core
+    - xarray
+
+test:
+  imports:
+    - seaduck
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/MaceKuailv/seaduck
+  dev_url: https://github.com/MaceKuailv/seaduck
+  doc_url: https://macekuailv.github.io/seaduck/
+  summary: A python package that interpolates data from ocean dataset from both Eulerian and Lagrangian perspective.
+  license: Apache-2.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - MaceKuailv

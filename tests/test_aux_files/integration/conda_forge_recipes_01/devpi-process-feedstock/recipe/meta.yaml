@@ -1,0 +1,44 @@
+{% set version = "1.0.0" %}
+
+package:
+  name: devpi-process
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/d/devpi-process/devpi_process-{{ version }}.tar.gz
+  sha256: 18cb93b430d560a40bf0e11136dfff4eb5edf665d3c49cd1b0ab5d8b11675a6e
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps
+  number: 0
+
+requirements:
+  host:
+    - hatch-vcs >=0.3
+    - hatchling >=1.18
+    - pip
+    - python >=3.8
+  run:
+    - devpi-client >=6.0.5
+    - devpi-server >=6.9.2
+    - python >=3.8
+    - typing_extensions >=4.7.1
+
+test:
+  imports:
+    - devpi_process
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/tox-dev/devpi-process
+  summary: devpi process provides a programmatic API to create and use a devpi server process
+  license: MIT
+  license_file: LICENSE.txt
+
+extra:
+  recipe-maintainers:
+    - bollwyvl

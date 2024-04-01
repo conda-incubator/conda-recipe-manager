@@ -1,0 +1,41 @@
+{% set name = "queuelib" %}
+{% set version = "1.6.2" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 4b207267f2642a8699a1f806045c56eb7ad1a85a10c0e249884580d139c2fcd2
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.5
+  run:
+    - python >=3.5
+
+test:
+  imports:
+    - queuelib
+    - queuelib.tests
+
+about:
+  home: https://github.com/scrapy/queuelib
+  summary: Collection of persistent (disk-based) queues
+  license: BSD-3-Clause
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - synapticarbors
+    - Gallaecio
+    - kmike
+    - wRAR

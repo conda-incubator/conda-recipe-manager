@@ -1,0 +1,60 @@
+{% set version = "2.0.7" %}
+
+package:
+  name: responder
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/r/responder/responder-{{ version }}.tar.gz
+  sha256: 23a8f4b0136f74c272d187eb888a16e0b3fe4434881abfb60efecb71d78f6934
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+  entry_points:
+    - responder = responder.cli:cli
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+  run:
+    - python >=3.6
+    - aiofiles
+    - apispec >=1.0.0b1
+    - apistar
+    - chardet
+    - docopt
+    - graphene <3.0
+    - graphql-server-core >=1.1
+    - itsdangerous
+    - jinja2
+    - marshmallow
+    - python-multipart
+    - pyyaml
+    - requests
+    - requests-toolbelt
+    - rfc3986
+    - starlette ~=0.13.0
+    - uvicorn >=0.12.0,<0.13.3
+    - whitenoise
+
+test:
+  imports:
+    - responder
+  commands:
+    - responder --help
+
+about:
+  home: https://github.com/taoufik07/responder
+  license: APACHE-2.0
+  license_family: APACHE
+  license_file: LICENSE
+  summary: A familiar HTTP Service Framework for Python
+  doc_url: http://python-responder.org/
+
+extra:
+  recipe-maintainers:
+    - dhirschfeld
+    - carlodri

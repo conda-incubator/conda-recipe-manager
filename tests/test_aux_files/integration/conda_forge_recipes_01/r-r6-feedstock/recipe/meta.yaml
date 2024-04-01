@@ -1,0 +1,65 @@
+{% set version = "2.5.1" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-r6
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/R6_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/R6/R6_{{ version }}.tar.gz
+  sha256: 8d92bd29c2ed7bf15f2778618ffe4a95556193d21d8431a7f75e7e5fc102bf48
+
+build:
+  merge_build_host: true  # [win]
+  number: 2
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+  run:
+    - r-base
+
+test:
+  commands:
+    - $R -e "library('R6')"           # [not win]
+    - "\"%R%\" -e \"library('R6')\""  # [win]
+
+about:
+  home: https://r6.r-lib.org, https://github.com/r-lib/R6/
+  license: MIT
+  license_file: LICENSE
+  summary: Creates classes with reference semantics, similar to R's built-in reference classes. Compared to reference classes, R6 classes are simpler and lighter-weight, and they are not built on S4 classes so they do not require the methods package. These classes allow public and private members, and they support inheritance,
+    even when the classes are defined in different packages.
+  license_family: MIT
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+
+# Package: R6
+# Title: Encapsulated Classes with Reference Semantics
+# Version: 2.4.0
+# Authors@R: person("Winston", "Chang", role = c("aut", "cre"), email = "winston@stdout.org")
+# Description: Creates classes with reference semantics, similar to R's built-in reference classes. Compared to reference classes, R6 classes are simpler and lighter-weight, and they are not built on S4 classes so they do not require the methods package. These classes allow public and private members, and they support inheritance, even when the classes are defined in different packages.
+# Depends: R (>= 3.0)
+# Suggests: knitr, microbenchmark, pryr, testthat, ggplot2, scales
+# License: MIT + file LICENSE
+# URL: https://r6.r-lib.org, https://github.com/r-lib/R6/
+# LazyData: true
+# BugReports: https://github.com/r-lib/R6/issues
+# RoxygenNote: 6.1.1
+# NeedsCompilation: no
+# Packaged: 2019-02-14 18:34:54 UTC; winston
+# Author: Winston Chang [aut, cre]
+# Maintainer: Winston Chang <winston@stdout.org>
+# Repository: CRAN
+# Date/Publication: 2019-02-14 19:42:14 UTC

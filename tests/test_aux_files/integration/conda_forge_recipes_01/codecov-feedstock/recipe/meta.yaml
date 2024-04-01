@@ -1,0 +1,50 @@
+{% set name = "codecov" %}
+{% set version = "2.1.13" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/codecov-{{ version }}.tar.gz
+  sha256: 2362b685633caeaf45b9951a9b76ce359cd3581dd515b430c6c3f5dfb4d92a8c
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+  entry_points:
+    - codecov=codecov:main
+
+requirements:
+  host:
+    - pip
+    - python >=3.3
+  run:
+    - coverage
+    - python >=3.3
+    - requests >=2.7.9
+
+test:
+  imports:
+    - codecov
+  commands:
+    - pip check
+    - codecov --help
+  requires:
+    - pip
+
+about:
+  home: https://github.com/codecov/codecov-python
+  license: Apache-2.0
+  license_file: LICENSE
+  license_family: Apache
+  summary: Hosted coverage reports for Github, Bitbucket and Gitlab
+  doc_url: https://github.com/codecov/codecov-python
+  dev_url: https://github.com/codecov/codecov-python
+
+extra:
+  recipe-maintainers:
+    - CJ-Wright
+    - marcelotrevisani
+    - thewchan

@@ -1,0 +1,50 @@
+{% set name = "loris" %}
+{% set version = "0.5.3" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/loris-{{ version }}.tar.gz
+  sha256: 2c77d110182e6bb78a7eeffc0d7dfbc3d56883bb26717cb05ac46cabc3091669
+
+build:
+  number: 5
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - numpy                                  # [build_platform != target_platform]
+  host:
+    - numpy
+    - pip
+    - python
+  run:
+    - aedat  # [not aarch64 and not ppc64le]
+    - python
+    - tqdm
+    - {{ pin_compatible('numpy') }}
+
+test:            # [not aarch64 and not ppc64le]
+  imports:       # [not aarch64 and not ppc64le]
+    - loris      # [not aarch64 and not ppc64le]
+  commands:      # [not aarch64 and not ppc64le]
+    - pip check  # [not aarch64 and not ppc64le]
+  requires:      # [not aarch64 and not ppc64le]
+    - pip        # [not aarch64 and not ppc64le]
+
+about:
+  home: https://github.com/neuromorphic-paris/loris
+  summary: read and write files from neuromorphic cameras
+  license: GPL-3.0-or-later
+  license_file: LICENSE.txt
+
+extra:
+  recipe-maintainers:
+    - Tobias-Fischer

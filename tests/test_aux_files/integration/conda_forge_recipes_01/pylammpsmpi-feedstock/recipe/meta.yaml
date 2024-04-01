@@ -1,0 +1,51 @@
+{% set name = "pylammpsmpi" %}
+{% set version = "0.2.15" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/pylammpsmpi-{{ version }}.tar.gz
+  sha256: 787d943f20e878d3e949e77ee0ae24233c4c87dfbc6cef0a0e8ff31e226e510f
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  number: 0
+
+requirements:
+  host:
+    - python >3.7
+    - pip
+    - mpi4py
+    - pympipool
+    - numpy
+    - versioneer
+    - toml
+  run:
+    - python >3.7
+    - mpi4py >=3.1.4,<=3.1.5
+    - pympipool >=0.7.0,<=0.7.17
+    - numpy >=1.23.5,<=1.26.4
+
+test:
+  imports:
+    - pylammpsmpi
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/pyiron/pylammpsmpi
+  summary: Parallel Lammps Python interface
+  license: BSD-3-Clause
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - pyiron-runner
+    - jan-janssen
+    - pmrv
+    - srmnitc

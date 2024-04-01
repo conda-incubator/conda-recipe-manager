@@ -1,0 +1,69 @@
+{% set version = "3.2-3" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-spatstat.random
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/spatstat.random_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/spatstat.random/spatstat.random_{{ version }}.tar.gz
+  sha256: e052a33e90b097bc160c687d4927e17d01a1c282f503205d322133464f3934a7
+
+build:
+  merge_build_host: true  # [win]
+  number: 0
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - cross-r-base {{ r_base }}  # [build_platform != target_platform]
+    - r-spatstat.data            # [build_platform != target_platform]
+    - r-spatstat.utils           # [build_platform != target_platform]
+    - r-spatstat.geom            # [build_platform != target_platform]
+    - {{ compiler('c') }}              # [not win]
+    - {{ compiler('m2w64_c') }}        # [win]
+    - {{ compiler('cxx') }}            # [not win]
+    - {{ compiler('m2w64_cxx') }}      # [win]
+    - {{ posix }}filesystem        # [win]
+    - {{ posix }}make
+    - {{ posix }}sed               # [win]
+    - {{ posix }}coreutils         # [win]
+    - {{ posix }}zip               # [win]
+    - cross-r-base {{ r_base }}    # [build_platform != target_platform]
+  host:
+    - r-base
+    - r-spatstat.data >=3.0
+    - r-spatstat.geom >=3.2_9
+    - r-spatstat.utils >=3.0_2
+  run:
+    - r-base
+    - {{ native }}gcc-libs         # [win]
+    - r-spatstat.data >=3.0
+    - r-spatstat.geom >=3.2_9
+    - r-spatstat.utils >=3.0_2
+
+test:
+  commands:
+    - $R -e "library('spatstat.random')"           # [not win]
+    - "\"%R%\" -e \"library('spatstat.random')\""  # [win]
+
+about:
+  home: https://spatstat.org/
+  dev_url: https://github.com/spatstat/spatstat.random
+  license: GPL-2.0-or-later
+  summary: Functionality for random generation of spatial data in the 'spatstat' family of packages. Generates random spatial patterns of points according to many simple rules (complete spatial randomness, Poisson, binomial, random grid, systematic, cell), randomised alteration of patterns (thinning, random shift, jittering),  simulated
+    realisations of random point processes (simple sequential inhibition, Matern inhibition models, Matern cluster process, Neyman-Scott cluster processes, log-Gaussian Cox processes, product shot noise cluster processes) and simulation of Gibbs point processes (Metropolis-Hastings birth-death-shift algorithm, alternating
+    Gibbs sampler). Also generates random spatial patterns of line segments, random tessellations, and random images (random noise, random mosaics). Excludes random generation on a linear network, which is covered by the separate package 'spatstat.linnet'.
+  license_family: GPL2
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-2
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-3
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r

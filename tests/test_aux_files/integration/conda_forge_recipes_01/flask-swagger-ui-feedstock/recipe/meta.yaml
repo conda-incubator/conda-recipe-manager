@@ -1,0 +1,42 @@
+{% set name = "flask-swagger-ui" %}
+{% set version = "4.11.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/flask-swagger-ui-{{ version }}.tar.gz
+  sha256: a370199a780d678b32e38f1be10d4d81efa0ee63e9fe2fb766ff1a4b6c37dac8
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.7
+  run:
+    - flask
+    - python >=3.7
+
+test:
+  imports:
+    - flask_swagger_ui
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/sveint/flask-swagger-ui
+  summary: Swagger UI blueprint for Flask
+  license: MIT
+  license_file: flask_swagger_ui/LICENSE
+
+extra:
+  recipe-maintainers:
+    - xhochy
+    - ukaratay

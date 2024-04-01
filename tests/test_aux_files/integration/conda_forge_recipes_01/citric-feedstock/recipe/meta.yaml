@@ -1,0 +1,43 @@
+{% set name = "citric" %}
+{% set version = "1.0.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/citric-{{ version }}.tar.gz
+  sha256: a874928ee6416eadfe6ccca28b6eb38dc6fd938db4066f1ba5f272b9c7c7642d
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  number: 0
+
+requirements:
+  host:
+    - python >=3.8
+    - hatch-vcs
+    - hatchling
+    - pip
+  run:
+    - python >=3.8
+    - requests >=2.23
+
+test:
+  imports:
+    - citric
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/edgarrmondragon/citric
+  summary: A client to the LimeSurvey Remote Control API 2, written in modern Python.
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - edgarrmondragon

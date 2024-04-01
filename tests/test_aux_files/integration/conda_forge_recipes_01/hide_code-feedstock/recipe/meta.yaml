@@ -1,0 +1,47 @@
+{% set name = "hide_code" %}
+{% set version = "0.7.0" %}
+{% set sha256 = "a2a2598dadd7b37b7bfe1b094db3168acdf7c28c371eeca26cbad3e6579d4771" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://pypi.io/packages/source/h/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  number: 1
+  skip: true  # [win or osx or py < 30]
+  script: |
+    set -ex
+    python setup.py install --single-version-externally-managed --record record.txt
+    jupyter nbextension install --py hide_code --sys-prefix
+
+requirements:
+  host:
+    - python
+    - setuptools
+    - notebook >=4.4.1,<7
+    - importlib-metadata  # [py<310]
+    - python-pdfkit
+  run:
+    - python
+    - notebook >=4.4.1,<7
+    - importlib-metadata  # [py<310]
+    - python-pdfkit
+
+test:
+  imports:
+    - hide_code
+
+about:
+  home: https://github.com/kirbs-/hide_code
+  license: MIT
+  license_file: hide_code/LICENSE
+  summary: Code, prompt and output hiding for Jupyter/IPython notebooks.
+
+extra:
+  recipe-maintainers:
+    - scopatz

@@ -1,0 +1,38 @@
+{% set name = "gnu-units" %}
+{% set version = "2.22" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://ftp.gnu.org/gnu/units/units-{{ version }}.tar.gz
+  sha256: 5d13e1207721fe7726d906ba1d92dc0eddaa9fc26759ed22e3b8d1a793125848
+
+build:
+  number: 0
+  skip: true  # [win]
+  script:
+    - ./configure --prefix={{ PREFIX }}
+    - make
+    - make check
+    - make install
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - make
+
+test:
+  commands:
+    - units m feet
+
+about:
+  home: https://www.gnu.org/software/units/
+  license: GPL-2.0-or-later
+  license_file: COPYING
+  summary: GNU Units converts quantities expressed in various systems of measurement to their equivalents in other systems of measurement
+
+extra:
+  recipe-maintainers:
+    - ngam

@@ -1,0 +1,65 @@
+{% set version = "3.2.9" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-oompabase
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/oompaBase_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/oompaBase/oompaBase_{{ version }}.tar.gz
+  sha256: 14ca2b8e713a6a7ce13758f7f5c183dbc4fdfedc4f1244ca31bbdadf8a16bcb2
+
+build:
+  merge_build_host: true  # [win]
+  number: 3
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+    - r-cluster
+  run:
+    - r-base
+    - r-cluster
+
+test:
+  commands:
+    - $R -e "library('oompaBase')"           # [not win]
+    - "\"%R%\" -e \"library('oompaBase')\""  # [win]
+
+about:
+  home: http://oompa.r-forge.r-project.org/
+  license: Apache-2.0
+  summary: Provides the class unions that must be preloaded in order for the basic tools in the OOMPA (Object-Oriented  Microarray and Proteomics Analysis) project to be defined and loaded. It also includes vectorized operations for row-by-row means, variances, and t-tests. Finally, it provides new color schemes. Details
+    on the packages in the OOMPA project can be found at <http://oompa.r-forge.r-project.org/>.
+  license_family: APACHE
+  license_file: LICENSE-2.0.txt
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+
+# Package: oompaBase
+# Version: 3.2.9
+# Date: 2019-08-19
+# Title: Class Unions, Matrix Operations, and Color Schemes for OOMPA
+# Author: Kevin R. Coombes
+# Maintainer: Kevin R. Coombes <krc@silicovore.com>
+# Depends: R (>= 3.0)
+# Imports: methods, graphics, grDevices, stats, cluster
+# Description: Provides the class unions that must be preloaded in order for the basic tools in the OOMPA (Object-Oriented  Microarray and Proteomics Analysis) project to be defined and loaded. It also includes vectorized operations for row-by-row means, variances, and t-tests. Finally, it provides new color schemes. Details on the packages in the OOMPA project can be found at <http://oompa.r-forge.r-project.org/>.
+# License: Apache License (== 2.0)
+# LazyLoad: yes
+# URL: http://oompa.r-forge.r-project.org/
+# NeedsCompilation: no
+# Packaged: 2019-08-24 09:52:53 UTC; Kevin Coombes
+# Repository: CRAN
+# Date/Publication: 2019-08-24 14:40:02 UTC

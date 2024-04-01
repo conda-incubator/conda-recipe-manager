@@ -1,0 +1,153 @@
+{% set name = "yarp" %}
+{% set namecxx = "libyarp" %}
+{% set namepython = "yarp-python" %}
+{% set version = "3.9.0" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/robotology/yarp/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: 3691c12a522e246ea506866df99a30b0d2c50d5c5efde602e7e207cd5dd7a4e2
+  patches:
+    - fixpypy.patch
+    - 2983.patch
+    - 3097.patch
+
+build:
+  number: 2
+
+outputs:
+  - name: {{ namecxx }}
+    script: build_cxx.sh  # [unix]
+    script: bld_cxx.bat  # [win]
+    build:
+      run_exports:
+        - {{ pin_subpackage(namecxx, max_pin='x.x.x') }}
+    requirements:
+      build:
+        - {{ compiler('c') }}
+        - {{ compiler('cxx') }}
+        - cmake
+        - pkg-config
+        - ninja
+        - multisheller
+        - {{ cdt('mesa-libgl-devel') }}  # [linux]
+        - {{ cdt('mesa-dri-drivers') }}  # [linux]
+        - {{ cdt('libselinux') }}  # [linux]
+        - {{ cdt('libxdamage') }}  # [linux]
+        - {{ cdt('libxxf86vm') }}  # [linux]
+        - {{ cdt('libxext') }}  # [linux]
+        - {{ cdt('libxcb') }}  # [linux]
+        - {{ cdt('libxfixes') }}  # [linux]
+        - {{ cdt('libxau') }}  # [linux]
+        - {{ cdt('expat') }}  # [linux]
+        - ycm-cmake-modules
+
+      host:
+        - ace  # [not osx or not arm64]
+        - tinyxml
+        - eigen
+        - sdl
+        - sqlite
+        - libjpeg-turbo
+        - bash-completion  # [not win]
+        - libi2c  # [linux]
+        - robot-testing-framework
+        - xorg-libxfixes  # [linux]
+        - libpng
+        - libzlib
+        - soxr
+        - libedit  # [not win]
+        - libopencv
+        - portaudio
+        - qt-main
+        - ffmpeg
+
+      run:
+        # ycm and eigen are mentioned in the headers so needed when building
+        # against libyarp
+        - ycm-cmake-modules
+        - eigen
+
+    test:
+      commands:
+        - yarp help
+        - test -f ${PREFIX}/include/yarp/os/all.h  # [not win]
+        - test -f ${PREFIX}/lib/libYARP_os.so  # [linux]
+        - test -f ${PREFIX}/lib/libYARP_os.dylib  # [osx]
+        - test -f ${PREFIX}/lib/cmake/YARP_os/YARP_osConfig.cmake  # [not win]
+        - if not exist %PREFIX%\\Library\\include\\yarp\\os\\all.h exit 1  # [win]
+        - if not exist %PREFIX%\\Library\\lib\\YARP_os.lib exit 1  # [win]
+        - if not exist %PREFIX%\\Library\\bin\\YARP_os.dll exit 1  # [win]
+        - if not exist %PREFIX%\\Library\\lib\\cmake\\YARP_os\\YARP_osConfig.cmake exit 1  # [win]
+
+  - name: {{ namepython }}
+    script: build_py.sh  # [unix]
+    script: bld_py.bat  # [win]
+    requirements:
+      build:
+        - {{ compiler('c') }}
+        - {{ compiler('cxx') }}
+        - swig 4.1.1
+        - ninja
+        - cmake
+        - python                                 # [build_platform != target_platform]
+        - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+      host:
+        - {{ pin_subpackage(namecxx, exact=True) }}
+        - python
+        - pip
+        - openssl
+
+      run:
+        - {{ pin_subpackage(namecxx, exact=True) }}
+        - python
+        - numpy
+    test:
+      commands:
+        - test $(pip list | grep yarp | tr -s " " | grep $PKG_VERSION | wc -l) -eq 1  # [unix]
+        - pip check
+      requires:
+        - pip
+      imports:
+        - yarp
+
+  - name: {{ name }}
+    build:
+      run_exports:
+        - {{ pin_subpackage(namecxx, max_pin='x.x.x') }}
+    requirements:
+      run:
+        - {{ pin_subpackage(namecxx, exact=True) }}
+        - {{ pin_subpackage(namepython, max_pin='x.x.x') }}
+    test:
+      imports:
+        - yarp
+
+  - name: yarp-cxx
+    build:
+      run_exports:
+        - {{ pin_subpackage(namecxx, max_pin='x.x.x') }}
+    requirements:
+      run:
+        - {{ pin_subpackage(namecxx, exact=True) }}
+    test:
+      commands:
+        - yarp help
+
+about:
+  home: https://github.com/robotology/yarp
+  license: BSD-3-Clause AND MIT AND GPL-3.0-or-later
+  license_file:
+    - COPYING
+    - extern/thrift/LICENSES/BSD-3-Clause.txt
+    - extern/dirent/dirent/LICENSE
+    - extern/xmlrpcpp/xmlrpcpp/COPYING
+  summary: YARP is a library and toolkit for communication and device interfaces, used on everything from humanoids to embedded devices.
+
+
+extra:
+  recipe-maintainers:
+    - traversaro

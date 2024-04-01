@@ -1,0 +1,81 @@
+{% set name = "iDQ" %}
+{% set version = "0.6.3" %}
+{% set sha256 = "e8cb1b7ca35e73be8756faf8dfae94ab267c40bc0d6bbb3cf3899c9c76ae6f5d" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: http://software.igwn.org/lscsoft/source/{{ name }}-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.9
+    - setuptools
+    - setuptools-scm
+  run:
+    - dqsegdb2 >=1.0
+    - ezdag
+    - gpstime
+    - gwpy >=2.1
+    - gwtrigfind
+    - h5py >=2.2.1
+    - ligo-segments >=1.0.0
+    - ligo-scald >=0.8
+    - matplotlib-base >=2.0
+    - numpy >=1.7.1
+    - pluggy
+    - python >=3.9
+    - python-confluent-kafka >=0.11.5
+    - python-lal
+    - python-ldas-tools-framecpp
+    - python-ligo-lw
+    - scikit-learn >=0.18.2
+    - scipy >=0.12.1
+    - toml
+    - ujson
+    - xgboost
+
+test:
+  imports:
+    - idq
+  commands:
+    - idq-batch --help
+    - idq-calibrate --help
+    - idq-check_config --help
+    - idq-condor_batch --help
+    - idq-create-channel-list --help
+    - idq-evaluate --help
+    - idq-generate-vetoes --help
+    - idq-simtimeseries --help
+    - idq-stream --help
+    - idq-streaming_train --help
+    - idq-streaming_evaluate --help
+    - idq-streaming_calibrate --help
+    - idq-streaming_timeseries --help
+    - idq-streaming_report --help
+    - idq-target-times --help
+    - idq-timeseries --help
+    - idq-train --help
+    - idq-report --help
+
+about:
+  home: https://git.ligo.org/lscsoft/iDQ
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  doc_url: https://docs.ligo.org/lscsoft/iDQ
+  dev_url: https://git.ligo.org/lscsoft/iDQ
+  summary: a low-latency statistical data quality pipeline for glitch detection
+
+extra:
+  recipe-maintainers:
+    - myNameIsPatrick

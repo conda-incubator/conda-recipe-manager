@@ -1,0 +1,56 @@
+{% set version = "2023.0.1" %}
+
+package:
+  name: lsprotocol
+  version: {{ version }}
+
+source:
+  - folder: dist
+    url: https://pypi.io/packages/source/l/lsprotocol/lsprotocol-{{ version }}.tar.gz
+    sha256: cc5c15130d2403c18b734304339e51242d3018a05c4f7d0f198ad6e0cd21861d
+  - folder: src
+    url: https://github.com/microsoft/lsprotocol/archive/refs/tags/{{ version }}.tar.gz
+    sha256: 0697ef66ca1b547cadb4c27080d6095c2e403b9aeb05401de383126a70720a56
+
+build:
+  noarch: python
+  script: cd dist && {{ PYTHON }} -m pip install . -vv --no-build-isolation --no-deps
+  number: 0
+
+requirements:
+  host:
+    - flit-core >=3.2,<4
+    - pip
+    - python >=3.7
+  run:
+    - attrs >=21.3.0
+    - cattrs !=23.2.1
+    - python >=3.7
+
+test:
+  source_files:
+    - src/conftest.py
+    - src/tests
+    - src/generator
+  imports:
+    - lsprotocol
+  commands:
+    - pip check
+    - cd src && pytest ./tests -vv --cov=lsprotocol --cov-branch --cov-report=term-missing:skip-covered --no-cov-on-fail --cov-fail-under=91
+  requires:
+    - pyhamcrest
+    - importlib_resources
+    - jsonschema
+    - pip
+    - pytest-cov
+
+about:
+  home: https://pypi.org/project/lsprotocol
+  summary: Python implementation of the Language Server Protocol.
+  dev_url: https://github.com/microsoft/lsprotocol
+  license: MIT
+  license_file: dist/LICENSE
+
+extra:
+  recipe-maintainers:
+    - bollwyvl

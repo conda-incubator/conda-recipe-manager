@@ -1,0 +1,46 @@
+{% set name = "types-aiobotocore-cloudformation" %}
+{% set version = "2.12.1" %}
+{% set lib_version = version.split(".post")[0] %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 6433f064856d6068cc5581a1c11a87843810b8644c3e6f670d27f7c97c870e28
+
+build:
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+  noarch: python
+
+requirements:
+  host:
+    - python >=3.7
+    - pip
+  run:
+    - python >=3.7
+    - aiobotocore
+    - typing_extensions
+
+test:
+  imports:
+    - types_aiobotocore_cloudformation
+  requires:
+    - pip
+  commands:
+    - pip check
+
+about:
+  home: https://github.com/youtype/mypy_boto3_builder
+  summary: Type annotations for aiobotocore.CloudFormation {{ lib_version }} service generated with mypy-boto3-builder
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  doc_url: https://youtype.github.io/types_aiobotocore_docs/
+  dev_url: https://github.com/youtype/mypy_boto3_builder
+
+extra:
+  recipe-maintainers:
+    - vemel

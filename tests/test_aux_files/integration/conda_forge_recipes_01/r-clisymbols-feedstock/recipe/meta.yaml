@@ -1,0 +1,48 @@
+{% set version = "1.2.0" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-clisymbols
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/clisymbols_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/clisymbols/clisymbols_{{ version }}.tar.gz
+  sha256: 0649f2ce39541820daee3ed408d765eddf83db5db639b493561f4e5fbf88efe0
+
+build:
+  merge_build_host: true  # [win]
+  number: 1005
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+  run:
+    - r-base
+
+test:
+  commands:
+    - $R -e "library('clisymbols')"           # [not win]
+    - "\"%R%\" -e \"library('clisymbols')\""  # [win]
+
+about:
+  home: https://github.com/gaborcsardi/clisymbols
+  license: MIT
+  summary: A small subset of Unicode symbols, that are useful when building command line applications. They fall back to alternatives on terminals that do not support Unicode. Many symbols were taken from the 'figures' 'npm' package (see <https://github.com/sindresorhus/figures>).
+  license_family: MIT
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/MIT
+    - LICENSE
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+    - roryk

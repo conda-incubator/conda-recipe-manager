@@ -1,0 +1,61 @@
+{% set version = "2.1.0" %}
+
+package:
+  name: ecell4_base
+  version: {{ version }}
+
+source:
+  - url: https://github.com/ecell/ecell4_base/releases/download/v{{ version }}/ecell4_base.tar.gz
+    sha256: 98ed3baa1558c41d836541830ab662fe176e7be7a7dd9962ef8591f0b56e5a4b
+    patches:
+      - patches/0001-Remove-A.patch
+      - patches/0002-workaround-the-link-error-around-clock_gettime.patch
+
+build:
+  number: 7
+  skip: true  # [python_impl == 'pypy']
+
+requirements:
+  build:
+    - {{ compiler('cxx') }}
+    - cmake
+    - make  # [unix]
+    - ninja  # [win]
+  host:
+    - python
+    - setuptools
+    - pip
+    - pybind11
+    - hdf5
+    - gsl
+    - libboost-headers
+    - zlib
+  run:
+    - gsl
+    - python
+
+test:
+  imports:
+    - ecell4_base.core
+    - ecell4_base.bd
+    - ecell4_base.egfrd
+    - ecell4_base.gillespie
+    - ecell4_base.meso
+    - ecell4_base.ode
+    - ecell4_base.sgfrd
+    - ecell4_base.spatiocyte
+
+about:
+  home: https://github.com/ecell/ecell4_base
+  license: GPL-3.0-or-later
+  license_family: GPL
+  license_file: LICENSE
+  summary: An integrated software environment for multi-algorithm, multi-timescale, multi-spatial-representation simulation
+
+extra:
+  recipe-maintainers:
+    - kozo2
+    - ToruNiina
+    - 0ncorhynchus
+    - YukiSakamoto
+    

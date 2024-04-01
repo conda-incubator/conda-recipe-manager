@@ -1,0 +1,54 @@
+{% set version = "1.1.0" %}
+
+package:
+  name: trustme
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/t/trustme/trustme-{{ version }}.tar.gz
+  sha256: 5375ad7fb427074bec956592e0d4ee2a4cf4da68934e1ba4bcf4217126bc45e6
+
+build:
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  noarch: python
+
+requirements:
+  host:
+    - pip
+    - python >=3.8
+  run:
+    - cryptography >=3.1
+    - idna >=2.0
+    - python >=3.8
+
+test:
+  source_files:
+    - tests
+  imports:
+    - trustme
+  commands:
+    - pip check
+    - pytest --cov=trustme --cov-branch --cov-report=term-missing:skip-covered --no-cov-on-fail --cov-fail-under=98
+  requires:
+    - pip
+    - pytest
+    - pytest-cov
+    - pyopenssl
+    - service_identity
+    # probably not used by newer service-identity
+    - six
+
+about:
+  home: https://github.com/python-trio/trustme
+  summary: '#1 quality TLS certs while you wait, for the discerning tester'
+  license: Apache-2.0 or MIT
+  license_file:
+    - LICENSE.MIT
+    - LICENSE.APACHE2
+  doc_url: https://trustme.readthedocs.io
+  doc_source_url: https://github.com/python-trio/trustme/tree/v{{ version }}/docs
+
+extra:
+  recipe-maintainers:
+    - bollwyvl

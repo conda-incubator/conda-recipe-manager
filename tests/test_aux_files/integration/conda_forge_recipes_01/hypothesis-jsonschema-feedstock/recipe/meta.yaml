@@ -1,0 +1,43 @@
+{% set version = "0.23.1" %}
+
+package:
+  name: hypothesis-jsonschema
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/h/hypothesis-jsonschema/hypothesis-jsonschema-{{ version }}.tar.gz
+  sha256: f4ac032024342a4149a10253984f5a5736b82b3fe2afb0888f3834a31153f215
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+
+requirements:
+  host:
+    - pip
+    - python >=3.8
+  run:
+    - hypothesis >=6.84.3
+    - jsonschema >=4.18.0
+    - python >=3.8
+
+test:
+  requires:
+    - pip
+  imports:
+    - hypothesis_jsonschema
+  commands:
+    - pip check
+
+about:
+  home: https://pypi.org/project/hypothesis-jsonschema/
+  license: MPL-2.0
+  license_family: MOZILLA
+  license_file: LICENSE
+  summary: Tools to generate test data from JSON schemata with Hypothesis
+  dev_url: https://github.com/python-jsonschema/hypothesis-jsonschema
+
+extra:
+  recipe-maintainers:
+    - bollwyvl

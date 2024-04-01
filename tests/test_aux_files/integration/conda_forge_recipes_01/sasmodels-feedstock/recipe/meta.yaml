@@ -1,0 +1,45 @@
+{% set name = "sasmodels" %}
+{% set version = "1.0.7" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: ac9127c525b88f9731cd325b05c21f29f45371ba31095df8e207fd56553124c0
+
+build:
+  number: 0
+  script: '{{ PYTHON }} -m pip install . --no-deps --ignore-installed -vvv '
+  noarch: python
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+  run:
+    - python >=3.6
+    - bumps
+    - numpy
+    - pyopencl
+    - scipy
+
+test:
+  imports:
+    - sasmodels
+    - sasmodels.custom
+    - sasmodels.models
+
+about:
+  home: http://www.sasview.org
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE.txt
+  summary: Package for calculation of small angle scattering models using OpenCL
+  dev_url: https://github.com/SasView/sasmodels
+
+extra:
+  recipe-maintainers:
+    - tschoonj
+    - mrakitin

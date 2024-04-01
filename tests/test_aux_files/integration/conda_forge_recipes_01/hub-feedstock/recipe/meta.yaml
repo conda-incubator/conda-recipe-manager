@@ -1,0 +1,67 @@
+{% set goname = "github.com/github/hub" %}
+{% set version = "2.14.2" %}
+
+{% set name = goname.split('/')[-1] %}
+{% set pkg_src = ('src/'+goname).replace("/",os.sep) %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://{{ goname }}/archive/v{{ version }}.tar.gz
+  sha256: e19e0fdfd1c69c401e1c24dd2d4ecf3fd9044aa4bd3f8d6fd942ed1b2b2ad21a
+
+build:
+  number: 2
+
+requirements:
+  build:
+    - {{ compiler('go') }}
+
+test:
+  commands:
+    - hub version
+
+outputs:
+  - name: {{ name }}
+    files:
+      - bin/hub{{ target_goexe }}
+      - etc/bash_completion.d/hub.sh  # [unix]
+      - Library/etc/bash_completion.d/hub.sh  # [win]
+
+  - name: {{ name }}-alias
+    script: alias/build.sh  # [unix]
+    script: alias/build.bat  # [win]
+    requirements:
+      run:
+        - {{ pin_subpackage(name, exact=True) }}
+    test:
+      script: alias/test.sh  # [unix]
+      script: alias/test.bat  # [win]
+    about:
+      home: https://github.com/conda-forge/hub-feedstock
+      license: BSD-3-Clause
+      license_family: BSD
+      summary: hub's aliasing scripts
+      description: |
+        This package installs conda's (de)activate aliasing `git` to `hub`
+
+
+about:
+  home: https://github.com/github/hub
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: git + hub = github
+
+  description: |
+    hub is a command line tool that wraps git in order to extend it with
+    extra features and commands that make working with GitHub easier.
+  dev_url: https://github.com/github/hub
+
+extra:
+  recipe-maintainers:
+    - matthiasdiener
+    - sodre
+    - ngam

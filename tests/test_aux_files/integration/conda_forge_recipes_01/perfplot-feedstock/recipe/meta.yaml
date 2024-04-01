@@ -1,0 +1,53 @@
+{% set name = "perfplot" %}
+{% set version = "0.10.2" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/perfplot-{{ version }}.tar.gz
+  sha256: d76daa72334564b5c8825663f24d15db55ea33e938b34595a146e5e44ed87e41
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.7
+    - flit-core
+    - matplotlib-base
+    - matplotx
+    - numpy >=1.20
+    - python
+    - rich
+    - typing_extensions
+  run:
+    - matplotlib-base
+    - matplotx
+    - numpy >=1.20
+    - python >=3.7
+    - rich
+    - typing_extensions
+
+test:
+  imports:
+    - perfplot
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/nschloe/perfplot
+  summary: Performance plots for Python code snippets
+  license: GPL-3.0-only
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - izahn

@@ -1,0 +1,42 @@
+{% set name = "jive" %}
+{% set version = "7.41" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://gitlab.com/tango-controls/jive/-/archive/{{ version }}/jive-{{ version }}.tar.gz
+  sha256: c25907e0887ba3ca96084d049ae797e184a638d2c57a6bda43e093782e4f8603
+
+build:
+  number: 0
+
+requirements:
+  build:
+    - openjdk 17
+    - maven
+  run:
+    - openjdk >=17
+
+test:
+  commands:
+    - jive -h
+    - test -f ${PREFIX}/share/java/Jive.jar             # [unix]
+    - test -f ${PREFIX}/bin/jive                        # [unix]
+    - if not exist %PREFIX%\share\java\Jive.jar exit 1  # [win]
+    - if not exist %PREFIX%\Scripts\jive.bat exit 1     # [win]
+
+about:
+  home: https://www.tango-controls.org
+  license: GPL-3.0-or-later
+  license_file:
+    - LICENSE
+    - aggregate-third-party-report.html
+  summary: Jive is a standalone JAVA application designed to browse and edit the static TANGO database.
+  dev_url: https://gitlab.com/tango-controls/jive
+  doc_url: https://tango-controls.readthedocs.io/en/latest/tools-and-extensions/built-in/jive/index.html
+
+extra:
+  recipe-maintainers:
+    - beenje

@@ -1,0 +1,48 @@
+{% set version = "0.3.19" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-inline
+  version: {{ version|replace("-", "_") }}
+
+source:
+  fn: inline_{{ version }}.tar.gz
+  url:
+    - {{ cran_mirror }}/src/contrib/inline_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/inline/inline_{{ version }}.tar.gz
+  sha256: 0ee9309bb7dab0b97761ddd18381aa12bd7d54678ccd7bec00784e831f4c99d5
+
+build:
+  merge_build_host: true  # [win]
+  number: 2
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+  run:
+    - r-base
+
+test:
+  commands:
+    - $R -e "library('inline')"           # [not win]
+    - "\"%R%\" -e \"library('inline')\""  # [win]
+
+about:
+  home: https://CRAN.R-project.org/package=inline
+  license: LGPL-2.0-or-later
+  summary: Functionality to dynamically define R functions and S4 methods with 'inlined' C, C++ or Fortran code supporting the .C and .Call calling conventions.
+  license_family: LGPL
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/LGPL-3
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+    - croth1

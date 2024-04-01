@@ -1,0 +1,48 @@
+{% set version = "0.6.2" %}
+{% set name = "gfan" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}{{ version }}.tar.gz
+  url: http://home.math.au.dk/jensen/software/gfan/gfan{{ version }}.tar.gz
+  sha256: a674d5e5dc43634397de0d55dd5da3c32bd358d05f72b73a50e62c1a1686f10a
+  patches:
+    # Patches taken from https://github.com/sagemath/sage
+    - patches/nodel.patch
+    # patch Makefile to use CXXFLAGS, LDFLAGS, etc.
+    - patches/Makefile.patch
+
+build:
+  number: 1003
+  skip: true  # [win]
+
+requirements:
+  build:
+    - {{ compiler('cxx') }}
+    - make
+    - gfan  # [build_platform != target_platform]
+  host:
+    - gmp
+    - cddlib
+  run:
+    - gmp
+    - cddlib
+
+test:
+  commands:
+    - test -f ${PREFIX}/bin/gfan
+
+about:
+  home: http://home.math.au.dk/jensen/software/gfan/gfan.html
+  license: GPL-2.0-or-later
+  license_file: COPYING
+  summary: Gfan is a software package for computing Gröbner fans and tropical varieties
+  doc_url: http://home.math.au.dk/jensen/software/gfan/gfanmanual0.5.pdf
+
+extra:
+  recipe-maintainers:
+    - isuruf
+    - saraedum

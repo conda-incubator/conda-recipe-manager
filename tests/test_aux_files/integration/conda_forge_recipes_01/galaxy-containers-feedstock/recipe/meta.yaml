@@ -1,0 +1,51 @@
+{% set version = "22.1.1" %}
+{% set sha256 = "41e0003b18e580175d443cf21e9c2d2eb21a265c012164f7255cdb0c03a76334" %}
+{% set galaxy_version = version.split(".")[:2]|join(".") %}
+
+package:
+  name: galaxy-containers
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/g/galaxy-containers/galaxy-containers-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+    # Depend on galaxy-util during build time to avoid packaging galaxy/__init__.py .
+    - galaxy-util >={{ galaxy_version }}
+  run:
+    - galaxy-util >={{ galaxy_version }}
+    - typing_extensions
+    - importlib_resources
+    - python >=3.6
+    - requests
+
+test:
+  imports:
+    - galaxy
+    - galaxy.containers
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://galaxyproject.org
+  license: AFL-3.0
+  license_file: LICENSE
+  summary: Galaxy Container Modeling and Interaction Abstractions
+  doc_url: https://docs.galaxyproject.org
+  dev_url: https://github.com/galaxyproject/galaxy
+
+extra:
+  recipe-maintainers:
+    - nsoranzo
+    - bgruening

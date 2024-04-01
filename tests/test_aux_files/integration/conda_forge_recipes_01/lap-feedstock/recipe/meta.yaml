@@ -1,0 +1,41 @@
+{% set version = "0.4.0" %}
+
+package:
+  name: lap
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/l/lap/lap-{{ version }}.tar.gz
+  sha256: c4dad9976f0e9f276d8a676a6d03632c3cb7ab7c80142e3b27303d49f0ed0e3b
+
+build:
+  number: 1005
+  script: "{{ PYTHON }} -m pip install . --no-deps -vv"
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+  host:
+    - python
+    - pip
+    - numpy
+  run:
+    - python
+    - {{ pin_compatible('numpy') }}
+
+test:
+  imports:
+    - lap
+
+about:
+  home: https://github.com/gatagat/lap
+  license: BSD-2-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: 'Linear Assignment Problem solver (LAPJV/LAPMOD)'
+  dev_url: https://github.com/gatagat/lap
+
+extra:
+  recipe-maintainers:
+    - primozgodec

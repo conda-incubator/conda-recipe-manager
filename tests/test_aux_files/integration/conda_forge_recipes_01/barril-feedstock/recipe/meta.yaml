@@ -1,0 +1,53 @@
+{% set name = "barril" %}
+{% set version = "2.0.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: f344dacf795d3410c8191f585eba663bb85d0db1f1db6a6348b52fa9ecb52f7f
+
+build:
+  noarch: python
+  number: 0
+  script: '{{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv '
+
+requirements:
+  host:
+    - pip
+    - python >=3.8
+    - setuptools_scm
+  run:
+    - attrs >=18.1.0
+    - numpy >=1.11.0
+    - oop-ext >=1.1
+    - python >=3.8
+    - typing_extensions
+
+test:
+  imports:
+    - barril
+  requires:
+    - pytest
+    - pytest-mock
+  commands:
+    - pytest --pyargs barril
+
+about:
+  home: https://github.com/ESSS/barril
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: Python package to manage units for physical quantities
+
+extra:
+  recipe-maintainers:
+    - igortg
+    - kfasolin
+    - lincrosenbach
+    - nicoddemus
+    - tadeu
+    - jaimeambrus
+    - williamjamir

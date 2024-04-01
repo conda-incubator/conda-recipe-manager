@@ -1,0 +1,63 @@
+{% set name = "ibis-vega-transform" %}
+{% set version = "5.3.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/Quansight/{{ name }}/archive/{{ version }}.tar.gz
+  sha256: 92a1971682d12b26dd64e77f14c5805e1c2ed0bed0d41f2a09e10366eaad0152
+
+build:
+  noarch: python
+  number: 0
+  script: "{{ PYTHON }} -m pip install --no-deps -vv ."
+
+requirements:
+  host:
+    - jupyterlab 3.*
+    - jupyter-packaging 0.7.9
+    - nodejs >=12
+    - pip
+    - python >=3.7,<3.9
+    - setuptools >=46.4.0
+  run:
+    - altair >=4.0.0
+    - altair-transform
+    - graphviz
+    - ibis-framework >=1.3.0
+    - jaeger
+    - jaeger-client
+    - jupyterlab 3.*
+    - jupyter-jaeger >=1.0.4
+    - jupyterlab_server
+    - mypy_extensions
+    - nodejs >=12
+    - nbclassic =>0.2
+    - notebook
+    - opentracing
+    - pymapd >=0.24
+    - python >=3.7,<3.9
+    - sqlalchemy <1.4
+    - tornado
+    - typing_extensions
+
+test:
+  imports:
+    - ibis_vega_transform
+  commands:
+    - jupyter labextension list 2>&1 | grep -ie "ibis-vega-transform.*OK"
+
+about:
+  home: https://github.com/Quansight/ibis-vega-transform
+  license: Apache-2.0
+  license_family: APACHE
+  license_file: LICENSE.txt
+  summary: Python evaluation of Vega transforms using Ibis expressions
+  dev_url: https://github.com/Quansight/ibis-vega-transform
+
+extra:
+  recipe-maintainers:
+    - scopatz
+    - xmnlab

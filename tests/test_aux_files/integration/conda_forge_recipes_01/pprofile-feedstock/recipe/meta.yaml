@@ -1,0 +1,42 @@
+{% set name = "pprofile" %}
+{% set version = "2.0.2" %}
+{% set sha256 = "3469102f462f9fc2d889970afcf73d89c0d89a36c49a4c262c3edc302b4a22da" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  number: 1001
+  script: "{{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv"
+  entry_points:
+    - pprofile = pprofile:main
+
+requirements:
+  host:
+    - python
+    - pip
+  run:
+    - python
+
+test:
+  imports:
+    - pprofile
+    - zpprofile
+  commands:
+    - pprofile --help
+
+about:
+  home: http://github.com/vpelletier/pprofile
+  license: GPL-2.0-or-later
+  license_file: COPYING
+  summary: Line-granularity, thread-aware deterministic and statistic pure-python profiler
+
+extra:
+  recipe-maintainers:
+    - jakirkham

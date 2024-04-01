@@ -1,0 +1,45 @@
+{% set name = "rjsmin" %}
+{% set version = "1.2.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/rjsmin-{{ version }}.tar.gz
+  sha256: 8c1bcd821143fecf23242012b55e13610840a839cd467b358f16359010d62dae
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+  host:
+    - python >=3.8
+    - pip
+  run:
+    - python >=3.8
+
+test:
+  imports:
+    - rjsmin
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/ndparker/rjsmin
+  summary: Javascript Minifier
+  license: Apache-2.0
+  license_family: Apache
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - cshaley
+    - sannykr
+    - rxm7706

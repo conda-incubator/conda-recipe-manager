@@ -1,0 +1,40 @@
+{% set name = "diskcache" %}
+{% set version = "5.6.3" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 2c3a3fa2743d8535d832ec61c2054a1641f41775aa7c556758a109941e33e4fc
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - python >=3.5
+    - pip
+  run:
+    - python >=3.5
+
+test:
+  imports:
+    - diskcache
+
+about:
+  home: http://www.grantjenks.com/docs/diskcache/
+  license_file: LICENSE
+  license: Apache-2.0
+  license_family: Apache
+  summary: Disk and file backed cache.
+  dev_url: https://github.com/grantjenks/python-diskcache
+  doc_url: http://www.grantjenks.com/docs/diskcache/
+
+extra:
+  recipe-maintainers:
+    - pmlandwehr
+    - xhochy

@@ -1,0 +1,82 @@
+{% set name = "aim" %}
+{% set version = "3.17.4" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/aim-{{ version }}.tar.gz
+  sha256: fdc79e8d0bbae0fdb56b835f8f9efa499ee3ce45a49bfad8681194447078fa44
+
+build:
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+  # NOTE(hadim): windows is not available because of aimrocks missing there
+  skip: true  # [win]
+
+requirements:
+  build:
+    - python                                    # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}        # [build_platform != target_platform]
+    - cython ==3.0.*                            # [build_platform != target_platform]
+    - aimrocks ==0.4.0                          # [build_platform != target_platform]
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - make  # [unix]
+  host:
+    - python
+    - pip
+    - cython ==3.0.*
+    - aimrocks ==0.4.0
+  run:
+    # Sync deps with https://github.com/aimhubio/aim/blob/v3.16.0/setup.py
+    - python
+    - aim-ui =={{ version }}
+    - aimrecords ==0.0.7
+    - aimrocks ==0.4.0
+    - cachetools >=4.0.0
+    - click >=7.0
+    - cryptography >=3.0
+    - filelock >=3.3.0,<4
+    - numpy >=1.12.0,<2
+    - psutil >=5.6.7
+    - py3nvml >=0.2.5
+    - RestrictedPython >=5.1
+    - tqdm >=4.20.0
+    - aiofiles >=0.5.0
+    - alembic >=1.5.0,<2
+    - fastapi >=0.69.0,<1
+    - jinja2 >=2.10.0,<4
+    - pytz >=2019.1
+    - SQLAlchemy >=1.4.1,<2
+    - uvicorn >=0.12.0,<1
+    - Pillow >=8.0.0
+    - protobuf >=3.9.2,<5
+    - packaging >=15.0
+    - python-dateutil
+    - requests
+    - grpcio >=1.42.0
+    - analytics-python >=2.2.2
+
+test:
+  imports:
+    - aim
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/aimhubio/aim
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: A super-easy way to record, search and compare 1000s of ML training runs
+  dev_url: https://github.com/aimhubio/aim
+
+extra:
+  recipe-maintainers:
+    - gorarakelyan
+    - psortos
+    - mxr-conda

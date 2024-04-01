@@ -1,0 +1,63 @@
+{% set name = "diffusers" %}
+{% set version = "0.27.1" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/diffusers-{{ version }}.tar.gz
+  sha256: 0c3632cfbb0ae29e22c6160cf8bc977afecdfe66eebe6a6bbb100c58742136ff
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - python >=3.6
+    - filelock
+    - huggingface_hub
+    - importlib-metadata
+    - numpy
+    - pillow
+    - regex !=2019.12.17
+    - requests
+    - pytorch >=1.4
+    - safetensors
+
+test:
+  imports:
+    - diffusers
+    - diffusers.models
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/huggingface/diffusers
+  summary: Diffusers
+  license: Apache-2.0
+  license_file: LICENSE
+  description: |
+    :hugs: Diffusers provides pretrained diffusion models across multiple modalities, 
+    such as vision and audio, and serves as a modular toolbox for inference and 
+    training of diffusion models.
+
+    PyPI: [https://pypi.org/project/diffusers/](https://pypi.org/project/diffusers/)
+
+  doc_url: https://github.com/huggingface/diffusers
+  dev_url: https://github.com/huggingface/diffusers
+
+extra:
+  recipe-maintainers:
+    - sugatoray
+    # maintainers from upstream repo
+    - anton-l
+    - patrickvonplaten

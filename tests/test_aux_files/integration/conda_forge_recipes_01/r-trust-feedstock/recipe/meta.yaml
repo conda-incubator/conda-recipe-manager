@@ -1,0 +1,47 @@
+{% set version = "0.1-8" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-trust
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/trust_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/trust/trust_{{ version }}.tar.gz
+  sha256: 952e348b62aec35988b103fd152329662cb6a451538f184549252fbf49d7dcac
+
+build:
+  noarch: generic
+  number: 3
+
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  host:
+    - r-base
+  run:
+    - r-base
+
+test:
+  commands:
+    - $R -e "library('trust')"           # [not win]
+    - "\"%R%\" -e \"library('trust')\""  # [win]
+
+about:
+  home: http://www.stat.umn.edu/geyer/trust/
+  license: MIT
+  license_file: 
+    - LICENSE 
+    - COPYING 
+  summary: Does local optimization using two derivatives and trust regions. Guaranteed to converge
+    to local minimum of objective function.
+  license_family: MIT
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+    - stevierene82

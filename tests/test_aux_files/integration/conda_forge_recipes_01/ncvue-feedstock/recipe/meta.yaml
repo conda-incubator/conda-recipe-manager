@@ -1,0 +1,68 @@
+{% set name = "ncvue" %}
+{% set version = "4.4.1" %}
+{% set sha256 = "f577f2459ea06e8d28e391a7e8e5250a645d7fdbd1af1794b703a192ff020652" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/ncvue-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  number: 0
+  noarch: python
+  entry_points:
+    - ncvue = ncvue.__main__:main
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.8
+    - pip
+    - setuptools >=42
+    - setuptools_scm >=3.5
+  run:
+    - python >=3.8
+    - numpy
+    - matplotlib-base
+    - netcdf4
+    - cartopy
+    - __linux  # [linux]
+    - __osx    # [osx]
+    - __win    # [win]
+    - tk       # [linux]
+
+test:
+  imports:
+    - ncvue  # [not linux]
+  commands:
+    - xvfb-run --auto-servernum python -c "import ncvue"  # [linux]
+
+app:
+  entry: python -m ncvue
+  icon: ncvue_icon.png
+  summary: ncvue - a minimal GUI for a quick view of netcdf files
+  type: desk
+  own_environment: true
+
+about:
+  home: https://github.com/mcuntz/ncvue
+  summary: 'A minimal GUI for a quick view of netcdf files'
+  dev_url: https://github.com/mcuntz/ncvue
+  license: MIT
+  license_file: LICENSE
+  description: |
+    ncvue is a minimal GUI for a quick view of netCDF files. It is aiming to
+    be a drop-in replacement for ncview and panoply, being slightly more
+    general than ncview targeting only maps but providing animations, zooming
+    and panning capabilities unlike panoply. If ncvue is used with maps,
+    it supports mostly structured grids, more precisely the grids supported by
+    cartopy.
+  doc_url: https://mcuntz.github.io/ncvue
+
+extra:
+  recipe-maintainers:
+    - mcuntz

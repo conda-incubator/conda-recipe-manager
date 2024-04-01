@@ -1,0 +1,42 @@
+{% set version = "0.5.2" %}
+
+package:
+  name: missingno
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/m/missingno/missingno-{{ version }}.tar.gz
+  sha256: 4a4baa9ca9f9e4e0d9402455df26b656632e94b99e87fa64c0cdbbbc722837ac
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+  run:
+    - python >=3.6
+    - numpy
+    - scipy
+    - pandas
+    - matplotlib-base
+    - seaborn
+
+test:
+  imports:
+    - missingno
+
+about:
+  home: https://github.com/ResidentMario/missingno
+  license: MIT
+  license_family: MIT
+  license_file: {{ environ["RECIPE_DIR"] }}/LICENSE
+  summary: Missing data visualization module for Python.
+
+extra:
+  recipe-maintainers:
+    - vasudevanv
+    - ericmjl

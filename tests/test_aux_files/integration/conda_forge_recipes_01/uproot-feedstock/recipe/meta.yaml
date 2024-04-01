@@ -1,0 +1,81 @@
+{% set name = "uproot" %}
+{% set version = "5.3.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 3a627eb7a61ed7c074f32985d255cc86269c159ac3b4378cb42186d1c377e95f
+
+build:
+  number: 0
+
+outputs:
+  - name: uproot-base
+    build:
+      noarch: python
+      script:
+        - python -m pip install . --no-deps -vv
+    requirements:
+      host:
+        - python >=3.8
+        - hatchling >1.10.0
+        - pip
+      run:
+        - python >=3.8
+        - numpy
+        - packaging
+        - awkward >=2.4.6
+        - fsspec
+        - cramjam >=2.5.0
+        - typing_extensions >=4.1.0
+    test:
+      imports:
+        - uproot
+        - uproot.behaviors
+      commands:
+        - pip check
+      requires:
+        - pip
+
+  - name: uproot
+    build:
+      noarch: python
+
+    requirements:
+      run:
+        - {{ pin_subpackage('uproot-base', exact=True) }}
+        # Compression
+        - python-xxhash
+        # Other common requirements
+    test:
+      imports:
+        - uproot
+        - uproot.behaviors
+
+about:
+  home: https://github.com/scikit-hep/uproot5
+  license: BSD-3-Clause
+  license_file: LICENSE
+  summary: ROOT I/O in pure Python and NumPy.
+  description: |
+    uproot (originally μproot, for "micro-Python ROOT") is a reader and a writer
+    of the ROOT file format using only Python and Numpy. Unlike the standard C++
+    ROOT implementation, uproot is only an I/O library, primarily intended to
+    stream data into machine learning libraries in Python. Unlike PyROOT and
+    root_numpy, uproot does not depend on C++ ROOT. Instead, it uses Numpy calls
+    to rapidly cast data blocks in the ROOT file as Numpy arrays.
+  dev_url: https://github.com/scikit-hep/uproot5
+  doc_url: https://uproot.readthedocs.io/en/latest/
+
+extra:
+  recipe-maintainers:
+    - lgray
+    - chrisburr
+    - jpivarski
+    - henryiii
+    - agoose77
+    - ioanaif
+    - conda-forge/scikit-hep

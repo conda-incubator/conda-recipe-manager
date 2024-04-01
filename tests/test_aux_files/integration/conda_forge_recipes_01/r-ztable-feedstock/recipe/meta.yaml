@@ -1,0 +1,60 @@
+{% set version = "0.2.3" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-ztable
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/ztable_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/ztable/ztable_{{ version }}.tar.gz
+  sha256: 4896d984c06d5174e4c74fb1b673d0ceb1e16797731995c1059a2006418f47df
+
+build:
+  merge_build_host: true  # [win]
+  number: 2
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+    - r-rcolorbrewer
+    - r-flextable
+    - r-magrittr
+    - r-officer
+    - r-rstudioapi
+    - r-scales
+    - r-stringr
+  run:
+    - r-base
+    - r-rcolorbrewer
+    - r-flextable
+    - r-magrittr
+    - r-officer
+    - r-rstudioapi
+    - r-scales
+    - r-stringr
+
+test:
+  commands:
+    - $R -e "library('ztable')"           # [not win]
+    - "\"%R%\" -e \"library('ztable')\""  # [win]
+
+about:
+  home: http://github.com/cardiomoon/ztable
+  license: GPL-2.0-only
+  summary: Makes zebra-striped tables (tables with alternating row colors) in LaTeX and HTML formats easily from a data.frame, matrix, lm, aov, anova, glm, coxph, nls, fitdistr, mytable and cbind.mytable objects.
+  license_family: GPL2
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-2
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r

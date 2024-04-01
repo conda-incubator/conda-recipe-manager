@@ -1,0 +1,78 @@
+{% set version = '0.0-3' %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-assertive.data
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/assertive.data_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/assertive.data/assertive.data_{{ version }}.tar.gz
+  sha256: 5a00fb48ad870d9b3c872ce3d6aa20a7948687a980f49fe945b455339e789b01
+
+build:
+  merge_build_host: True  # [win]
+  number: 4
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+    - r-assertive.base >=0.0_2
+    - r-assertive.strings
+  run:
+    - r-base
+    - r-assertive.base >=0.0_2
+    - r-assertive.strings
+
+test:
+  commands:
+    - $R -e "library('assertive.data')"           # [not win]
+    - "\"%R%\" -e \"library('assertive.data')\""  # [win]
+
+about:
+  home: https://bitbucket.org/richierocks/assertive.data
+  license: GPL-3.0-or-later
+  summary: A set of predicates and assertions for checking the properties of (country independent)
+    complex data types.  This is mainly for use by other package developers who want
+    to include run-time testing features in their own packages.  End-users will usually
+    want to use assertive directly.
+  license_family: GPL3
+  license_file: '{{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-3'
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+    - jenzopr
+
+# Package: assertive.data
+# Type: Package
+# Title: Assertions to Check Properties of Data
+# Version: 0.0-3
+# Date: 2018-11-20
+# Author: Richard Cotton [aut, cre]
+# Maintainer: Richard Cotton <richierocks@gmail.com>
+# Authors@R: person("Richard", "Cotton", role = c("aut", "cre"), email = "richierocks@gmail.com")
+# Description: A set of predicates and assertions for checking the properties of (country independent) complex data types.  This is mainly for use by other package developers who want to include run-time testing features in their own packages.  End-users will usually want to use assertive directly.
+# URL: https://bitbucket.org/richierocks/assertive.data
+# BugReports: https://bitbucket.org/richierocks/assertive.data/issues
+# Depends: R (>= 3.0.0)
+# Imports: assertive.base (>= 0.0-2), assertive.strings
+# Suggests: testthat
+# License: GPL (>= 3)
+# LazyLoad: yes
+# LazyData: yes
+# Acknowledgments: Development of this package was partially funded by the Proteomics Core at Weill Cornell Medical College in Qatar <http://qatar-weill.cornell.edu>.  The Core is supported by 'Biomedical Research Program' funds, a program funded by Qatar Foundation.
+# Collate: 'imports.R' 'assert-is-data.R' 'is-data.R'
+# RoxygenNote: 6.1.0
+# NeedsCompilation: no
+# Packaged: 2018-11-21 21:52:11 UTC; richierocks
+# Repository: CRAN
+# Date/Publication: 2018-11-21 22:20:03 UTC

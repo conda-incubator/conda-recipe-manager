@@ -1,0 +1,47 @@
+{% set name = "numba-scipy" %}
+{% set version = "0.3.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 700a53187e462591ff45b9118ca84bde29e3be2c43e64bdf692e3d163acf0365
+
+build:
+  number: 1
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+    - setuptools
+  run:
+    - python >=3.6
+    - numba >=0.45
+    - scipy >=0.16,<=1.7.3
+    - setuptools
+
+test:
+  requires:
+    - pip
+    - numpy =1.22
+  commands:
+    - pip check
+  imports:
+    - numba_scipy
+    - numba_scipy.special
+
+about:
+  home: https://github.com/numba/numba-scipy
+  license: BSD-2-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: numba-scipy extends Numba to make it aware of SciPy
+
+extra:
+  recipe-maintainers:
+    - xhochy

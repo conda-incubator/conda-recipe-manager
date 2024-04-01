@@ -1,0 +1,67 @@
+{% set version = "0.8.9" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-reshape
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/reshape_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/reshape/reshape_{{ version }}.tar.gz
+  sha256: 791178b3b5f30c166ebf5910a5ab1c67b54e7023b10b6c2e2ddd1cc02a1e4048
+
+build:
+  merge_build_host: true  # [win]
+  number: 2
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+    - cross-r-base {{ r_base }}    # [build_platform != target_platform]
+    - r-plyr                       # [build_platform != target_platform]
+  host:
+    - r-base
+    - r-plyr
+  run:
+    - r-base
+    - r-plyr
+
+test:
+  commands:
+    - $R -e "library('reshape')"           # [not win]
+    - "\"%R%\" -e \"library('reshape')\""  # [win]
+
+about:
+  home: http://had.co.nz/reshape
+  license: MIT
+  summary: 'Flexibly restructure and aggregate data using just two functions: melt and cast.'
+  license_family: MIT
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/MIT
+    - LICENSE
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+
+# Package: reshape
+# Version: 0.8.8
+# Title: Flexibly Reshape Data
+# Description: Flexibly restructure and aggregate data using just two functions: melt and cast.
+# Authors@R: person("Hadley", "Wickham", , "hadley@rstudio.com", c("aut", "cre"))
+# URL: http://had.co.nz/reshape
+# Depends: R (>= 2.6.1)
+# Imports: plyr
+# License: MIT + file LICENSE
+# LazyData: true
+# NeedsCompilation: yes
+# Packaged: 2018-10-23 18:21:49 UTC; hadley
+# Author: Hadley Wickham [aut, cre]
+# Maintainer: Hadley Wickham <hadley@rstudio.com>
+# Repository: CRAN
+# Date/Publication: 2018-10-23 18:50:03 UTC

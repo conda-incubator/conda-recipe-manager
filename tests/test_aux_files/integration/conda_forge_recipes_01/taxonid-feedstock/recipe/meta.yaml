@@ -1,0 +1,48 @@
+{% set name = "taxonid" %}
+{% set version = "0.1.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/brsynth/{{ name }}/archive/{{ version }}.tar.gz
+  sha256: af20877bf9ede4be92fd5421a14be26583bdae4cacd16b745b575ed943fb9e69
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install -vv .
+
+requirements:
+  host:
+    - python >=3.9
+    - pip
+  run:
+    - python >=3.9
+    - biopython
+    - brs_utils
+    - colored
+
+test:
+  source_files:
+    - tests
+  imports:
+    - taxonid
+  requires:
+    - pytest
+  commands:
+    - python -m taxonid --help
+    - cd tests
+    - pytest -v
+
+about:
+  home: https://github.com/brsynth/taxonid
+  summary: "Get the taxon id from a given organism name"
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - tduigou
+    - breakthewall

@@ -1,0 +1,81 @@
+{% set name = "opentelemetry-instrumentation-django" %}
+{% set version = "0.45b0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/opentelemetry_instrumentation_django-{{ version }}.tar.gz
+  sha256: d8b55747d6784167ab3a50dc128cc13b6966a2215ce55f4043392ac1c83b5bb2
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.7
+    - pip
+    - hatchling
+  run:
+    - python >=3.7
+    - opentelemetry-api ~=1.12
+    - opentelemetry-instrumentation-wsgi ==0.45b0
+    - opentelemetry-instrumentation ==0.45b0
+    - opentelemetry-semantic-conventions ==0.45b0
+    - opentelemetry-util-http ==0.45b0
+    # - opentelemetry-test-utils ==0.37b0
+    # - opentelemetry-instrumentation-django 
+    # - opentelemetry-instrumentation-asgi ==0.37b0
+    # - django >=1.10
+    # - opentelemetry-test-utils ==0.38b0
+    # - opentelemetry-instrumentation-django 
+    # - opentelemetry-instrumentation-asgi ==0.38b0
+    # - django >=1.10
+    # - opentelemetry-test-utils ==0.39b0
+    # - opentelemetry-instrumentation-django 
+    # - opentelemetry-instrumentation-asgi ==0.39b0
+    # - django >=1.10
+    # - opentelemetry-test-utils ==0.40b0
+    # - opentelemetry-instrumentation-django 
+    # - opentelemetry-instrumentation-asgi ==0.40b0
+    # - django >=1.10
+    # - opentelemetry-test-utils ==0.41b0
+    # - opentelemetry-instrumentation-django 
+    # - opentelemetry-instrumentation-asgi ==0.41b0
+    # - django >=1.10
+    # - opentelemetry-test-utils ==0.42b0
+    # - opentelemetry-instrumentation-django 
+    # - opentelemetry-instrumentation-asgi ==0.42b0
+    # - django >=1.10
+    # - opentelemetry-test-utils ==0.43b0
+    # - opentelemetry-instrumentation-django 
+    # - opentelemetry-instrumentation-asgi ==0.43b0
+    # - django >=1.10
+    # - opentelemetry-test-utils ==0.44b0
+    # - opentelemetry-instrumentation-django 
+    # - opentelemetry-instrumentation-asgi ==0.44b0
+    # - django >=1.10
+    # - opentelemetry-instrumentation-asgi ==0.45b0
+    # - django >=1.10
+
+test:
+  imports:
+    - opentelemetry
+    - opentelemetry.instrumentation
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation/opentelemetry-instrumentation-django
+  summary: OpenTelemetry Instrumentation for Django
+  license: Apache-2.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - mariusvniekerk

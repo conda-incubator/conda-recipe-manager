@@ -1,0 +1,126 @@
+{% set processor = "cpu" %}
+{% set name = "colmap" %}
+{% set version = "3.9.1" %}
+{% set build = 3 %}
+
+{% set processor = "cpu" if cuda_compiler_version == "None" else "gpu" %}  # [not osx]
+{% set processor = "cpu" %}  # [osx]
+
+# Prioritize gpu build if cudatoolkit can be installed (through __cuda virtual package)
+{% set build = build + 100 if processor == "gpu" else build %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  - url: https://github.com/{{ name }}/{{ name }}/archive/{{ version }}.tar.gz
+    sha256: f947ad80802baa8f00f30f26d316d8c608ab2626465eac1c81cf325d57879862
+    patches:
+      - 2338.patch
+      - fix-find-lz4.patch  # [win]
+
+build:
+  number: {{ build }}
+  string: {{ processor }}h{{ PKG_HASH }}_{{ build }}
+  skip: true  # [win and cuda_compiler_version == "11.2"]
+  run_exports:
+    - {{ pin_subpackage('colmap', max_pin='x.x') }}
+
+requirements:
+  build:
+    - {{ compiler('cxx') }}
+    - {{ compiler('c') }}
+    - {{ stdlib("c") }}
+    - {{ compiler('cuda') }}         # [(cuda_compiler or "None") != "None"]
+    - cmake
+    - make                           # [unix]
+    - pkg-config
+    - ninja
+    - llvm-openmp                    # [osx]
+    - libgomp                        # [linux]
+    # x11 stuff
+    - {{ cdt('mesa-libgl-devel') }}  # [unix and not arm64]
+    - {{ cdt('mesa-dri-drivers') }}  # [unix and not arm64]
+    - {{ cdt('libselinux') }}        # [linux]
+    - {{ cdt('libxcb') }}            # [linux]
+    - {{ cdt('libxdamage') }}        # [linux]
+    - {{ cdt('libxfixes') }}         # [linux]
+    - {{ cdt('libxxf86vm') }}        # [linux]
+    - {{ cdt('libxext') }}           # [linux]
+    - {{ cdt('libxau') }}            # [linux]
+    - {{ cdt('expat-devel') }}       # [linux]
+  host:
+    # x11 stuff
+    - xorg-libxext                   # [unix]
+    - xorg-libxdmcp                  # [unix]
+    - xorg-libxau                    # [unix]
+    - libxcb                         # [unix]
+    - xorg-libxfixes                 # [unix]
+    - xorg-libxrender                # [unix]
+    - xorg-libx11                    # [unix]
+    - xorg-libice                    # [unix]
+    - xorg-libsm                     # [unix]
+    - libglu                         # [linux]
+    # deps
+    - libblas
+    - libcblas
+    - libboost-devel
+    - suitesparse
+    - eigen
+    - freeimage
+    - glog
+    - gflags
+    - glew
+    - cgal-cpp
+    - ceres-solver
+    - qt-main
+    - git
+    - flann
+    - sqlite
+    - vlfeat                         # [unix]
+    - gmp                            # [unix]
+    - lz4-c
+    - metis
+    - libcurand-dev                  # [cuda_compiler_version == "12.0"]
+    - cuda-cudart-dev                # [win and cuda_compiler_version == "12.0"]
+    - cuda-version {{ cuda_compiler_version }}  # [cuda_compiler_version == "12.0"]
+  run:
+    - vlfeat                         # [unix]
+    - flann
+    - xorg-libxext                   # [unix]
+    - xorg-libxdmcp                  # [unix]
+    - xorg-libxau                    # [unix]
+    - libxcb                         # [unix]
+    - xorg-libxfixes                 # [unix]
+    - xorg-libxrender                # [unix]
+    - xorg-libx11                    # [unix]
+    - xorg-libice                    # [unix]
+    - xorg-libsm                     # [unix]
+    - libglu                         # [linux]
+    - __cuda >={{ cuda_compiler_version }}  # [(cuda_compiler or "None") != "None"]
+
+test:
+  commands:
+    - if exist %PREFIX%\\Library\\bin\\colmap.exe (exit 0) else (exit 1)  # [win]
+    - if exist %PREFIX%\\Library\\lib\\colmap_exe.lib (exit 0) else (exit 1)  # [win]
+    - if exist %PREFIX%\\Library\\lib\\colmap_cuda.lib (exit 0) else (exit 1)  # [win and (cuda_compiler or "None") != "None"]
+    - test -f $PREFIX/bin/colmap  # [unix]
+    - test -f $PREFIX/lib/libcolmap_exe.a  # [unix]
+    - test -f $PREFIX/lib/libcolmap_util_cuda.a  # [unix and (cuda_compiler or "None") != "None"]
+    - test -f $PREFIX/share/colmap/colmap-config.cmake  # [unix]
+
+about:
+  home: https://colmap.github.io/
+  license: BSD-3-Clause
+  license_file:
+    - COPYING.txt
+    - src/thirdparty/LSD/LICENSE
+    - src/thirdparty/PoissonRecon/LICENSE
+    - src/thirdparty/SiftGPU/LICENSE
+    - src/thirdparty/VLFeat/LICENSE
+  summary: COLMAP is a general-purpose Structure-from-Motion (SfM) and Multi-View Stereo (MVS) pipeline with a graphical and command-line interface.
+
+extra:
+  recipe-maintainers:
+    - Tobias-Fischer

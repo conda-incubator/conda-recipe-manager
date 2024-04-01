@@ -1,0 +1,51 @@
+{% set name = "zope.index" %}
+{% set version = "6.0" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/zope.index-{{ version }}.tar.gz
+  sha256: 61ceefd2cf57c16deb10ff6e954ad50f481860d10782eb92b3b45d2df3de45e4
+
+build:
+  number: 1
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+  host:
+    - pip
+    - python
+  run:
+    - btrees >=4.4.1
+    - persistent
+    - python
+    - setuptools
+    - six
+    - zope.interface
+
+test:
+  imports:
+    - zope
+    - zope.index
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/zopefoundation/zope.index
+  summary: Indices for using with catalog like text, field, etc.
+  license: ZPL-2.1
+  license_file:
+    - COPYRIGHT.txt
+    - LICENSE.txt
+
+extra:
+  recipe-maintainers:
+    - osamples
+    - izahn

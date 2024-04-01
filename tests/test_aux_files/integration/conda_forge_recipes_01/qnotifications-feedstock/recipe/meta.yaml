@@ -1,0 +1,44 @@
+{% set name = "qnotifications" %}
+{% set pypiname = "python-" + name %}
+{% set version = "2.0.6" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ pypiname[0] }}/{{ pypiname }}/{{ pypiname }}-{{ version }}.tar.gz
+  sha256: 8509398452d95c5edce789bb6085ebbb571ec37fc3903102ae60b07db4f93eea
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+  number: 0
+
+requirements:
+  host:
+    - pyqt
+    - qtpy
+    - pip
+    - python
+
+  run:
+    - python
+    - qtpy
+    - pyqt
+
+test:
+  imports:
+    - QNotifications
+
+about:
+  home: https://github.com/dschreij/QNotifications
+  license: LGPL-3.0-or-later
+  license_family: LGPL
+  license_file: license
+  summary: Web-style in-app notifications for PyQt4/5
+
+extra:
+  recipe-maintainers:
+    - dschreij
+    - smathot

@@ -1,0 +1,75 @@
+{% set version = "2.2-7" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-relaimpo
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/relaimpo_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/relaimpo/relaimpo_{{ version }}.tar.gz
+  sha256: 4a1b3e78305447016eb8d0186b9cafe6e2f37b35da3ea534980215d8a7b96090
+
+build:
+  merge_build_host: true  # [win]
+  number: 0
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+    - r-mass
+    - r-boot
+    - r-corpcor
+    - r-mitools
+    - r-survey
+  run:
+    - r-base
+    - r-mass
+    - r-boot
+    - r-corpcor
+    - r-mitools
+    - r-survey
+
+test:
+  commands:
+    - $R -e "library('relaimpo')"           # [not win]
+    - "\"%R%\" -e \"library('relaimpo')\""  # [win]
+
+about:
+  home: http://prof.beuth-hochschule.de/groemping/relaimpo/, http://prof.beuth-hochschule.de/groemping/
+  license: GPL-2
+  summary: Provides several metrics for assessing relative importance in linear models. These can be printed, plotted and bootstrapped. The recommended metric is lmg, which provides a decomposition of the model explained variance into non-negative contributions. There is a version of this package available that additionally
+    provides a new and also recommended metric called pmvd. If you are a non-US user, you can download this extended version from Ulrike Groempings web site.
+  license_family: GPL2
+  license_file: {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-2
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+
+# Package: relaimpo
+# Title: Relative Importance of Regressors in Linear Models
+# Version: 2.2-3
+# Date: 2018-03-09
+# Authors@R: c(person("Ulrike", "Groemping", role = c("aut", "cre"), email = "groemping@beuth-hochschule.de"), person("Lehrkamp", "Matthias", role = "ctb"))
+# Description: Provides several metrics for assessing relative importance in linear models. These can be printed, plotted and bootstrapped. The recommended metric is lmg, which provides a decomposition of the model explained variance into non-negative contributions. There is a version of this package available that additionally provides a new and also recommended metric called pmvd. If you are a non-US user, you can download this extended version from Ulrike Groempings web site.
+# Depends: R(>= 2.2.1), MASS, boot, survey, mitools, graphics
+# Imports: methods, corpcor
+# Maintainer: Ulrike Groemping <groemping@beuth-hochschule.de>
+# License: GPL-2
+# LazyLoad: yes
+# Encoding: latin1
+# URL: http://prof.beuth-hochschule.de/groemping/relaimpo/, http://prof.beuth-hochschule.de/groemping/
+# NeedsCompilation: no
+# Packaged: 2018-03-09 11:11:57 UTC; Gromping
+# Author: Ulrike Groemping [aut, cre], Lehrkamp Matthias [ctb]
+# Repository: CRAN
+# Date/Publication: 2018-03-10 16:27:32 UTC

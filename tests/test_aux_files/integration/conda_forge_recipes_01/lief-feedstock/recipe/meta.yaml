@@ -1,0 +1,162 @@
+{% set version = "0.14.1" %}
+
+package:
+  name: lief
+  version: {{ version }}
+
+source:
+  - url: https://github.com/lief-project/LIEF/archive/{{ version }}.tar.gz
+    sha256: 92916dcb3178353d863aef4f409186889983c56e025b774741d5316a72ec3a7d
+    patches:
+      - 0001-Inject-proper-extension-module-suffix-via-env-var.patch
+      # Upstream does not support dynamic linking to libLIEF from the Python
+      # extension module. To make this work, we need to export symbols from
+      # libLIEF which the module uses.
+      # Since it offers few (any?) real advantages, we may want to drop dynamic
+      # linking in the future and link libLIEF statically for py-lief, too.
+      - 0002-Dynamically-link-Python-library-to-libLIEF.patch
+      - 0003-Export-symbols-used-by-Python-library-from-libLIEF.patch
+
+build:
+  number: 1
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - ccache
+    - {{ stdlib('c') }}
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - pkg-config            # [not win]
+    - cmake
+    - ninja
+  host:
+    - nlohmann_json
+
+outputs:
+  - name: py-lief
+    script: install-py-lief.sh  # [unix]
+    script: install-py-lief.bat  # [win]
+    build:
+      run_exports:
+        - {{ pin_subpackage('py-lief', max_pin='x.x') }}
+      ignore_run_exports:
+        - python
+    requirements:
+      build:
+        - ccache
+        - {{ stdlib('c') }}
+        - {{ compiler('c') }}
+        - {{ compiler('cxx') }}
+        - pkg-config            # [not win]
+        - cmake
+        - ninja
+        - python                                 # [build_platform != target_platform]
+        - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+        - pydantic >=2.4.2                       # [build_platform != target_platform]
+        - pydantic-core >=2.10.1                 # [build_platform != target_platform]
+        - scikit-build-core >=0.6.0              # [build_platform != target_platform]
+        - setuptools >=68.2.2                    # [build_platform != target_platform]
+        - tomli >=2.0.1                          # [build_platform != target_platform]
+      host:
+        - nlohmann_json
+        # Dynamically linked to libLIEF for now; see comment in patch section.
+        - {{ pin_subpackage('liblief', exact=True) }}
+        - python
+        - pip
+        # Upstream pins build dependencies exactly; we are a bit more lenient
+        # here to avoid potential solvability issues.
+        - pydantic >=2.4.2
+        - pydantic-core >=2.10.1
+        - scikit-build-core >=0.6.0
+        - setuptools >=68.2.2
+        - tomli >=2.0.1
+      run:
+        - __osx >={{ MACOSX_DEPLOYMENT_TARGET|default("10.13") }}  # [osx and x86_64]
+        - {{ pin_subpackage('liblief', exact=True) }}
+        - python
+    test:
+      requires:
+        - {{ compiler('cxx') }}
+      imports:
+        - lief
+      commands:
+        # Test general functionality by introspecting inter-subpackage linkage.
+        - python -c "import ctypes.util, lief; missing = {name for name in {s.name for s in lief.parse(lief._lief.__file__).imported_functions} - {s.name for s in lief.parse(ctypes.util.find_library('LIEF')).exported_functions} if '4LIEF' in name}; assert not missing, missing"
+
+  - name: liblief
+    script: install-liblief.sh  # [unix]
+    script: install-liblief.bat  # [win]
+    build:
+      run_exports:
+        - {{ pin_subpackage('liblief', max_pin='x.x') }}
+    requirements:
+      build:
+        - ccache
+        - {{ stdlib('c') }}
+        - {{ compiler('c') }}
+        - {{ compiler('cxx') }}
+        - pkg-config            # [not win]
+        - cmake
+        - ninja
+      host:
+        - nlohmann_json
+      run:
+        - __osx >={{ MACOSX_DEPLOYMENT_TARGET|default("10.13") }}  # [osx and x86_64]
+    test:
+      files:
+        - tests
+      commands:
+        - set -x   # [not win]
+        - echo on  # [win]
+        - pushd tests
+        # Aid uniform tests below: Put current dir bluntly on PATH; alias "findstr"->"grep", "call;"->"true".
+        - PATH=".:${PATH}"            # [not win]
+        - findstr() { grep "${@}"; }  # [not win]
+        - call() { true; }            # [not win]
+
+        - pushd self
+        - cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug . || exit 1
+        - ninja || exit 1
+        # FIXME: Actual test disabled on Windows for now; LIEF::Parser::parse does not finish on Windows.
+        - test-lief-self || exit 1  # [not win]
+        - popd
+
+        - pushd macho
+        - cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug . || exit 1
+        - ninja || exit 1
+        # This MachO object has no DynamicSymbolCommand, testing for bug fixed in PR:
+        # https://github.com/lief-project/LIEF/pull/262
+        # FIXME: Actual test disabled on Windows for now; LIEF::MachO::Parser::parse does not finish on Windows.
+        - test-lief-macho macOS-libpython2.7.a-getbuildinfo.o > output.txt || exit 1  # [not win]
+        - findstr has_dynamic_symbol_command output.txt && exit 1 || call;
+        - popd
+
+        - popd
+      requires:
+        - {{ compiler('c') }}
+        - {{ compiler('cxx') }}
+        - cmake
+        - ninja
+
+about:
+  home: https://lief.quarkslab.com/
+  license: Apache-2.0
+  license_file: LICENSE
+  license_family: Apache
+  summary: A cross platform library to parse, modify and abstract ELF, PE and MachO formats.
+  description: |
+    It turns out that many projects need to parse executable formats and they usually re-implement
+    their own parser. Moreover these parsers are usually bound to one language.
+    LIEF attempts to fill this void.
+  doc_url: https://lief.quarkslab.com/doc/stable/index.html
+  doc_source_url: https://github.com/lief-project/LIEF/tree/master/doc
+
+extra:
+  recipe-maintainers:
+    - isuruf
+    - mbargull
+    - msarahan
+    - xhochy
+    - wolfv

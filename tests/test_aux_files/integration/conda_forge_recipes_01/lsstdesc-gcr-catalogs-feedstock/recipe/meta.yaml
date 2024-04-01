@@ -1,0 +1,66 @@
+{% set name = "lsstdesc-gcr-catalogs" %}
+{% set version = "1.8.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/LSSTDESC/gcr-catalogs/archive/v{{ version }}.tar.gz
+  sha256: 5ab790baedef8f64a0eb12fe2c4179bfa7fcf23c3648c80080b408177de90587
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+  run:
+    - python >=3.6
+    - requests
+    - pyyaml
+    - numpy
+    - astropy
+    - gcr >=0.9.2
+    - h5py
+    - healpy
+    - pandas
+    - pyarrow
+    - pytables
+    - python-blosc2  # needed by pytables
+
+test:
+  source_files:
+    - conftest.py
+    - tests/
+  imports:
+    - GCRCatalogs
+  commands:
+    - pip check
+    - pytest --no-catalog
+  requires:
+    - pip
+    - pytest
+
+about:
+  home: https://github.com/LSSTDESC/gcr-catalogs
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: A repository of data catalogs for the LSST Dark Energy Science Collaboration (DESC)
+  description: |
+    GCRCatalogs is a Python package that serves as a catalog repository for 
+    the Rubin LSST Dark Energy Science Collaboration (DESC). 
+    It provides a unified user interface to access all catalogs by using 
+    the Generic Catalog Reader (GCR) base class.
+  doc_url: https://github.com/LSSTDESC/gcr-catalogs/blob/master/README.md
+  dev_url: https://github.com/LSSTDESC/gcr-catalogs
+
+extra:
+  recipe-maintainers:
+    - yymao
+    - JoanneBogart
+    - heather999

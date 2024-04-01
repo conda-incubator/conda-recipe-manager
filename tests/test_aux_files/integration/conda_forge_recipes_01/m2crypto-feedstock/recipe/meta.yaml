@@ -1,0 +1,57 @@
+{% set name = "M2Crypto" %}
+{% set version = "0.41.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 3a1358c7ee849046d91782a777f1786bf027a1c1d51b5faf8f19435bfc3f1495
+  patches:
+   - Remove-OpenSSL-1.0.0-support-to-avoid-windows-issues.patch
+
+build:
+  number: 0
+  script: OPENSSL_PATH=$PREFIX {{ PYTHON }} -m pip install . -vv  # [not win]
+  script: "set \"OPENSSL_PATH=%LIBRARY_PREFIX%\" && {{ PYTHON }} -m pip install . -vv"  # [win]
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - swig                                   # [build_platform != target_platform]
+    - {{ compiler("c") }}
+  host:
+    - openssl
+    - pip
+    - python
+    - setuptools
+    - swig >=2.0.4
+  run:
+    - openssl
+    - python
+
+test:
+  imports:
+    - M2Crypto
+    - M2Crypto.SSL
+  commands:
+    - pip check
+    - python -m pytest tests/ -v -rs -k "not test_ssl"
+  requires:
+    - parameterized
+    - pip
+    - pytest
+  source_files:
+    - tests
+
+about:
+  home: https://gitlab.com/m2crypto/m2crypto
+  license: MIT
+  license_file: LICENCE
+  summary: 'M2Crypto: A Python crypto and SSL toolkit'
+
+extra:
+  recipe-maintainers:
+    - chrisburr

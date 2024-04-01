@@ -1,0 +1,45 @@
+{% set version = "1.2.0" %}
+
+package:
+  name: ndcsv
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/n/ndcsv/ndcsv-{{ version }}.tar.gz
+  sha256: 54d67ae4161e0d7574e73c37ceb5a8c928fd688e5edfa53f219672719d89b05c
+
+build:
+  noarch: python
+  number: 0
+  script: python -m pip install --no-deps --ignore-installed .
+
+requirements:
+  build:
+    - python >=3.8
+    - pip
+    - setuptools >=66
+    - setuptools_scm
+  run:
+    - python >=3.8
+    - packaging >=22
+    - numpy >=1.14
+    - pandas >=0.24
+    - pshell >=1.0
+    - xarray >=0.14
+
+test:
+  imports:
+    - ndcsv
+  requires:
+    - pytest >=3.8
+
+about:
+  home: https://github.com/crusaderky/ndcsv
+  license: Apache-2.0
+  license_family: Apache
+  license_file: LICENSE
+  summary: N-Dimensional CSV files for xarray
+
+extra:
+  recipe-maintainers:
+    - crusaderky

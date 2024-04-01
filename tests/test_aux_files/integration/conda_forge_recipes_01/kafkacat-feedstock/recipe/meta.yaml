@@ -1,0 +1,44 @@
+{% set name = "kafkacat" %}
+{% set version = "1.7.1" %}
+{% set sha256hash = "4c043cb86824a8f650d7dbe3aceaec8aa3fadafbd456d7e7444f18f184fe2347" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/edenhill/{{ name }}/archive/{{ version }}.tar.gz
+  sha256: a2daa5a14c43522153241a1d8a7ba3a51aa2a76f53a957907e18c79beec4a3a3
+
+build:
+  number: 2
+  skip: true  # [win]
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - make
+  host:
+    # Compiling with latest 0.9.4 breaks backwards ABI compatibility.
+    - librdkafka
+    - yajl 2.1.*
+
+  run:
+    - librdkafka
+    - yajl 2.1.*
+
+test:
+  commands:
+    - kcat -V
+
+about:
+  home: https://github.com/edenhill/kafkacat
+  license: BSD-2-Clause
+  license_file: LICENSE
+  summary: Generic command line non-JVM Apache Kafka producer and consumer
+
+extra:
+  recipe-maintainers:
+    - rmax
+    - jan-janssen

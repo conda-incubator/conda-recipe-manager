@@ -1,0 +1,50 @@
+{% set name = "cloudflare" %}
+{% set version = "2.19.2" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/cloudflare-{{ version }}.tar.gz
+  sha256: 10d4b96b2addee07dfa3699e0a167df77d2a8d5ab7f86e6590eaa6ea87d6dc18
+
+build:
+  number: 0
+  noarch: python
+  entry_points:
+    - cli4=cli4.__main__:main
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.7
+    - pip
+  run:
+    - python >=3.7
+    - beautifulsoup4
+    - jsonlines
+    - pyyaml
+    - requests
+
+test:
+  imports:
+    - CloudFlare
+    - cli4
+  commands:
+    - pip check
+    # works but has a non-zero return :-/
+    # - cli4 --version
+  requires:
+    - pip
+
+about:
+  home: https://github.com/cloudflare/python-cloudflare
+  summary: Python wrapper for the Cloudflare v4 API
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - ocefpaf

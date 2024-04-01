@@ -1,0 +1,56 @@
+{% set name = "libobjcryst" %}
+{% set version = "2024.1.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://github.com/diffpy/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: 93799365d7b69a60ffab43f967732167c177334abac97828ce5c848cdb2add1b
+
+build:
+  number: 0
+  run_exports:
+    - {{ pin_subpackage('libobjcryst', max_pin='x.x') }}
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - scons
+  host:
+    - libboost-headers
+
+test:
+  commands:
+    - test -f $PREFIX/lib/libObjCryst${SHLIB_EXT}             # [not win]
+    - test -f $PREFIX/include/ObjCryst/version.h              # [not win]
+    - if not exist %LIBRARY_LIB%\\libObjCryst.lib exit 1      # [win]
+    - if not exist %LIBRARY_INC%\\ObjCryst\\version.h exit 1  # [win]
+
+about:
+  home: https://github.com/diffpy/libobjcryst/
+  license: GPL-2.0-only
+  license_family: GPL
+  license_file: LICENSE.txt
+  summary: ObjCryst++ packaged for installation as a shared library.
+
+  description: |
+    ObjCryst++ is Object-Oriented Crystallographic Library for C++ developed
+    by Vincent Favre-Nicolin. libobjcryst is a mirror of the ObjCryst++
+    sources from https://sourceforge.net/projects/objcryst, expanded with
+    SCons build scripts to make it easier to install as a system shared
+    library. libobjcryst does not include GUI related files from ObjCryst++.
+    This distribution contains required sources from cctbx and newmat that are
+    used in ObjCryst++.
+  doc_url: https://github.com/diffpy/libobjcryst
+  dev_url: https://github.com/diffpy/libobjcryst
+
+extra:
+  recipe-maintainers:
+    - vincefn
+    - pavoljuhas
+    - sbillinge
+    - st3107

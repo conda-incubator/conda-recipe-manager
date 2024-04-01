@@ -1,0 +1,50 @@
+{% set name = "nyxtools" %}
+{% set version = "0.0.13" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/nyxtools-{{ version }}.tar.gz
+  sha256: 9a278af7930b77f1af48002166815144d82b6c6f82391f795e10e46259bd1f00
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.7
+    - pip
+  run:
+    - python >=3.7
+    - area-detector-handlers
+    - mxtools
+    - fabio
+    - tiled
+    # TODO: remove tiled once databroker has tiled as a dependency for
+    # databroker > 2.0.0b4 - copied from mxtools
+
+
+test:
+  imports:
+    - nyxtools
+    - nyxtools.tests
+#  commands:
+#    - pip check
+#  requires:
+#    - pip
+
+about:
+  home: https://github.com/NSLS-II-NYX/nyxtools
+  summary: Common code for the NYX beamline at NSLS-II.
+  license: BSD-3-Clause
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - vshekar
+    - JunAishima
+    - mrakitin

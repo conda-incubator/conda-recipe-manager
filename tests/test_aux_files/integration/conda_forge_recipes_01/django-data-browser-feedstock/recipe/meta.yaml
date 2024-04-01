@@ -1,0 +1,44 @@
+{% set name = "django-data-browser" %}
+{% set version = "4.2.8" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/django-data-browser-{{ version }}.tar.gz
+  sha256: dabecc5ff5c09b1e12e360fd853f718d87dda837b992354041993f857567a012
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  number: 0
+
+requirements:
+  host:
+    - python >=3.7
+    - pip
+  run:
+    - python >=3.7
+    - django >=3.2
+    - hyperlink
+    - python-dateutil
+    - sqlparse
+
+test:
+  imports:
+    - data_browser
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/tolomea/django-data-browser
+  summary: Interactive user-friendly database explorer.
+  license: BSD-3-Clause
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - rxm7706

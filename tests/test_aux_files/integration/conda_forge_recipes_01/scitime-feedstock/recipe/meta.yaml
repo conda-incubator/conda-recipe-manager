@@ -1,0 +1,45 @@
+{% set version = "0.1.1" %}
+
+package:
+  name: scitime
+  version: {{ version }}
+
+source:
+  url: https://github.com/scitime/scitime/archive/v{{ version }}.tar.gz
+  sha256: f47ddc9d5a47bef6021a227d8fed06da689cf0d2d45f0419b1cc15c14551fea2
+
+build:
+  noarch: python
+  number: 0
+  script: "{{ PYTHON }} -m pip install . --no-deps -vv"
+
+requirements:
+  host:
+    - python >=3.7
+    - setuptools >=3.3
+    - pip ==20.3.4
+  run:
+    - python >=3.7
+    - psutil
+    - joblib
+    - scikit-learn
+    - pandas
+
+test:
+  imports:
+    - scitime
+
+about:
+  home: https://github.com/scitime/scitime
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: 'Training time estimation for scikit-learn algorithms'
+
+  description: |
+    Training time estimation for scikit-learn algorithms.
+  dev_url: https://github.com/scitime/scitime
+
+extra:
+  recipe-maintainers:
+    - nathan-toubiana

@@ -1,0 +1,67 @@
+{% set name = "nagl" %}
+{% set version = "0.0.10" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/SimonBoothroyd/{{ name }}/archive/{{ version }}.tar.gz
+  sha256: 5d5dd333f709cc0e4d5a254c1e4ae2f0bc112df709dcb86d303b1d67a490ef2c
+
+build:
+  noarch: python
+  number: 0
+  script: "{{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv"
+  entry_points:
+    - nagl = nagl.cli:cli
+
+requirements:
+  host:
+    - python >=3.8
+    - pip
+    - versioneer
+  run:
+    - python >=3.8
+    - pydantic
+    - jinja2
+    - openssl
+    - rich
+
+    - rdkit
+
+    - click
+    - click-option-group
+
+    - pytorch
+    - pytorch-lightning
+
+    - dgl >=0.7
+
+    - pyarrow
+    - mlflow
+
+test:
+  imports:
+    - nagl
+  commands:
+    - nagl --help
+
+about:
+  home: https://github.com/SimonBoothroyd/nagl
+  license: MIT AND BSD-3-Clause
+  license_file:
+    - LICENSE
+    - LICENSE-3RD-PARTY
+  summary: A playground for applying graph convolutional networks to molecules.
+  description: |
+    A playground for applying graph convolutional networks to molecules, with a focus 
+    on learning continuous "atom-type" embeddings and from these classical molecule 
+    force field parameters.
+  doc_url: https://github.com/SimonBoothroyd/nagl
+  dev_url: https://github.com/SimonBoothroyd/nagl
+
+extra:
+  recipe-maintainers:
+    - simonboothroyd
+    - jthorton

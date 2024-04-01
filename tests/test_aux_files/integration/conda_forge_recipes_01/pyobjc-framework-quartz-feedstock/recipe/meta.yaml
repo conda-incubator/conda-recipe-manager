@@ -1,0 +1,58 @@
+{% set name = "pyobjc-framework-Quartz" %}
+{% set version = "10.2" %}
+
+package:
+  name: pyobjc-framework-quartz
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 9b947e081f5bd6cd01c99ab5d62c36500d2d6e8d3b87421c1cbb7f9c885555eb
+
+build:
+  number: 0
+  script:
+    # force pyobjc to use conda-forge's chosen SDK
+    - export CFLAGS="${CFLAGS} -isysroot ${SDKROOT:-$CONDA_BUILD_SYSROOT}"
+    - {{ PYTHON }} -m pip install . -vv
+  skip: true  # [(not osx) or py2k or python_impl == 'pypy' or (arm64 and py < 39)]
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+  host:
+    - pip
+    - python
+  run:
+    - python
+    - pyobjc-core
+    - pyobjc-framework-cocoa
+
+test:
+  imports:
+    - Quartz
+    - Quartz.CoreGraphics
+    - Quartz.CoreVideo
+    - Quartz.ImageIO
+    - Quartz.ImageKit
+    - Quartz.PDFKit
+    - Quartz.QuartzComposer
+    - Quartz.QuartzCore
+    - Quartz.QuartzFilters
+    - Quartz.QuickLookUI
+
+about:
+  home: https://github.com/ronaldoussoren/pyobjc
+  dev_url: https://github.com/ronaldoussoren/pyobjc/tree/master/pyobjc-framework-Quartz
+  doc_url: https://pyobjc.readthedocs.io/en/latest/
+  license: MIT
+  license_file: LICENSE.txt
+  summary: Wrappers for the Quartz frameworks on Mac OS X
+
+extra:
+  recipe-maintainers:
+    - jschueller
+    - hhslepicka
+    - thewchan

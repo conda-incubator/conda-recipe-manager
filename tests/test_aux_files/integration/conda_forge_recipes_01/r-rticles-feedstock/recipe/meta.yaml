@@ -1,0 +1,56 @@
+{% set version = "0.26" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-rticles
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/rticles_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/rticles/rticles_{{ version }}.tar.gz
+  sha256: 73ee73184e6034a34d5c7bc0baad288ab9ff180f792a9870c52ec62144943a6c
+
+build:
+  merge_build_host: true  # [win]
+  number: 0
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+    - r-knitr >=1.30
+    - r-rmarkdown >=2.14
+    - r-tinytex >=0.30
+    - r-xfun
+    - r-yaml
+  run:
+    - r-base
+    - r-knitr >=1.30
+    - r-rmarkdown >=2.14
+    - r-tinytex >=0.30
+    - r-xfun
+    - r-yaml
+
+test:
+  commands:
+    - $R -e "library('rticles')"           # [not win]
+    - "\"%R%\" -e \"library('rticles')\""  # [win]
+
+about:
+  home: https://github.com/rstudio/rticles
+  license: GPL-3.0-only
+  summary: A suite of custom R Markdown formats and templates for authoring journal articles and conference submissions.
+  license_family: GPL3
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-3
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r

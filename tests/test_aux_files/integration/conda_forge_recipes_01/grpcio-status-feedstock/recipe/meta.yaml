@@ -1,0 +1,54 @@
+{% set name = "grpcio-status" %}
+{% set version = "1.62.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/grpcio-status-{{ version }}.tar.gz
+  sha256: 3431c8abbab0054912c41df5c72f03ddf3b7a67be8a287bb3c18a3456f96ff77
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.7
+    - pip
+  run:
+    - python >=3.7
+    - protobuf >=4.21.6
+    - grpcio >=1.62.1
+    - googleapis-common-protos >=1.5.5
+
+test:
+  imports:
+    - grpc_status
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://grpc.io
+  summary: Status proto mapping for gRPC
+  license: Apache-2.0
+  license_file: LICENSE
+  description: |
+    Reference package for GRPC Python status proto mapping.
+
+    gRPC Python: https://grpc.io/docs/languages/python/quickstart/
+    gRPC Python API: https://grpc.github.io/grpc/python/
+
+    PyPI: [https://pypi.org/project/grpcio-status](https://pypi.org/project/grpcio-status)
+
+  doc_url: https://grpc.io/docs/languages/python/quickstart/
+  dev_url: https://github.com/grpc/grpc/tree/master/src/python/grpcio_status
+
+extra:
+  recipe-maintainers:
+    - sugatoray
+    - xylar

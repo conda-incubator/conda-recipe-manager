@@ -1,0 +1,44 @@
+{% set name = "affinegap" %}
+{% set version = "1.12" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/affinegap-{{ version }}.tar.gz
+  sha256: 02faa7579df8d98beafd40bb924b7a3a9d4e42edf6938e297366903054e4ef61
+
+build:
+  number: 3
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+  host:
+    - cython
+    - pip
+    - python
+  run:
+    - python
+
+test:
+  imports:
+    - affinegap
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/datamade/affinegap
+  summary: A Cython implementation of the affine gap string distance
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - osamples
+    - izahn

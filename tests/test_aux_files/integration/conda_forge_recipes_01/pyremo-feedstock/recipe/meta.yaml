@@ -1,0 +1,51 @@
+{% set name = "pyremo" %}
+{% set version = "0.7.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 3b25ab65c8121592b36bd4eac29dbc78ddeb17ffcb1e46455f8e51e2622b7c99
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  entry_points:
+    - prsint = pyremo.cli:prsint
+    - pyremo-analysis = pyremo.cli:main_analysis
+    - pradd-vars = pyremo.cli:add_variables
+
+requirements:
+  host:
+    - pip
+    - python >=3.7
+    - setuptools_scm
+
+  run:
+    - python >=3.7
+    - numpy <1.26.3
+    - pooch >=1.0
+    - xarray >=0.20
+    - py-cordex >=0.4.0
+    - xesmf >=0.7.0
+    - cf_xarray >=0.8.0
+    - setuptools >=40.4
+
+test:
+  imports:
+    - pyremo
+
+about:
+  home: https://github.com/remo-rcm/pyremo
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: processing tools for the regional climate model REMO
+  doc_url: https://pyremo.readthedocs.io
+  dev_url: https://github.com/remo-rcm/pyremo
+
+extra:
+  recipe-maintainers:
+    - larsbuntemeyer

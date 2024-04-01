@@ -1,0 +1,48 @@
+{% set name = "atomic-counter" %}
+{% set version = "0.1.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/a/atomic_counter/atomic_counter-{{ version }}.tar.gz
+  sha256: 39e6f10d0240af39b606dbf7f0b92c4e795dc7fce31abd3543a454ccae2d6586
+
+build:
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 1
+
+requirements:
+  build:
+    - {{ compiler('rust') }}
+    - {{ compiler('c') }}
+    - maturin
+  host:
+    - python
+    - pip
+    - maturin
+  run:
+    - python
+    - python-dateutil
+
+test:
+  imports:
+    - atomic_counter
+  requires:
+    - pip
+  commands:
+    - pip check
+
+about:
+  home: https://github.com/timkpaine/atomic-counter
+  summary: 'Atomic counters'
+  description: |
+    `atomic-counter` is a rust library for generating a monotonically increasing sequence of integers. Depending on the particular configuration of the counter, the generated sequence will be produce unique numbers down to the nanosecond, regardless of memory state.
+  license: Apache-2.0
+  license_family: Apache
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - timkpaine

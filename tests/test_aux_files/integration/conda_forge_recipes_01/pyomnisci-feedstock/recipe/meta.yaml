@@ -1,0 +1,53 @@
+{% set name = "pyomnisci" %}
+{% set version = "0.28.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: adc518d0caab317da34a150c77722073c732a5a7b351f75629e9df69436f6a98
+
+build:
+  number: 1
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps
+
+requirements:
+  host:
+    - python >=3.7
+    - pip
+    - setuptools
+    - setuptools-scm
+    - wheel
+  run:
+    - python >=3.7
+    - pyarrow 3.0.0
+    - pyomniscidb >=5.5.0
+    - shapely
+    - sqlalchemy >=1.3
+    - pandas
+    - packaging >=20.0
+    - requests >=2.23.0
+    - numba >=0.49  # keep consistency with cudf 0.15
+
+test:
+  imports:
+    - pyomnisci
+
+about:
+  home: https://github.com/omnisci/{{ name }}
+  license: Apache-2.0
+  license_family: Apache
+  license_file: LICENSE.md
+  summary: This package enables using common Python data science toolkits with OmniSciDB
+  description: |
+    This package enables using common Python data science toolkits with OmniSciDB. It brings 
+    data frame support on CPU and GPU as well as support for arrow.
+  doc_url: https://{{ name }}.readthedocs.io/
+  dev_url: https://github.com/omnisci/{{ name }}
+
+extra:
+  recipe-maintainers:
+    - xmnlab

@@ -1,0 +1,41 @@
+{% set name = "hijridate" %}
+{% set version = "2.4.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 19b81ba7341cdc11011ff88401b437c0bd1188473921d38fe01b78f8c09735ad
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.7
+    - pip
+  run:
+    - python >=3.7
+
+test:
+  imports:
+    - hijridate
+  requires:
+    - pip
+  commands:
+    - pip check
+
+about:
+  home: https://github.com/dralshehri/hijridate
+  summary: Accurate Hijri-Gregorian dates converter based on the Umm al-Qura calendar
+  license: MIT
+  license_file: LICENSE
+  doc_url: https://hijridate.readthedocs.io/
+
+extra:
+  recipe-maintainers:
+    - dralshehri

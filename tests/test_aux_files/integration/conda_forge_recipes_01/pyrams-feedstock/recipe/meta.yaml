@@ -1,0 +1,52 @@
+{% set name = "pyrams" %}
+{% set version = "0.8.8" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/pyrams-{{ version }}.tar.gz
+  sha256: a825d55701290f3554166455d328be2293eb7d1cadf48d25b6b8b8c2dc804027
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - cartopy
+    - matplotlib-base
+    - metpy
+    - netcdf4
+    - numpy
+    - pandas
+    - python >=3.6
+    - shapely
+    - tqdm
+    - xarray >=v2022.03.0
+    - cf_xarray >=0.7.4
+    - pint >=0.18
+    - pint-xarray >=0.3
+
+test:
+  imports:
+    - pyrams
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/lsterzinger/pyrams
+  summary: Set of tools for working with RAMS model data. Documentation can be found here https://pyrams.readthedocs.io/en/stable/?badge=stable
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - lsterzinger

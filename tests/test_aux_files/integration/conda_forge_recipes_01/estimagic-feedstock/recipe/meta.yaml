@@ -1,0 +1,56 @@
+{% set name = "estimagic" %}
+{% set version = "0.4.6" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/estimagic-{{ version }}.tar.gz
+  sha256: e7d91debd0d5e6baf930f6983fd11fe5e904850893266a24d117ef6cec300f05
+
+build:
+  number: 0
+  noarch: python
+  entry_points:
+    - estimagic=estimagic.cli:cli
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.8
+    - setuptools-scm
+    - toml
+  run:
+    - bokeh <=2.4.3
+    - click
+    - cloudpickle
+    - joblib
+    - numpy >=1.17
+    - pandas >=1.0
+    - python >=3.8
+    - scipy >=1.7
+    - sqlalchemy >=1.3
+    - pybaum >=0.1.2
+    - plotly
+
+test:
+  imports:
+    - estimagic
+  commands:
+    - estimagic --help
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/OpenSourceEconomics/estimagic
+  summary: Tools for difficult nonlinear optimization problems.
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - janosg

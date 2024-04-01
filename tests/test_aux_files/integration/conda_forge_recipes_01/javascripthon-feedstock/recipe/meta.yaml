@@ -1,0 +1,44 @@
+{% set name = "javascripthon" %}
+{% set version = "0.12" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: ec00ba71991043069e436ae200b58a0e2532fba30fa456d6b4b51ff7fc5b797d
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+  entry_points:
+    - pj = metapensiero.pj.__main__:main
+
+requirements:
+  host:
+    - python >=3.7
+    - pip
+  run:
+    - python >=3.7
+    - setuptools
+    - dukpy
+
+test:
+  imports:
+    - metapensiero.pj
+  commands:
+    - pj --help
+
+about:
+  home: https://gitlab.com/metapensiero/metapensiero.pj
+  license: GPL-3.0-only
+  license_family: GPL
+  license_file: LICENSE.txt
+  summary: 'Javascript for refined palates: a Python 3 to ES6 Javascript translator.'
+
+extra:
+  recipe-maintainers:
+    - hoechenberger
+    - kastman

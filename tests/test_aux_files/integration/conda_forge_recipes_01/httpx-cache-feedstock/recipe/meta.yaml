@@ -1,0 +1,48 @@
+{% set version = "0.13.0" %}
+
+package:
+  name: httpx-cache
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/h/httpx-cache/httpx_cache-{{ version }}.tar.gz
+  sha256: 12a2798f968100f985b5d05600609fb96fc7053ec46063555f041e9a1c5f8306
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - hatchling
+    - pip
+    - python >=3.7
+  run:
+    - aiorwlock >=1.2.0,<2.0.0
+    - anyio >=3.4.0,<4.0.0
+    - attrs >=21.4.0,<24.0.0
+    - fasteners >=0.16.3,<0.18.0
+    - httpx >=0.23.0,<1.0
+    - msgpack-python >=1.0.3,<2.0.0
+    - python >=3.7
+
+test:
+  imports:
+    - httpx_cache
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/obendidi/httpx-cache
+  summary: Simple caching transport for httpx.
+  license: BSD-3-Clause
+  license_file: LICENSE
+  doc_url: https://obendidi.github.io/httpx-cache
+
+extra:
+  recipe-maintainers:
+    - obendidi
+    - ludaavics

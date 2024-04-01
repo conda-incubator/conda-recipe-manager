@@ -1,0 +1,51 @@
+{% set name = "pymovements" %}
+{% set version = "0.17.3" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/pymovements-{{ version }}.tar.gz
+  sha256: db50ce1e0808ea14bba990876ce2ba305c0dd88b78501b82c719d7bc9b7be56d
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.9
+    - setuptools >=42
+    - wheel
+    - pip
+  run:
+    - python >=3.9
+    - matplotlib-base >=3.5.0,<3.9
+    - numpy >=1.20.0,<2
+    - pandas >1.2.0,<3
+    - polars >=0.19.14,<0.19.16
+    - pyarrow >=11.0.0,<15
+    - pyopenssl >=16.0.0,<24.0.0
+    - scipy >=1.8.0,<2
+    - tqdm >=4.27.0,<5
+    - typing_extensions >=4.0.0
+
+test:
+  imports:
+    - pymovements
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/aeye-lab/pymovements
+  summary: A python package for processing eye movement data
+  license: MIT
+  license_file: LICENSE.txt
+
+extra:
+  recipe-maintainers:
+    - dkrako

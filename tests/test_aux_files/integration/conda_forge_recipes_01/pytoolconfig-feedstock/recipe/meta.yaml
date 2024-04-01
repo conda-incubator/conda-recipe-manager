@@ -1,0 +1,44 @@
+{% set version = "1.2.5" %}
+
+package:
+  name: pytoolconfig
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/p/pytoolconfig/pytoolconfig-{{ version }}.tar.gz
+  sha256: a50f9dfe23b03a9d40414c1fdf902fefbeae12f2ac75a3c8f915944d6ffac279
+
+build:
+  script: {{ PYTHON }} -m pip install . -vv
+  noarch: python
+  number: 0
+
+requirements:
+  host:
+    - pip <22
+    - pdm
+    - pdm-pep517 >=1.0.5
+    - python >=3.7
+  run:
+    - packaging >=22.0
+    - python >=3.7
+    - tomli >=2.0.1
+    - typing-extensions >=4.4.0
+
+test:
+  imports:
+    - pytoolconfig
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://pypi.org/project/pytoolconfig
+  summary: Python tool configuration
+  license: LGPL-3.0-or-later
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - jan-janssen

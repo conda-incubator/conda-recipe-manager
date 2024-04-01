@@ -1,0 +1,83 @@
+{% set version = "0.4.16" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-ggfortify
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/ggfortify_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/ggfortify/ggfortify_{{ version }}.tar.gz
+  sha256: bb1bee685cb97a9ac1b1a6592b96571752a9e195575a1584f1c046c53c510316
+
+build:
+  merge_build_host: true  # [win]
+  number: 1
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+    - r-dplyr >=0.3
+    - r-ggplot2 >=2.0.0
+    - r-gridextra
+    - r-scales
+    - r-stringr
+    - r-tibble
+    - r-tidyr
+  run:
+    - r-base
+    - r-dplyr >=0.3
+    - r-ggplot2 >=2.0.0
+    - r-gridextra
+    - r-scales
+    - r-stringr
+    - r-tibble
+    - r-tidyr
+
+test:
+  commands:
+    - $R -e "library('ggfortify')"           # [not win]
+    - "\"%R%\" -e \"library('ggfortify')\""  # [win]
+
+about:
+  home: https://github.com/sinhrks/ggfortify
+  license: GPL-2.0-only
+  summary: Unified plotting tools for statistics commonly used, such as GLM, time series, PCA families, clustering and survival analysis. The package offers a single plotting interface for these analysis results and plots in a unified style using 'ggplot2'.
+  license_family: GPL2
+  license_file: {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-2
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+    - ocefpaf
+
+# Package: ggfortify
+# Type: Package
+# Title: Data Visualization Tools for Statistical Analysis Results
+# Version: 0.4.6
+# Date: 2019-03-20
+# Authors@R: c( person("Masaaki", "Horikoshi", role = c("aut"), email = "sinhrks@gmail.com"), person("Yuan", "Tang", role = c("aut", "cre"), email = "terrytangyuan@gmail.com", comment = c(ORCID = "0000-0001-5243-233X")), person("Austin", "Dickey", role = c("ctb")), person("Matthias", "Grenie", role = c("ctb")), person("Ryan", "Thompson", role = c("ctb")), person("Luciano", "Selzer", role = c("ctb")), person("Dario", "Strbenac", role = c("ctb")), person("Kirill", "Voronin", role = c("ctb")) )
+# Maintainer: Yuan Tang <terrytangyuan@gmail.com>
+# URL: https://github.com/sinhrks/ggfortify
+# BugReports: https://github.com/sinhrks/ggfortify/issues
+# Encoding: UTF-8
+# Description: Unified plotting tools for statistics commonly used, such as GLM, time series, PCA families, clustering and survival analysis. The package offers a single plotting interface for these analysis results and plots in a unified style using 'ggplot2'.
+# License: GPL-2
+# VignetteBuilder: knitr
+# Depends: methods, ggplot2 (>= 2.0.0)
+# Imports: dplyr (>= 0.3), tidyr, gridExtra, grid, scales, stringr, tibble
+# Suggests: testthat, cluster, changepoint, dlm, fGarch, forecast, ggrepel, glmnet, grDevices, KFAS, knitr, lintr, mapdata, MASS, MSwM, nlme, raster, ROCR, sp, stats, strucchange, survival, timeSeries, tseries, utils, vars, xts, zoo, lfda
+# RoxygenNote: 6.1.0
+# NeedsCompilation: no
+# Packaged: 2019-03-20 03:33:20 UTC; yuan.tang
+# Author: Masaaki Horikoshi [aut], Yuan Tang [aut, cre] (<https://orcid.org/0000-0001-5243-233X>), Austin Dickey [ctb], Matthias Grenie [ctb], Ryan Thompson [ctb], Luciano Selzer [ctb], Dario Strbenac [ctb], Kirill Voronin [ctb]
+# Repository: CRAN
+# Date/Publication: 2019-03-20 07:00:07 UTC

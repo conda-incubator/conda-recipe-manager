@@ -1,0 +1,52 @@
+{% set name = "sketchnu" %}
+{% set version = "1.4.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/mhendrey/sketchnu/archive/v{{ version }}.tar.gz
+  sha256: 56c2b614332ab2890b7c2333fbda5b12d5f903ce387e8de6d071c9a5f01e5eb8
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.8
+  run:
+    - numba >=0.54.1
+    - psutil
+    - python >=3.8
+
+test:
+  imports:
+    - sketchnu
+  requires:
+    - pip
+    - pytest
+  source_files:
+    - tests
+  commands:
+    - pip check
+    - pytest tests
+
+about:
+  home: https://github.com/mhendrey/sketchnu
+  summary: "Numba implementations of some sketch algorithms"
+  description: |
+    Numba implementations of the HyperLogLog++, count-min sketches with conservative
+    updating & optional log-based counters, and topkapi heavy-hitters. Also, includes
+    helper functions to use multiprocessing to speed up processing.
+  license: GPL-3.0-or-later
+  license_file: LICENSE
+  doc_url: https://mhendrey.github.io/sketchnu
+  dev_url: https://github.com/mhendrey/sketchnu
+
+extra:
+  recipe-maintainers:
+    - mhendrey

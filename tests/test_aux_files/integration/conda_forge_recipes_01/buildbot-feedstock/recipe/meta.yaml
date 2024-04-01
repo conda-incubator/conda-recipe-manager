@@ -1,0 +1,66 @@
+{% set name = "buildbot" %}
+{% set version = "3.11.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: aee616d6c5681af14c8be352fb188db27d08ab64662a56b1e1bc47818ae3e996
+
+build:
+  number: 0
+  noarch: python
+  entry_points:
+    - buildbot=buildbot.scripts.runner:run
+    - buildbot_windows_service=buildbot.scripts.windows_service:HandleCommandLine
+  script: '{{ PYTHON }} -m pip install . -vv '
+
+requirements:
+  host:
+    - pip
+    - python >=3.8
+    - setuptools >=8.0
+  run:
+    - python >=3.8
+    - setuptools >=8.0
+    - twisted >=18.7.0,<=22.10.0
+    - jinja2 >=2.1
+    - msgpack-python >=0.6.0
+    - croniter >=1.3.0
+    - importlib-resources >=5
+    - zope.interface >=4.1.1
+    - sqlalchemy >=1.3.0,<1.5
+    - alembic >=1.6.0
+    - python-dateutil >=1.5
+    - txaio >=2.2.2
+    - autobahn >=0.16.0
+    - packaging
+    - pyjwt
+    - pyyaml
+    - unidiff >=0.7.5
+
+test:
+  imports:
+    - buildbot
+    - buildbot.changes
+  commands:
+    - pip check
+    - buildbot --help
+    - buildbot_windows_service --help  # [win]
+  requires:
+    - pip
+
+about:
+  home: https://buildbot.net/
+  license: GPL-2.0
+  license_file: COPYING
+  summary: Python-based continuous integration testing framework
+  doc_url: https://docs.buildbot.net
+
+extra:
+  recipe-maintainers:
+    - kszucs
+    - xhochy
+    - marcelotrevisani

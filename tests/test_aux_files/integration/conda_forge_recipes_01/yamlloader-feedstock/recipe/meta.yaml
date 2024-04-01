@@ -1,0 +1,47 @@
+{% set name = "yamlloader" %}
+{% set version = "1.3.2" %}
+{% set sha256 = "7dbd98421d8090c521655f1b06ca030067f29df5253a8878126bce3a90f56817" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - python >=3.7
+    - pip
+  run:
+    - python >=3.7
+    - pyyaml
+
+test:
+  imports:
+    - yamlloader
+
+about:
+  home: https://github.com/Phynix/yamlloader
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: Loaders and dumpers for PyYAML
+
+  description: |
+    This module provides loaders and dumpers for PyYAML. Currently, an OrderedDict
+    loader/dumper is implemented, allowing to keep items order when loading respectively
+    dumping a file from/to an OrderedDict.
+  dev_url: https://github.com/Phynix/yamlloader
+
+extra:
+  recipe-maintainers:
+    - jonas-eschle
+    - rasmusagren

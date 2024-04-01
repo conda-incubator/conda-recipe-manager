@@ -1,0 +1,54 @@
+{% set name = "rosdistro" %}
+{% set version = "0.9.0" %}
+{% set sha256 = "b49d9c3c65cc1dff3b56ba61559d70439597417491e1525e4e314f15503517f9" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://github.com/ros-infrastructure/{{ name }}/archive/{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  number: 1
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+  host:
+    - python
+    - pip
+    - setuptools
+  run:
+    - python
+    - setuptools
+    - pyyaml
+    - catkin_pkg
+    - rospkg
+
+test:
+  commands:
+    - rosdistro_build_cache --help
+    - rosdistro_freeze_source --help
+    - rosdistro_migrate_to_rep_141 --help
+    - rosdistro_migrate_to_rep_143 --help
+    - rosdistro_reformat --help
+  imports:
+    - rosdistro
+
+about:
+  home: http://wiki.ros.org/rosdistro
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE.txt
+  summary: Tools to work with catkinized rosdistro files
+  dev_url: https://github.com/ros-infrastructure/rosdistro
+
+extra:
+  recipe-maintainers:
+    - wolfv
+    - seanyen

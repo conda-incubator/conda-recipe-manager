@@ -1,0 +1,75 @@
+{% set version = '2.3' %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-matrixeqtl
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/MatrixEQTL_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/MatrixEQTL/MatrixEQTL_{{ version }}.tar.gz
+  sha256: 881acaba080a836e71302f06b11cbc78c6a5fdbc89d6c8979b84c81657812683
+
+build:
+  merge_build_host: True  # [win]
+  number: 3
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+  run:
+    - r-base
+
+test:
+  commands:
+    - $R -e "library('MatrixEQTL')"           # [not win]
+    - "\"%R%\" -e \"library('MatrixEQTL')\""  # [win]
+
+about:
+  home: http://www.bios.unc.edu/research/genomic_software/Matrix_eQTL/
+  license: LGPL-3
+  summary: Matrix eQTL is designed for fast eQTL analysis on large datasets. Matrix eQTL can
+    test for association between genotype and gene expression using linear regression
+    with either additive or ANOVA genotype effects. The models can include covariates
+    to account for factors as population stratification, gender, and clinical variables.
+    It also supports models with heteroscedastic and/or correlated errors, false discovery
+    rate estimation and separate treatment of local (cis) and distant (trans) eQTLs.
+    For more details see Shabalin (2012) <doi:10.1093/bioinformatics/bts163>.
+  license_family: LGPL
+  license_file:
+    - '{{ environ["PREFIX"] }}/lib/R/share/licenses/LGPL-3'
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+    - MathiasHaudgaard
+    - FrodePedersen
+    - ArneKr
+
+
+# Package: MatrixEQTL
+# Type: Package
+# Title: Matrix eQTL: Ultra Fast eQTL Analysis via Large Matrix Operations
+# Version: 2.3
+# Date: 2019-12-04
+# Authors@R: person(  "Andrey A", "Shabalin", role = c("aut", "cre"), email = "andrey.shabalin@gmail.com", comment = c(ORCID = "0000-0003-0309-6821"))
+# Description: Matrix eQTL is designed for fast eQTL analysis on large datasets. Matrix eQTL can test for association between genotype and gene expression using linear regression with either additive or ANOVA genotype effects. The models can include covariates to account for factors as population stratification, gender, and clinical variables. It also supports models with heteroscedastic and/or correlated errors, false discovery rate estimation and separate treatment of local (cis) and distant (trans) eQTLs. For more details see Shabalin (2012) <doi:10.1093/bioinformatics/bts163>.
+# License: LGPL-3
+# LazyLoad: yes
+# BugReports: https://github.com/andreyshabalin/MatrixEQTL/issues
+# URL: http://www.bios.unc.edu/research/genomic_software/Matrix_eQTL/
+# Depends: R (>= 2.12.0), methods, utils, graphics, stats
+# NeedsCompilation: no
+# Packaged: 2019-12-05 00:23:41 UTC; Andrey
+# Author: Andrey A Shabalin [aut, cre] (<https://orcid.org/0000-0003-0309-6821>)
+# Maintainer: Andrey A Shabalin <andrey.shabalin@gmail.com>
+# Repository: CRAN
+# Date/Publication: 2019-12-22 10:06:37 UTC

@@ -1,0 +1,59 @@
+{% set name = "valgrind" %}
+{% set version = "3.22.0" %}
+{% set sha256 = "c811db5add2c5f729944caf47c4e7a65dcaabb9461e472b578765dd7bf6d2d4c" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://sourceware.org/pub/{{ name }}/{{ name }}-{{ version }}.tar.bz2
+  sha256: {{ sha256 }}
+  patches:   # [osx]
+    - 0001-added-mach_voucher_types-include.patch  # [osx]
+
+build:
+  number: 1
+  skip: true  # [not linux]
+
+requirements:
+  build:
+    - {{ compiler("cxx") }}
+    - make
+    - pkg-config
+    - perl
+  host:
+    - zlib
+  run:
+    - zlib
+
+test:
+  commands:
+    - valgrind --help
+    - valgrind ls -l
+
+about:
+  home: http://valgrind.org
+  license: GPL-2.0-or-later
+  license_family: GPL
+  license_file: COPYING
+  summary: A tool for detecting memory errors, and an instrumentation framework for building dynamic analysis tools.
+
+  description: |
+    Valgrind is an instrumentation framework for building dynamic analysis tools. There are Valgrind tools that can
+    automatically detect many memory management and threading bugs, and profile your programs in detail. You can also use
+    Valgrind to build new tools.  The Valgrind distribution currently includes six production-quality tools: a memory
+    error detector, two thread error detectors, a cache and branch-prediction profiler, a call-graph generating cache and
+    branch-prediction profiler, and a heap profiler. It also includes three experimental tools: a stack/global array
+    overrun detector, a second heap profiler that examines how heap blocks are used, and a SimPoint basic block vector
+    generator.
+  doc_url: http://valgrind.org/docs/manual/manual.html
+  dev_url: http://valgrind.org/downloads/repository.html
+
+extra:
+  recipe-maintainers:
+    - jakirkham
+    - notestaff
+    - scopatz
+    - saraedum

@@ -1,0 +1,48 @@
+{% set name = "pyzotero" %}
+{% set version = "1.5.18" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 42cecd858703bab49ee92b68ccd1b1d1cbbf85d3f9c889963f352badf8f1a42f
+
+build:
+  noarch: python
+  number: 0
+  script:
+    - rm -f pyproject.toml
+    - {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+    - setuptools-scm
+  run:
+    - python >=3.6
+    - feedparser >=6
+    - pytz
+    - requests >=2.21.0
+    - pathlib
+    - bibtexparser
+
+test:
+  imports:
+    - pyzotero.zotero
+
+about:
+  home: https://github.com/urschrei/pyzotero
+  license: MIT
+  license_family: MIT
+  license_file: license.txt
+  summary: Python wrapper for the Zotero API
+  doc_url: http://pyzotero.readthedocs.org
+  dev_url: https://github.com/urschrei/pyzotero
+
+extra:
+  recipe-maintainers:
+    - moorepants
+    - urschrei

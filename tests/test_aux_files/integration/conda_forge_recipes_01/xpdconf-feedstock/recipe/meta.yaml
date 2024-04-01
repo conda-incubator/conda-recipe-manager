@@ -1,0 +1,44 @@
+{% set name = "xpdconf" %}
+{% set version = "0.4.6" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/xpdconf-{{ version }}.tar.gz
+  sha256: 5be6d1906ac889286748785068b8579184b92b8fa9abf9bdd98a81f361557f87
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install --no-deps .
+  number: 0
+
+requirements:
+  host:
+    - python >=3.8
+    - pip
+  run:
+    - python >=3.8
+    - databroker
+    - pyyaml
+
+test:
+  imports:
+    - xpdconf
+    - xpdconf.conf
+
+about:
+  home: http://github.com/xpdAcq/xpdConf
+  license: BSD-3-Clause 
+  license_family: BSD
+  license_file: LICENSE
+  summary: 'Configuration for XPD beamlines'
+  doc_url: https://github.com/xpdAcq/xpdConf
+  dev_url: https://github.com/xpdAcq/xpdConf
+
+extra:
+  recipe-maintainers:
+    - mrakitin
+    - sbillinge
+    - st3107

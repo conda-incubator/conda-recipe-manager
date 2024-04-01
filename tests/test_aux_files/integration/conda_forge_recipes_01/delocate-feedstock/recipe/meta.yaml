@@ -1,0 +1,44 @@
+{% set version = "0.11.0" %}
+
+package:
+  name: delocate
+  version: {{ version }}
+
+source:
+  fn: delocate-{{ version }}.tar.gz
+  url: https://pypi.io/packages/source/d/delocate/delocate-{{ version }}.tar.gz
+  sha256: 63b0b66467c11fa096aa3179b84d9cef1ab6dc6b0bee78bd7d5dd15814776515
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - python >=3.6
+    - packaging
+    - typing-extensions
+    - macholib
+
+test:
+  imports:
+    - delocate
+  commands:
+    - delocate-listdeps -h
+    - delocate-wheel -h
+
+about:
+  home: https://github.com/matthew-brett/delocate
+  license: BSD-2-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: Move OSX dynamic libraries into package
+
+extra:
+  recipe-maintainers:
+    - jschueller
+    - isuruf

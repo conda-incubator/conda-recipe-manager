@@ -1,0 +1,115 @@
+{% set name = "gst-plugins-bad" %}
+{% set version = "1.22.9" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://gstreamer.freedesktop.org/src/gst-plugins-bad/gst-plugins-bad-{{ version }}.tar.xz
+  sha256: 1bc65d0fd5f53a3636564efd3fcf318c3edcdec39c4109a503c1fc8203840a1d
+
+build:
+  number: 0
+  run_exports:
+    # remove symbols at .90 patch releases just before minor versions?
+    #    https://abi-laboratory.pro/tracker/timeline/gstreamer/
+    - {{ pin_subpackage('gst-plugins-bad', max_pin='x.x') }}
+  ignore_run_exports_from:   # [win]
+    - python                 # [win]
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - {{ cdt('mesa-libgl-devel') }}      # [linux]
+    - {{ cdt('libdrm-devel') }}          # [linux]
+    - {{ cdt('mesa-dri-drivers') }}      # [linux]
+    - {{ cdt('libselinux-devel') }}      # [linux]
+    - gettext                            # [osx and build_platform != target_platform]
+    - pkg-config
+    - perl
+    - libtool  # [unix]
+    # hmaarrfk 2023/12/10
+    # Meson on windows seems to have a hard time
+    # finding pkg-config with python 3.12
+    - python 3.11            # [win]
+    - meson
+    - ninja
+    # hmaarrfk 2022/11/20
+    # Ensure that we have a consistent version of openssl
+    # between build and host to avoid compilation problems in windows
+    - openssl
+    - zlib
+  host:
+    - python 3.11            # [win]
+    - libiconv
+    - gstreamer         {{ version }}
+    - gst-plugins-base  {{ version }}
+    - gobject-introspection              # [linux]
+    - glib
+    - gettext                            # [osx]
+    - libxcb                             # [linux]
+    - pthread-stubs                      # [linux]
+    - openssl
+    - libxml2
+    - libsndfile
+    - libopus
+    # hmaarrfk
+    # I'm pretty sure when we removed the static libraries
+    # pkgconfig stopped working for anything that links privately to zlib
+    - zlib
+    - xorg-libx11                        # [linux]
+    - xorg-libxfixes                     # [linux]
+    - xorg-libxext                       # [linux]
+    - xorg-xproto                        # [linux]
+    - xorg-libx11                        # [linux]
+    - expat                              # [linux]
+    - xorg-libxrender                    # [linux]
+    - xorg-libxdamage                    # [linux]
+    - xorg-libxxf86vm                    # [linux]
+    - xorg-libxau                        # [linux]
+
+test:
+  commands:
+    # fbdevsink = Linux framebuffer video sink
+    - test -f $PREFIX/lib/gstreamer-1.0/libgstfbdevsink${SHLIB_EXT}  # [linux]
+    - test -f $PREFIX/lib/gstreamer-1.0/libgstaiff${SHLIB_EXT}  # [not win]
+    - test -f $PREFIX/lib/gstreamer-1.0/libgstaudiovisualizers${SHLIB_EXT}  # [not win]
+    - test -f $PREFIX/lib/gstreamer-1.0/libgstcoloreffects${SHLIB_EXT}  # [not win]
+    - test -f $PREFIX/lib/gstreamer-1.0/libgstgeometrictransform${SHLIB_EXT}  # [not win]
+    - test -f $PREFIX/lib/gstreamer-1.0/libgstjpegformat${SHLIB_EXT}  # [not win]
+    - test -f $PREFIX/lib/gstreamer-1.0/libgstmpegpsmux${SHLIB_EXT}  # [not win]
+    - test -f $PREFIX/lib/gstreamer-1.0/libgstrtmp2${SHLIB_EXT}  # [not win]
+    - test -f $PREFIX/lib/gstreamer-1.0/libgstsndfile${SHLIB_EXT}  # [not win]
+    - test -f $PREFIX/lib/gstreamer-1.0/libgsttranscode${SHLIB_EXT}  # [not win]
+    - test -f $PREFIX/lib/gstreamer-1.0/libgstvideofiltersbad${SHLIB_EXT}  # [not win]
+    - test -f $PREFIX/lib/gstreamer-1.0/libgstvideoparsersbad${SHLIB_EXT}  # [not win]
+    - if not exist %LIBRARY_LIB%\\gstreamer-1.0\\gstaiff.dll exit 1  # [win]
+    - if not exist %LIBRARY_LIB%\\gstreamer-1.0\\gstaudiovisualizers.dll exit 1  # [win]
+    - if not exist %LIBRARY_LIB%\\gstreamer-1.0\\gstcoloreffects.dll exit 1  # [win]
+    - if not exist %LIBRARY_LIB%\\gstreamer-1.0\\gstd3d.dll exit 1  # [win]
+    - if not exist %LIBRARY_LIB%\\gstreamer-1.0\\gstdirectsoundsrc.dll exit 1  # [win]
+    - if not exist %LIBRARY_LIB%\\gstreamer-1.0\\gstgeometrictransform.dll exit 1  # [win]
+    - if not exist %LIBRARY_LIB%\\gstreamer-1.0\\gstjpegformat.dll exit 1  # [win]
+    - if not exist %LIBRARY_LIB%\\gstreamer-1.0\\gstmpegpsmux.dll exit 1  # [win]
+    - if not exist %LIBRARY_LIB%\\gstreamer-1.0\\gstrtmp2.dll exit 1  # [win]
+    - if not exist %LIBRARY_LIB%\\gstreamer-1.0\\gstsndfile.dll exit 1  # [win]
+    - if not exist %LIBRARY_LIB%\\gstreamer-1.0\\gsttranscode.dll exit 1  # [win]
+    - if not exist %LIBRARY_LIB%\\gstreamer-1.0\\gstvideofiltersbad.dll exit 1  # [win]
+    - if not exist %LIBRARY_LIB%\\gstreamer-1.0\\gstvideoparsersbad.dll exit 1  # [win]
+    - if not exist %LIBRARY_LIB%\\gstreamer-1.0\\gstwasapi.dll exit 1  # [win]
+    - gst-inspect-1.0 --plugin audiovisualizers
+
+about:
+  home: http://gstreamer.freedesktop.org/
+  license: LGPL-2.1-or-later
+  license_file: COPYING
+  summary: GStreamer Bad Plug-ins
+  dev_url: https://gitlab.freedesktop.org/gstreamer/gstreamer/-/tree/main/subprojects/gst-plugins-bad
+
+extra:
+  recipe-maintainers:
+    - scopatz
+    - kuepe-sl
+    - hmaarrfk

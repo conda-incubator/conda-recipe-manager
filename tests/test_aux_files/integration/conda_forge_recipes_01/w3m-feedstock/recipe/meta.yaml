@@ -1,0 +1,56 @@
+{% set name = "w3m" %}
+{% set version = "0.5.3+git20220429" %}
+{% set sha256 = "6d76fcccb7c94658f2753f0777f69283d5cb447004a0d0d3087c1d873edc0af3" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://github.com/tats/w3m/archive/refs/tags/v{{ version }}.tar.gz
+  # original url: https://downloads.sourceforge.net/project/{{ name }}/{{ name }}/{{ name }}-{{ version }}/{{ name }}-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+build:
+  number: 1
+  skip: True  # [win]
+
+requirements:
+  build:
+    - pkg-config
+    - make
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+  host:
+    - bdw-gc
+    - gettext
+    - libiconv
+    - ncurses
+    - openssl
+    - readline
+  run:
+    - bdw-gc
+    - gettext
+    - libiconv
+    - ncurses
+    - openssl
+    - readline
+
+test:
+  commands:
+    - w3m -help | grep usage
+
+about:
+  home: http://w3m.sourceforge.net
+  license: MIT
+  license_family: MIT
+  license_file: COPYING
+  summary: 'Text mode web browser/pager.'
+
+  # The remaining entries in this section are optional, but recommended
+  description: |
+    w3m text mode web browser/pager.  Works well with an Emacs front end called emacs-w3m.
+
+extra:
+  recipe-maintainers:
+    - notestaff

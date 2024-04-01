@@ -1,0 +1,55 @@
+{% set version = "0.12.1" %}
+
+package:
+  name: pvcaptest
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/c/captest/captest-{{ version }}.tar.gz
+  sha256: d178179e6e150d916ce671bf6ba6968efa4fb8f0eb16bb9a3b09bb7d29d6ac86 
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.8
+    - versioneer
+
+  run:
+    - bokeh >=3
+    - matplotlib-base >=2
+    - numpy >=1.13.0
+    - pandas >=1
+    - python >=3.8
+    - python-dateutil >=2.5
+    - scikit-learn >=0.19
+    - statsmodels >=0.8
+    - holoviews >=1.14.8
+    - pvlib-python >=0.9
+    - param
+    - colorcet
+    - openpyxl
+    - panel
+
+test:
+  imports:
+    - captest
+  requires:
+    - pip
+  commands:
+    - pip check
+
+about:
+  home: http://github.com/pvcaptest/pvcaptest
+  license: MIT
+  license_file: ./LICENSE.txt
+  summary: Framework and methods to facilitate photovoltaic facility capacity testing following ASTM E2848.
+  doc_url: https://pvcaptest.readthedocs.io/en/latest/
+
+extra:
+  recipe-maintainers:
+    - bt-

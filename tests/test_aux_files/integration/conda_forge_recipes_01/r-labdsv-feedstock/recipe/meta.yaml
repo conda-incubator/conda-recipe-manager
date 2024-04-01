@@ -1,0 +1,79 @@
+{% set version = "2.1-0" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-labdsv
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/labdsv_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/labdsv/labdsv_{{ version }}.tar.gz
+  sha256: 99da92515e9aa49ea7f3df7e301ef714c57054a3838139cd3fd798531d625cd1
+
+build:
+  merge_build_host: true  # [win]
+  number: 1
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ compiler('c') }}              # [not win]
+    - {{ compiler('m2w64_c') }}        # [win]
+    - {{ compiler('fortran') }}        # [not win]
+    - {{ compiler('m2w64_fortran') }}  # [win]
+    - {{ posix }}filesystem        # [win]
+    - {{ posix }}make
+    - {{ posix }}sed               # [win]
+    - {{ posix }}coreutils         # [win]
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+    - r-mass
+    - r-rtsne
+    - r-cluster
+    - r-mgcv
+  run:
+    - r-base
+    - {{ native }}gcc-libs         # [win]
+    - r-mass
+    - r-rtsne
+    - r-cluster
+    - r-mgcv
+
+test:
+  commands:
+    - $R -e "library('labdsv')"           # [not win]
+    - "\"%R%\" -e \"library('labdsv')\""  # [win]
+
+about:
+  home: http://ecology.msu.montana.edu/labdsv/R
+  license: GPL-2.0-or-later
+  summary: A variety of ordination and community analyses useful in analysis of data sets in community ecology.   Includes many of the common ordination methods, with  graphical routines to facilitate their interpretation,  as well as several novel analyses.
+  license_family: GPL3
+  license_file: {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-2
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+    - nsoranzo
+
+# Package: labdsv
+# Version: 2.0-1
+# Title: Ordination and Multivariate Analysis for Ecology
+# Author: David W. Roberts <droberts@montana.edu>
+# Maintainer: David W. Roberts <droberts@montana.edu>
+# Depends: R (>= 2.10), mgcv
+# Imports: cluster, Rtsne, MASS
+# Suggests: optpart
+# Enhances: vegan
+# Description: A variety of ordination and community analyses useful in analysis of data sets in community ecology.   Includes many of the common ordination methods, with  graphical routines to facilitate their interpretation,  as well as several novel analyses.
+# License: GPL (>= 2)
+# URL: http://ecology.msu.montana.edu/labdsv/R
+# Packaged: 2019-08-04 10:08:57 UTC; dvrbts
+# NeedsCompilation: yes
+# Repository: CRAN
+# Date/Publication: 2019-08-04 12:00:02 UTC

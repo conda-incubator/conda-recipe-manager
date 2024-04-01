@@ -1,0 +1,45 @@
+{% set name = "napari-labels-overlap" %}
+{% set version = "0.0.3" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/napari-labels-overlap-{{ version }}.tar.gz
+  sha256: 4da786d029ab2a58ae6d75289ee95c1041a9fd80a803ccff1e88ecabce77dc6f
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.7
+  run:
+    - napari
+    - napari-plugin-engine >=0.1.4
+    - python >=3.7
+    - scikit-image
+
+test:
+  imports:
+    - napari_labels_overlap
+  commands:
+    - pip list
+    # - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/chili-chiu/napari-labels-overlap
+  summary: create an overlap labels layer from two labels layers
+  license: BSD-3-Clause
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - goanpeca
+    - jaimergp

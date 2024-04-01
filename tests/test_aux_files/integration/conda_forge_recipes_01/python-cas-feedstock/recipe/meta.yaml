@@ -1,0 +1,44 @@
+{% set name = "python-cas" %}
+{% set version = "1.6.0" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/python-cas-{{ version }}.tar.gz
+  sha256: b8f1dcb1b6c56b3ff4f86bbef47bcdfcf932061ccd4812ae35e3f63954dfdb28
+
+build:
+  number: 1
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - lxml
+    - python >=3.6
+    - requests
+    - six
+
+test:
+  imports:
+    - cas
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/python-cas/python-cas
+  summary: Python CAS client library
+  license: MIT
+  license_file: LICENSE.txt
+
+extra:
+  recipe-maintainers:
+    - mxr-conda

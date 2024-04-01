@@ -1,0 +1,59 @@
+{% set name = "ndarray" %}
+{% set version = "1.6.4" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/ndarray/ndarray/archive/{{ version }}.tar.gz
+  sha256: a125dfcb3c5bdfd1ef9055cd4f2c3de60ad02abc53279dd25e28d155e786ebe0
+  patches:
+    - linux-aarch64.patch  # [aarch64]
+
+build:
+  number: 2
+  skip: true  # [win]
+  ignore_run_exports_from:
+    - numpy *
+    - pybind11
+    - libboost-devel
+
+requirements:
+  build:
+    - cmake
+    - m4
+    - {{ compiler('cxx') }}
+    - pkg-config
+    - ninja
+
+  host:
+    - libboost-devel
+    - fftw
+    - eigen
+    # following are test dependencies
+    - numpy *            # [build_platform == target_platform]
+    - pybind11 >2.2      # [build_platform == target_platform]
+
+test:
+  commands:
+    - test -f ${PREFIX}/include/ndarray.h  # [unix]
+    - test -f ${PREFIX}/include/ndarray/ArrayBaseN.h  # [unix]
+    - test -f ${PREFIX}/include/ndarray/detail/Core.h  # [unix]
+
+about:
+  home: https://github.com/ndarray/ndarray/
+  doc_url: https://ndarray.github.io/ndarray/
+  dev_url: https://github.com/ndarray/ndarray/
+  license: BSD-3-Clause
+  license_file: LICENSE
+  summary: NumPy-friendly multidimensional arrays in C++
+  description: |
+    ndarray is a template library that provides multidimensional array objects in C++, with an
+    interface and features designed to mimic the Python 'numpy' package as much as possible.
+
+extra:
+  recipe-maintainers:
+    - mwittgen
+    - brianv0
+    - TallJimbo

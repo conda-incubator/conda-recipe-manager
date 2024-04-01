@@ -1,0 +1,45 @@
+{% set name = "flatten_json" %}
+{% set version = "0.1.14" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 4008b1bd81743e6fcdc29ddbb640f5c1589376116e0c8f36cb4a0003d41fe102
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+  run:
+    - python >=3.6
+    - six
+
+test:
+  imports:
+    - flatten_json
+
+about:
+  home: https://github.com/amirziai/flatten
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE.txt
+  summary: Flatten JSON objects
+
+  description: |
+    Flattens JSON objects in Python. flatten_json flattens the hierarchy in
+    your object which can be useful if you want to force your objects into a table.
+  doc_url: https://github.com/amirziai/flatten
+  dev_url: https://github.com/amirziai/flatten
+
+extra:
+  recipe-maintainers:
+    - andreyz4k
+    - xhochy

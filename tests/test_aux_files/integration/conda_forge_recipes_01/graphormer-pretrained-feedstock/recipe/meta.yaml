@@ -1,0 +1,52 @@
+{% set name = "graphormer-pretrained" %}
+{% set version = "0.2.3" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/graphormer-pretrained-{{ version }}.tar.gz
+  sha256: 775018e909d7a04824025540e96cc358e7ada7f0b441f48e8f5464b5e96bb5a3
+
+build:
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+  number: 0
+  skip: true  # [win]
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+  host:
+    - python
+    - setuptools
+    - wheel
+    - cython
+    - numpy
+    - pip
+  run:
+    - python
+    - tqdm
+    - gcsfs
+    - pytorch >=1.10.2
+    - pytorch_geometric
+    - ogb
+    - tensorboardx
+    - fairseq >=0.12.3
+    - python-lmdb
+    - datamol
+    - {{ pin_compatible('numpy') }}
+
+test:
+  imports:
+    - graphormer_pretrained
+
+about:
+  home: https://github.com/maclandrol/graphormer-pretrained
+  summary: Packaging of Graphormer is a deep learning package by Microsoft that allows researchers and developers to train custom models for molecule modeling tasks.
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - maclandrol

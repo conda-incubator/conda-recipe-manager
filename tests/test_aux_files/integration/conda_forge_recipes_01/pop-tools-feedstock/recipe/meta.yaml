@@ -1,0 +1,61 @@
+{% set name = "pop-tools" %}
+{% set version = "2023.6.0" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/pop-tools-{{ version }}.tar.gz
+  sha256: 0543b21bdf67765641c5ddad150e7870f3b3f7f098a41aa75c761867b9003c66
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.7
+    - setuptools >=30.3.0
+    - setuptools_scm
+  run:
+    - dask >=2.14
+    - numba >=0.52
+    - numpy >=1.17.0
+    - pooch >=1.3.0
+    - python >=3.7
+    - pyyaml >=5.3.1
+    - xarray >=0.16.1
+
+test:
+  imports:
+    - pop_tools
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/NCAR/pop-tools
+  license: Apache-2.0
+  license_family: Apache
+  license_file: LICENSE
+  summary: Tools to support analysis of POP2-CESM model solutions with xarray
+  dev_url: https://github.com/NCAR/pop-tools
+  description: |
+    Tools to support analysis of the [Parallel Ocean Program v2(POP2)](http://www.cesm.ucar.edu/models/cesm1.0/pop2/doc/sci/POPRefManual.pdf) 
+    -- the ocean component of CESM -- model solutions with xarray.
+  doc_url: https://pop-tools.readthedocs.io
+
+extra:
+  recipe-maintainers:
+    - andersy005
+    - mnlevy1981
+    - matt-long
+    - mgrover1
+    - dcherian
+    - klindsay28
+    - gustavo-marques

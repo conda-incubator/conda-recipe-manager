@@ -1,0 +1,44 @@
+{% set name = "elastic-transport" %}
+{% set version = "8.13.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/elastic-transport-{{ version }}.tar.gz
+  sha256: 2410ec1ff51221e8b3a01c0afa9f0d0498e1386a269283801f5c12f98e42dc45
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - python >=3.6
+    - urllib3 >=1.26.2,<3
+    - certifi
+
+test:
+  imports:
+    - elastic_transport
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/elastic/elastic-transport-python
+  summary: Transport classes and utilities shared among Python Elastic client libraries
+  license: Apache-2.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - ezimuel
+    - joshmock
+    - pquentin

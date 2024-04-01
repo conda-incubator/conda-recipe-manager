@@ -1,0 +1,43 @@
+{% set name = "whey-pth" %}
+{% set version = "0.0.5" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/whey-pth-{{ version }}.tar.gz
+  sha256: cbfcc723bc587ecde44c6b0c83270673d38d88c3fc8f8268a49b21db1fd60747
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - dom-toml >=0.4.0
+    - python >=3.6
+    - whey >=0.0.15
+
+test:
+  imports:
+    - whey_pth
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/repo-helper/whey-pth
+  summary: Extension to whey to support .pth files.
+  license: MIT
+  license_file: LICENSE
+  doc_url: https://whey-pth.readthedocs.io/en/latest
+
+extra:
+  recipe-maintainers:
+    - domdfcoding

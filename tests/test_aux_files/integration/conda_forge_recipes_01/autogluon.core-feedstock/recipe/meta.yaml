@@ -1,0 +1,74 @@
+{% set name = "autogluon.core" %}
+{% set version = "1.0.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/autogluon/autogluon/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: a4d950b5c796a835c690d25dc2406ab35062a973ed70685f5b8f1e850b780bbc 
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install ./core -vv
+  number: 3
+  script_env:
+    - RELEASE=1
+
+requirements:
+  # adds osx_arm64 builds. See https://conda-forge.org/blog/posts/2020-10-29-macos-arm64/
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - cython                                 # [build_platform != target_platform]
+    - numpy  >=1.21,<1.29                    # [build_platform != target_platform]
+  host:
+    - python >=3.8,<3.12
+    - pip
+  # see https://github.com/autogluon/autogluon/blob/master/core/src/autogluon/core/_setup_utils.py
+  run:
+    - python >=3.8,<3.12
+    - boto3 >=1.10,<2
+    - numpy >=1.21,<1.29
+    - pandas >=2.0.0,<2.2.0
+    - scikit-learn >=1.0,<1.5  # >=1.3 conflicts with pytorch cuda version
+    - scipy >=1.5.4,<1.13
+    - psutil >=5.7.3,<6
+    - networkx >=3.0,<4
+    - tqdm >=4.38,<5
+    - pillow >=10.0.1,<11
+    - requests
+    - matplotlib-base
+    # not install ray by default for now to avoid grpcio pin
+    # - ray-default >=2.6.3,<2.7  # [not osx]
+    # - ray-tune >=2.6.3,<2.7  # [not osx]
+    - autogluon.common =={{ version }}
+
+test:
+  imports:
+    - autogluon.core
+  commands:
+    - python -c "from autogluon.core import __version__ as v; assert v == '{{ version }}', f'{v} != {{ version }}'"
+  requires:
+    - pip
+
+about:
+  home: https://pypi.org/project/autogluon.core
+  summary: AutoML for Image, Text, and Tabular Data
+  description: |
+    AutoGluon automates machine learning tasks enabling you to easily achieve strong 
+    predictive performance in your applications. With just a few lines of code, you 
+    can train and deploy high-accuracy machine learning and deep learning models on 
+    image, text, time series, and tabular data.  
+  dev_url: https://github.com/autogluon/autogluon/
+  license: Apache-2.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - suzhoum
+    - tonyhoo
+    - yinweisu
+    - giswqs
+    - Innixma

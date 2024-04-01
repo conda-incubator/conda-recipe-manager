@@ -1,0 +1,44 @@
+{% set name = "cliche" %}
+{% set version = "0.7.66" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/cliche-{{ version }}.tar.gz
+  sha256: 3bcfe6ebb17b24916995011b0c7fe45b28799a0cb8cc78585e47e14ab6099912
+
+
+build:
+  number: 0
+  noarch: python
+  entry_points:
+    - cliche = cliche.__init__:main
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.7
+  run:
+    - python >=3.7
+
+test:
+  imports:
+    - cliche
+  commands:
+    - pip check
+    - cliche --help
+  requires:
+    - pip
+
+about:
+  home: https://github.com/kootenpv/cliche
+  summary: A minimalistic CLI wrapper out to be the best
+  license: MIT
+  license_file: license.txt
+
+extra:
+  recipe-maintainers:
+    - kootenpv

@@ -1,0 +1,34 @@
+{% set version = "2024.3.3" %}
+
+package:
+  name: nebari-dask
+  version: {{ version }}
+
+build:
+  number: 0
+  noarch: generic
+
+requirements:
+  run:
+    - dask
+    - dask-gateway ==2023.9.0
+    - ipywidgets >=8.0.0
+
+test:
+  imports:
+    - dask
+
+about:
+  home: https://github.com/nebari-dev
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: "Nebari dask dependencies."
+
+extra:
+  recipe-maintainers:
+    - viniciusdc
+    - trallard
+    - dcmcand
+    - marcelovilla
+    - Adam-D-Lewis

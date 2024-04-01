@@ -1,0 +1,50 @@
+{% set name = "fABBA" %}
+{% set version = "1.2.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 0f0773170d7bf0ae20b09c9bc39f8766897ecc251b85a6041b30c1199f4d9364
+
+build:
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+requirements:
+  build:
+    - {{ compiler('c') }}
+  host:
+    - python
+    - pip
+    - numpy
+    - cython
+  run:
+    - python
+    - pandas
+    - requests
+    - matplotlib-base
+    - {{ pin_compatible('numpy') }}
+    - scikit-learn
+    - scipy >=1.2.1
+
+test:
+  imports:
+    - fABBA
+  requires:
+    - pip
+  commands:
+    - pip check
+
+about:
+  home: https://github.com/nla-group/fABBA
+  summary: An efficient aggregation method for the symbolic representation of temporal data.
+  license: BSD-3-Clause
+  license_file: LICENSE
+  dev_url: https://github.com/nla-group/fABBA
+
+extra:
+  recipe-maintainers:
+    - guettel
+    - chenxinye

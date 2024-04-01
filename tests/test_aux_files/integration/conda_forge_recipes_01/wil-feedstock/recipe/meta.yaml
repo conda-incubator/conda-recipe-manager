@@ -1,0 +1,43 @@
+{% set name = "wil" %}
+{% set version = "1.0.240122.1" %}
+{% set sha256 = "e599f2843c01b9e4827e46f11d3651180675c8ecdbba8bdae735f533672989d3" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/microsoft/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  number: 0
+  skip: true  # [not win]
+
+requirements:
+  build:
+    - {{ compiler("cxx") }}
+    - cmake
+    - ninja
+
+test:
+  commands:
+    - if not exist %PREFIX%\\Library\\share\\cmake\\WIL\\wilConfig.cmake exit 1
+    - if not exist %PREFIX%\\Library\\include\\wil\\com.h exit 1
+
+about:
+  home: https://github.com/microsoft/wil
+  summary: Windows Implementation Libraries (WIL)
+  description: >-
+    The Windows Implementation Libraries (WIL) is a header-only C++ library created to make life easier for developers on Windows through readable type-safe C++ interfaces for common Windows coding patterns.
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  doc_url: https://github.com/Microsoft/wil/wiki
+  dev_url: https://github.com/microsoft/wil
+
+extra:
+  recipe-maintainers:
+    - teo-tsirpanis
+    - jdblischak
+    - Shelnutt2

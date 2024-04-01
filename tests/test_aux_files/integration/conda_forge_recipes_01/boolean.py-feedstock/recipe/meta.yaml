@@ -1,0 +1,40 @@
+{% set version = "4.0" %}
+{% set sha256 = "17b9a181630e43dde1851d42bef546d616d5d9b4480357514597e78b203d06e4" %}
+
+package:
+  name: boolean.py
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/b/boolean.py/boolean.py-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - python >=3.6
+
+test:
+  imports:
+    - boolean
+
+about:
+  home: https://github.com/bastikr/boolean.py
+  license: BSD-2-Clause
+  license_file: LICENSE.txt
+  summary: >
+    Define boolean algebras, create and parse boolean expressions and create custom boolean DSL.
+  doc_url: https://booleanpy.readthedocs.io/
+  dev_url: https://github.com/bastikr/boolean.py
+
+extra:
+  recipe-maintainers:
+    - mbargull
+    - pkgw

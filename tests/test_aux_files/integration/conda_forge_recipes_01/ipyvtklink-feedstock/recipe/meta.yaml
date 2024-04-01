@@ -1,0 +1,46 @@
+{% set name = "ipyvtklink" %}
+{% set version = "0.2.3" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 7e5a8d0b0b4da9ae5db96618a8ed6ecdbe7b83b0c79b9b52c998129b35da825d
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+  run:
+    - python >=3.6
+    - Pillow
+    - ipywidgets <8.0
+    - ipycanvas >=0.5.0
+    - ipyevents >=0.8.0
+
+test:
+  imports:
+    - ipyvtklink
+
+about:
+  home: https://github.com/Kitware/ipyvtklink/
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: Minimal ipywidget to interface with any Python vtkRenderWindow
+  description: |
+    ipyvtklink provides an ipywidget interface for interacting with vtkRenderWindows in a Jupyter notebook. This is most notably used with PyVista.
+  doc_url: https://github.com/Kitware/ipyvtklink/blob/master/README.md
+  dev_url: https://github.com/Kitware/ipyvtklink
+
+extra:
+  recipe-maintainers:
+    - banesullivan
+    - akaszynski

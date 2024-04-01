@@ -1,0 +1,43 @@
+{% set name = "pyilluminate" %}
+{% set version = "0.7.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: dede26a117c0626fbb2576662283b4b9b6be5c19a08a6b2d42fec2df3548d742
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.7,<4
+    - pip
+  run:
+    - python >=3.7,<4
+    - numpy
+    - pyserial
+    - dataclasses
+    - xarray
+    - multiuserfilelock
+    - packaging
+
+test:
+  imports:
+    - pyilluminate
+
+about:
+  home: https://github.com/ramonaoptics/pyilluminate
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: Python interface for controlling the Illuminate boards.
+
+extra:
+  recipe-maintainers:
+    - hmaarrfk

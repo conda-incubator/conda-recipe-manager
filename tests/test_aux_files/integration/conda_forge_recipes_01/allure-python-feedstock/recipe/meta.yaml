@@ -1,0 +1,126 @@
+{% set name = "allure-python" %}
+{% set version = "2.13.4" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/allure-framework/{{ name }}/archive/{{ version }}.tar.gz
+  sha256: e52e3046c89400fcc92f0b0f599934456d38c20daabf3ddad3d34248a769ad59
+
+build:
+  number: 0
+
+outputs:
+  - name: allure-python-commons
+    build:
+      noarch: python
+    requirements:
+      host:
+        - pip
+        - python >=3.6
+        - setuptools-scm
+      run:
+        - python >=3.6
+        - attrs >=16.0.0
+        - pluggy >=0.4.0
+    script: install.sh
+    test:
+      imports:
+        - allure
+        - allure_commons
+  - name: allure-behave
+    build:
+      noarch: python
+    requirements:
+      host:
+        - pip
+        - python >=3.6
+        - setuptools-scm
+      run:
+        - python >=3.6
+        - behave >=1.2.5
+        - {{ pin_subpackage('allure-python-commons', exact=True) }}
+    script: install.sh
+    test:
+      imports:
+        - allure_behave
+  - name: allure-nose2
+    build:
+      noarch: python
+    requirements:
+      host:
+        - pip
+        - python >=3.6
+        - setuptools-scm
+      run:
+        - python >=3.6
+        - nose2
+        - {{ pin_subpackage('allure-python-commons', exact=True) }}
+    script: install.sh
+    test:
+      imports:
+        - allure_nose2
+  - name: allure-pytest
+    build:
+      noarch: python
+    requirements:
+      host:
+        - pip
+        - python >=3.6
+        - setuptools-scm
+      run:
+        - python >=3.6
+        - pytest >=4.5.0
+        - {{ pin_subpackage('allure-python-commons', exact=True) }}
+    script: install.sh
+    test:
+      imports:
+        - allure_pytest
+  - name: allure-pytest-bdd
+    build:
+      noarch: python
+    requirements:
+      host:
+        - pip
+        - python >=3.6
+        - setuptools-scm
+      run:
+        - python >=3.6
+        - pytest >=4.5.0
+        - pytest-bdd >=3.0.0
+        - {{ pin_subpackage('allure-python-commons', exact=True) }}
+    script: install.sh
+    test:
+      imports:
+        - allure_pytest_bdd
+  - name: allure-robotframework
+    build:
+      noarch: python
+    requirements:
+      host:
+        - pip
+        - python >=3.6
+        - setuptools-scm
+      run:
+        - python >=3.6
+        - robotframework
+        - {{ pin_subpackage('allure-python-commons', exact=True) }}
+    script: install.sh
+    test:
+      imports:
+        - AllureLibrary
+        - allure_robotframework
+
+about:
+  home: https://github.com/allure-framework/allure-python
+  license: Apache-2.0
+  license_file: LICENSE
+  summary: Allure integrations for Python test frameworks
+
+extra:
+  recipe-maintainers:
+    - kenodegard
+    - nsoranzo

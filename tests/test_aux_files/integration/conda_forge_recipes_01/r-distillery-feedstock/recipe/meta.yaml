@@ -1,0 +1,62 @@
+{% set version = "1.2-1" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-distillery
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/distillery_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/distillery/distillery_{{ version }}.tar.gz
+  sha256: 4b88f0b34e472b9134ad403fb32283424f1883a5943e52c55f1fe05995efb5fa
+
+build:
+  merge_build_host: true  # [win]
+  noarch: generic
+  number: 2
+  script: R CMD INSTALL --build .
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+  run:
+    - r-base
+
+test:
+  commands:
+    - $R -e "library('distillery')"           # [not win]
+    - "\"%R%\" -e \"library('distillery')\""  # [win]
+
+about:
+  home: http://www.ral.ucar.edu/staff/ericg
+  license: GPL (>= 2)
+  summary: Some very simple method functions for confidence interval calculation, bootstrap resampling, and to distill pertinent information from a potentially complex object; primarily used in common with packages extRemes and SpatialVx.
+  license_family: GPL3
+  license_file: {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-2
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+    - jsignell
+
+# Package: distillery
+# Version: 1.0-6
+# Date: 2019-03-28
+# Title: Method Functions for Confidence Intervals and to Distill Information from an Object
+# Author: Eric Gilleland
+# Maintainer: Eric Gilleland <ericg@ucar.edu>
+# Depends: R (>= 2.10.0)
+# Description: Some very simple method functions for confidence interval calculation, bootstrap resampling, and to distill pertinent information from a potentially complex object; primarily used in common with packages extRemes and SpatialVx.
+# License: GPL (>= 2)
+# URL: http://www.ral.ucar.edu/staff/ericg
+# NeedsCompilation: no
+# Packaged: 2019-04-02 17:12:03 UTC; eric
+# Repository: CRAN
+# Date/Publication: 2019-04-02 19:50:03 UTC

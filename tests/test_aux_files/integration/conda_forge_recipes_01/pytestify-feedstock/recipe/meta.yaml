@@ -1,0 +1,47 @@
+{% set name = "pytestify" %}
+{% set version = "1.5.0" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/pytestify-{{ version }}.tar.gz
+  sha256: 7a144c30f3a353875e3c63724f3f5eb562946dcb7b9619b6fcd004f4973985a8
+
+build:
+  number: 0
+  noarch: python
+  entry_points:
+    - pytestify = pytestify._main:main
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - python >=3.6
+    - tokenize-rt >=4.0.0
+
+test:
+  imports:
+    - pytestify
+    - pytestify.fixes
+  commands:
+    - pip check
+    - pytestify --help
+  requires:
+    - pip
+
+about:
+  home: https://github.com/dannysepler/pytestify
+  summary: Automatically convert unittests to pytest
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - nicoddemus
+    - dannysepler

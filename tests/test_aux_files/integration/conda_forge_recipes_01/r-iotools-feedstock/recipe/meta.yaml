@@ -1,0 +1,55 @@
+{% set version = "0.3-5" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-iotools
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/iotools_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/iotools/iotools_{{ version }}.tar.gz
+  sha256: 9cf917ca6bf779b527462f127cd02e3da9624c1ea68a6555d74572a5c270b48b
+
+build:
+  merge_build_host: true  # [win]
+  number: 0
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ compiler('c') }}              # [not win]
+    - {{ compiler('m2w64_c') }}        # [win]
+    - {{ posix }}filesystem        # [win]
+    - {{ posix }}make
+    - {{ posix }}sed               # [win]
+    - {{ posix }}coreutils         # [win]
+    - {{ posix }}zip               # [win]
+    - cross-r-base {{ r_base }}    # [build_platform != target_platform]
+  host:
+    - r-base
+  run:
+    - r-base
+    - {{ native }}gcc-libs         # [win]
+
+test:
+  commands:
+    - $R -e "library('iotools')"           # [not win]
+    - "\"%R%\" -e \"library('iotools')\""  # [win]
+
+about:
+  home: http://www.rforge.net/iotools
+  license: GPL-2.0-or-later
+  summary: Basic I/O tools for streaming and data parsing.
+  license_family: GPL3
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-2
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-3
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+    - lecorguille

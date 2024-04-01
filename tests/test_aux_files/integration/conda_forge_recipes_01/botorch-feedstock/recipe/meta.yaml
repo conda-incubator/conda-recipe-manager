@@ -1,0 +1,70 @@
+{% set name = "botorch" %}
+{% set version = "0.10.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/botorch-{{ version }}.tar.gz
+  sha256: 31b363fc8d0c514b7e00d35d7b2eb0a4fd22b6cede14aca24ce5b65f88694889
+
+build:
+  noarch: python
+  number: 0
+  script:
+    - {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.9
+    - pip
+    - setuptools
+    - setuptools_scm
+    - toml
+  run:
+    - python >=3.9
+    - linear_operator ==0.5.1
+    - pytorch >=1.13.1
+    - gpytorch ==1.11
+    - scipy
+    - pyro-ppl >=1.8.4
+    - multipledispatch
+
+test:
+  imports:
+    - botorch
+    - botorch.acquisition
+    - botorch.exceptions
+    - botorch.generation
+    - botorch.models
+    - botorch.optim
+    - botorch.posteriors
+    - botorch.sampling
+    - botorch.test_functions
+    - botorch.utils
+    - botorch.cross_validation
+    - botorch.fit
+    - botorch.logging
+    - botorch.settings
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://botorch.org
+  license: MIT
+  license_file: LICENSE
+  summary: Bayesian Optimization in PyTorch
+  doc_url: https://botorch.org/docs/introduction
+  dev_url: https://github.com/pytorch/botorch
+
+  description: |
+    BoTorch is a library for Bayesian Optimization built on PyTorch.
+
+extra:
+  recipe-maintainers:
+    - maclandrol
+    - ngam
+    - thewchan

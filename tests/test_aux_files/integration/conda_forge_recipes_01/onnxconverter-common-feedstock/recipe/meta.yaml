@@ -1,0 +1,45 @@
+{% set name = "onnxconverter-common" %}
+{% set version = "1.14.0" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/microsoft/{{ name }}/archive/v{{ version }}.tar.gz
+  sha256: a7eb7067875b498a5db4ca75ae67c8b258b489ea85acce23e95a0d0d522c79ca
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - packaging
+    - python >=3.6
+    - numpy
+    - protobuf ==3.20.2
+    - onnx
+
+test:
+  imports:
+    - onnxconverter_common
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/microsoft/onnxconverter-common
+  summary: Common utilities for ONNX converters
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - xhochy

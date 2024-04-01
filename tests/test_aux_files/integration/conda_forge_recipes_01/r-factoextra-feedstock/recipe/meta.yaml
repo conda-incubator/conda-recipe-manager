@@ -1,0 +1,67 @@
+{% set version = "1.0.7" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-factoextra
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/factoextra_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/factoextra/factoextra_{{ version }}.tar.gz
+  sha256: 624ff01c74933352aca55966f8a052b1ccc878f52c2c307e47f88e0665db94aa
+
+build:
+  merge_build_host: True  # [win]
+  number: 3
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+    - cross-r-base {{ r_base }}    # [build_platform != target_platform]
+  host:
+    - r-base
+    - r-factominer
+    - r-abind
+    - r-cluster
+    - r-dendextend
+    - r-ggplot2 >=2.2.0
+    - r-ggpubr >=0.1.5
+    - r-ggrepel
+    - r-reshape2
+    - r-tidyr
+  run:
+    - r-base
+    - r-factominer
+    - r-abind
+    - r-cluster
+    - r-dendextend
+    - r-ggplot2 >=2.2.0
+    - r-ggpubr >=0.1.5
+    - r-ggrepel
+    - r-reshape2
+    - r-tidyr
+
+test:
+  commands:
+    - $R -e "library('factoextra')"           # [not win]
+    - "\"%R%\" -e \"library('factoextra')\""  # [win]
+
+about:
+  home: https://CRAN.R-project.org/package=factoextra
+  license: GPL-2.0-only
+  summary: Provides some easy-to-use functions to extract and visualize the output of multivariate data analyses, including 'PCA' (Principal Component Analysis),
+    'CA' (Correspondence Analysis), 'MCA' (Multiple Correspondence Analysis), 'FAMD' (Factor Analysis of Mixed Data), 'MFA' (Multiple Factor Analysis) and 'HMFA'
+    (Hierarchical Multiple Factor Analysis) functions from different R packages. It contains also functions for simplifying some clustering analysis steps and provides
+    'ggplot2' - based elegant data visualization.
+  license_family: GPL2
+  license_file: {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-2
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r

@@ -1,0 +1,57 @@
+{% set name = "rowan" %}
+{% set version = "1.3.0.post1" %}
+{% set sha256 = "8f1d0e3279f80c6ae1ee68a90955301853b5586f64e42ba4c27d85504d525e4f" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  build:
+    - python
+    - pip
+    - setuptools
+  run:
+    - python
+    - numpy >=1.10
+
+test:
+  imports:
+    - rowan
+    - rowan.mapping
+    - rowan.geometry
+    - rowan.calculus
+    - rowan.interpolate
+    - rowan.random
+
+about:
+  home: https://github.com/glotzerlab/rowan
+  license: BSD-3
+  license_family: BSD
+  license_file: LICENSE.txt
+  summary: Perform quaternion operations using numpy arrays
+
+  description: |
+    rowan performs quaternion operations directly on numpy arrays.
+    The package does not require conversion of arrays into a special
+    quaternion object, ensuring easy integration into existing code,
+    but broadcasting is fully supported natively for all operations to
+    ensure that code is performant.
+  doc_url: http://rowan.readthedocs.io/
+  dev_url: https://github.com/glotzerlab/rowan
+
+extra:
+  recipe-maintainers:
+    - vyasr
+    - joaander
+    - bdice

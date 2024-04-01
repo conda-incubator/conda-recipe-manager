@@ -1,0 +1,44 @@
+{% set name = "i18nice" %}
+{% set version = "0.13.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/i18nice-{{ version }}.tar.gz
+  sha256: 775fb77ca4bac29d15bb5c928584a1ba6e3a66dc7343ab36aba1326c4c3c24de
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  number: 0
+
+requirements:
+  host:
+    - python >=3.7
+    - pip
+  run:
+    - python >=3.7
+
+test:
+  imports:
+    - i18n
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/Krutyi-4el/i18nice
+  summary: Translation library for Python
+  description: |
+    This library provides i18n functionality for Python 3 out of the box.
+    The usage is mostly based on Rails i18n library.
+    See https://github.com/solaluset/i18nice for details.
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - cmarmo

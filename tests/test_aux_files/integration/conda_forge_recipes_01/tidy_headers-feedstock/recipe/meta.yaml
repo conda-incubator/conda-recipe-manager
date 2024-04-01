@@ -1,0 +1,45 @@
+{% set name = "tidy_headers" %}
+{% set version = "1.0.3" %}
+{% set sha256 = "82bd39752c9eb171708619c5affbcfd86a82bab801b42e167eba53812dc75c82" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+    - flit
+    - numpy
+  run:
+    - python >=3.6
+    - numpy
+
+test:
+  imports:
+    - tidy_headers
+
+about:
+  home: https://github.com/untzag/tidy_headers
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE.txt
+  summary: Easy headers, inspired by the tidy data specification.
+
+extra:
+  recipe-maintainers:
+    - untzag
+    - ksunden
+    - darienmorrow
+    - kameyer226
+    - ddkohler

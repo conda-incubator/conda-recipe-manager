@@ -1,0 +1,48 @@
+{% set name = "pybobyqa" %}
+{% set version = "1.4" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/numericalalgorithmsgroup/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: 27d256e25e07bd462a0fc26c2d5407e8b6c340774064ba694ebc5021491c1aba
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.8
+    - pip
+  run:
+    - python >=3.8
+    - numpy >=1.11
+    - scipy >=0.17
+    - pandas >=0.17
+
+test:
+  imports:
+    - pybobyqa
+
+about:
+  home: https://github.com/numericalalgorithmsgroup/pybobyqa
+  summary: Derivative-Free Solver for Bound-Constrained Minimization
+  description: |
+    Py-BOBYQA is a flexible package for solving bound-constrained general 
+    objective minimization, without requiring derivatives of the objective. At 
+    its core, it is a Python implementation of the BOBYQA algorithm by Powell, 
+    but Py-BOBYQA has extra features improving its performance on some problems
+    (see the papers below for details). Py-BOBYQA is particularly useful when 
+    evaluations of the objective function are expensive and/or noisy.
+  license: GPL-3.0-or-later
+  license_file: LICENSE.txt
+  doc_url: https://numericalalgorithmsgroup.github.io/pybobyqa/
+
+extra:
+  recipe-maintainers:
+    - vitenti
+    - marcpaterno

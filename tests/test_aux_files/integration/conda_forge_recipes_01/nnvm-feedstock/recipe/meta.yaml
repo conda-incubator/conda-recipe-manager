@@ -1,0 +1,52 @@
+{% set name = "nnvm" %}
+{% set version = "0.6.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/apache/incubator-tvm/archive/v{{ version }}.tar.gz
+  sha256: e2688526d24242bbf5f3adbc0590b1234c4fd0b7a8f61bd837af6c49e5020713
+
+build:
+  number: 0
+  script:
+    - cd nnvm/python
+    - {{ PYTHON }} -m pip install . --no-deps -vv
+  skip: true  # [win]
+
+requirements:
+  build:
+    - {{ compiler('cxx') }}
+    - {{ compiler('c') }}
+  host:
+    - libtvm {{ version }}
+    - python
+    - cython
+    - setuptools
+    - numpy
+    - pip
+  run:
+    - python
+    - tvm-py {{ version }}
+    - {{ pin_compatible('numpy') }}
+    - libtvm {{ version }}
+
+test:
+  imports:
+    - nnvm
+
+about:
+  home: https://tvm.apache.org/
+  license: Apache-2.0
+  license_family: Apache
+  license_file: LICENSE
+  summary: 'NNVM Compiler Module of TVM Stack'
+  doc_url: https://tvm.apache.org/docs/
+  dev_url: https://github.com/apache/incubator-tvm
+
+extra:
+  recipe-maintainers:
+    - ngam
+    - marcelotrevisani

@@ -1,0 +1,42 @@
+{% set name = "vscode-icons" %}
+{% set version = "12.5.0" %}
+{% set publisher = "vscode-icons-team" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url: https://github.com/{{ name }}/{{ name }}/archive/v{{ version }}.tar.gz
+  sha256: 19712201c1175b627cb400389ee37b6d63882cc16d92d79208efdc00c2c78850
+
+build:
+  number: 1
+  skip: true  # [win or (nodejs != 16)]
+
+requirements:
+  build:
+    - nodejs
+  host:
+    - nodejs
+    - vsce
+    - code-server >=3.9
+  run:
+    - code-server >=3.9
+
+test:
+  commands:
+    - code-server --list-extensions --show-versions | grep {{ publisher }}.{{ name }}@{{ version }}
+
+about:
+  home: https://github.com/vscode-icons/vscode-icons
+  license: MIT
+  license_family: MIT
+  license_file:
+    - LICENSE
+  summary: Icons for Visual Studio Code.
+
+extra:
+  recipe-maintainers:
+    - conda-forge/code-server
+    - fhoehle

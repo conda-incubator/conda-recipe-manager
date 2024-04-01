@@ -1,0 +1,48 @@
+{% set name = "ChiantiPy" %}
+{% set version = "0.15.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/chianti-atomic/{{ name }}/archive/v{{ version }}.tar.gz
+  sha256: 4c0396397f71af8db009b8ce7ee90a02fc0e9ee7cfac23a470902d78e47e1389
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+  run:
+    - python >=3.6
+    - numpy
+    - scipy
+    - ipyparallel
+    - matplotlib
+    - pyqt
+
+test:
+  imports:
+    - ChiantiPy
+
+about:
+  home: https://github.com/chianti-atomic/ChiantiPy
+  summary: a Python interface to the CHIANTI atomic database for astrophysical spectroscopy
+  license: ISC
+  license_file: licenses/LICENSE
+  description: |
+    ChiantiPy is the Python interface to the CHIANTI atomic database for astrophysical 
+    spectroscopy. It provides the capability to calculate the emission line and 
+    continuum spectrum of an optically thin plasma based on the data in the 
+    CHIANTI database.
+  doc_url: https://chiantipy.readthedocs.io/en/latest/
+  dev_url: https://github.com/chianti-atomic/ChiantiPy
+
+extra:
+  recipe-maintainers:
+    - epassaro

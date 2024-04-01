@@ -1,0 +1,44 @@
+{% set name = "symbolite" %}
+{% set version = "0.6.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/symbolite-{{ version }}.tar.gz
+  sha256: 40fac5e23e7021ffb2d571e334e65c9a6cb9dbfd17af0408fb884007cce837a1
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  number: 0
+
+requirements:
+  host:
+    - python >=3.10
+    - setuptools
+    - setuptools-scm
+    - pip
+  run:
+    - python >=3.10
+    - typing-extensions
+
+test:
+  imports:
+    - symbolite
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/hgrecco/symbolite
+  summary: A minimalistic symbolic package.
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - maurosilber
+    - hgrecco

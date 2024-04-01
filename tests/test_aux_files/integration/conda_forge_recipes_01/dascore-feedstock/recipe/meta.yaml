@@ -1,0 +1,60 @@
+{% set name = "dascore" %}
+{% set version = "0.1.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/dascore-{{ version }}.tar.gz
+  sha256: fa8aadbc8cecbc580a2cd3ee99e95bb555b42073afc5998fdf0baaca678a076a
+
+build:
+  noarch: python
+  script: SETUPTOOLS_SCM_PRETEND_VERSION={{ version }} {{ PYTHON }} -m pip install . -v
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.10
+    - setuptools >=45
+    - setuptools_scm >=3.4
+    - toml
+  run:
+    - matplotlib-base >=3.5
+    - numpy >=1.24
+    - packaging
+    - pandas >=2.0
+    - pooch >=1.2
+    - pydantic >=2.1
+    - rich
+    - scipy >=1.11
+    - pytables >=3.7
+    - typing_extensions
+    - pint
+    - python >=3.10
+    - segyio
+    - h5py
+
+test:
+  imports:
+    - dascore
+  commands:
+    - pip check
+    - python -c "import dascore; ver = dascore.__version__; assert ver != '0.0.0'"
+  requires:
+    - pip
+
+about:
+  home: https://pypi.org/project/dascore/
+  summary: A python library distributed fiber optic sensing
+  license: LGPL-3.0-or-later
+  license_file:
+    - LICENSE
+
+extra:
+  recipe-maintainers:
+    - d-chambers
+    - eileenrmartin
+    - ahmadtourei

@@ -1,0 +1,58 @@
+{% set version = "1.1.5" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-blockmodeling
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/blockmodeling_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/blockmodeling/blockmodeling_{{ version }}.tar.gz
+  sha256: 3b6f910078c29b801651e3a686112e41e456c517e1b99fcda11bb12681bb1503
+
+build:
+  merge_build_host: true  # [win]
+  number: 0
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ compiler('c') }}              # [not win]
+    - {{ compiler('m2w64_c') }}        # [win]
+    - {{ compiler('fortran') }}        # [not win]
+    - {{ compiler('m2w64_fortran') }}  # [win]
+    - {{ posix }}filesystem        # [win]
+    - {{ posix }}make
+    - {{ posix }}sed               # [win]
+    - {{ posix }}coreutils         # [win]
+    - {{ posix }}zip               # [win]
+    - cross-r-base {{ r_base }}    # [build_platform != target_platform]
+  host:
+    - r-base
+    - r-matrix
+  run:
+    - r-base
+    - {{ native }}gcc-libs         # [win]
+    - r-matrix
+
+test:
+  commands:
+    - $R -e "library('blockmodeling')"           # [not win]
+    - "\"%R%\" -e \"library('blockmodeling')\""  # [win]
+
+about:
+  home: https://CRAN.R-project.org/package=blockmodeling
+  license: GPL-2.0-or-later
+  summary: 'This is primarily meant as an implementation of generalized blockmodeling for valued networks. In addition, measures of similarity or dissimilarity based on structural equivalence and  regular equivalence (REGE algorithms) can be computed and partitioned matrices can be plotted: Žiberna (2007)<doi:10.1016/j.socnet.2006.04.002>,
+    Žiberna (2008)<doi:10.1080/00222500701790207>, Žiberna (2014)<doi:10.1016/j.socnet.2014.04.002>.'
+  license_family: GPL3
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-2
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r

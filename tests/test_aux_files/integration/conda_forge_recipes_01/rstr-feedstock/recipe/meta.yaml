@@ -1,0 +1,53 @@
+{% set version = "3.2.2" %}
+
+package:
+  name: rstr
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/r/rstr/rstr-{{ version }}.tar.gz
+  sha256: c4a564d4dfb4472d931d145c43d1cf1ad78c24592142e7755b8866179eeac012
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+
+requirements:
+  host:
+    - pip
+    - python >=3.7
+    - setuptools >=61.2
+    - setuptools-scm >=3.4.3
+  run:
+    - python >=3.7
+
+test:
+  source_files:
+    - tests
+  imports:
+    - rstr
+  requires:
+    - pip
+    - m2-grep  # [win]
+    - mypy
+    - pytest-cov
+  commands:
+    - pip list
+    - pip list | grep -iE "^rstr\s+{{ version.replace(".", "\.") }}"
+    - pip check
+    # xeger.py:15: error: Unused "type: ignore" comment
+    - mypy --strict -p rstr --no-warn-unused-ignores
+    - pytest -vv --cov=rstr --cov-branch --cov-report=term-missing:skip-covered --no-cov-on-fail --cov-fail-under=88
+
+about:
+  home: https://github.com/leapfrogonline/rstr
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE.txt
+  summary: Generate random strings in Python
+
+extra:
+  recipe-maintainers:
+    - claymcleod
+    - bollwyvl

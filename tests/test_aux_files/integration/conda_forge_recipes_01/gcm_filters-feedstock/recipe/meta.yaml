@@ -1,0 +1,54 @@
+{% set name = "gcm_filters" %}
+{% set version = "0.3.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 68d50b011d0dd3113dd66a7fd6d1c81797cc70dfa812fb5a1b8d1a58f36f7208
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+  run:
+    - python >=3.6
+    - dask
+    - scipy
+    - xarray
+
+test:
+  imports:
+    - gcm_filters
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/ocean-eddy-cpt/gcm-filters
+  license: LGPL-3.0-only
+  license_family: LGPL
+  license_file: LICENSE.txt
+  summary: Diffusion-based Spatial Filtering of Gridded Data
+  description: |
+    **GCM-Filters** is a python package that performs spatial filtering analysis in a flexible and efficient way.
+    The GCM-Filters algorithm applies a discrete Laplacian to smooth a field through an iterative process that resembles 
+    diffusion ([Grooms et al., 2021](https://doi.org/10.1029/2021MS002552)). The package can be used for either gridded 
+    observational data or gridded data that is produced by General Circulation Models (GCMs) of ocean, weather, and climate.
+    Such GCM data come on complex curvilinear grids, whose geometry is respected by the GCM-Filters Laplacians. Through 
+    integration with [dask](https://dask.org/), GCM-Filters enables parallel, out-of-core filter analysis on both CPUs and GPUs.
+  doc_url: https://gcm-filters.readthedocs.io/en/latest/
+  dev_url: https://github.com/ocean-eddy-cpt/gcm-filters
+
+extra:
+  recipe-maintainers:
+    - rabernat
+    - NoraLoose
+    - iangrooms

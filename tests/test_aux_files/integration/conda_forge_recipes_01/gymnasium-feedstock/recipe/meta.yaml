@@ -1,0 +1,216 @@
+{% set version = "0.28.1" %}
+
+package:
+  name: gymnasium-split
+  version: {{ version }}
+
+source:
+  url: https://github.com/Farama-Foundation/Gymnasium/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: 59dddc9ba631ed353cb6983cb3fff113c8619ef03142fd8474aa56bfccf9c424
+  patches:
+    # only for gymnasium <=0.28.1 (has been fixed upstream in #f6ceb08)
+    - patches/0001-add-missing-phys2d-asset-in-setup.patch
+    # only for gymnasium <=0.28.1 (has been fixed upstream in #4350e9c)
+    - patches/0003-skip-if-jax-or-torch-is-missing.patch
+    # only for gymnasium <=0.28.1 (has been fixed upstream in #50b12df)
+    - patches/0004-skip-fork-start-method-if-not-available.patch
+    # only for gymnasium <=0.28.1 (has been fixed upstream in #f47caeb)
+    - patches/0005-skip-mujoco-if-gl-not-available.patch
+
+build:
+  number: 0
+
+# Need these up here for conda-smithy to handle them properly.
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - numpy                                  # [build_platform != target_platform]
+  host:
+    - python
+    - pip
+    - setuptools
+    - wheel
+  run:
+    - python
+
+outputs:
+  - name: gymnasium
+    build:
+      script: {{ PYTHON }} -m pip install . -vv --no-deps
+    requirements:
+      build:
+        - python                                 # [build_platform != target_platform]
+        - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+        - numpy                                  # [build_platform != target_platform]
+      host:
+        - python
+        - pip
+        - cloudpickle >=1.2.0
+        - numpy
+      run:
+        - python
+        - cloudpickle >=1.2.0
+        - farama-notifications
+        - numpy
+        - jax-jumpy >=1.0.0
+        - typing_extensions >=4.3.0
+        - importlib_metadata >=4.8.1  # [py<=39]
+    test:
+      imports:
+        - gymnasium
+
+  - name: gymnasium-all
+    requirements:
+      host:
+        - python
+      run:
+        - python
+        - {{ pin_subpackage('gymnasium-atari', exact=True) }}
+        - {{ pin_subpackage('gymnasium-box2d', exact=True) }}
+        - {{ pin_subpackage('gymnasium-classic_control', exact=True) }}
+        - {{ pin_subpackage('gymnasium-mujoco', exact=True) }}
+        # see below
+        # - {{ pin_subpackage('gymnasium-mujoco_py', exact=True) }}
+        - {{ pin_subpackage('gymnasium-toy_text', exact=True) }}
+        - {{ pin_subpackage('gymnasium-other', exact=True) }}
+    test:
+      source_files:
+        - tests/
+      requires:
+        - mock
+        - pytest
+        - scipy
+        - pip
+        - jax >= 0.3.24  # [osx or linux64]
+        # conda-forge doesn't have pytorch on all platforms/arches yet
+      commands:
+        - pip check
+        {% set tests_to_skip = "_not_a_real_test" %}
+        # the following pygame tests are skipped [according to selector], because there is no rendering support during the CI build
+        {% set tests_to_skip = tests_to_skip + " or test_human_rendering" %}                    # [osx]
+        {% set tests_to_skip = tests_to_skip + " or test_keyboard_irrelevant_keydown_event" %}  # [osx]
+        {% set tests_to_skip = tests_to_skip + " or test_keyboard_keyup_event" %}               # [osx]
+        {% set tests_to_skip = tests_to_skip + " or test_keyboard_quit_event" %}                # [osx]
+        {% set tests_to_skip = tests_to_skip + " or test_keyboard_relevant_keydown_event" %}    # [osx]
+        {% set tests_to_skip = tests_to_skip + " or test_no_error_warnings[env0]" %}            # [osx]
+        {% set tests_to_skip = tests_to_skip + " or test_no_error_warnings[env1]" %}            # [osx]
+        {% set tests_to_skip = tests_to_skip + " or test_play_loop_real_env" %}                 # [osx]
+        {% set tests_to_skip = tests_to_skip + " or test_play_relevant_keys" %}                 # [osx]
+        {% set tests_to_skip = tests_to_skip + " or test_pygame_quit_event" %}                  # [osx]
+        {% set tests_to_skip = tests_to_skip + " or test_video_size_no_zoom" %}                 # [osx]
+        {% set tests_to_skip = tests_to_skip + " or test_video_size_zoom" %}                    # [osx]
+        # need to specify opengl driver on linux to enable offscreen rendering in MuJoCo
+        - export MUJOCO_GL="osmesa"  # [linux]
+        - pytest -v tests/ -k "not ({{ tests_to_skip }})"
+
+  - name: gymnasium-atari
+    requirements:
+      host:
+        - python
+      run:
+        - python
+        - {{ pin_subpackage('gymnasium', exact=True) }}
+        - shimmy-atari
+    test:
+      commands:
+        - echo "tested in shimmy-atari"
+
+  - name: gymnasium-box2d
+    requirements:
+      host:
+        - python
+        - swig ==4.*
+      run:
+        - python
+        - {{ pin_subpackage('gymnasium', exact=True) }}
+        - box2d-py ==2.3.*
+        - pygame ==2.1.*
+    test:
+      imports:
+        - gymnasium.envs.box2d
+
+  - name: gymnasium-classic_control
+    requirements:
+      host:
+        - python
+      run:
+        - python
+        - {{ pin_subpackage('gymnasium', exact=True) }}
+        - pygame ==2.1.*
+    test:
+      imports:
+        - gymnasium.envs.classic_control
+
+  - name: gymnasium-mujoco
+    requirements:
+      host:
+        - python
+      run:
+        - python
+        - {{ pin_subpackage('gymnasium', exact=True) }}
+        - mujoco-python >=2.3.2,<=2.3.3
+        - imageio >=2.14.1
+    test:
+      imports:
+        - gymnasium.envs.mujoco
+
+  - name: gymnasium-mujoco_py
+    build:
+      # we currently don't have https://github.com/openai/mujoco-py
+      # in conda-forge, and it'll be replaced by mujoco anyway
+      skip: true
+    requirements:
+      host:
+        - python
+      run:
+        - python
+        - {{ pin_subpackage('gymnasium', exact=True) }}
+        - mujoco-py >=2.1,<2.2
+        - imageio >=2.14.1
+    test:
+      imports:
+        - gymnasium.envs.mujoco
+
+  - name: gymnasium-toy_text
+    requirements:
+      host:
+        - python
+      run:
+        - python
+        - {{ pin_subpackage('gymnasium', exact=True) }}
+        - pygame ==2.1.*
+    test:
+      imports:
+        - gymnasium.envs.toy_text
+
+  - name: gymnasium-other
+    requirements:
+      host:
+        - python
+      run:
+        - python
+        - {{ pin_subpackage('gymnasium', exact=True) }}
+        - lz4 >=3.1.0
+        - matplotlib >=3.0
+        - moviepy >=1.0
+        - py-opencv >=3.0
+        - pytorch >=1.0  # [unix and not ppc64le]
+    test:
+      imports:
+        # There are no tests in the source code for gymnasium-other
+
+about:
+  home: https://gymnasium.farama.org/
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: A standard API for reinforcement learning and a diverse set of reference environments (formerly Gym)
+  dev_url: https://github.com/Farama-Foundation/Gymnasium
+
+extra:
+  recipe-maintainers:
+    - h-vetinari
+    - pseudo-rnd-thoughts
+    - thewchan
+  feedstock-name: gymnasium

@@ -1,0 +1,97 @@
+{% set name = "cp2k" %}
+{% set version = "2024.1" %}
+
+# Define build matrix for MPI vs. non-mpi
+# ensure mpi is defined (needed for conda-smithy recipe-lint)
+{% set mpi = mpi or 'nompi' %}
+{% set build = 2 %}
+{% if mpi == 'nompi' %}
+# prioritize 'nompi' variant via build number
+{% set build = build + 1000 %}
+{% endif %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  - url: https://github.com/{{ name }}/{{ name }}/releases/download/v{{ version }}/{{ name }}-{{ version }}.tar.bz2
+    sha256: a7abf149a278dfd5283dc592a2c4ae803b37d040df25d62a5e35af5c4557668f
+    patches:
+      - macosxtest.patch  # [osx]
+  - url: https://github.com/cp2k/dbcsr/releases/download/v2.6.0/dbcsr-2.6.0.tar.gz
+    sha256: c67b02ff9abc7c1f529af446a9f01f3ef9e5b0574f220259128da8d5ca7e9dc6
+    folder: exts/dbcsr
+
+build:
+  number: {{ build }}
+  string: {{ blas_impl }}_{{ mpi }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}
+  # osx build skipped until futher notice:
+  # - nompi: osx issue introduced in 8.1, fixed in future 8.2
+  # - openmpi: runtime failures during test suite
+  skip: true  # [not linux]
+  # For version 2024.1 the tests fail with segmentation fault with MKL and OpenMPI
+  # in line 455 of cp_basic_linalg.f, i.e.
+  #          CALL pdgemm(transa, transb, m, n, k, alpha, a, i_a, j_a, desca, b, i_b, j_b, &
+  #                   descb, beta, c, i_c, j_c, descc)
+  # (specific to scalapack MKL and tested as failing for MKL 2019 until 2024
+  skip: true  # [mpi == 'openmpi' and blas_impl == 'mkl']
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - {{ compiler('fortran') }}
+    - make
+    - fypp
+    - llvm-openmp  # [osx]
+    - libgomp  # [linux]
+    - cmake
+    - libtool
+    - python
+  host:
+    - {{ mpi }}  # [mpi != 'nompi']
+    - scalapack  # [mpi != 'nompi']
+    - {{ blas_impl }}  # [blas_impl != 'mkl']
+    - mkl-devel  # [blas_impl == 'mkl']
+    - fftw
+    - spglib
+    - libxc >=5.1
+    - libint >=2.9.0
+    - libxsmm
+    - sirius  # [mpi != 'nompi']
+  run:
+    - {{ mpi }}  # [mpi != 'nompi']
+    - libblas * *{{ blas_impl }}
+    - libcblas * *{{ blas_impl }}
+    - liblapack * *{{ blas_impl }}
+    - scalapack  # [mpi != 'nompi' and blas_impl != 'mkl']
+    - __osx >={{ MACOSX_DEPLOYMENT_TARGET|default("10.9") }}  # [osx and x86_64]
+
+test:
+  commands:
+    # note: regtests are running at the "build" stage; this is just a smoke test
+    - cp2k.ssmp --help  # [mpi == 'nompi']
+    - mpiexec --bind-to none -mca plm isolated cp2k.psmp --help   # [mpi != 'nompi']
+
+
+about:
+  home: https://www.cp2k.org
+  license: GPL-2.0-only
+  license_family: GPL
+  license_file: LICENSE
+  summary: Quantum chemistry and solid state physics software package
+
+  description: |
+    CP2K is a quantum chemistry and solid state physics software package 
+    that can perform atomistic simulations of solid state, liquid, 
+    molecular, periodic, material, crystal, and biological systems. 
+  doc_url: https://manual.cp2k.org
+  dev_url: https://github.com/cp2k/cp2k
+
+extra:
+  recipe-maintainers:
+    - jan-janssen
+    - oschuett
+    - ltalirz

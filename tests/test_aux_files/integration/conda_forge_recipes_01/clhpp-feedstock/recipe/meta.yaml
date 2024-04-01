@@ -1,0 +1,56 @@
+{% set name = "clhpp" %}
+{% set version = "2.0.16" %}
+{% set sha256 = "869456032e60787eed9fceaeaf6c6cb4452bc0ff97e0f5a271510145a1c8f4d4" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://github.com/KhronosGroup/OpenCL-CLHPP/archive/v{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  number: 0
+  always_include_files:
+    - include/CL/opencl.hpp
+    - include/CL/cl2.hpp
+
+requirements:
+  build:
+    - cmake
+    - make   # [unix]
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - python >=3.5
+  host:
+    - ocl-icd                    # [linux]
+    - khronos-opencl-icd-loader  # [win or osx]
+  run:
+    - khronos-opencl-icd-loader  # [win]
+    - ocl-icd                    # [linux]
+
+test:
+  commands:
+    - test -d "${PREFIX}/include/CL"                     # [unix]
+    - test -f "${PREFIX}/include/CL/opencl.hpp"          # [unix]
+    - test -f "${PREFIX}/include/CL/cl2.hpp"             # [unix]
+    - if not exist %LIBRARY_INC%\\CL exit 1              # [win]
+    - if not exist %LIBRARY_INC%\\CL\\opencl.hpp exit 1  # [win]
+    - if not exist %LIBRARY_INC%\\CL\\cl2.hpp exit 1     # [win]
+
+about:
+  home: https://github.com/KhronosGroup/OpenCL-CLHPP
+  license: Apache-2.0
+  license_file: LICENSE.txt
+  summary: OpenCL Host API C++ bindings
+
+  dev_url: https://github.com/KhronosGroup/OpenCL-CLHPP
+  doc_url: http://github.khronos.org/OpenCL-CLHPP
+
+extra:
+  recipe-maintainers:
+    - inducer
+    - isuruf
+    - jakirkham

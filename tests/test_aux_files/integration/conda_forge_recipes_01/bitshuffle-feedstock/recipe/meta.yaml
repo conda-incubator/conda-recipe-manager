@@ -1,0 +1,62 @@
+{% set name = "bitshuffle" %}
+{% set version = "0.5.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/kiyo-masui/{{ name }}/archive/{{ version }}.tar.gz
+  sha256: 2631aaa5d4c24e51415c7b1827d4f9dcf505ad8db03738210da9ce6dab8f5870
+  patches:
+    - patch/0001-Do-not-override-conda-forge-compilation-flags.patch
+
+build:
+  number: 1
+  skip: true  # [win]
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+  host:
+    - cython >=0.19
+    - h5py
+    - hdf5
+    - lz4
+    - numpy
+    - pip
+    - python
+  run:
+    - cython
+    - h5py
+    - hdf5
+    - {{ pin_compatible('numpy') }}
+    - python
+
+test:
+  source_files:
+    - tests
+  requires:
+    - pip
+    - pytest
+  commands:
+    - pip check
+    - test -f $PREFIX/lib/bitshuffle.a
+    - pytest tests
+
+about:
+  home: https://github.com/kiyo-masui/bitshuffle
+  summary: Filter for improving compression of typed binary data.
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  description: |
+    Bitshuffle is an algorithm that rearranges typed, binary data for improving compression,
+    as well as a python/C package that implements this algorithm within the Numpy framework.
+  doc_url: https://github.com/kiyo-masui/bitshuffle
+  dev_url: https://github.com/kiyo-masui/bitshuffle
+
+extra:
+  recipe-maintainers:
+    - xmnlab
+    - anthchirp

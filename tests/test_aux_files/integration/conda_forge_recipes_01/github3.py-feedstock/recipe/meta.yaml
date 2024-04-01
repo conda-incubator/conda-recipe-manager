@@ -1,0 +1,53 @@
+{% set version = "4.0.1" %}
+
+package:
+  name: github3.py
+  version: {{ version }}
+
+source:
+  fn: github3.py-{{ version }}.tar.gz
+  url: https://pypi.io/packages/source/g/github3.py/github3.py-{{ version }}.tar.gz
+  sha256: 30d571076753efc389edc7f9aaef338a4fcb24b54d8968d5f39b1342f45ddd36
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.7
+    - hatchling >=1.14.1
+    - pip
+    - setuptools
+  run:
+    - python >=3.7
+    - pyjwt >=2.3.0
+    - python-dateutil >=2.6.0
+    - requests >=2.18
+    - uritemplate >=3.0.0
+
+test:
+  imports:
+    - github3
+    - github3.gists
+    - github3.issues
+    - github3.repos
+    - github3.search
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github3py.readthedocs.org
+  license: BSD-3-Clause
+  license_file: LICENSE
+  summary: Python wrapper for the GitHub API (http://developer.github.com/v3).
+
+extra:
+  recipe-maintainers:
+    - jakirkham
+    - ocefpaf
+    - sigmavirus24
+    - scopatz

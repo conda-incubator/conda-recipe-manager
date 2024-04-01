@@ -1,0 +1,55 @@
+{% set name = "python-engineio" %}
+{% set version = "4.8.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: f8609e3afdda318fdc336b4ba2de8dd397bb8f9b8a1b43e56c27330e32c2e34c
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+
+  run:
+    - python >=3.6
+    - simple-websocket >=0.10.0
+
+test:
+  imports:
+    - engineio
+    # - engineio.async_eventlet
+    # - engineio.async_gevent
+    # - engineio.async_gevent_uwsgi
+    # - engineio.async_threading
+    - engineio.middleware
+    - engineio.packet
+    - engineio.payload
+    - engineio.server
+    - engineio.socket
+  requires:
+    - pip
+  commands:
+    - pip check
+
+about:
+  home: https://github.com/miguelgrinberg/python-engineio/
+  license_file: LICENSE
+  license: MIT
+  license_family: MIT
+  summary: Engine.IO server
+  doc_url: https://python-engineio.readthedocs.io
+  dev_url: https://github.com/miguelgrinberg/python-engineio/
+
+extra:
+  recipe-maintainers:
+    - ReimarBauer
+    - synapticarbors

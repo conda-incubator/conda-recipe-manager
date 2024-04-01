@@ -1,0 +1,49 @@
+{% set name = "phasespace" %}
+{% set version = "1.9.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/zfit/phasespace/archive/{{ version }}.tar.gz
+  sha256: 3210024f5a933216b627dcb4bb530670772e905ff4ccd1a5bee2b06dd02ab02d
+
+build:
+  number: 0
+  script: '{{ PYTHON }} -m pip install . -vv '
+  noarch: python
+
+requirements:
+  host:
+    - pip
+    - python >=3.8
+    - setuptools_scm
+    - setuptools_scm_git_archive
+  run:
+    - python >=3.8
+    - tensorflow >=2.7
+    - tensorflow-probability >=0.17
+    - particle
+    - decaylanguage
+
+test:
+  imports:
+    - phasespace
+    - phasespace.kinematics
+    - phasespace.phasespace
+    - phasespace.random
+
+about:
+  home: https://github.com/zfit/phasespace
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: Phase space generation implemented in TensorFlow
+  doc_url: https://phasespace.readthedocs.io
+  dev_url: https://github.com/zfit/phasespace
+
+extra:
+  recipe-maintainers:
+    - chrisburr
+    - jonas-eschle

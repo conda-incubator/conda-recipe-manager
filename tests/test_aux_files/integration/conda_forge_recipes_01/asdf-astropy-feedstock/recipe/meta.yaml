@@ -1,0 +1,52 @@
+{% set name = "asdf-astropy" %}
+{% set version = "0.6.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: f0835960154f24f9a030974f225988edeac1109a7f8faf2bdf2abe29a79dbc33
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.9
+    - setuptools-scm
+  run:
+    - asdf >=2.13
+    - asdf-coordinates-schemas >=0.3
+    - asdf-transform-schemas >=0.5
+    - asdf-standard >=1.1.0
+    - astropy >=5.0.4
+    - numpy >=1.20
+    - packaging >=19
+    - python >=3.9
+
+test:
+  imports:
+    - asdf_astropy
+  commands:
+    - pip check
+    - pytest --pyargs asdf_astropy
+  requires:
+    - pytest-astropy
+    - scipy
+
+about:
+  home: https://github.com/astropy/asdf-astropy
+  summary: ASDF serialization support for astropy
+  license: BSD-3-Clause
+  license_file: LICENSE.rst
+
+extra:
+  recipe-maintainers:
+    - jhunkeler
+    - WilliamJamieson
+    - braingram

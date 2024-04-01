@@ -1,0 +1,52 @@
+{% set version = "0.33.12" %}
+
+package:
+  name: tilt
+  version: {{ version }}
+
+source:
+  url: https://github.com/tilt-dev/tilt/archive/v{{ version }}.tar.gz
+  sha256: 4fe1695f77c96cf91864a40c194df11a121a5676f156a52d8bc3cb64a1cec6e7
+
+build:
+  number: 0
+  script_env:
+    - OUTPUT_PATH={{ target_gobin }}tilt{{ target_goexe }}
+
+requirements:
+  build:
+    - {{ compiler('go') }}
+
+    - {{ compiler('c') }}        # [unix]
+    - {{ compiler('cxx') }}      # [unix]
+    - {{ compiler('m2w64_c') }}        # [win]
+    - {{ compiler('m2w64_cxx') }}      # [win]
+
+    - go-licenses
+    - sysroot_linux-64 2.17  # [linux64]
+    - make
+    - nodejs
+    - yarn <2
+  run_constrained:
+    - {{ pin_compatible(compiler('c')) }}        # [unix]
+    - {{ pin_compatible(compiler('cxx')) }}      # [unix]
+    - {{ pin_compatible(compiler('m2w64_c')) }}        # [win]
+    - {{ pin_compatible(compiler('m2w64_cxx')) }}      # [win]
+
+test:
+  commands:
+    - tilt version
+
+about:
+  home: https://github.com/tilt-dev/tilt
+  license: Apache-2.0
+  license_file: LICENSE
+  summary: A multi-service dev environment for teams on Kubernetes
+  description: |
+    Tilt automates all the steps from a code change to a new process: watching
+    files, building container images, and bringing your environment up-to-date.
+
+extra:
+  recipe-maintainers:
+    - joseph-zhong
+    - nicks

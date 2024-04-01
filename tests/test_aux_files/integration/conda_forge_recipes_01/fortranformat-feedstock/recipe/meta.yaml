@@ -1,0 +1,46 @@
+{% set name = "fortranformat" %}
+{% set version = "2.0.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 52473831d6f6bad7c2de0f26ad51856ea5d0ef097bcba5af3b855b871b815b0d
+
+build:
+  number: 0
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+  noarch: python
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - python >=3.6
+
+test:
+  imports:
+    - fortranformat
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/brendanarnold/py-fortranformat
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: Mimics Fortran textual IO in Python
+  description: "FORTRAN format interpreter for Python.\nGenerates text from a Python list of variables or will read a line of text into Python variables according to the FORTRAN format statement passed."
+  doc_url: https://github.com/brendanarnold/py-fortranformat/blob/master/docs/wiki/guide.md
+  dev_url: https://github.com/brendanarnold/py-fortranformat
+
+extra:
+  recipe-maintainers:
+    - smithsp
+    - alexmalins

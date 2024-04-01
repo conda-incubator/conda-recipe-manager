@@ -1,0 +1,75 @@
+{% set version = "2.17.2" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-r.devices
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/R.devices_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/R.devices/R.devices_{{ version }}.tar.gz
+  sha256: 403eeaf552dd696142096973dee3460dc52c19b73fd194841dd4638e2bdcec95
+
+build:
+  merge_build_host: true  # [win]
+  number: 0
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+    - r-r.methodss3 >=1.8.1
+    - r-r.oo >=1.24.0
+    - r-r.utils >=2.10.1
+    - r-base64enc >=0.1_2
+  run:
+    - r-base
+    - r-r.methodss3 >=1.8.1
+    - r-r.oo >=1.24.0
+    - r-r.utils >=2.10.1
+    - r-base64enc >=0.1_2
+
+test:
+  commands:
+    - $R -e "library('R.devices')"           # [not win]
+    - "\"%R%\" -e \"library('R.devices')\""  # [win]
+
+about:
+  home: https://github.com/HenrikBengtsson/R.devices
+  license: LGPL-2.1-or-later
+  summary: Functions for creating plots and image files in a unified way regardless of output format (EPS, PDF, PNG, SVG, TIFF, WMF, etc.). Default device options as well as scales and aspect ratios are controlled in a uniform way across all device types. Switching output format requires minimal changes in code. This package
+    is ideal for large-scale batch processing, because it will never leave open graphics devices or incomplete image files behind, even on errors or user interrupts.
+  license_family: LGPL
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/LGPL-2.1
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+
+# Package: R.devices
+# Version: 2.16.1
+# Depends: R (>= 2.14.0)
+# Imports: grDevices, R.methodsS3 (>= 1.7.1), R.oo (>= 1.21.0), R.utils (>= 2.6.0), base64enc (>= 0.1-2)
+# Suggests: digest (>= 0.6.13), Cairo (>= 1.5-9), R.rsp
+# VignetteBuilder: R.rsp
+# Authors@R: c(person("Henrik", "Bengtsson", role=c("aut", "cre", "cph"), email = "henrikb@braju.com"))
+# Author: Henrik Bengtsson [aut, cre, cph]
+# Maintainer: Henrik Bengtsson <henrikb@braju.com>
+# Title: Unified Handling of Graphics Devices
+# Description: Functions for creating plots and image files in a unified way regardless of output format (EPS, PDF, PNG, SVG, TIFF, WMF, etc.). Default device options as well as scales and aspect ratios are controlled in a uniform way across all device types. Switching output format requires minimal changes in code. This package is ideal for large-scale batch processing, because it will never leave open graphics devices or incomplete image files behind, even on errors or user interrupts.
+# License: LGPL (>= 2.1)
+# URL: https://github.com/HenrikBengtsson/R.devices
+# BugReports: https://github.com/HenrikBengtsson/R.devices/issues
+# LazyLoad: TRUE
+# NeedsCompilation: no
+# Packaged: 2019-10-23 04:00:55 UTC; hb
+# Repository: CRAN
+# Date/Publication: 2019-10-24 06:00:03 UTC

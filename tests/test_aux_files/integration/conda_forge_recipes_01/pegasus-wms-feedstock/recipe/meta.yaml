@@ -1,0 +1,70 @@
+{% set name = "pegasus-wms" %}
+{% set version = "5.0.7" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/pegasus-wms-{{ version }}.tar.gz
+  sha256: c850cfb229c11635d45c4d4d0fe54299887de35d45d5623415ec5fd45f78640d
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.5
+    - setuptools >=44.0.0
+  run:
+    - flask >1.1,<2.3
+    - flask-caching >1.8
+    - gitpython >1.0
+    - pamela >=1.0,<1.1.0
+    - pegasus-wms.api
+    - pegasus-wms.common
+    - pegasus-wms.dax
+    - pegasus-wms.worker
+    - pika >=1.1.0
+    - python >=3.5
+    - pyyaml >5.3
+    - requests >2.23
+    - sqlalchemy >1.3,<1.4
+
+test:
+  requires:
+    - pip
+  imports:
+    - Pegasus
+  commands:
+    - python -m pip check
+    - python -m pip show pegasus-wms
+
+about:
+  home: http://pegasus.isi.edu
+  dev_url: https://github.com/pegasus-isi/pegasus.git
+  doc_url: https://pegasus.isi.edu/documentation/
+  license: Apache-2.0
+  license_file: LICENSE
+  summary: Pegasus Workflow Management System Python API
+  description: |
+    Pegasus Workflow Management System Python API
+    =============================================
+
+    This package contains the Python APIs for Pegasus WMS, including:
+
+    1. The DAX API (Versions 2 and 3)
+    2. The PDAX API (Version 2)
+    3. The monitoring API
+    4. The Stampede database API
+    5. The Pegasus statistics API
+    6. The Pegasus plots API
+    7. Misc. Pegasus utilities
+    8. The pegasus service, including the ensemble manager and dashboard
+
+extra:
+  recipe-maintainers:
+    - duncanmmacleod

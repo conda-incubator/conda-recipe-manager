@@ -1,0 +1,42 @@
+{% set name = "cssutils" %}
+{% set version = "2.10.2" %}
+{% set sha256 = "93cf92a350b1c123b17feff042e212f94d960975a3ed145743d84ebe8ccec7ab" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+    - setuptools_scm >=6.4.2
+  run:
+    - python >=3.6
+
+test:
+  imports:
+    - cssutils
+
+about:
+  home: http://cthedot.de/cssutils/
+  license: LGPL-3.0-only
+  license_file:
+    - COPYING
+    - COPYING.LESSER
+
+  summary: A CSS Cascading Style Sheets library for Python
+
+extra:
+  recipe-maintainers:
+    - vamega

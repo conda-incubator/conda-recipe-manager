@@ -1,0 +1,44 @@
+{% set name = "trompeloeil" %}
+{% set version = "47" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/rollbear/trompeloeil/archive/v{{ version }}.tar.gz
+  sha256: 4a1d79260c1e49e065efe0817c8b9646098ba27eed1802b0c3ba7d959e4e5e84
+
+build:
+  number: 0
+
+requirements:
+  build:
+    - cmake
+    - {{ compiler('cxx') }}
+    - ninja
+
+test:
+  requires:
+    - cmake
+    - {{ compiler('cxx') }}
+    - ninja
+  files:
+    - test
+
+  commands:
+    - cd test
+    - cmake . -GNinja -DCMAKE_BUILD_TYPE=Release
+    - cmake --build . --config Release
+    - ./program  # [unix]
+    - program.exe  # [win]
+
+about:
+  home: https://github.com/rollbear/trompeloeil
+  license: BSL-1.0
+  license_file: LICENSE_1_0.txt
+  summary: Header only C++14 mocking framework
+
+extra:
+  recipe-maintainers:
+    - apmorton

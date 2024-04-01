@@ -1,0 +1,48 @@
+{% set name = "tyro" %}
+{% set version = "0.7.3" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/tyro-{{ version }}.tar.gz
+  sha256: d44fefe04b581714f7d59d8fc8efb1f373b366da16e5acce2074994c9da52187
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install --no-deps . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.7
+    - setuptools >=61.0
+    - pip
+  run:
+    - python >=3.7
+    - docstring_parser >=0.14.1
+    - typing-extensions >=4.3.0
+    - pyyaml >=6.0
+    - colorama >=0.4.0
+    - frozendict >=2.3.4
+    - rich >=11.1.0
+    - shtab >=1.5.6
+
+test:
+  imports:
+    - tyro
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/brentyi/tyro
+  summary: Strongly typed, zero-effort CLI interfaces
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - traversaro

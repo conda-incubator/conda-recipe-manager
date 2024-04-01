@@ -1,0 +1,41 @@
+{% set name = "github-action-utils" %}
+{% set version = "1.1.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/github-action-utils-{{ version }}.tar.gz
+  sha256: 8aa40d90b89d814004160bb7e90b42cc07b55f41f66e4a4a32766d26c9ca3d61
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - python >=3.6
+
+test:
+  imports:
+    - github_action_utils
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/saadmk11/github-action-utils
+  summary: Collection of python functions that can be used to run GitHub Action Workflow Commands
+  license: MIT
+  license_file:
+    - LICENSE
+
+extra:
+  recipe-maintainers:
+    - thewchan

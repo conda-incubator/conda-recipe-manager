@@ -1,0 +1,54 @@
+{% set name = "PyHive" %}
+{% set version = "0.7.0" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 585beff9578a61b99aed47140fec97e26323e8c685a5b5d0c8550a8ebf8a24e0
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - future
+    - python >=3.6
+    - python-dateutil
+    - thrift >=0.10.0
+    - thrift_sasl >0.2.1
+    - requests >=1.0.0
+    - sqlalchemy >=0.8.7
+
+test:
+  imports:
+    - TCLIService
+    - pyhive
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://pypi.org/project/PyHive/
+  summary: Python interface to Hive
+  license: Apache-2.0
+  license_family: Apache
+  license_file: LICENSE
+  description: |
+    PyHive is a collection of Python DB-API and SQLAlchemy interfaces for Presto and Hive.
+  doc_url: https://pypi.python.org/pypi/PyHive
+  doc_source_url: https://github.com/dropbox/PyHive/blob/master/README.rst
+
+extra:
+  recipe-maintainers:
+    - mariusvniekerk
+    - bandersen23

@@ -1,0 +1,70 @@
+{% set version = "0.4.4" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-mockery
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/mockery_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/mockery/mockery_{{ version }}.tar.gz
+  sha256: 072220a0f2455fca91649fc7ce4ed503cfaa965aa769d1bd0fd6622b222845c3
+
+build:
+  merge_build_host: true  # [win]
+  number: 0
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+    - r-testthat
+  run:
+    - r-base
+    - r-testthat
+
+test:
+  commands:
+    - $R -e "library('mockery')"           # [not win]
+    - "\"%R%\" -e \"library('mockery')\""  # [win]
+
+about:
+  home: https://github.com/jfiksel/mockery
+  license: MIT
+  summary: " The two main functionalities of this package are creating mock objects (functions) and selectively intercepting calls to a given function that originate in some other function. It can be used with any testing framework available for R. Mock objects can be injected with either this package's own stub() function
+    or a similar with_mock() facility present in the 'testthat' package."
+  license_family: MIT
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/MIT
+    - LICENSE
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+
+# Package: mockery
+# Version: 0.4.2
+# Title: Mocking Library for R
+# Description:  The two main functionalities of this package are creating mock objects (functions) and selectively intercepting calls to a given function that originate in some other function. It can be used with any testing framework available for R. Mock objects can be injected with either this package's own stub() function or a similar with_mock() facility present in the 'testthat' package.
+# Authors@R: c( person("Noam", "Finkelstein", role = c("aut")), person("Lukasz", "Bartnik", role = c("aut")), person("Jim", "Hester", role = c("cre"), email = "jim.hester@rstudio.com") )
+# URL: https://github.com/jfiksel/mockery
+# BugReports: https://github.com/jfiksel/mockery/issues
+# Imports: testthat
+# Suggests: knitr, rmarkdown (>= 1.0), R6
+# License: MIT + file LICENSE
+# Collate: 'expectations.R' 'mockery.R' 'mock-object.R' 'stub.R'
+# VignetteBuilder: knitr
+# RoxygenNote: 6.0.1
+# NeedsCompilation: no
+# Packaged: 2019-09-03 14:05:29 UTC; jhester
+# Author: Noam Finkelstein [aut], Lukasz Bartnik [aut], Jim Hester [cre]
+# Maintainer: Jim Hester <jim.hester@rstudio.com>
+# Repository: CRAN
+# Date/Publication: 2019-09-03 22:10:06 UTC

@@ -1,0 +1,44 @@
+{% set name = "ploomber-scaffold" %}
+{% set version = "0.3.1" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/ploomber-scaffold-{{ version }}.tar.gz
+  sha256: 9ad42a891185f7595eb4f44c00b1fb5d1d9332b50f1769e2b2c6f21bc00c0ee1
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - python >=3.6
+    - jinja2
+
+test:
+  imports:
+    - ploomber_scaffold
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/ploomber/ploomber
+  summary: Supporting package for ploomber
+  license: Apache-2.0
+  license_file: LICENSE
+  dev_url: https://github.com/ploomber/ploomber
+
+extra:
+  recipe-maintainers:
+    - edublancas
+    - RoyalTS

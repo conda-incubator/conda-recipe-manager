@@ -1,0 +1,56 @@
+{% set version = "1.0.3" %}
+
+package:
+  name: delta-sharing-python
+  version: {{ version }}
+
+source:
+  - folder: dist
+    url: https://pypi.io/packages/source/d/delta-sharing/delta-sharing-{{ version }}.tar.gz
+    sha256: 7a7de73b8fbc3f3fb249be24196ee31365fddaa04442877e82ab33d8eaa96471
+  - folder: src
+    url: https://github.com/delta-io/delta-sharing/archive/refs/tags/v{{ version }}.tar.gz
+    sha256: eeae6ae23c89b7fe17002f97e8662feca70f2296e68d10d676533e0b4ce196df
+
+build:
+  number: 0
+  noarch: python
+  script: cd dist && {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.7
+  run:
+    - aiohttp
+    - dataclasses  # this is a no-op on py3.8+
+    - fsspec >=0.7.4
+    - numpy
+    - pandas
+    - pyarrow >=4.0.0
+    - python >=3.7
+    - requests
+    - yarl >=1.6.0
+
+test:
+  source_files:
+    - src/python/delta_sharing/tests
+  imports:
+    - delta_sharing
+  commands:
+    - pip check
+  requires:
+    - pip
+    - pytest-cov
+
+about:
+  home: https://delta.io/sharing
+  summary: Python Connector for Delta Sharing
+  dev_url: https://github.com/delta-io/delta-sharing
+  doc_url: https://docs.delta.io/latest/index.html
+  license: Apache-2.0
+  license_file: src/LICENSE.txt
+
+extra:
+  recipe-maintainers:
+    - bollwyvl

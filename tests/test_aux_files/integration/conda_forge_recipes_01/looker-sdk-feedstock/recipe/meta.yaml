@@ -1,0 +1,44 @@
+{% set name = "looker-sdk" %}
+{% set version = "24.2.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/looker_sdk-{{ version }}.tar.gz
+  sha256: 3187a566bcdf6a719a79981b0717c06b1663dce410ef502a7e1f589333a26e87
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.7
+    - pip
+  run:
+    - python >=3.7
+    - attrs >=20.1.0
+    - cattrs >=1.3
+    - requests >=2.22
+    - typing-extensions >=4.1.1
+
+test:
+  imports:
+    - looker_sdk
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://pypi.python.org/pypi/looker_sdk
+  summary: Looker REST API
+  license: MIT
+  license_file: LICENSE.txt
+
+extra:
+  recipe-maintainers:
+    - xylar

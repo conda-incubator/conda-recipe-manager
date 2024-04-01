@@ -1,0 +1,76 @@
+{% set name = "mne-bids-pipeline" %}
+{% set version = "1.8.0" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name.replace('-', '_') }}-{{ version }}.tar.gz
+  sha256: 9669ea108996c5b2206293db65593bed24092ef52bdbffe0757814c25cf26754
+
+build:
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+  noarch: python
+  entry_points:
+    - mne_bids_pipeline = mne_bids_pipeline._main:main
+
+requirements:
+  host:
+    - pip
+    - hatchling
+    - hatch-vcs
+    - python >=3.9
+  run:
+    - python >=3.9
+    - psutil
+    - packaging
+    - joblib >=0.14
+    - threadpoolctl
+    - dask
+    - bokeh <3
+    - jupyter-server-proxy
+    - scikit-learn
+    - numpy
+    - scipy
+    - matplotlib-base
+    - pandas
+    - seaborn
+    - json_tricks
+    - rich
+    - python-picard
+    - qtpy
+    - pyvista
+    - pyvistaqt
+    - openpyxl
+    - autoreject
+    - mne-base >=1.6
+    - h5io
+    - mne-bids >=0.11.1
+    - nibabel
+    - filelock
+    - pydantic
+    - annotated-types
+    - tqdm
+
+test:
+  imports:
+    - mne_bids_pipeline
+  commands:
+    - pip check
+    - mne_bids_pipeline --version
+  requires:
+    - pip
+
+about:
+  home: https://pypi.org/project/mne-bids-pipeline/
+  summary: A standardized processing pipeline for your MEG and EEG data
+  license: BSD-3-Clause
+  license_file: LICENSE.txt
+
+extra:
+  recipe-maintainers:
+    - larsoner
+    - hoechenberger

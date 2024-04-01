@@ -1,0 +1,42 @@
+{% set name = "setuptools-markdown" %}
+{% set version = "0.4.1" %}
+{% set hash_type = "sha256" %}
+{% set hash = "e8da0784a730eb8aa8f686d34e0f5c02bb236ae4d7f07ee36006f103b24f0c29" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  {{ hash_type }}: {{ hash }}
+
+build:
+  number: 0
+  script: "{{ PYTHON }} -m pip install . --no-deps -vv"
+  noarch: python
+
+requirements:
+  build:
+    - pip
+    - python
+    - setuptools        
+  run:
+    - python    
+    - pypandoc
+
+test:
+  imports:
+    - setuptools_markdown
+
+about:
+  home: https://github.com/msabramo/setuptools-markdown
+  license: MIT
+  license_file: LICENSE-MIT
+  summary: Use Markdown for your project description
+  dev_url: https://github.com/msabramo/setuptools-markdown
+
+extra:
+  recipe-maintainers:
+    - nicoddemus

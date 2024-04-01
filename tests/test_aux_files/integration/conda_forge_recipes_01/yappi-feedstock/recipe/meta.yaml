@@ -1,0 +1,49 @@
+{% set name = "yappi" %}
+{% set version = "1.6.0" %}
+{% set hash = "a9aaf72009d8c03067294151ee0470ac7a6dfa7b33baab40b198d6c1ef00430a" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: {{ hash }}
+
+build:
+  entry_points:
+    - yappi = yappi:main
+  script: {{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv
+  number: 0
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - {{ compiler('cxx') }}
+  host:
+    - pip
+    - python
+  run:
+    - python
+
+test:
+  imports:
+    - yappi
+
+  commands:
+    - yappi --help
+
+about:
+  home: https://github.com/sumerc/yappi
+  license: MIT
+  # license file not available in package, see:
+  # https://bitbucket.org/sumerc/yappi/pull-requests/27
+  license_file: {{ environ["RECIPE_DIR"] }}/LICENSE
+  summary: Yet Another Python Profiler
+  license_family: MIT
+
+extra:
+  recipe-maintainers:
+    - nicoddemus

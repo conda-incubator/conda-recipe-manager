@@ -1,0 +1,82 @@
+{% set name = "bilby" %}
+{% set version = "2.2.3" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 25b0036118c31f779cbea1644d5822b83677a9e7ca41b7cc02fd0066f4c6b5c3
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  entry_points:
+    - bilby_plot = cli_bilby.plot_multiple_posteriors:main
+    - bilby_result = cli_bilby.bilby_result:main
+
+requirements:
+  host:
+    - pip
+    - python >=3.7
+    - setuptools >=42
+    - setuptools-scm >=3.4.3
+  run:
+    - astropy
+    - attrs
+    - bilby.cython >=0.3.0
+    - corner
+    - dill
+    - dynesty >=2.0.1
+    - emcee
+    - h5py
+    - matplotlib-base <3.8.0
+    - numpy
+    - packaging
+    - pandas
+    - pytables
+    - python >=3.8
+    - scipy >=1.5
+    - tqdm
+
+test:
+  requires:
+    - gwpy
+    - pip
+    - python-lal
+    - python-lalsimulation
+  imports:
+    - bilby
+    - bilby.core
+    - bilby.core.sampler
+    - bilby.gw
+    - bilby.gw.detector
+    - bilby.gw.sampler
+    - bilby.hyper
+    - cli_bilby
+  commands:
+    # check requirements
+    - python -m pip check bilby
+    - python -m pip show bilby
+    # check entry points
+    - bilby_plot --help
+    - bilby_result --help
+    # check PSD from file works (validates data files)
+    - python -c "from bilby.gw.detector import PowerSpectralDensity; print(PowerSpectralDensity.from_aligo().psd_array)"
+
+about:
+  home: https://git.ligo.org/lscsoft/bilby
+  dev_url: https://git.ligo.org/lscsoft/bilby
+  doc_url: https://lscsoft.docs.ligo.org/bilby/
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE.md
+  summary: A user-friendly Bayesian inference library
+
+extra:
+  recipe-maintainers:
+    - duncanmmacleod
+    - ColmTalbot
+    - GregoryAshton

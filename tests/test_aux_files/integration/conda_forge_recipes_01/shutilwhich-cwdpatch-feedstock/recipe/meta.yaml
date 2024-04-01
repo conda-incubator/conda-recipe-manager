@@ -1,0 +1,39 @@
+{% set name = "shutilwhich-cwdpatch" %}
+{% set version = "0.1.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: fbd5158d6fda0f2bffefa847f90ba2250e948e44cf11eb995f86e5bc73dada06
+
+build:
+  noarch: python
+  number: 1
+  script: "{{ PYTHON }} -m pip install . --no-deps -vv"
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+  run:
+    - python
+
+test:
+  imports:
+    - shutilwhich_cwdpatch
+
+about:
+  home: https://github.com/kiwi0fruit/shutilwhich-cwdpatch
+  license: Python-2.0
+  license_family: PSF
+  license_file: LICENSE
+  summary: "Patch for shutil.which and shutilwhich that disables search in CWD on Windows."
+  doc_url: https://github.com/kiwi0fruit/shutilwhich-cwdpatch
+  dev_url: https://github.com/kiwi0fruit/shutilwhich-cwdpatch
+
+extra:
+  recipe-maintainers:
+    - kiwi0fruit

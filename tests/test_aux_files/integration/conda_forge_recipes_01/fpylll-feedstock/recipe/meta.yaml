@@ -1,0 +1,65 @@
+{% set version = "0.6.1" %}
+{% set name = "fpylll" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://github.com/fplll/fpylll/releases/download/{{ version }}/fpylll-{{ version }}.tar.gz
+  sha256: c8a18e735358adef4c398fcc2f567fda01f79f7321825d747dfb2d3dfeef33b3
+
+build:
+  number: 0
+  skip: true  # [win]
+  # fpylll supports Python 3.10+. However, it seems to build with 3.9, so we keep it around for the moment.
+  skip: true  # [py<39]
+  script:
+    - {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - cython                                 # [build_platform != target_platform]
+    - numpy                                  # [build_platform != target_platform]
+    - {{ compiler('cxx') }}
+    - pkg-config
+  host:
+    - cython
+    - gmp
+    - mpfr
+    - qd
+    - fplll >=5.4.4
+    - cysignals
+    - numpy
+    - python
+    - pip
+  run:
+    - cysignals
+    # While newer versions of numpy have a run_exports, older versions might be lacking this, so we pin explicitly.
+    - {{ pin_compatible('numpy') }}
+    - python
+
+test:
+  requires:
+    - pytest
+  commands:
+    - py.test --disable-pytest-warnings
+  imports:
+    - fpylll
+  source_files:
+    - tests/*
+
+about:
+  home: https://github.com/fplll/fpylll
+  license: GPL-2.0-or-later
+  license_file: LICENSE
+  summary: A Python (2 and 3) wrapper for fplll.
+  dev_url: https://github.com/fplll/fpylll
+
+extra:
+  recipe-maintainers:
+    - isuruf
+    - saraedum

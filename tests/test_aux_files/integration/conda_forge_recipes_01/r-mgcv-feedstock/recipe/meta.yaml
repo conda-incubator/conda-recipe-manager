@@ -1,0 +1,65 @@
+{% set version = "1.9-1" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-mgcv
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/mgcv_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/mgcv/mgcv_{{ version }}.tar.gz
+  sha256: 700fbc37bedd3a49505b9bc4949faee156d9cfb4f669d797d06a10a15a5bdb32
+
+build:
+  merge_build_host: true  # [win]
+  number: 0
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - cross-r-base {{ r_base }}  # [build_platform != target_platform]
+    - r-matrix                   # [build_platform != target_platform]
+    - r-nlme >=3.1_64            # [build_platform != target_platform]
+    - {{ compiler('c') }}        # [not win]
+    - {{ compiler('m2w64_c') }}  # [win]
+    - {{ posix }}filesystem      # [win]
+    - {{ posix }}make
+    - {{ posix }}sed             # [win]
+    - {{ posix }}coreutils       # [win]
+    - {{ posix }}zip             # [win]
+  host:
+    - r-base
+    - libblas
+    - liblapack
+    - libgomp                    # [linux]
+    - llvm-openmp                # [osx]
+    - r-matrix
+    - r-nlme >=3.1_64
+  run:
+    - r-base
+    - {{ native }}gcc-libs       # [win]
+    - r-matrix
+    - r-nlme >=3.1_64
+
+test:
+  commands:
+    - $R -e "library('mgcv')"           # [not win]
+    - "\"%R%\" -e \"library('mgcv')\""  # [win]
+
+about:
+  home: https://CRAN.R-project.org/package=mgcv
+  license: GPL-2.0-or-later
+  summary: Generalized additive (mixed) models, some of their extensions and other generalized ridge regression with multiple smoothing parameter estimation by (Restricted) Marginal Likelihood, Generalized Cross Validation and similar, or using iterated nested Laplace approximation for fully Bayesian inference. See Wood
+    (2017) <doi:10.1201/9781315370279> for an overview. Includes a gam() function, a wide variety of smoothers, 'JAGS' support and distributions beyond the exponential family.
+  license_family: GPL2
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-2
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-3
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r

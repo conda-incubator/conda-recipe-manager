@@ -1,0 +1,46 @@
+{% set name = "dask-searchcv" %}
+{% set version = "0.2.0" %}
+{% set sha256 = "c1eaa9271dadc0d25659550352e883402dc7c28a217209c4715d5b46556a8565" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  noarch: python
+  number: 0
+  script: python setup.py install --single-version-externally-managed --record record.txt
+
+requirements:
+  build:
+    - python
+    - setuptools
+  run:
+    - python
+    - dask >=0.14.0
+    - numpy >=1.8.0
+    - scikit-learn >=0.18.0
+    - scipy >=0.13.0
+    - toolz >=0.8.2
+
+test:
+  imports:
+    - dask_searchcv
+
+about:
+  home: http://dask-searchcv.readthedocs.io/
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE.txt
+  summary: 'Tools for doing hyperparameter search with Scikit-Learn and Dask'
+  doc_url: http://dask-searchcv.readthedocs.io/
+  dev_url: https://github.com/dask/dask-searchcv
+
+extra:
+  recipe-maintainers:
+    - jcrist

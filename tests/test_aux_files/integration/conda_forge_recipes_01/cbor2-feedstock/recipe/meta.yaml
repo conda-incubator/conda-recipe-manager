@@ -1,0 +1,45 @@
+{% set name = "cbor2" %}
+{% set version = "5.6.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/cbor2-{{ version }}.tar.gz
+  sha256: b7513c2dea8868991fad7ef8899890ebcf8b199b9b4461c3c11d7ad3aef4820d
+
+build:
+  skip: true  # [py<37]
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  number: 0
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+  host:
+    - python
+    - setuptools >=61
+    - setuptools-scm >=6.4
+    - pip
+  run:
+    - python
+
+test:
+  imports:
+    - cbor2
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/agronholm/cbor2
+  doc_url: https://cbor2.readthedocs.io/
+  summary: CBOR (de)serializer with extensive tag support
+  license: MIT
+  license_file: LICENSE.txt
+
+extra:
+  recipe-maintainers:
+    - thewchan

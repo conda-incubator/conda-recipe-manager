@@ -1,0 +1,45 @@
+{% set version = "1.2.11" %}
+
+package:
+  name: alsa-lib
+  version: {{ version }}
+
+source:
+  url: https://github.com/alsa-project/alsa-lib/archive/v{{ version }}.tar.gz
+  sha256: 12216f0730d6dde3ded6a2a5388bc0009ad07f5c65972bd89aac9a76f8f085a4
+
+build:
+  number: 1
+  skip: true  # [not linux]
+  run_exports:
+    # https://abi-laboratory.pro/?view=timeline&l=alsa
+    # Seems like they accidentally broke patch version ABI compatibility
+    # and quickly fixed it.
+    - {{ pin_subpackage("alsa-lib", max_pin="x.x") }}
+
+requirements:
+  build:
+    - make
+    - autoconf
+    - automake
+    - libtool
+    - {{ compiler('c') }}
+  host:
+  run:
+
+test:
+  commands:
+    - test -f $PREFIX/lib/libasound$SHLIB_EXT
+
+about:
+  home: http://www.alsa-project.org/main/index.php/Main_Page
+  license: LGPL-2.1-or-later
+  license_family: GPL
+  license_file: COPYING
+  summary: Advanced Linux Sound Architecture
+
+extra:
+  recipe-maintainers:
+    - scopatz
+    - ocefpaf
+    - ryanvolz

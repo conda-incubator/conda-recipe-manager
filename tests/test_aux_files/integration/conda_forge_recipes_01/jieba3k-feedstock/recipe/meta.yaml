@@ -1,0 +1,42 @@
+{% set name = "jieba3k" %}
+{% set version = "0.35.1" %}
+
+package:
+  name: '{{ name|lower }}'
+  version: '{{ version }}'
+
+source:
+  fn: '{{ name }}-{{ version }}.zip'
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.zip
+  'sha256': '980a4f2636b778d312518066be90c7697d410dd5a472385f5afced71a2db1c10'
+
+build:
+  number: 1008
+  script: "{{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv"
+  skip: True  # [py2k]
+
+requirements:
+  host:
+    - python
+    - pip
+  run:
+    - python
+
+test:
+  imports:
+    - jieba
+
+about:
+  home: https://github.com/fxsjy/jieba/tree/jieba3k
+  license: MIT
+  license_family: MIT
+  # See issue https://github.com/fxsjy/jieba/issues/545 for adding LICENSE to src distribution
+  license_file: '{{ environ["RECIPE_DIR"] }}/LICENSE'
+  summary: Chinese Words Segmentation Utilities
+  description: "Jieba (Chinese for 'to stutter') Chinese text segmentation: built to be the best Python Chinese word segmentation module."
+  dev_url: 'https://github.com/fxsjy/jieba/tree/jieba3k'
+
+extra:
+  recipe-maintainers: 
+  - ganeshhubale
+  - synapticarbors

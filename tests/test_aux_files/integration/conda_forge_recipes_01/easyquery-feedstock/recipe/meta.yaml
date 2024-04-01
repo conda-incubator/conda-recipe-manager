@@ -1,0 +1,46 @@
+{% set name = "easyquery" %}
+{% set version = "0.4.0" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/easyquery-{{ version }}.tar.gz
+  sha256: f1f598b0a7912abb8006a4e102c0b22dfe97ec1775c615cb773e3afe66f57cc2
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - numexpr >=2.0
+    - numpy >=1.7
+    - python >=3.6
+
+test:
+  imports:
+    - easyquery
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/yymao/easyquery
+  summary: Create easy-to-use Query objects that can apply on NumPy structured arrays, astropy Table, and Pandas DataFrame.
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  doc_url: https://github.com/yymao/easyquery/blob/master/README.md
+  dev_url: https://github.com/yymao/easyquery
+
+extra:
+  recipe-maintainers:
+    - yymao

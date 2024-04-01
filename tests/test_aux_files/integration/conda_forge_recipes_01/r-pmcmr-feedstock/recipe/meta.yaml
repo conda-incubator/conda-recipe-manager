@@ -1,0 +1,47 @@
+{% set version = "4.4" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-pmcmr
+  version: {{ version|replace("-", "_") }}
+
+source:
+  fn: PMCMR_{{ version }}.tar.gz
+  url:
+    - {{ cran_mirror }}/src/contrib/PMCMR_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/PMCMR/PMCMR_{{ version }}.tar.gz
+  sha256: e7b4d9d595a879a62c9b3bb44c1f95432ad75a6607f84ce6bfc6395fee1dc116
+
+build:
+  noarch: generic
+  merge_build_host: true  # [win]
+  number: 2
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+  run:
+    - r-base
+
+test:
+  commands:
+    - $R -e "library('PMCMR')"           # [not win]
+    - "\"%R%\" -e \"library('PMCMR')\""  # [win]
+
+about:
+  home: https://CRAN.R-project.org/package=PMCMR
+  license: GPL (>= 3)
+  summary: "Note, that the 'PMCMR' package is superseded by the novel 'PMCMRplus' package. The 'PMCMRplus' package contains all functions from  'PMCMR' and many more parametric and non-parametric multiple comparison procedures, one-factorial trend tests, as well as improved method functions,  such as print, summary and plot.\
+    \  The 'PMCMR' package is no longer maintained, but kept for compatibility of reverse depending packages for some time. "
+  license_family: GPL3
+  license_file: {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-3
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r

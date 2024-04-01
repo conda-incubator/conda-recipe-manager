@@ -1,0 +1,60 @@
+{% set version = "1.2" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-ccp
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/CCP_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/CCP/CCP_{{ version }}.tar.gz
+  sha256: 7e3906abf51f4c7046730760800711b915f52855fbb2bfd33eca8fa75e70f618
+
+build:
+  noarch: generic
+  merge_build_host: true  # [win]
+  number: 2
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+
+  host:
+    - r-base
+  run:
+    - r-base
+
+test:
+  commands:
+    - $R -e "library('CCP')"           # [not win]
+    - "\"%R%\" -e \"library('CCP')\""  # [win]
+
+about:
+  home: https://CRAN.R-project.org/package=CCP
+  license: GPL-2.0-or-later
+  summary: Significance tests for canonical correlation analysis, including asymptotic tests and a Monte Carlo method
+  license_family: GPL
+  license_file: {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-3
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+
+# Package: CCP
+# Type: Package
+# Title: Significance Tests for Canonical Correlation Analysis (CCA)
+# Version: 1.1
+# Date: 2009-12-14
+# Author: Uwe Menzel
+# Maintainer: Uwe Menzel to <uwemenzel@gmail.com>
+# Description: Significance tests for canonical correlation analysis, including asymptotic tests and a Monte Carlo method
+# License: GPL
+# LazyLoad: yes
+# Packaged: 2012-10-29 13:13:08 UTC; ripley
+# Repository: CRAN
+# Date/Publication: 2012-10-29 13:13:38
+# NeedsCompilation: no

@@ -1,0 +1,74 @@
+{% set name = "pypots" %}
+{% set version = "0.3.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 02edcaab5632366af66667caaefbb5abea78b32aa2d773a704498b05a223be2e
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.7
+    - pip
+    - numpy
+    - scikit-learn
+    - pytorch >=1.10.0
+    - scipy
+    - tensorboard
+    - pandas
+    - h5py
+    - pyarrow
+    - matplotlib
+    - pygrinder >=0.4
+    - tsdb >=0.2
+    - packaging
+  run:
+    - python >=3.7
+
+
+test:
+  imports:
+    - pypots
+  requires:
+    - pip
+    - numpy
+    - scikit-learn
+    - pytorch >=1.10.0
+    - scipy
+    - tensorboard
+    - pandas
+    - h5py
+    - pyarrow
+    - matplotlib
+    - pygrinder >=0.4
+    - tsdb >=0.2
+    - packaging
+  commands:
+    - pip check
+
+about:
+  home: https://github.com/WenjieDu/PyPOTS
+  summary: a Python toolbox for machine learning on Partially-Observed Time Series
+  description: |
+    PyPOTS is born to become a handy toolbox that is going to make data mining on POTS easy rather than tedious, 
+    to help engineers and researchers focus more on the core problems in their hands rather than on how to deal 
+    with the missing parts in their data. PyPOTS will keep integrating classical and the latest state-of-the-art 
+    data mining algorithms for partially-observed multivariate time series. For sure, besides various algorithms, 
+    PyPOTS is going to have unified APIs together with detailed documentation and interactive examples across 
+    algorithms as tutorials.
+  license: BSD-3-Clause
+  license_file: LICENSE
+  doc_url: https://docs.pypots.com
+  dev_url: https://github.com/WenjieDu/PyPOTS
+
+extra:
+  recipe-maintainers:
+    - WenjieDu

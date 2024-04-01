@@ -1,0 +1,57 @@
+{% set version = "0.7.2" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-brglm
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/brglm_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/brglm/brglm_{{ version }}.tar.gz
+  sha256: 56098d2ce238478e7a27cacc4cdec0bc65f287fe746b38fbb1edda20c1675023
+
+build:
+  merge_build_host: true  # [win]
+  number: 3
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ compiler('c') }}          # [not win]
+    - {{ compiler('m2w64_c') }}    # [win]
+    - {{ posix }}filesystem        # [win]
+    - {{ posix }}make
+    - {{ posix }}sed               # [win]
+    - {{ posix }}coreutils         # [win]
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+    - r-profilemodel
+  run:
+    - r-base
+    - {{ native }}gcc-libs         # [win]
+    - r-profilemodel
+
+test:
+  commands:
+    - $R -e "library('brglm')"           # [not win]
+    - "\"%R%\" -e \"library('brglm')\""  # [win]
+
+about:
+  home: https://github.com/ikosmidis/brglm
+  license: GPL-2.0-or-later
+  summary: Fit generalized linear models with binomial responses using either an adjusted-score approach to bias reduction or maximum penalized likelihood where penalization is by Jeffreys invariant prior. These procedures return estimates with improved frequentist properties (bias, mean squared error) that are always finite
+    even in cases where the maximum likelihood estimates are infinite (data separation). Fitting takes place by fitting generalized linear models on iteratively updated pseudo-data. The interface is essentially the same as 'glm'.  More flexibility is provided by the fact that custom pseudo-data representations can be specified
+    and used for model fitting. Functions are provided for the construction of confidence intervals for the reduced-bias estimates.
+  license_family: GPL3
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-2
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-3
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r

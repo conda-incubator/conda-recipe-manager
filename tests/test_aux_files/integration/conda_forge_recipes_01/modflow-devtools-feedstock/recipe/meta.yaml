@@ -1,0 +1,42 @@
+{% set name = "modflow-devtools" %}
+{% set version = "1.4.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/modflow-devtools-{{ version }}.tar.gz
+  sha256: 5a9460cbf43fa89c85103a26b318b2833ce323a41fee93ebdd8a1a2c70904132
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.8
+    - setuptools >=61
+    - pip
+  run:
+    - python >=3.8
+
+test:
+  imports:
+    - modflow_devtools
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/MODFLOW-USGS/modflow-devtools
+  summary: Python tools for MODFLOW development
+  license: CC0-1.0
+  license_file: LICENSE.md
+
+extra:
+  recipe-maintainers:
+    - jdhughes-usgs
+    - wpbonelli

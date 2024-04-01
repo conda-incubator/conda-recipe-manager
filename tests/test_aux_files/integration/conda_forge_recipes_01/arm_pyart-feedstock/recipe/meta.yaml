@@ -1,0 +1,83 @@
+{% set name = "arm_pyart" %}
+{% set version = "1.18.0" %}
+{% set sha256 = "6f68fcd65b51cc084c7f36d71fbdd4609c07d3f55a5a8e527c1f7a600056ae0c" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  number: 0
+  skip: true  # [py<39]
+  script:
+    - export RSL_PATH=$PREFIX    # [not win]
+    - {{ PYTHON }} -m pip install . --no-deps -vvv
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - numpy >=1.18                           # [build_platform != target_platform]
+    - {{ compiler('c') }}
+  host:
+    - python
+    - pip
+    - numpy >=1.18
+    - cython >=0.24.0
+    - setuptools_scm
+  run:
+    - python
+    - {{ pin_compatible('numpy') }}
+    - setuptools
+    - setuptools_scm
+    - numpy >=1.18
+    - scipy
+    - matplotlib-base
+    - netcdf4
+    - xarray
+    - pooch
+    - versioneer
+    - fsspec
+    - s3fs
+    - cftime
+    - xradar
+    - open-radar-data
+    - pandas
+    - mda-xdrlib
+test:
+  imports:
+    - pyart
+    - pyart.core
+    - pyart.io
+    - pyart.graph
+  requires:
+    - pip
+
+about:
+  home: http://arm-doe.github.io/pyart/
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE.txt
+  summary: Python ARM Radar Toolkit
+  description: |
+    The Python ARM Radar Toolkit, Py-ART, is an open source Python
+    module containing a growing collection of weather radar algorithms
+    and utilities build on top of the Scientific Python stack and
+    distributed under the 3-Clause BSD license. Py-ART is used by the
+    Atmospheric Radiation Measurement (ARM) Climate Research Facility for
+    working with data from a number of precipitation and cloud radars, but
+    has been designed so that it can be used by others in the radar and
+    atmospheric communities to examine, process, and analyze data from many
+    types of weather radars.
+  doc_url: https://arm-doe.github.io/pyart/
+  dev_url: https://arm-doe.github.io/pyart/API/index.html
+
+extra:
+  recipe-maintainers:
+    - zssherman
+    - mgrover1

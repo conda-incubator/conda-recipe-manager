@@ -1,0 +1,47 @@
+{% set name = "hydrodata" %}
+{% set version = "0.9.4" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/hydrodata-{{ version }}.tar.gz
+  sha256: ee56400400de6a2af36225b752ee7c676f3af39d1fe45e796885f01169f79e74
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python
+  run:
+    - pygeoogc
+    - pygeoutils
+    - pynhd
+    - pygeohydro
+    - py3dep
+    - pydaymet
+    - python >=3.6
+
+test:
+  imports:
+    - pygeohydro
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://pypi.org/project/hydrodata/
+  summary: hydrodata is now pygeohydro, please install pygeohydro instead.
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - cheginit

@@ -1,0 +1,47 @@
+{% set name = "typed-settings" %}
+{% set version = "24.2.0" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/typed_settings-{{ version }}.tar.gz
+  sha256: 06ea2c7c89428020fe87b780ffafe813df3375445a4f77a293e772b01a4947e6
+
+build:
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+  skip: true  # [py < 37]
+
+requirements:
+  host:
+    - hatchling
+    - pip
+    - python
+  run:
+    - python
+    - attrs >=22.1
+    - cattrs >=22.2
+    - tomli >=2  # [py < 311]
+
+test:
+  imports:
+    - typed_settings
+    - typed_settings.attrs
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://gitlab.com/sscherfke/typed-settings
+  summary: Typed settings based on attrs classes
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - tdsmith
+    - asford

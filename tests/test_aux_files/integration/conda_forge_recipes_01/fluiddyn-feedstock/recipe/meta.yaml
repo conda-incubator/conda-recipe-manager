@@ -1,0 +1,91 @@
+{% set name = "fluiddyn" %}
+{% set version = "0.6.0" %}
+{% set build = 0 %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 47ad53b3723487d3711ec4ea16bca2d7c270b5c5c5a0255f7684558d7397850e
+
+build:
+  number: {{ build }}
+  noarch: python
+  entry_points:
+    - fluidinfo = fluiddyn.util.info:main
+    - fluidnbstripout = fluiddoc.fluidnbstripout:main
+    - fluiddocset = fluiddoc.fluiddocset:main
+    - fluiddump = fluiddyn.io.dump:main
+    - fluidmat2py = fluiddyn.util.matlab2py:main
+    - fluidcluster-help = fluiddyn.clusters:print_help_scheduler
+  script: '{{ PYTHON }} -m pip install .[full] --no-deps --ignore-installed -vv '
+
+requirements:
+  host:
+    - pip
+    - python >=3.9
+    - pdm-backend >=2.1.8
+    # needed because https://github.com/pdm-project/pdm-backend/issues/209
+    - editables >=0.3
+  run:
+    - python >=3.9
+    - numpy
+    - psutil >=5.2.1
+    - h5py
+    - h5netcdf
+    - nbstripout
+    - scipy
+    - matplotlib-base
+    - imageio
+    - scikit-image
+    - qtpy
+    - distro
+    - simpleeval >=0.9.13
+    # because fluiddoc still uses pkg_resources
+    - setuptools
+
+test:
+  imports:
+    - fluiddoc
+    - fluiddyn
+    - fluiddyn.calcul
+    - fluiddyn.calcul.test
+    - fluiddyn.clusters
+    - fluiddyn.clusters.test
+    - fluiddyn.io
+    - fluiddyn.io.test
+    - fluiddyn.output
+    - fluiddyn.output.test
+    - fluiddyn.util
+    - fluiddyn.util.matlab2py
+    - fluiddyn.util.matlab2py.test
+    - fluiddyn.util.test
+  commands:
+    - fluidinfo --help
+    - fluidnbstripout --help
+    - fluiddocset --help
+    - fluiddump --help
+    - fluidmat2py --help
+    - fluidcluster-help --help
+
+about:
+  home: https://foss.heptapod.net/fluiddyn/fluiddyn/
+  license: CECILL-B
+  license_file: LICENSE.txt
+  summary: Framework for studying fluid dynamics.
+  description: |
+    FluidDyn project is an ecosystem of packages for research and teaching in
+    fluid dynamics. The Python package fluiddyn contains basic utilities to
+    manage File I/O for some esoteric formats, publication quality figures, job
+    submission on clusters, MPI powerful classes to handle parameters, arrays,
+    series of files simplified interfaces to calculate FFT, spherical harmonics
+    and much more.
+  doc_url: https://fluiddyn.readthedocs.io
+
+extra:
+  recipe-maintainers:
+    - CyrilleBonamy
+    - paugier
+    - ashwinvis

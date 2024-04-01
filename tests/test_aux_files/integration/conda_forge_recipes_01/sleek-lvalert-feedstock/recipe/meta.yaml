@@ -1,0 +1,52 @@
+{% set name = "sleek-lvalert" %}
+{% set version = "2.0.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 74c5309a4a0fd98d677cbc559862d273cc480e6b0f3a1131ee79fb5ca36f18a6
+
+build:
+  entry_points:
+    - lvalert = sleek_lvalert.tool:main
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python
+    - setuptools >=30.3.0
+  run:
+    - python
+    - safe-netrc
+    - setuptools
+    - slixmpp
+  run_constrained:
+    # this package conflicts with ligo-lvalert
+    - ligo-lvalert >=9999
+
+test:
+  imports:
+    - sleek_lvalert
+  commands:
+    - lvalert --help
+
+about:
+  home: https://git.ligo.org/emfollow/sleek-lvalert
+  license: GPL-3.0-or-later
+  license_family: GPL
+  license_file: LICENSE.md
+  summary: LIGO/Virgo LVAlert client powered by SleekXMPP
+  description: |
+    sleek-lvalert is a client for the LIGO/Virgo LVAlert pubsub
+    infrastructure that is powered by SleekXMPP and is compatible
+    with Python 3.
+
+extra:
+  recipe-maintainers:
+    - duncanmmacleod

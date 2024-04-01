@@ -1,0 +1,39 @@
+{% set name = "types-croniter" %}
+{% set version = "2.0.0.20240321" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/types-croniter-{{ version }}.tar.gz
+  sha256: 5d9560e0fd3cf0299860e886f3cb19c38ec22135cee7b2e69daa8b2312c4f24c
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - python >=3.6
+
+test:
+  commands:
+    - test -f $SP_DIR/croniter-stubs/__init__.pyi
+
+
+about:
+  home: https://github.com/python/typeshed
+  summary: Typing stubs for croniter
+  license: Apache-2.0 AND MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - fhoehle
+    - conda-forge/mypy

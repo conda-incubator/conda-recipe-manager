@@ -1,0 +1,56 @@
+{% set name = "boututils" %}
+{% set version = "0.2.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: b8e12cace0638645de09647b60f1f1e0079ded359855a9d220aede94736d2fe5
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.0
+    - pip
+    - setuptools_scm
+  run:
+    - python >=3.0
+    - numpy
+    - matplotlib-base
+    - scipy
+    - h5py
+    - future
+    - netcdf4
+
+test:
+  imports:
+    - boututils
+  requires:
+    - pytest
+  commands:
+    - pytest --pyargs boututils
+
+about:
+  home: https://github.com/boutproject/boututils
+  license: LGPL-3.0-only
+  license_family: LGPL
+  license_file: LICENSE
+  summary: Python utilities for BOUT++
+  description: |
+    pip-package of what was previously found in BOUT-dev/tools/pylib/boututils
+    Note that BOUT-dev/tools/pylib/boututils will likely be replaced by this
+    repo in BOUT++ v4.4.0.
+    > **NOTE**: This package will likely be superseded by xBOUT in the near future
+  dev_url: https://github.com/boutproject/boututils
+
+extra:
+  recipe-maintainers:
+    - johnomotani
+    - ZedThree
+    - loeiten

@@ -1,0 +1,38 @@
+{% set name = "cloud-sql-proxy" %}
+{% set version = "2.10.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/GoogleCloudPlatform/{{ name }}/archive/v{{ version }}.tar.gz
+  sha256: 312d8d5a50ec920734c3ba6721f2088c9c9bd3d010091f867300dfb4803dcb1c
+
+build:
+  number: 0
+  script:
+    - mkdir $PREFIX/bin && go build && cp cloud-sql-proxy $PREFIX/bin  # [not win]
+    - go install -v .          # [win]
+    - cd cmd && go-licenses save . --save_path ../library_licenses
+
+requirements:
+  build:
+    - {{ compiler('go') }}
+    - go-licenses
+
+test:
+  commands:
+    - cloud-sql-proxy --help
+
+about:
+  home: https://github.com/GoogleCloudPlatform/cloud-sql-proxy
+  license: Apache-2.0
+  license_file:
+    - library_licenses/
+    - LICENSE
+  summary: A utility for connecting securely to your Cloud SQL instances
+
+extra:
+  recipe-maintainers:
+    - xhochy

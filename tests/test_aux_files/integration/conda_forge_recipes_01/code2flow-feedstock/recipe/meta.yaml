@@ -1,0 +1,44 @@
+{% set name = "code2flow" %}
+{% set version = "2.5.1" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/code2flow-{{ version }}.tar.gz
+  sha256: ad98717920da6598dac38a1951f38b84891f4aa4bd2f36c119b0dbac729f4785
+
+build:
+  number: 0
+  noarch: python
+  entry_points:
+    - code2flow=code2flow.engine:main
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - python >=3.6
+
+test:
+  imports:
+    - code2flow
+  commands:
+    - pip check
+    - code2flow --help
+  requires:
+    - pip
+
+about:
+  home: https://github.com/scottrogowski/code2flow
+  summary: Visualize your source code as DOT flowcharts
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - thewchan

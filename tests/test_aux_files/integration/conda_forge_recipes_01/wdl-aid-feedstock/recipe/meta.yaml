@@ -1,0 +1,46 @@
+{% set name = "WDL-AID" %}
+{% set version = "1.0.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 96d1706cdca8d83d9df096aa4a4dfa3ad44581f1cc530f214dcc5bac115dddc7
+
+build:
+  noarch: python
+  number: 0
+  entry_points:
+    - wdl-aid=wdl_aid.wdl_aid:main
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - jinja2
+    - miniwdl >=1.0
+    - python >=3.6
+
+test:
+  imports:
+    - wdl_aid
+    - wdl_aid.templates
+  commands:
+    - wdl-aid --help
+
+about:
+  home: https://github.com/biowdl/wdl-aid
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: Automatic Input Documentation for WDL workflows
+  doc_url: https://wdl-aid.readthedocs.io/
+
+extra:
+  recipe-maintainers:
+    - DavyCats
+    - rhpvorderman

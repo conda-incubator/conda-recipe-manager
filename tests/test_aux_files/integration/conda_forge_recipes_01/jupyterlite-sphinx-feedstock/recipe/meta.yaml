@@ -1,0 +1,50 @@
+{% set name = "jupyterlite-sphinx" %}
+{% set version = "0.13.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/jupyterlite_sphinx-{{ version }}.tar.gz
+  sha256: 6a34e7f5d69155e0b2208de79cb0be2e913085047d784353cfa4f112e1872169
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.8
+    - hatchling
+    - pip
+  run:
+    - python >=3.8
+    - docutils
+    - jupyter_server
+    - jupyterlab_server
+    - jupyterlite-core >=0.2.0,<0.3.0
+    - sphinx >=4
+
+test:
+  imports:
+    - jupyterlite_sphinx
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/jupyterlite/jupyterlite-sphinx
+  summary: Sphinx extension for deploying JupyterLite
+  doc_url: https://jupyterlite-sphinx.readthedocs.io
+  license: BSD-3-Clause
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - Carreau
+    - steppi
+    - jtpio
+    - martinRenou

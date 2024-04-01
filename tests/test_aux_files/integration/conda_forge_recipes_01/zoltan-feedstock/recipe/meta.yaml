@@ -1,0 +1,58 @@
+{% set name = "zoltan" %}
+{% set version = "3.901" %}
+{% set build = 1 %}
+
+{% set mpi = mpi or 'mpich' %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/sandialabs/Zoltan/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: 030c22d9f7532d3076e40cba1f03a63b2ee961d8cc9a35149af4a3684922a910
+  patches:
+    - token-replace.pl.patch
+
+build:
+  number: {{ build }}
+  skip: true  # [win]
+  {% set mpi_prefix = "mpi_" + mpi %}
+  string: {{ mpi_prefix }}_h{{ PKG_HASH }}_{{ build }}
+  run_exports:
+    - {{ name }} * {{ mpi_prefix }}_*
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - {{ compiler('fortran') }}
+    - make
+    - gnuconfig   # [unix]
+  host:
+    - {{ mpi }}
+    - perl
+
+test:
+  commands:
+    - test -f ${PREFIX}/include/zoltan.h  # [unix]
+
+about:
+  home: http://www.cs.sandia.gov/Zoltan/
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: COPYRIGHT_AND_LICENSE
+  summary: Parallel Partitioning, Load Balancing and Data-Management Services
+  description: |
+    The Zoltan Library provides critical data-management services to a wide range of parallel applications.
+  doc_url: https://cs.sandia.gov/Zoltan/
+  dev_url: https://github.com/sandialabs/Zoltan
+
+extra:
+  recipe-maintainers:
+    - SylvainCorlay
+    - JohanMabille
+    - cekees
+    - DavidBrochart
+    - rishi9699
+    - xylar

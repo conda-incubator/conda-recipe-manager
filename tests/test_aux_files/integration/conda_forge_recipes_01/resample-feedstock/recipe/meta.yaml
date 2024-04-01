@@ -1,0 +1,51 @@
+{% set name = "resample" %}
+{% set version = "1.7.1" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/resample-{{ version }}.tar.gz
+  sha256: 4355cc4f491bc76e76c6d6ae18df88b7f0d9a93cd9ffb01bdf6f8e5a06f28330
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.8
+    - setuptools >=61
+    - setuptools-scm >=6.2
+    - pip
+  run:
+    - python >=3.8
+    - numpy >=1.21
+    - scipy >=1.10
+
+test:
+  source_files:
+    - tests
+  requires:
+    - pytest
+    - pip
+  imports:
+    - resample
+  commands:
+    - python -m pytest tests
+    - pip check
+
+about:
+  home: https://github.com/scikit-hep/resample
+  summary: Tools for randomization-based inference in Python
+  license: BSD-3-Clause
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - dsaxton
+    - HDembinski
+    - conda-forge/scikit-hep

@@ -1,0 +1,65 @@
+{% set name = "xeus-robot-static" %}
+{% set version = "0.4.4" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/jupyter-xeus/xeus-robot-wheel/archive/{{ version }}.tar.gz
+  sha256: e3d6cafcdb70fd37053c1cfdabf3f7d7a7d660041a74e3d72668f80cdbef75df
+
+build:
+  number: 2
+  skip: true  # [(win and vc<14) or ppc64le or py==36]
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  build:
+    - pkg-config                             # [unix]
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - {{ compiler('cxx') }}
+    - cmake
+    - make                                   # [unix]
+  host:
+    - openssl =1.1.1l
+    - pip
+    - python
+    - scikit-build >=0.11.0,<0.14
+    - libuuid                                # [linux]
+    - perl                                   # [win]
+    - nasm                                   # [win]
+  run:
+    - openssl =1.1.1l
+    - python
+    - xeus-python-static  >=0.13.5,<0.14
+    - robotframework-interpreter  >=0.7.4,<0.8
+    - robotframework-lsp  >=0.14,<0.15
+    - jupyterlab_robotmode
+    - ipywidgets
+  run_constrained:
+    # Add a run constraint on xeus-robot 0.0.0 making it impossible to install both
+    - xeus-robot =0.0.0
+
+test:
+  imports:
+    - xrobot
+  commands:
+    - test -f ${PREFIX}/share/jupyter/kernels/xrobot/kernel.json                      # [unix]
+    - if not exist %PREFIX%\\share\\jupyter\\kernels\\xrobot\\kernel.json (exit 1)    # [win]
+
+about:
+  home: https://github.com/jupyter-xeus/xeus-robot
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: A Jupyter kernel for the Robot Framework based on Xeus (static build)
+  description: xeus-robot is a Jupyter kernel for the Robot Framework based on the Xeus library, a native implementation of the Jupyter protocol.
+  dev_url: https://github.com/jupyter-xeus/xeus-robot-wheel
+
+extra:
+  recipe-maintainers:
+    - SylvainCorlay
+    - JohanMabille
+    - martinRenou

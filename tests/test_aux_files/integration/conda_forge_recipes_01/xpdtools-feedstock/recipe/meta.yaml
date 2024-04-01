@@ -1,0 +1,63 @@
+{% set name = "xpdtools" %}
+{% set version = "0.8.2" %}
+{% set sha256 = "b7b3412a4137df3ef60ba93740614039819615265e4e833c8b1a7de15b631d19" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: http://github.com/xpdAcq/{{ name }}/releases/download/{{ version }}/{{ name }}-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+  entry_points:
+    - image_to_iq = xpdtools.cli.process_tiff:run_main
+
+requirements:
+  build:
+    - python >=3
+    - pip 
+  run:
+    - python >=3
+    - numpy
+    - scipy
+    - scikit-beam
+    - pyyaml
+    - pyfai
+    - rapidz
+    - fire
+    - pims
+    - fabio
+    - numba
+    - matplotlib-base
+    - tqdm
+    - scikit-learn
+    - tomopy
+
+
+test:
+  imports:
+    - xpdtools
+    - xpdtools.tools
+    - xpdtools.cli.process_tiff
+  commands:
+    - image_to_iq -- --help
+
+about:
+  home: https://github.com/xpdAcq/xpdtools
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: 'Analysis Tools for XPD'
+
+  doc_url: https://xpdacq.github.io/xpdtools/
+  dev_url: https://github.com/xpdAcq/xpdtools
+
+extra:
+  recipe-maintainers:
+    - st3107

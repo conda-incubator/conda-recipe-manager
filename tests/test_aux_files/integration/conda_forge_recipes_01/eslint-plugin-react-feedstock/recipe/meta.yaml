@@ -1,0 +1,41 @@
+{% set name = "eslint-plugin-react" %}
+{% set version = "7.34.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/yannickcr/eslint-plugin-react/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: 592c000dd7289e4ff3101777963bed20486b51e44002bc336ebd13388376b3ee
+
+build:
+  skip: true  # [win]
+  number: 0
+
+requirements:
+  build:
+    - nodejs
+  host:
+    - nodejs
+    - yarn <2
+    - npmignore
+  run:
+    - nodejs
+
+test:
+  commands:
+    - test -d $PREFIX/lib/node_modules/eslint-plugin-react  # [unix]
+    - if not exist %LIBRARY_INC%\lib\node_modules\eslint-plugin-react exit 1  # [win]
+
+about:
+  home: https://github.com/yannickcr/eslint-plugin-react
+  license: MIT
+  license_file:
+    - LICENSE
+    - ThirdPartyLicenses.txt
+  summary: Find and fix problems in your JavaScript code.
+
+extra:
+  recipe-maintainers:
+    - xhochy

@@ -1,0 +1,121 @@
+{% set name = "puma" %}
+{% set version = "3.2.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/nasa/puma/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: 25308c057b36a7d394a58f3b16ede621ba739b5c504e51c069edc913f086ad7d
+
+build:
+  skip: true  # [py==38]
+  number: 2
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - cython                                 # [build_platform != target_platform]
+    - numpy                                  # [build_platform != target_platform]
+    - sysroot_linux-64 2.17  # [linux64]
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - {{ cdt('mesa-libgl-devel') }}  # [linux]
+    - {{ cdt('mesa-dri-drivers') }}  # [linux]
+    - {{ cdt('libselinux') }}  # [linux]
+    - {{ cdt('libxdamage') }}  # [linux]
+    - {{ cdt('libxxf86vm') }}  # [linux]
+    - {{ cdt('libxext') }}     # [linux]
+    - libgomp  # [linux]
+    - llvm-openmp  # [osx]
+    - cmake  # [not win]
+    - make  # [not win]
+    - swig  # [not win]
+  host:
+    - xorg-libxfixes  # [linux]
+    - python
+    - cython
+    - pip
+    - setuptools
+    - numpy
+    - eigen  # [not win]
+    - fftw  # [not win]
+    - libtiff  # [not win]
+    - qt-main  # [not win]
+  run:
+    - python
+    - {{ pin_compatible('numpy') }}
+    - scipy =1.11
+    - scikit-image >=0.17
+    - matplotlib-base
+    - pyvista >=0.40.0
+    - vtk
+    - scikit-umfpack  # [not win]
+    - ocl-icd-system  # [linux]
+
+test:
+  imports:
+    - TexGen.Core  # [not win]
+    - pumapy
+  source_files:
+    - python/test/*.py
+
+about:
+  home: https://github.com/nasa/puma
+  license: NASA-1.3
+  license_file:
+    - LICENSE.txt
+    - install/TexGen/LICENSE.txt
+    - gui/src/Utilities/qcustomplot/GPL.txt
+  summary: A package to compute material properties from micro-CT data.
+  description: |
+    The Porous Microstructure Analysis (PuMA) software has been developed to
+    compute effective material properties and perform material response simulations on
+    digitized microstructures of porous media. PuMA is able to import digital three-dimensional
+    images obtained from X-ray microtomography or to generate artificial microstructures
+    that mimic real materials. PuMA also provides a module for interactive 3D visualizations.
+    Version 3 includes modules to compute simple morphological properties such as porosity,
+    volume fractions, pore diameter, and specific surface area. Additional capabilities include
+    the determination of effective thermal and electrical conductivity (both radiative and solid conduction - 
+    including the ability to simulate local anisotropy for the latter); effective diffusivity and 
+    tortuosity from the continuum to the rarefied regime; techniques to determine the local material orientation, 
+    as well as the mechanical properties (elasticity coefficient), and the permeability of a material.
+    Some examples of microstructures that have been run in the past are shown in the pictures below,
+    together with PuMA's software architecture schematic.
+    <p align="center">
+      <img src="https://github.com/nasa/puma/raw/main/doc/source/puma_description.png" width="100%"></img>
+    </p>
+
+    ### Citing PuMA
+    If you use PuMA in your research, please use the following BibTeX entries to cite it:
+
+    ```BibTeX
+    @article{puma2021,
+      title={Update 3.0 to “PuMA: The Porous Microstructure Analysis software”,(PII: S2352711018300281)},
+      author={Ferguson, Joseph C and Semeraro, Federico and Thornton, John M and Panerai, Francesco and Borner, Arnaud and Mansour, Nagi N},
+      journal={SoftwareX},
+      volume={15},
+      pages={100775},
+      year={2021},
+      publisher={Elsevier}
+    }
+    @article{puma2018,
+      title={PuMA: The porous microstructure analysis software},
+      author={Ferguson, Joseph C and Panerai, Francesco and Borner, Arnaud and Mansour, Nagi N},
+      journal={SoftwareX},
+      volume={7},
+      pages={81--87},
+      year={2018},
+      publisher={Elsevier}
+    }
+    ```
+
+  doc_url: https://puma-nasa.readthedocs.io/
+  dev_url: https://gitlab.com/jcfergus/puma-dev
+
+extra:
+  recipe-maintainers:
+    - fsemerar
+    - Tobias-Fischer

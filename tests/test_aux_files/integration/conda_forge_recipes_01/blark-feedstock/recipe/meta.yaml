@@ -1,0 +1,48 @@
+{% set name = "blark" %}
+{% set version = "0.8.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/b/blark/blark-{{ version }}.tar.gz
+  sha256: 76a8c9438a2afeb2f121b44571ec95608de9d037920d95c3f27a0be94b64c699
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+  entry_points:
+    - blark = blark.__main__:main
+
+requirements:
+  host:
+    - python >=3.9
+    - pip
+  run:
+    - python >=3.9
+    - lark >=1.0
+    - lxml
+    - packaging
+    - typing-extensions
+
+test:
+  imports:
+    - blark
+    - blark.tests
+  commands:
+    - blark --help
+    - blark parse --help
+    - blark format --help
+
+about:
+  home: https://github.com/klauer/blark
+  license: GPL-2.0-only
+  license_family: GPL
+  license_file: LICENSE
+  summary: Beckhoff TwinCAT ST (IEC 61131-3) code parsing in Python using Lark
+
+extra:
+  recipe-maintainers:
+    - klauer

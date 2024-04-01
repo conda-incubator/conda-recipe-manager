@@ -1,0 +1,52 @@
+{% set name = "zarr-checksum" %}
+{% set version = "0.4.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/zarr_checksum-{{ version }}.tar.gz
+  sha256: e92772c5b1159bd147947e09cb62d774d32f19f6d8d41132ed4a881db9ed6198
+
+build:
+  entry_points:
+    - zarrsum = zarr_checksum.cli:cli
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.7,<4.0
+    - poetry-core >=1.0.0
+    - pip
+  run:
+    - python >=3.7,<4.0
+    - click >=8.1.3,<9.0
+    - tqdm >=4.64.1,<5.0
+
+test:
+  requires:
+    - boto3 >=1.24,<2.0
+    - pip
+    - pytest
+    - zarr >=2.12,<3.0
+  imports:
+    - zarr_checksum
+  commands:
+    - pip check
+    - zarrsum --help
+    - python -m pytest -vv --pyargs zarr_checksum
+
+about:
+  home: https://github.com/dandi/zarr_checksum
+  summary: Checksum support for zarrs stored in various backends
+  license: Apache-2.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - jjnesbitt
+    - jwodder
+    - yarikoptic

@@ -1,0 +1,39 @@
+{% set goname = "github.com/direnv/direnv" %}
+{% set version = "2.33.0" %}
+
+{% set name = goname.split('/')[-1] %}
+{% set pkg_src = ('src/'+goname).replace("/",os.sep) %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version|replace("-", "_") }}
+
+source:
+  - folder: {{ pkg_src }}
+    url: https://{{ goname }}/archive/v{{ version }}.tar.gz
+    sha256: 8ef18051aa6bdcd6b59f04f02acdd0b78849b8ddbdbd372d4957af7889c903ea
+
+build:
+  number: 0
+  script:
+    - pushd {{ pkg_src }}
+    - go install -v -ldflags "-X main.revision=conda-forge" .
+
+requirements:
+  build:
+    - {{ compiler('go') }}
+
+test:
+  commands:
+    - direnv --version
+
+about:
+  home: https://{{ goname }}
+  license: MIT
+  license_family: MIT
+  license_file: {{ pkg_src }}/LICENSE
+  summary: unclutter your .profile
+
+extra:
+  recipe-maintainers:
+    - daizeng1984

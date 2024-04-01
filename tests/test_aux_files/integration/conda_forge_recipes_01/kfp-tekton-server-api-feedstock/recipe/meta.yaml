@@ -1,0 +1,47 @@
+{% set name = "kfp-tekton-server-api" %}
+{% set version = "1.8.0rc8" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 16d55ea126d254b908c9385b70f31549ef44f035a8b997f0fadf908c8004f001
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.5
+    - requests
+  run:
+    - python >=3.5
+    - certifi
+    - python-dateutil
+    - six
+    - urllib3
+
+test:
+  imports:
+    - kfp_tekton_server_api
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/kubeflow/kfp-tekton/
+  summary: REST API specification for Kubeflow Pipelines on Tekton
+  license: Apache-2.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - Tomcli
+    - yhwang

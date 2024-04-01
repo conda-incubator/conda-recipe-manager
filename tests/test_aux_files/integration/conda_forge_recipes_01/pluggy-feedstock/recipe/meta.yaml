@@ -1,0 +1,46 @@
+{% set name = "pluggy" %}
+{% set version = "1.4.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/pluggy-{{ version }}.tar.gz
+  sha256: 8c85c2876142a764e5b7548e7d9a0e0ddb46f5185161049a79b7e974454223be
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.8
+    - setuptools-scm
+    - pip
+  run:
+    - python >=3.8
+
+test:
+  imports:
+    - pluggy
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/pytest-dev/pluggy
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: Plugin registration and hook calling for Python
+  doc_url: https://pluggy.readthedocs.io/en/latest/
+  dev_url: https://github.com/pytest-dev/pluggy/
+
+extra:
+  recipe-maintainers:
+    - johnnygenomics
+    - nicoddemus
+    - adriendelsalle

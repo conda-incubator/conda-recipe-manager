@@ -1,0 +1,73 @@
+{% set version = "0.16.0" %}
+
+package:
+  name: datashader
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/d/datashader/datashader-{{ version }}.tar.gz
+  sha256: ed4c111957578dcb3fcff972d954f77586dafd71a7345fd5cd069d9fb050d0d1
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv
+  entry_points:
+    - datashader = datashader.__main__:main
+
+requirements:
+  host:
+    - python >=3.9
+    - pip
+    - param
+    - pyct-core
+  run:
+    - python >=3.9
+    - colorcet
+    - dask-core
+    - multipledispatch
+    - numba
+    - numpy
+    - pandas
+    - param
+    - pillow
+    - pyct
+    - requests
+    - scipy
+    - toolz
+    - xarray
+
+test:
+  requires:
+    - fastparquet
+    - flake8
+    - nbsmoke >=0.5.0
+    - pytest
+    - pytest-benchmark
+    - holoviews >=1.14.1
+    - netcdf4
+  imports:
+    - datashader
+  commands:
+    - datashader copy-examples --path=. --force
+    # just run one notebook for now; increase in the future if notebooks can be run quickly with test/tiny data
+    - pytest --nbsmoke-run -k ".ipynb" getting_started/2_Pipeline.ipynb
+
+about:
+  home: https://datashader.org
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE.txt
+  summary: Data visualization toolchain based on aggregating into a grid
+  description: |
+    Datashader is a data rasterization pipeline for automating the process of
+    creating meaningful representations of large amounts of data.
+  doc_url: https://datashader.org
+  dev_url: https://github.com/holoviz/datashader
+
+extra:
+  recipe-maintainers:
+    - jbednar
+    - ocefpaf
+    - philippjfr
+    - ianthomas23

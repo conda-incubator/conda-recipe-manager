@@ -1,0 +1,53 @@
+{% set name = "freetds" %}
+{% set version = "1.4.12" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  url: http://www.freetds.org/files/stable/{{ name }}-{{ version }}.tar.bz2
+  sha256: a2cb8993a46417e0503e7b8488463d91b8c5d9a4601d6ee2484d28f56d3a7075
+
+build:
+  number: 0
+  run_exports:
+    # https://abi-laboratory.pro/tracker/timeline/freetds/
+    - {{ pin_subpackage('freetds') }}
+
+requirements:
+  build:
+    - gnuconfig  # [unix]
+    - {{ compiler('c') }}
+    - libtool  # [unix]
+    - make   # [unix]
+    - pkg-config
+    - cmake  # [win]
+    - ninja  # [win]
+  host:
+    - openssl
+    - unixodbc  # [unix]
+    - krb5      # [unix]
+    - readline  # [not win]
+    - libiconv  # [unix]
+    - perl  # [win]
+  run:
+    - krb5     # [unix]
+
+test:
+  commands:
+    - tsql -C
+
+about:
+  home: http://www.freetds.org/
+  license: LGPL-2.0-only
+  license_file: COPYING_LIB.txt
+  summary: FreeTDS is a free implementation of Sybase's DB-Library, CT-Library, and ODBC libraries
+  license_family: LGPL
+  doc_url: http://www.freetds.org/docs.html
+  dev_url: https://github.com/FreeTDS/freetds
+
+extra:
+  recipe-maintainers:
+    - mariusvniekerk
+    - xhochy

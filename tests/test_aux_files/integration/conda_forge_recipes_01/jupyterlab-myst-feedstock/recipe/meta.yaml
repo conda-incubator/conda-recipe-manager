@@ -1,0 +1,55 @@
+{% set version = "2.3.2" %}
+
+package:
+  name: jupyterlab-myst
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/j/jupyterlab-myst/jupyterlab_myst-{{ version }}.tar.gz
+  sha256: 9ef601cbbde3a4a7c3b404fad43c5e0534f2cbb86f8de4c3596f329b7c295094
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+
+requirements:
+  host:
+    - hatch-jupyter-builder >=0.5
+    - hatch-nodejs-version >=0.3.2
+    - hatchling >=1.5.0
+    - jupyterlab >=4.0.0,<5
+    - pip
+    - python >=3.8
+  run:
+    - jupyter_server >=2.0.1,<3
+    - python >=3.8
+  run_constrained:
+    - jupyterlab >=4,<5
+
+test:
+  imports:
+    - jupyterlab_myst
+  commands:
+    - pip check
+    - jupyter labextension list
+    - jupyter labextension list 1>labextensions 2>&1
+    - grep -iE "jupyterlab-myst.*v{{ version.replace(".", "\\.") }}.*enabled.*OK.*jupyterlab_myst" labextensions
+  requires:
+    - jupyterlab >=4,<5
+    - m2-grep  # [win]
+    - pip
+
+about:
+  home: https://github.com/executablebooks/jupyterlab-myst
+  summary: A Myst renderer for JupyterLab
+  license: BSD-3-Clause
+  license_file:
+    - LICENSE
+    - jupyterlab_myst/labextension/static/third-party-licenses.json
+
+extra:
+  recipe-maintainers:
+    - agoose77
+    - bollwyvl
+    - stevejpurves

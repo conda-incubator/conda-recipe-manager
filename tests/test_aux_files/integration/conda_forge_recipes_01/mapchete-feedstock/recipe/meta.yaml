@@ -1,0 +1,79 @@
+{% set name = "mapchete" %}
+{% set version = "2024.2.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/mapchete-{{ version }}.tar.gz
+  sha256: 41484a1714e6f0ae02e47cff94672aa35e51bbca17b164e165c9e57b69295d4f
+
+build:
+  entry_points:
+    - mapchete=mapchete.cli.main:main
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - hatchling
+    - python >=3.8
+    - pip
+  run:
+    - python >=3.8
+    - python-dateutil
+    - affine
+    - aiobotocore >=1.1.2
+    - aiohttp
+    - boto3 >=1.14.44
+    - cachetools
+    - click >=7.1.1
+    - click-plugins
+    - click-spinner
+    - dask
+    - distributed
+    - fiona >=1.8.13.post1
+    - flask >=1.1.2,<=3.0.0
+    - fsspec[http,s3] >=2023.12.0
+    - geobuf
+    - importlib-metadata
+    - importlib-resources
+    - lxml
+    - memray
+    - numpy >=1.16
+    - oyaml
+    - protobuf <=3.20.1    
+    - pydantic >=2.3.0
+    - pydantic-settings >=2.0.0
+    - pyproj
+    - pystac[urllib3] <=1.7.3
+    - pystac-client >=0.7.2    
+    - rasterio >=1.2.10    
+    - retry
+    - rtree    
+    - s3fs >2023.9.0
+    - shapely >=2.0.0
+    - tilematrix >=2022.12.0
+    - tqdm
+
+test:
+  imports:
+    - mapchete
+  commands:
+    - pip check
+    - mapchete --help
+  requires:
+    - pip
+
+about:
+  home: https://github.com/ungarj/mapchete
+  summary: Tile-based geodata processing using rasterio & Fiona
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - ungarj
+    - Scartography

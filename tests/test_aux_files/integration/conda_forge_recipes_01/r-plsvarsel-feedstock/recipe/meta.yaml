@@ -1,0 +1,64 @@
+{% set version = "0.9.10" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-plsvarsel
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/plsVarSel_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/plsVarSel/plsVarSel_{{ version }}.tar.gz
+  sha256: cf0893d8df57d6f0e1c919ed1071d6a0186153ad545ea4b554006913f8260f2b
+
+build:
+  noarch: generic
+  merge_build_host: true  # [win]
+  number: 1
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+
+  host:
+    - r-base
+    - r-bdsmatrix
+    - r-genalg
+    - r-mass
+    - r-msqc
+    - r-mvtnorm
+    - r-pls
+    - r-praznik
+    - r-progress
+  run:
+    - r-base
+    - r-bdsmatrix
+    - r-genalg
+    - r-mass
+    - r-msqc
+    - r-mvtnorm
+    - r-pls
+    - r-praznik
+    - r-progress
+
+test:
+  commands:
+    - $R -e "library('plsVarSel')"           # [not win]
+    - "\"%R%\" -e \"library('plsVarSel')\""  # [win]
+
+about:
+  home: https://CRAN.R-project.org/package=plsVarSel
+  dev_url: https://github.com/khliland/plsVarSel/
+  license: GPL-2.0-or-later
+  summary: Interfaces and methods for variable selection in Partial Least Squares. The methods include filter methods, wrapper methods and embedded methods. Both regression and classification is supported.
+  license_family: GPL
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-2
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-3
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r

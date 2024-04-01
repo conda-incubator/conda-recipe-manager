@@ -1,0 +1,55 @@
+{% set version = "4.0.0" %}
+
+package:
+  name: jupyterlab-kernelspy
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/j/jupyterlab-kernelspy/jupyterlab_kernelspy-{{ version }}.tar.gz
+  sha256: f36ed0f1adf0adfa99ff30eaa88e4fcef645c6822588eefb8c0bb08a18929aa0
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+
+requirements:
+  host:
+    - jupyterlab >=4,<5
+    - hatch-jupyter-builder >=0.5
+    - hatch-nodejs-version
+    - hatchling >=1.5.0
+    - pip
+    - python >=3.8
+  run:
+    - python >=3.8
+  run_constrained:
+    - jupyterlab >=4,<5
+
+test:
+  imports:
+    - jupyterlab_kernelspy
+  commands:
+    - pip check
+    - jupyter labextension list
+    - jupyter labextension list 1>labextensions 2>&1
+    - grep -iE "jupyterlab-kernelspy.*v{{ version.replace('.', '\.') }}.*OK.*jupyterlab_kernelspy" labextensions
+  requires:
+    - pip
+    - jupyterlab
+    - m2-grep  # [win]
+
+about:
+  home: https://github.com/jupyterlab-contrib/jupyterlab-kernelspy
+  summary: A JupyterLab extension for inspecting messages to/from a kernel
+  license: BSD-3-Clause
+  license_file: 
+    - LICENSE
+    - jupyterlab_kernelspy/labextension/static/third-party-licenses.json
+
+extra:
+  recipe-maintainers:
+    - bollwyvl
+    - fcollonval
+    - jtpio
+    - martinRenou

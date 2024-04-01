@@ -1,0 +1,52 @@
+{% set name = "solar_system_ephemerides" %}
+{% set version = "1.0.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/solar_system_ephemerides-{{ version }}.tar.gz
+  sha256: 8084c564a46676f8417cdf01cfbd104a1dedc6d61eab000d264f7c1b15b52a83
+
+build:
+  entry_points:
+    - create_solar_system_ephemeris = solar_system_ephemerides.generate:cli
+    - ephemeris_path = solar_system_ephemerides.paths:cli
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.6,<4.0
+    - setuptools >=61
+    - setuptools-scm >=6.2
+    - wheel
+    - pip
+  run:
+    - python >=3.6,<4.0
+    - astropy
+    - jplephem
+
+test:
+  imports:
+    - solar_system_ephemerides
+  commands:
+    - pip check
+    - create_solar_system_ephemeris --help
+    - ephemeris_path --help
+  requires:
+    - pip
+
+about:
+  home: https://github.com/cwinpy/solar-system-ephemerides
+  summary: Solar system ephemeris files
+  license: MIT
+  license_file: LICENSE
+  description: |
+    This package contains solar system ephemeris files for use in continuous gravitational-wave searches.
+
+extra:
+  recipe-maintainers:
+    - mattpitkin

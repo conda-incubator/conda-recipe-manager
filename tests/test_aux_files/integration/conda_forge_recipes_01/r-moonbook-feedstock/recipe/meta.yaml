@@ -1,0 +1,58 @@
+{% set version = "0.3.1" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-moonbook
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/moonBook_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/moonBook/moonBook_{{ version }}.tar.gz
+  sha256: 7da54fd5548bee59977fc45b2ce642a1e7850657a05010fdcd37ef0aeade84d6
+
+build:
+  merge_build_host: true  # [win]
+  number: 2
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+    - r-magrittr
+    - r-nortest
+    - r-sjmisc
+    - r-stringr
+    - r-survival
+    - r-ztable
+  run:
+    - r-base
+    - r-magrittr
+    - r-nortest
+    - r-sjmisc
+    - r-stringr
+    - r-survival
+    - r-ztable
+
+test:
+  commands:
+    - $R -e "library('moonBook')"           # [not win]
+    - "\"%R%\" -e \"library('moonBook')\""  # [win]
+
+about:
+  home: https://github.com/cardiomoon/moonBook
+  license: GPL-2.0-only
+  summary: Several analysis-related functions for the book entitled "R statistics and graph for medical articles" (written in Korean), version 1, by Keon-Woong Moon with Korean demographic data with several plot functions.
+  license_family: GPL2
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-2
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r

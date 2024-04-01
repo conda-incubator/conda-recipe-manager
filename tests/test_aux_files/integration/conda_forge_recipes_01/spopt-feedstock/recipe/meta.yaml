@@ -1,0 +1,64 @@
+{% set name = "spopt" %}
+{% set version = "0.6.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 1edf615a8ab1bbae3881c742083e20f18d24724947e84bf2dd12ec38510bcf3a
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv
+
+requirements:
+  host:
+    - python >=3.10
+    - pip
+    - setuptools >=61.0
+    - setuptools-scm >=6.2
+  run:
+    - python >=3.10
+    - geopandas >=0.12.0
+    - libpysal >=4.6
+    - mapclassify >=2.5
+    - networkx >=2.7
+    - numpy >=1.22
+    - pandas >=1.4, !=1.5.0
+    - pointpats >=2.3.0
+    - pulp >=2.7
+    - scikit-learn >=1.1
+    - scipy >=1.8
+    - shapely >=2.0.1
+    - spaghetti >=1.6.4
+    - tqdm >=4.63.0
+
+test:
+  imports:
+    - {{ name }}
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: http://pysal.org/
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE.txt
+  summary: 'spopt: Spatial Optimization'
+  description: |
+    Spopt is an open-source Python library for solving optimization problems with spatial data. Originating from the `region` module in [PySAL](http://pysal.org) (Python Spatial Analysis Library), it is under active development for the inclusion of newly proposed models and methods for regionalization, facility location, and transportation-oriented solutions.
+  doc_url: https://pysal.org/{{ name }}/
+  dev_url: http://github.com/pysal/{{ name }}
+
+extra:
+  recipe-maintainers:
+    - jGaboardi
+    - knaaptime
+    - xf37
+    - gegen07
+    - martinfleis

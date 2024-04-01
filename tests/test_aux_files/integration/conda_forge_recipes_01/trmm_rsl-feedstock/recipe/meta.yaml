@@ -1,0 +1,44 @@
+{% set version = "1.49" %}
+
+package:
+    name: trmm_rsl
+    version: {{ version }}
+
+source:
+    fn: rsl.v{{ version }}.tar.gz
+    url: https://github.com/conda-forge/trmm_rsl-feedstock/releases/download/source_v{{ version }}/rsl-v{{ version }}.tar.gz
+    md5: a2fcc2a30fb5d1fac7ca9ea9e1c6b04e
+
+build:
+    skip: True  # [win]
+    number: 5
+
+requirements:
+    build:
+        - zlib 1.2.*
+        - {{ compiler('c') }}
+        - make
+        - flex
+    run:
+        - zlib 1.2.*
+
+test:
+    commands:
+        # verify that the RSL programs were installed and are available
+        # When called without arguments these commands return 255
+        - "any_to_gif || [[ $? -eq 255 ]]"
+        - "any_to_uf || [[ $? -eq 255 ]]"
+        - "qlook || [[ $? -eq 255 ]]"
+
+about:
+    home: http://trmm-fc.gsfc.nasa.gov/trmm_gv/software/rsl/
+    license: GPL-2.0-or-later
+    license_family: GPL3
+    license_file: LICENSE.txt
+    summary: 'TRMM Radar Software Library'
+
+extra:
+    recipe-maintainers:
+        - jjhelmus
+        - zssherman
+        - mgrover1

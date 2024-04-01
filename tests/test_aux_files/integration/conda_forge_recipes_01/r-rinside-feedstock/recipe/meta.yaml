@@ -1,0 +1,82 @@
+{% set version = "0.2.18" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-rinside
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/RInside_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/RInside/RInside_{{ version }}.tar.gz
+  sha256: 805014f0f0a364633e0e3c59100665a089bc455dec80b24f04aaec96466cb736
+  patches:                     # [build_platform != target_platform]
+    - cross-compilation.patch  # [build_platform != target_platform]
+
+build:
+  merge_build_host: true  # [win]
+  number: 2
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - cross-r-base {{ r_base }}    # [build_platform != target_platform]
+    - r-rcpp                       # [build_platform != target_platform]
+    - {{ compiler('c') }}              # [not win]
+    - {{ compiler('m2w64_c') }}        # [win]
+    - {{ compiler('cxx') }}            # [not win]
+    - {{ compiler('m2w64_cxx') }}      # [win]
+    - {{ posix }}filesystem        # [win]
+    - {{ posix }}make
+    - {{ posix }}sed               # [win]
+    - {{ posix }}coreutils         # [win]
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+    - r-rcpp >=0.11.0
+  run:
+    - r-base
+    - {{ native }}gcc-libs         # [win]
+    - r-rcpp >=0.11.0
+
+test:
+  commands:
+    - $R -e "library('RInside')"           # [not win]
+    - "\"%R%\" -e \"library('RInside')\""  # [win]
+
+about:
+  home: http://dirk.eddelbuettel.com/code/rinside.html
+  license: GPL-2.0-or-later
+  summary: "C++ classes to embed R in C++ applications A C++ class providing the R interpreter is offered by this package making it easier to have \"R inside\" your C++ application. As R itself is embedded into your application, a shared library build of R is required. This works on Linux, OS X and even on Windows provided\
+    \ you use the same tools used to build R itself. d Numerous examples are provided in the eight subdirectories of the examples/ directory of the installed package: standard, 'mpi' (for parallel computing), 'qt' (showing how to embed 'RInside' inside a Qt GUI application), 'wt' (showing how to build a \"web-application\"\
+    \ using the Wt toolkit), 'armadillo' (for 'RInside' use with 'RcppArmadillo') and 'eigen' (for 'RInside' use with 'RcppEigen').  The examples use 'GNUmakefile(s)' with GNU extensions, so a GNU make is required (and will use the 'GNUmakefile' automatically). 'Doxygen'-generated documentation of the C++ classes is available\
+    \ at the 'RInside' website as well."
+  license_family: GPL
+  license_file: {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-2
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+    - SylvainCorlay
+
+# Package: RInside
+# Title: C++ Classes to Embed R in C++ Applications
+# Version: 0.2.15
+# Date: 2019-03-06
+# Author: Dirk Eddelbuettel and Romain Francois
+# Maintainer: Dirk Eddelbuettel <edd@debian.org>
+# Description: C++ classes to embed R in C++ applications A C++ class providing the R interpreter is offered by this package making it easier to have "R inside" your C++ application. As R itself is embedded into your application, a shared library build of R is required. This works on Linux, OS X and even on Windows provided you use the same tools used to build R itself. d Numerous examples are provided in the eight subdirectories of the examples/ directory of the installed package: standard, 'mpi' (for parallel computing), 'qt' (showing how to embed 'RInside' inside a Qt GUI application), 'wt' (showing how to build a "web-application" using the Wt toolkit), 'armadillo' (for 'RInside' use with 'RcppArmadillo') and 'eigen' (for 'RInside' use with 'RcppEigen').  The examples use 'GNUmakefile(s)' with GNU extensions, so a GNU make is required (and will use the 'GNUmakefile' automatically). 'Doxygen'-generated documentation of the C++ classes is available at the 'RInside' website as well.
+# Depends: R (>= 2.10.0)
+# Imports: Rcpp (>= 0.11.0)
+# LinkingTo: Rcpp
+# URL: http://dirk.eddelbuettel.com/code/rinside.html
+# License: GPL (>= 2)
+# BugReports: https://github.com/eddelbuettel/rinside/issues
+# MailingList: Please send questions and comments regarding RInside to rcpp-devel@lists.r-forge.r-project.org
+# NeedsCompilation: yes
+# Packaged: 2019-03-06 12:59:17.136291 UTC; edd
+# Repository: CRAN
+# Date/Publication: 2019-03-06 15:32:49 UTC

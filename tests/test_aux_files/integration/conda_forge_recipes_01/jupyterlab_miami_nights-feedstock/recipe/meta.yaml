@@ -1,0 +1,46 @@
+{% set name = "jupyterlab_miami_nights" %}
+{% set version = "0.4.2" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/jupyterlab_miami_nights-{{ version }}.tar.gz
+  sha256: 383f427cd51765dab352376e48132b2cf600bb4ff6537542de71e070d143118d
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.7
+    - jupyterlab ~=4.0
+    - hatchling >=1.3.1
+    - hatch-jupyter-builder
+  run:
+    - jupyterlab ~=4.0
+    - python >=3.7
+
+test:
+  commands:
+    - pip check
+    - test -f "${PREFIX}/share/jupyter/labextensions/@timkpaine/jupyterlab_miami_nights/package.json"                                    # [unix]
+    - if exist %PREFIX%\\share\\jupyter\\labextensions\\@timkpaine\\jupyterlab_miami_nights\\package.json (exit 0) else (exit 1)          # [win]
+  requires:
+    - pip
+
+about:
+  home: https://github.com/timkpaine/jupyterlab_miami_nights
+  summary: Combination of VS Code's SynthWave '84 and JupyterLab's Neon Night
+  license: BSD-3-Clause
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - jtpio
+    - timkpaine

@@ -1,0 +1,69 @@
+{% set name = "vorbis" %}
+{% set version = "1.3.7" %}
+{% set sha256 = "270c76933d0934e42c5ee0a54a36280e2d87af1de3cc3e584806357e237afd13" %}
+
+package:
+  name: lib{{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: lib{{ name }}-{{ version }}.tar.gz
+  url: https://github.com/xiph/{{ name }}/archive/v{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+  patches:
+    - export_legacy_so_symlinks.patch
+
+build:
+  number: 0
+  run_exports:
+    - {{ pin_subpackage('libvorbis', max_pin='x.x') }}
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - cmake
+    - make  # [unix]
+  host:
+    - libogg
+  run:
+    - libogg
+
+test:
+  commands:
+    - test -f $PREFIX/lib/pkgconfig/vorbis.pc                        # [unix]
+    - test -f $PREFIX/lib/pkgconfig/vorbisenc.pc                     # [unix]
+    - test -f $PREFIX/lib/pkgconfig/vorbisfile.pc                    # [unix]
+    - test -f $PREFIX/include/vorbis/codec.h                         # [unix]
+    - test -f $PREFIX/include/vorbis/vorbisenc.h                     # [unix]
+    - test -f $PREFIX/include/vorbis/vorbisfile.h                    # [unix]
+    - test -f $PREFIX/lib/libvorbis${SHLIB_EXT}                      # [unix]
+    - test -f $PREFIX/lib/libvorbisenc${SHLIB_EXT}                   # [unix]
+    - test -f $PREFIX/lib/libvorbisfile${SHLIB_EXT}                  # [unix]
+    - if not exist %LIBRARY_LIB%\\pkgconfig\\vorbis.pc exit 1        # [win]
+    - if not exist %LIBRARY_LIB%\\pkgconfig\\vorbisenc.pc exit 1     # [win]
+    - if not exist %LIBRARY_LIB%\\pkgconfig\\vorbisfile.pc exit 1    # [win]
+    - if not exist %LIBRARY_INC%\\vorbis\\codec.h exit 1             # [win]
+    - if not exist %LIBRARY_INC%\\vorbis\\vorbisenc.h exit 1         # [win]
+    - if not exist %LIBRARY_INC%\\vorbis\\vorbisfile.h exit 1        # [win]
+    - if not exist %LIBRARY_LIB%\\vorbis.lib exit 1                  # [win]
+    - if not exist %LIBRARY_LIB%\\vorbisenc.lib exit 1               # [win]
+    - if not exist %LIBRARY_LIB%\\vorbisfile.lib exit 1              # [win]
+    - if not exist %LIBRARY_BIN%\\vorbis.dll exit 1                  # [win]
+    - if not exist %LIBRARY_BIN%\\vorbisenc.dll exit 1               # [win]
+    - if not exist %LIBRARY_BIN%\\vorbisfile.dll exit 1              # [win]
+
+about:
+  home: https://www.xiph.org/
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: COPYING
+  summary: Vorbis audio format
+  description: Lossy audio codec with a fixed point decoder.
+  doc_url: https://wiki.xiph.org/
+
+extra:
+  recipe-maintainers:
+    - dschreij
+    - carlodri
+    - martinRenou

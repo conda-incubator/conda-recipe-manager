@@ -1,0 +1,48 @@
+{% set version = "1.4.1" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-estimability
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/estimability_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/estimability/estimability_{{ version }}.tar.gz
+  sha256: c65aaf1e452f3947013d3ce05ae674d48492081f615a942592dc91db780f1124
+
+build:
+  merge_build_host: true  # [win]
+  number: 2
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+    - cross-r-base {{ r_base }}    # [build_platform != target_platform]
+  host:
+    - r-base
+  run:
+    - r-base
+
+test:
+  commands:
+    - $R -e "library('estimability')"           # [not win]
+    - "\"%R%\" -e \"library('estimability')\""  # [win]
+
+about:
+  home: https://CRAN.R-project.org/package=estimability
+  license: GPL-3.0-or-later
+  summary: Provides tools for determining estimability of linear functions  of regression coefficients, and 'epredict' methods that handle  non-estimable cases correctly. Estimability theory is discussed in many linear-models textbooks including Chapter 3 of Monahan, JF (2008),  "A Primer on Linear Models", Chapman and Hall
+    (ISBN 978-1-4200-6201-4).
+  license_family: GPL3
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-3
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r

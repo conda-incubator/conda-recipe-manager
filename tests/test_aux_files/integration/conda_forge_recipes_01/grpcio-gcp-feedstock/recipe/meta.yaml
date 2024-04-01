@@ -1,0 +1,46 @@
+{% set name = "grpcio-gcp" %}
+{% set version = "0.2.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/grpcio-gcp-{{ version }}.tar.gz
+  sha256: e292605effc7da39b7a8734c719afb12ec4b5362add3528d8afad3aa3aa9057c
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 6
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+  run:
+    - python >=3.6
+    - grpcio >=1.12.0
+    - protobuf >=3.6.1
+
+test:
+  imports:
+    - grpc_gcp
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://grpc.io
+  license: Apache-2.0
+  license_file: LICENSE
+  license_family: Apache
+  summary: gRPC extensions for Google Cloud Platform
+  doc_url: https://grpc.io/docs/
+  dev_url: https://github.com/GoogleCloudPlatform/grpc-gcp-python
+
+extra:
+  recipe-maintainers:
+    - xylar
+    - BrentDorsey

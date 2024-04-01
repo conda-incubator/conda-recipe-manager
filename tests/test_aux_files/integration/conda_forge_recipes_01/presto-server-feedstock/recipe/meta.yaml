@@ -1,0 +1,49 @@
+{% set name = "presto-server" %}
+{% set version = "0.284" %}
+{% set java_version = 8 %}
+
+package:
+  name: {{ name|lower }}
+  version: "{{ version }}"
+
+source:
+  # Build needs a proper Git checkout.
+  git_url: https://github.com/prestodb/presto
+  git_rev: "{{ version }}"
+
+build:
+  number: 1
+  noarch: generic
+  missing_dso_whitelist:
+    # From libprocname, which is shipped as part of Presto
+    - /lib64/libc.so.6  # [linux]
+
+requirements:
+  build:
+    - git-lfs
+    - openjdk ={{ java_version }}
+    - maven >=3.3.9
+  run:
+    - openjdk ={{ java_version }}
+    - python >=2.4
+    - __unix
+
+test:
+  commands:
+    - presto-server --help
+
+about:
+  home: https://prestodb.io
+  summary: Fast and Reliable SQL Engine for Data Analytics and the Open Lakehouse
+  description: |
+    Presto is a distributed SQL query engine designed to query large data sets distributed over one or more heterogeneous data sources.
+  license: Apache-2.0
+  license_file:
+    - LICENSE
+    - target/generated-sources/license/THIRD-PARTY.txt
+  doc_url: http://prestodb.github.io/docs/current/index.html
+  dev_url: https://github.com/prestodb/presto
+
+extra:
+  recipe-maintainers:
+    - jonashaag

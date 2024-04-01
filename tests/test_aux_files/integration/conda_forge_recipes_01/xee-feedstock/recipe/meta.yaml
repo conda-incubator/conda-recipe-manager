@@ -1,0 +1,46 @@
+{% set name = "xee" %}
+{% set version = "0.0.11" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/xee-{{ version }}.tar.gz
+  sha256: b899120a1cf865ee2b2c746a065fc53d525a5322240d2bc7aa1e7a5cad29e8fe
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  number: 0
+
+requirements:
+  host:
+    - python >=3.8
+    - pip
+  run:
+    - python >=3.8
+    - affine
+    - earthengine-api >=0.1.374
+    - pyproj
+    - xarray
+    - dask
+
+test:
+  imports:
+    - xee
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/google/xee
+  summary: A Google Earth Engine extension for Xarray.
+  license: Apache-2.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - raybellwaves
+    - giswqs

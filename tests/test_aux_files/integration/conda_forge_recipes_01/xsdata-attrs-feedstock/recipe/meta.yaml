@@ -1,0 +1,51 @@
+{% set name = "xsdata-attrs" %}
+{% set version = "24.3" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/xsdata_attrs-{{ version }}.tar.gz
+  sha256: 9137f95e8b2292bf62ef9a85cfa85995ccabfb5ed3ea76474ce3e09c017f4784
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.8
+  run:
+    - attrs >=19.2.0
+    - python >=3.8
+    - xsdata >=23.5
+
+test:
+  requires:
+    - pytest
+  source_files:
+    - tests/*
+  commands:
+    - pytest
+
+about:
+  home: https://github.com/tefra/xsdata-attrs
+  summary: xsdata attrs plugin
+  description: |
+    xsData is a complete XML data binding library for python allowing
+    developers to access and use XML and JSON documents as simple objects rather
+    than using DOM.
+
+    Now powered by attrs!
+  dev_url: https://github.com/tefra/xsdata-attrs
+  doc_url: https://xsdata-attrs.readthedocs.io
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - tefra

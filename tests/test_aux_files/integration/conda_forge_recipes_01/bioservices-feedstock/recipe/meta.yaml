@@ -1,0 +1,59 @@
+{% set name = "BioServices" %}
+{% set version = "1.11.2" %}
+{% set sha256 = "31baaab4ab813b93f79995ba8cad431a16cbee99e1b0c6f9e419dd4be0c73a9e" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/bioservices-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  number: 1
+  noarch: python
+  script: {{ PYTHON }} -m pip install . --use-pep517 --no-deps -vv
+  entry_points:
+    - bioservices=bioservices.main:main
+
+requirements:
+  host:
+    - python >=3.7
+    - pip
+  run:
+    - python >=3.7
+    - appdirs
+    - beautifulsoup4
+    - click
+    - colorlog
+    - easydev >=0.12.0
+    - grequests
+    - matplotlib-base
+    - pandas >=0.21.1
+    - requests
+    - requests_cache
+    - suds-community >=0.7
+    - lxml
+    - tqdm
+    - wrapt
+    - xmltodict
+
+test:
+  imports:
+    - bioservices
+    - bioservices.apps
+    - bioservices.mapping
+  commands:
+    - bioservices --help
+
+about:
+  home: https://github.com/cokelaer/bioservices
+  summary: Access to Biological Web Services from Python
+  license: GPL-3.0-only
+  license_file: LICENSE
+  doc_url: https://bioservices.readthedocs.io/en/main/
+
+extra:
+  recipe-maintainers:
+    - mencian

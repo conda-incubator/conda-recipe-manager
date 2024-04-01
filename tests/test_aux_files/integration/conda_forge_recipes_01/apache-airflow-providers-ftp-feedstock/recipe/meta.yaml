@@ -1,0 +1,45 @@
+{% set name = "apache-airflow-providers-ftp" %}
+{% set version = "3.7.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name.replace('-', '_') }}-{{ version }}.tar.gz
+  sha256: cc6e7602fb9b92255b83343673923339c8fe7d22c8c738ba372ce38a70cce1cc
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.8,<4.dev0
+    - flit-core >=3.2,<4
+    - pip
+  run:
+    - python >=3.8
+    - apache-airflow >=2.6.0
+
+test:
+  imports:
+    - airflow.providers.ftp
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/apache/airflow/
+  summary: Provider package apache-airflow-providers-ftp for Apache Airflow
+  license: Apache-2.0
+  license_file: airflow/providers/ftp/LICENSE
+  license_family: Apache
+  doc_url: https://airflow.apache.org/docs/apache-airflow-providers-ftp/stable/index.html
+  dev_url: https://github.com/apache/airflow/
+
+extra:
+  recipe-maintainers:
+    - xylar

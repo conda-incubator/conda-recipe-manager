@@ -1,0 +1,49 @@
+{% set name = "hunter" %}
+{% set version = "3.6.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 16fbea3d6a67d474e13ee726bdf464211613ddddde338345338c3a5cd942585b
+
+build:
+  number: 1
+  entry_points:
+    - hunter-trace = hunter.remote:main
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+  skip: true  # [py<36]
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+  host:
+    - python
+    - cython
+    - pip
+  run:
+    - python
+    - colorama
+    - manhole  # [not win]
+
+test:
+  imports:
+    - hunter
+  commands:
+    - hunter-trace --help  # [not win]
+
+about:
+  home: https://github.com/ionelmc/python-hunter
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: Hunter is a flexible code tracing toolkit
+
+extra:
+  recipe-maintainers:
+    - mrakitin
+    - kbeeperez
+    - conda-forge/event-model

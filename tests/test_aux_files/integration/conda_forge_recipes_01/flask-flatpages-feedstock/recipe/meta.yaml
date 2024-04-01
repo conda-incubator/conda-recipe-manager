@@ -1,0 +1,50 @@
+{% set name = "flask-flatpages" %}
+{% set version = "0.8.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/Flask-FlatPages-{{ version }}.tar.gz
+  sha256: 403f0c574a308d45489bd02ac3abf618efc5f1f206b1f80603400580bcd0bc69
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  number: 1
+
+requirements:
+  host:
+    - python >=3.6
+    - setuptools
+    - wheel
+    - pip
+  run:
+    - python >=3.6
+    - flask >1.0
+    - jinja2 >=2.10.2
+    - markdown >=2.5
+    - pyyaml >5.3.1
+    - six
+
+test:
+  imports:
+    - flask_flatpages
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/SimonSapin/Flask-FlatPages
+  license: BSD-3-Clause
+  license_file: LICENSE
+  license_family: BSD
+  summary: Provides flat static pages to a Flask application
+  dev_url: https://github.com/SimonSapin/Flask-FlatPages
+  doc_url: https://flask-flatpages.readthedocs.io/en/latest/
+
+extra:
+  recipe-maintainers:
+    - jan-janssen

@@ -1,0 +1,64 @@
+{% set name = "mcalf" %}
+{% set version = "1.0.0" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/mcalf-{{ version }}.tar.gz
+  sha256: b33d53f1e87f458c4ab6015d8da7a4531daba8c2f995a725cbab13709dc6d773
+
+build:
+  number: 1
+  skip: true  # [py<36]
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+  host:
+    - pip
+    - python
+    - setuptools_scm
+  run:
+    - astropy >=4.2
+    - matplotlib-base >=3.1
+    - numpy >=1.18
+    - pathos >=0.2.5
+    - python
+    - pyyaml >=5.1
+    - scikit-learn >=0.22
+    - scipy >=1.4
+
+test:
+  imports:
+    - mcalf
+    - mcalf.models
+    - mcalf.profiles
+    - mcalf.profiles.voigt
+    - mcalf.profiles.gaussian
+    - mcalf.utils
+    - mcalf.utils.spec
+    - mcalf.utils.smooth
+    - mcalf.utils.mask
+    - mcalf.utils.plot
+    - mcalf.utils.misc
+    - mcalf.visualisation
+  commands:
+    - pip check
+    - python -c 'import platform;exit(0 if platform.python_implementation() == "PyPy" else 1)' || pytest --pyargs mcalf
+  requires:
+    - pip
+    - pytest
+
+about:
+  home: https://github.com/ConorMacBride/mcalf/
+  summary: 'MCALF: Multi-Component Atmospheric Line Fitting'
+  license: BSD-2-Clause
+  license_file: LICENSE.rst
+
+extra:
+  recipe-maintainers:
+    - ConorMacBride

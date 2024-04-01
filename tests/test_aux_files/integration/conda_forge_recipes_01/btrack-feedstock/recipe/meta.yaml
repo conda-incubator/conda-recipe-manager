@@ -1,0 +1,58 @@
+{% set name = "btrack" %}
+{% set version = "0.4.6" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/quantumjot/BayesianTracker/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: 997d303614d60001769f1d65fd4917b92975deb5653bcf8da788c414ad7a27db
+  patches:
+    - makefile.patch
+    - eigen_includes.patch
+
+build:
+  number: 1
+  skip: true  # [win or py==37]
+
+requirements:
+  build:
+    - {{ compiler('cxx') }}
+    - make
+  host:
+    - pip
+    - python
+    - eigen
+  run:
+    - cvxopt >=1.2.0
+    - h5py >=2.10.0
+    - napari >=0.4.16
+    - napari-plugin-engine
+    - numpy >=1.17.3
+    - pooch >=1.0.0
+    - pydantic >=1.9.0
+    - python
+    - scikit-image >=0.16.2
+    # Listed upstream, but not really used anywhere!
+    # - scipy >=1.3.1
+
+test:
+  imports:
+    - btrack
+  commands:
+    - pip check
+    - python -c "from btrack.libwrapper import get_library; print(get_library())"
+  requires:
+    - pip
+
+about:
+  home: https://github.com/quantumjot/BayesianTracker
+  summary: A framework for Bayesian multi-object tracking
+  license: MIT
+  license_file: LICENSE.md
+
+extra:
+  recipe-maintainers:
+    - goanpeca
+    - jaimergp

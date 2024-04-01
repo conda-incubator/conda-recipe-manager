@@ -1,0 +1,51 @@
+{% set name = "stone" %}
+{% set version = "3.3.3" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/dropbox/{{ name }}/archive/v{{ version }}.tar.gz
+  sha256: f39e20a282eebe38ea44438f807d55762fc8dcd704cc56774944646a471f60d6
+
+build:
+  number: 0
+  noarch: python
+  entry_points:
+    - stone=stone.cli:main
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - pytest-runner ==5.3.2
+    - python >=3.5
+  run:
+    - ply >=3.4
+    - python >=3.5
+    - six >=1.12.0
+
+test:
+  imports:
+    - stone
+  commands:
+    - pip check
+    - stone --help
+  requires:
+    - pip
+
+about:
+  home: https://www.dropbox.com/developers
+  summary: Stone is an interface description language (IDL) for APIs.
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  dev_url: https://github.com/dropbox/stone
+  doc_url: https://github.com/dropbox/stone/tree/main/docs
+
+extra:
+  recipe-maintainers:
+    - cjmartian
+    - BastianZim

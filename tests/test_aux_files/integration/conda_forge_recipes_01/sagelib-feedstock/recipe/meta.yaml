@@ -1,0 +1,248 @@
+{% set version = "10.2" %}
+{% set name = "sagelib" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/sagemath/sage/archive/{{ version }}.tar.gz
+  sha256: e7125f13495e1068edab73735aca7f9b2c655688096e9d109e628c023e76411f
+  patches:
+    - 0001-Build-glue-code-for-optional-extensions-sirocco-and-.patch
+    - 0002-Do-not-cleanup-all-.so-files-when-cross-compiling.patch  # [build_platform != target_platform]
+
+build:
+  number: 4
+  skip: true  # [win]
+  skip: true  # [py<39]
+  ignore_run_exports_from:
+    - {{ compiler('fortran') }}
+    - sirocco
+    - bliss
+
+requirements:
+  build:
+    - libtool
+    - automake
+    - m4
+    - {{ compiler('cxx') }}
+    - {{ compiler('c') }}
+    - {{ compiler('fortran') }}
+    - make
+    - pkg-config
+    - gettext
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - cython >=3,<4                          # [build_platform != target_platform]
+    - memory-allocator                       # [build_platform != target_platform]
+    - numpy                                  # [build_platform != target_platform]
+  host:
+    - pip
+    - setuptools
+    - libblas
+    - libcblas
+    - liblapack
+    - liblapacke
+    - libboost-headers
+    - arb
+    - brial         1.2.*
+    - cliquer       1.22.*
+    - cypari2       2.1.*
+    - cysignals     1.11.*
+    - cython        >=3,<4
+    - ecl           21.2.*
+    - eclib
+    - ecm           7.*
+    - fflas-ffpack  2.4.*
+    - future
+    - gap-core      4.12.2
+    - giac          1.9.*
+    - givaro        4.1.*
+    - glpk
+    - gmp
+    - gmpy2         2.1.*
+    - gsl
+    - iml           1.0.*
+    - jinja2        3.1.*
+    - jupyter_core  4.*
+    - lcalc         2.0.*
+    - libbraiding   1.2
+    - libbrial      1.2.*
+    # trying to merge the two folllowing lines into one doesn't work because of a
+    # conda-build bug
+    - libflint
+    - libflint      * *_ntl_*
+    - libgd         2.3.*
+    - libhomfly     1.02.*
+    - libpng
+    - linbox        >=1.6.3
+    - lrcalc        2.1
+    - m4ri
+    - m4rie
+    - memory-allocator
+    - mpc           1.*
+    - mpfi          1.5.*
+    - mpfr
+    - ntl
+    - numpy
+    - pari
+    - pkg-config
+    - pkgconfig
+    - planarity     3.*
+    - ppl           1.2
+    - pplpy         0.8.*
+    - python
+    - readline
+    - rw            0.9
+    - singular
+    - six
+    - symmetrica    3.0
+    - zlib
+    # sage runtime deps
+    - ipython       >=8.4,<9
+    - pexpect       >=4.8.0,<5
+    # for the symlinks
+    - threejs-sage
+    - notebook      >=6.4.12,<7
+    - jmol          >=14.29.52,<15
+    # we build glue against the optional sirocco extension
+    - sirocco
+    # we build glue against the header files of the optional bliss extension
+    - bliss >=0.77
+
+  # We can not include all actual runtime dependencies of Sage here as some of
+  # them require Sage to build, such as some of the database packages.
+  # The packages listed here are taken from the `SAGERUNTIME` variable in
+  # `build/make/Makefile`.
+  # These dependencies are enough to `import sage` and start `sage` but lots of
+  # things do not work. To get all the standard dependencies of Sage, install
+  # the "sage" package (which requires this "sagelib" package.)
+  run:
+    - {{ pin_compatible("libbrial", max_pin="x.x") }}
+    - {{ pin_compatible("cliquer", max_pin="x.x") }}
+    - {{ pin_compatible("cypari2") }}
+    - {{ pin_compatible("cysignals") }}
+    - {{ pin_compatible("cython") }}
+    - {{ pin_compatible("ecl", max_pin="x.x") }}
+    - eclib
+    - {{ pin_compatible("ecm") }}
+    - future
+    - {{ pin_compatible("gap-core", max_pin="x.x") }}
+    - {{ pin_compatible("giac", max_pin="x.x") }}
+    - glpk
+    - gmp
+    - {{ pin_compatible("gmpy2", max_pin="x.x") }}
+    - gsl
+    - {{ pin_compatible("iml", max_pin="x.x") }}
+    - {{ pin_compatible("jinja2", max_pin="x.x") }}
+    - {{ pin_compatible("jupyter_core") }}
+    - {{ pin_compatible("lcalc", max_pin="x.x") }}
+    - {{ pin_compatible("lrcalc", max_pin="x.x") }}
+    - {{ pin_compatible("libbraiding", max_pin="x.x") }}
+    - libflint  * *_ntl_*
+    - {{ pin_compatible("libgd", max_pin="x.x") }}
+    - {{ pin_compatible("libhomfly", max_pin="x.x") }}
+    - libpng
+    - {{ pin_compatible("linbox", max_pin="x.x") }}
+    - givaro
+    - fflas-ffpack
+    - {{ pin_compatible("m4ri") }}
+    - {{ pin_compatible("m4rie") }}
+    - memory-allocator
+    - mpc
+    - mpfi
+    - mpfr
+    - ntl
+    - {{ pin_compatible("numpy") }}
+    - {{ pin_compatible("planarity") }}
+    - {{ pin_compatible("ppl", max_pin="x.x") }}
+    - {{ pin_compatible("pplpy", max_pin="x.x") }}
+    - primecountpy
+    - python
+    - readline
+    - {{ pin_compatible("rw", max_pin="x.x") }}
+    - singular
+    - six
+    - {{ pin_compatible("symmetrica", max_pin="x.x") }}
+    - zlib
+    # sageruntime deps
+    # Disable ipython 8.19.0 which breaks the interactive session, see https://github.com/sagemath/sage/issues/36975
+    - ipython >=8.4,<9,!=8.19.0
+    - {{ pin_compatible("pexpect") }}
+    - python-lrcalc
+    - {{ pin_compatible("threejs-sage") }}
+
+test:
+  requires:
+    # Sage's doctesting framework uses a pretty printing command from sympy
+    - sympy
+    - ipywidgets
+    - pip
+  source_files:
+    - src/sage/version.py
+  imports:
+    - sage
+  commands:
+    - sage -v
+    - sage -c 1+1
+    # too many doctests fail still but we test that the doctesting framework works by testing a trivial file
+    - sage -tp src/sage/version.py
+    # Test that #135 has been resolved
+    - sage -c 'import sage.modular.multiple_zeta'
+
+outputs:
+  - name: sagelib
+
+  - name: sagemath-bliss
+    script: install-bliss-ext.sh
+    requirements:
+      build:
+        - {{ compiler('cxx') }}
+        - {{ compiler('c') }}
+      host:
+        - {{ pin_subpackage("sagelib", exact=True) }}
+        - bliss >=0.77
+        - python
+      run:
+        - {{ pin_subpackage("sagelib", exact=True) }}
+        - {{ pin_compatible("bliss", max_pin="x.x") }}
+        - python
+    test:
+      imports:
+        - sage.graphs.bliss
+
+  - name: sagemath-sirocco
+    script: install-sirocco-ext.sh
+    build:
+      ignore_run_exports_from:
+        - dummy
+    requirements:
+      build:
+        - {{ compiler('c') }}
+      host:
+        - {{ pin_subpackage("sagelib", exact=True) }}
+        - gmp
+        - mpfr
+        - sirocco
+        - python
+      run:
+        - {{ pin_subpackage("sagelib", exact=True) }}
+        - python
+    test:
+      imports:
+        - sage.libs.sirocco
+
+about:
+  home: https://www.sagemath.org
+  license: GPL-2.0-or-later
+  license_file: COPYING.txt
+  summary: Open Source Mathematical Software
+  dev_url: https://trac.sagemath.org
+  doc_url: https://doc.sagemath.org
+
+extra:
+  recipe-maintainers:
+    - isuruf
+    - saraedum
+    - alexjbest

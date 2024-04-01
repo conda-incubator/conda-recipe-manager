@@ -1,0 +1,68 @@
+{% set name = "MetPy" %}
+{% set version = "1.6.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 55bbcaaaef41027e67e051e3d2c029917217a2dd8768498d9dfca4939555ffdf
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.9
+    - setuptools
+    - pip
+    - setuptools_scm
+
+  run:
+    - python >=3.9
+    - matplotlib-base >=3.5.0
+    - numpy >=1.20
+    - pandas >=1.4.0
+    - pint >=0.17.0
+    - pooch >=1.2.0
+    - pyproj >=3.0.0
+    - scipy >=1.8.0
+    - traitlets >=5.0.5
+    - xarray >=0.21.0
+    - cartopy >=0.17.0
+
+test:
+  imports:
+    - metpy.calc
+    - metpy.interpolate
+    - metpy.io
+    - metpy.plots
+    - metpy.units
+
+about:
+  home: https://github.com/Unidata/MetPy
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: MetPy is a collection of tools in Python for reading, visualizing and performing calculations with weather data.
+  description: |
+    The space MetPy aims for is GEMPAK (and maybe NCL)-like functionality,
+    in a way that plugs easily into the existing scientific Python ecosystem
+    (numpy, scipy, matplotlib). So, if you take the average GEMPAK script for
+    a weather map, you need to: read data, calculate a derived field, and
+    show on a map/skew-T. One of the benefits hoped to achieve over GEMPAK
+    is to make it easier to use these routines for any meteorological Python
+    application; this means making it easy to pull out the LCL calculation
+    and just use that, or re-use the Skew-T with your own data code. MetPy
+    also prides itself on being well-documented and well-tested, so that
+    on-going maintenance is easily manageable.
+  doc_url: https://unidata.github.io/MetPy
+  dev_url: https://github.com/Unidata/MetPy
+
+extra:
+  recipe-maintainers:
+    - dopplershift
+    - dcamron

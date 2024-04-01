@@ -1,0 +1,51 @@
+{% set name = "ipytablewidgets" %}
+{% set version = "0.3.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/ipytablewidgets-{{ version }}.tar.gz
+  sha256: d78bc88a1fabfcf1cbc61806dbd62dc2ea2c4812e97b00f60a5b96a47dbea4b7
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  number: 0
+
+requirements:
+  host:
+    - python >=3.7
+    - jupyter_packaging >=0.10,<2
+    - jupyterlab >=3.0.0,<3.7
+    - setuptools >=40.8.0
+    - wheel
+    - pip
+  run:
+    - python >=3.7
+    - ipywidgets >=7.5.0,<9
+    - traitlets >=4.3.0
+    - traittypes >=0.0.6
+    - numpy >=1.10.4,<2.0.0
+    - pandas >=1.0.0,<2.0.0
+    - lz4
+
+test:
+  imports:
+    - ipytablewidgets
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/progressivis/ipytablewidgets
+  summary: A set of widgets to help facilitate reuse of large tables across widgets
+  license: BSD-3-Clause
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - xtianpoli
+    - ocefpaf

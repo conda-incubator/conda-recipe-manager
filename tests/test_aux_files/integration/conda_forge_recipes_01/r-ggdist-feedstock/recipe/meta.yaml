@@ -1,0 +1,84 @@
+{% set version = "3.3.2" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-ggdist
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/ggdist_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/ggdist/ggdist_{{ version }}.tar.gz
+  sha256: f6563091cb7ca48b4fb415740a60113be6aac541616f5025110364e12cbe83f1
+
+build:
+  merge_build_host: true  # [win]
+  number: 0
+  rpaths:
+    - lib/R/lib/
+    - lib/
+  skip: true  # [win]
+
+requirements:
+  build:
+    - cross-r-base {{ r_base }}    # [build_platform != target_platform]
+    - {{ compiler('c') }}          # [not win]
+    - {{ compiler('m2w64_c') }}    # [win]
+    - {{ compiler('cxx') }}        # [not win]
+    - {{ compiler('m2w64_cxx') }}  # [win]
+    - {{ posix }}filesystem        # [win]
+    - {{ posix }}make
+    - {{ posix }}sed               # [win]
+    - {{ posix }}coreutils         # [win]
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+    - r-cli
+    - r-distributional >=0.3.2
+    - r-ggplot2 >=3.5.0
+    - r-glue
+    - r-numderiv
+    - r-quadprog
+    - r-rcpp
+    - r-rlang >=0.3.0
+    - r-scales
+    - r-tibble
+    - r-vctrs
+    - r-withr
+  run:
+    - r-base
+    - {{ native }}gcc-libs         # [win]
+    - r-cli
+    - r-distributional >=0.3.2
+    - r-ggplot2 >=3.5.0
+    - r-glue
+    - r-numderiv
+    - r-quadprog
+    - r-rcpp
+    - r-rlang >=0.3.0
+    - r-scales
+    - r-tibble
+    - r-vctrs
+    - r-withr
+
+test:
+  commands:
+    - $R -e "library('ggdist')"           # [not win]
+    - "\"%R%\" -e \"library('ggdist')\""  # [win]
+
+about:
+  home: http://mjskay.github.io/ggdist
+  dev_url: https://github.com/mjskay/ggdist
+  license: GPL-3.0-or-later
+  summary: 'Provides primitives for visualizing distributions using ''ggplot2'' that are particularly tuned for visualizing uncertainty in either a frequentist or Bayesian mode. Both analytical distributions (such as frequentist confidence distributions or Bayesian priors) and distributions represented as samples (such as
+    bootstrap distributions or Bayesian posterior samples) are easily visualized. Visualization primitives include but are not limited to: points with multiple uncertainty intervals, eye plots (Spiegelhalter D., 1999) <https://ideas.repec.org/a/bla/jorssa/v162y1999i1p45-58.html>, density plots, gradient plots, dot plots
+    (Wilkinson L., 1999) <doi:10.1080/00031305.1999.10474474>, quantile dot plots (Kay M., Kola T., Hullman J., Munson S., 2016) <doi:10.1145/2858036.2858558>, complementary cumulative distribution function barplots (Fernandes M., Walls L., Munson S., Hullman J., Kay M., 2018) <doi:10.1145/3173574.3173718>, and fit curves
+    with multiple uncertainty ribbons.'
+  license_family: GPL3
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-3
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r

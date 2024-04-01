@@ -1,0 +1,49 @@
+{% set name = "flask-smorest" %}
+{% set version = "0.44.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 13f6e39d807c8847a56dc40656c2bbc0a2b2a430d8a4bb4a21836046757f7cef
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3
+    - pip
+  run:
+    - apispec >=5
+    - flask >=2
+    - marshmallow >=3.13
+    - python >=3
+    - webargs >=8
+    - werkzeug >=2
+
+test:
+  imports:
+    - flask_smorest
+  requires:
+    - pip
+  commands:
+    - pip check
+
+about:
+  home: https://github.com/marshmallow-code/flask-smorest
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: DB agnostic framework to build auto-documented REST APIs with Flask and marshmallow
+  doc_url: https://flask-smorest.readthedocs.io/
+  dev_url: https://github.com/marshmallow-code/flask-smorest
+
+extra:
+  recipe-maintainers:
+    - mcs07
+    - jan-janssen

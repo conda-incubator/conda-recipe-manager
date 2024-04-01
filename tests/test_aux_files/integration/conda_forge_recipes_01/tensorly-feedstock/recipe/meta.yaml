@@ -1,0 +1,57 @@
+{% set name = "tensorly" %}
+{% set version = "0.8.1" %}
+{% set sha256 = "0361202ac80341ff0563d27e774f0eb12190b3078bd07bc34cc5970e4c18caf5" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/tensorly/{{ name }}/archive/{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  number: 1
+  noarch: python
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - python >=3.8
+    - pip
+    - setuptools
+
+  run:
+    - python >=3.8
+    - numpy
+    - scipy
+
+test:
+  imports:
+    - tensorly
+  requires:
+    - pip
+  commands:
+    - pip check
+
+about:
+  home: https://github.com/tensorly/tensorly/
+  license: BSD-3-Clause
+  license_family: BSD
+  # https://github.com/tensorly/tensorly/pull/50 # not sure if relevant anymore?
+  license_file: LICENSE.txt
+  summary: Tensor learning in Python
+
+  description: |
+    TensorLy is a Python library that aims at making tensor learning simple 
+    and accessible. It allows to easily perform tensor decomposition, 
+    tensor learning and tensor algebra. Its backend system allows to 
+    seamlessly perform computation with NumPy, MXNet, PyTorch, TensorFlow 
+    or CuPy, and run methods at scale on CPU or GPU.
+  doc_url: http://tensorly.org
+  dev_url: https://github.com/tensorly/tensorly
+
+extra:
+  recipe-maintainers:
+    - CurtLH
+    - ngam

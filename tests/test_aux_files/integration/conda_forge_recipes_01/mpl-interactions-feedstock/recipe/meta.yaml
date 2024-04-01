@@ -1,0 +1,42 @@
+{% set name = "mpl-interactions" %}
+{% set version = "0.24.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/mpl_interactions-{{ version }}.tar.gz
+  sha256: a77b4092b60099951bc9460ed3a4fd9fe17f507e751cf178d5e123eed6363b3f
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - matplotlib-base >=3.4
+    - python >=3.6
+
+test:
+  imports:
+    - mpl_interactions
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://pypi.org/project/mpl-interactions/
+  summary: Matplotlib aware interact functions
+  dev_url: https://github.com/ianhi/mpl-interactions
+  license: BSD-3-Clause
+  license_file: LICENSE.txt
+
+extra:
+  recipe-maintainers:
+    - ianhi

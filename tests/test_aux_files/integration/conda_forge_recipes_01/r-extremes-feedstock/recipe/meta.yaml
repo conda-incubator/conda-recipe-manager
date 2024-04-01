@@ -1,0 +1,54 @@
+{% set version = "2.1-4" %}
+
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-extremes
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/extRemes_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/extRemes/extRemes_{{ version }}.tar.gz
+  sha256: cea42cf67e7a2d99451a2a3541bab41c1e64c86b45de37fa0119c49f7083b78a
+
+build:
+  merge_build_host: true  # [win]
+  number: 0
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - posix                # [win]
+    - {{ compiler('c') }}        # [unix]
+    - {{ compiler('m2w64_c') }}  # [win]
+  host:
+    - r-base
+    - r-lmoments
+    - r-car
+    - r-distillery
+    - libblas
+  run:
+    - r-base
+    - r-lmoments
+    - r-car
+    - r-distillery
+
+test:
+  commands:
+    - $R -e "library('extRemes')"  # [not win]
+    - "\"%R%\" -e \"library('extRemes')\""  # [win]
+
+about:
+  home: http://www.assessment.ucar.edu/toolkit/
+  license: GPL-2.0-or-later
+  summary: Functions for performing extreme value analysis.
+  license_family: GPL3
+  license_file: {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-3
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r

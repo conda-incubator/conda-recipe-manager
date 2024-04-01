@@ -1,0 +1,46 @@
+{% set name = "versioneer-518" %}
+{% set version = "0.19" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/versioneer-518-{{ version }}.tar.gz
+  sha256: a287608997415f45401849d1227a42bb41b80a6e4a7da5776666f85ce6faec41
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps
+
+requirements:
+  host:
+    - pip
+    - python >=2.7
+  run:
+    - python >=2.7
+
+test:
+  imports:
+    - versioneer
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/python-versioneer/versioneer-518
+  summary: Non-vendored versioneer in the spirit of PEP 518.
+  license: NIST-PD
+  license_file: LICENSE
+  description: >
+    This is a tool for managing a recorded version number in setuptools-based python projects. The goal is to remove the tedious and error-prone "update the embedded version string" step from your release process. Making a new release should be as easy as recording a new tag in your version-control system, and maybe making
+    new tarballs.
+  dev_url: https://github.com/python-versioneer/versioneer-518
+
+extra:
+  recipe-maintainers:
+    - Midnighter
+    - bucknerns

@@ -1,0 +1,44 @@
+{% set name = "kagglehub" %}
+{% set version = "0.2.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/kagglehub-{{ version }}.tar.gz
+  sha256: aa818924ee59f846f7aed36c0320829ef3968e33bd786334b69f86ae936e5ab8
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  number: 0
+
+requirements:
+  host:
+    - python >=3.7
+    - hatchling
+    - pip
+  run:
+    - python >=3.7
+    - requests
+    - tqdm
+    - packaging
+
+test:
+  imports:
+    - kagglehub
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/Kaggle/kagglehub
+  summary: Access Kaggle resources anywhere
+  license: Apache-2.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - ngam

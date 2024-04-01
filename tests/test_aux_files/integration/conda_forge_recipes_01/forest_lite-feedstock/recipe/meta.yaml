@@ -1,0 +1,56 @@
+{% set name = "forest_lite" %}
+{% set version = "0.17.4" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/MetOffice/forest-lite/archive/v{{ version }}.tar.gz
+  sha256: 38873d8c812657cb8010d05841bab70a0cdb56ac08d03727f9184966f1b3cdb7
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+  entry_points:
+    - forest_lite = forest_lite.cli:app
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+    - nodejs =14
+  run:
+    - python >=3.6
+    - fastapi
+    - typer
+    - bokeh
+    - uvicorn
+    - aiofiles
+    - cartopy_offlinedata
+    - datashader
+    - graphene >=2
+    - h5netcdf
+    - iris
+    - click =7.1.2
+
+test:
+  imports:
+    - forest_lite
+
+about:
+  home: https://github.com/MetOffice/forest-lite
+  license: GPL-3.0-only
+  license_family: GPL
+  license_file: LICENSE
+  summary: Forecast and observation research and evaluation survey tool
+  description: |
+    FOREST-Lite is a weather data web viewer with a Python data server
+    and JS client. It works with Python 3.7+.
+  doc_url: https://metoffice.github.io/forest-lite/
+  dev_url: https://github.com/MetOffice/forest-lite
+
+extra:
+  recipe-maintainers:
+    - andrewgryan

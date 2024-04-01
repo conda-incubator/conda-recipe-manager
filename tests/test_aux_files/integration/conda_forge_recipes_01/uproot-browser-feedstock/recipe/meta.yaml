@@ -1,0 +1,63 @@
+{% set name = "uproot-browser" %}
+{% set version = "0.6.5" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/uproot_browser-{{ version }}.tar.gz
+  sha256: 48d7175bf9d271c83fee9158ac2b2196786345ae36a92cb6640d289ebd0ac7fe
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  entry_points:
+    - uproot-browser = uproot_browser.__main__:main
+
+requirements:
+  host:
+    - pip
+    - python >=3.7
+    - hatchling
+    - hatch-vcs
+  run:
+    - awkward >=1
+    - click >=8
+    - hist >=2.4
+    - lz4
+    - numpy >=1.13.3
+    - plotext >=5.2.7
+    - python >=3.7
+    - rich >=13.3.3
+    - textual >=0.18
+    - typing_extensions
+    - uproot >=4.2.1
+
+test:
+  source_files:
+    - tests
+  imports:
+    - uproot_browser
+  commands:
+    - pip check
+    - curl -LO https://github.com/scikit-hep/scikit-hep-testdata/raw/v0.4.12/src/skhep_testdata/data/uproot-Event.root
+    - uproot-browser plot uproot-Event.root:hstat
+    - pytest
+  requires:
+    - pip
+    - pytest >=6
+    - pytest-asyncio
+    - scikit-hep-testdata
+
+about:
+  home: https://pypi.org/project/uproot-browser/
+  summary: Tools to inspect ROOT files with uproot
+  license: BSD-3-Clause
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - conda-forge/scikit-hep

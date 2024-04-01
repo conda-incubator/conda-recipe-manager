@@ -1,0 +1,43 @@
+{% set name = "hclfmt" %}
+{% set version = "2.20.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/hashicorp/hcl/archive/v{{ version }}.tar.gz
+  sha256: 3dd85236f08b264178cbdcd7638fee4fbd017c48bf7f53d71d6934c908b23f3d
+  folder: src
+
+build:
+  number: 0
+  script:
+    - cd src/cmd/hclfmt
+    - go-licenses save . --save_path ../../../library_licenses
+    - go build -v -o $PREFIX/bin/hclfmt  # [not win]
+    - go install -v .  # [win]
+    # Clear out cache to avoid file not removable warnings
+    - chmod -R u+w $(go env GOPATH) && rm -r $(go env GOPATH)  # [unix]
+
+requirements:
+  build:
+    - {{ compiler('go-nocgo') }}
+    - go-licenses
+
+test:
+  commands:
+    - hclfmt -version
+
+about:
+  home: https://github.com/hashicorp/hcl
+  license: MPL-2.0
+  license_file:
+    - src/LICENSE
+    - library_licenses/
+  summary: HCL reformatter
+
+extra:
+  recipe-maintainers:
+    - xhochy
+    - pavelzw

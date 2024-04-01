@@ -1,0 +1,69 @@
+{% set name = "adios_db" %}
+{% set version = "1.1.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/NOAA-ORR-ERD/adios_oil_database/archive/v{{ version }}.tar.gz
+  sha256: e216c530e2f4bae0b74617b49fd08645133b49612e3f253fa19c8abc9bb3843b
+
+build:
+  number: 0
+  noarch: python
+
+outputs:
+  - name: adios_db
+    script: build_base.sh
+    entry_points:
+      - adios_db_init = adios_db.scripts.db_initialize:init_db_cmd
+      - adios_db_import = adios_db.scripts.db_import:import_db_cmd
+      - adios_db_oil_query = adios_db.scripts.oil_query:oil_query_cmd
+      - adios_db_backup = adios_db.scripts.db_backup:backup_db_cmd
+      - adios_db_restore = adios_db.scripts.db_restore:restore_db_cmd
+      - adios_db_validate = adios_db.scripts.validate:main
+      - adios_db_update_test_data = adios_db.scripts.update_test_data:main
+      - adios_db_process_json = adios_db.scripts.process_json:run_through
+    requirements:
+      host:
+        - python >=3.8
+        - pip
+      run:
+        - python >=3.8
+        - numpy >=1.20
+        - pynucos >=2.12
+    test:
+      imports:
+        - adios_db
+
+  - name: adios-db
+    build:
+      noarch: generic
+    requirements:
+      run:
+        - {{ pin_subpackage('adios_db', max_pin="x.x.x") }}
+    test:
+      imports:
+        - adios_db
+
+about:
+  home: https://github.com/NOAA-ORR-ERD/adios_oil_database
+  summary: Package for working with data in the NOAA ADIOS Oil Database
+  description: |
+    Python package for managing oil properties data for the ADIOS Oil Databse.
+    It provides code for:
+    * Importing data
+    * Reading and writing the JSON format
+    * A data validation framework (there is a small amount of validation included, it is fairly starightformward to add more.
+    * Some computation on the data (interpolation, etc.)
+    * Code to build an oil definition as required by the NOAA GNOME oil weathering model.
+  license: CC0-1.0
+  license_file: LICENSE.txt
+  doc_url: https://noaa-orr-erd.github.io/adios_oil_database/
+  dev_url: https://github.com/NOAA-ORR-ERD/adios_oil_database
+
+extra:
+  recipe-maintainers:
+    - JamesMakela-NOAA
+    - ChrisBarker-NOAA

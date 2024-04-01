@@ -1,0 +1,43 @@
+{% set name = "eth-typing" %}
+{% set version = "4.0.0" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 9af0b6beafbc5c2e18daf19da5f5a68315023172c4e79d149e12ad10a3d3f731
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.7,<4.0
+    - typing-extensions >=4.0.1
+  run:
+    - python >=3.7,<4.0
+    - typing-extensions >=4.0.1
+
+test:
+  imports:
+    - eth_typing
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/ethereum/eth-typing
+  summary: 'eth-typing: Common type annotations for ethereum python packages'
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - step21

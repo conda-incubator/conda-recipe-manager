@@ -1,0 +1,57 @@
+{% set version = "0.3.3" %}
+
+package:
+  name: affogato
+  version: {{ version }}
+
+source:
+  url: https://github.com/constantinpape/affogato/archive/{{ version }}.tar.gz
+  sha256: ad3bb1aca50ce9311d4e88e97e701237bce94faa6e79460f0bc2d2061f1484d2
+
+build:
+  number: 3
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - numpy                                  # [build_platform != target_platform]
+    - cmake
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - ninja  # [win]
+    - make  # [not win]
+  host:
+    - python
+    - numpy
+    - setuptools  # [py>311]
+    - xtensor >=0.24,<0.25
+    - xtensor-python >=0.26,<0.27
+    - libboost-headers
+  run:
+    - python
+    - vigra
+    - {{ pin_compatible('numpy') }}
+
+test:
+  imports:
+    - affogato
+  source_files:
+    - src/python/test/**/*.py
+  commands:
+    - python -m unittest discover -s src/python/test -v  # [linux]
+    # only run the absolutely necessary tests on windows and mac
+    - python src/python/test/segmentation/test_mutex_watershed.py  # [win and osx]
+    - python src/python/test/segmentation/test_interactive_mws_segmentation.py  # [win and osx]
+    - python src/python/test/segmentation/test_grid_graph.py  # [win and osx]
+
+about:
+  home: https://github.com/constantinpape/affogato
+  license: MIT
+  license_file: LICENSE
+  summary: Affinity based segmentation algorithms.
+
+extra:
+  recipe-maintainers:
+    - constantinpape
+    - Steffen-Wolf

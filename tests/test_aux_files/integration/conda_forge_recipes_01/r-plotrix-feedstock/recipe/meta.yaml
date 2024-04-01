@@ -1,0 +1,61 @@
+{% set version = "3.8-4" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-plotrix
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/plotrix_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/plotrix/plotrix_{{ version }}.tar.gz
+  sha256: e6a22d93ab61c67af21cbbe1fe333c06934cf576a44745bf2beee59bceaae8d6
+
+build:
+  merge_build_host: true  # [win]
+  number: 0
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+  run:
+    - r-base
+
+test:
+  commands:
+    - $R -e "library('plotrix')"           # [not win]
+    - "\"%R%\" -e \"library('plotrix')\""  # [win]
+
+about:
+  home: https://CRAN.R-project.org/package=plotrix
+  license: GPL-2.0-or-later
+  summary: Lots of plots, various labeling, axis and color scaling functions.
+  license_family: GPL3
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-2
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+
+# Package: plotrix
+# Version: 3.7-6
+# Date: 2019-06-19
+# Title: Various Plotting Functions
+# Author: Jim Lemon, Ben Bolker, Sander Oom, Eduardo Klein, Barry Rowlingson, Hadley Wickham, Anupam Tyagi, Olivier Eterradossi, Gabor Grothendieck, Michael Toews, John Kane, Rolf Turner, Carl Witthoft, Julian Stander, Thomas Petzoldt, Remko Duursma, Elisa Biancotto, Ofir Levy, Christophe Dutang, Peter Solymos, Robby Engelmann,  Michael Hecker, Felix Steinbeck, Hans Borchers, Henrik Singmann, Ted Toal, Derek Ogle, Darshan Baral, Ulrike Groemping, Bill Venables
+# Maintainer: Jim Lemon <drjimlemon@gmail.com>
+# Imports: grDevices, graphics, stats, utils
+# Description: Lots of plots, various labeling, axis and color scaling functions.
+# License: GPL (>= 2)
+# NeedsCompilation: no
+# Packaged: 2019-06-21 06:24:44 UTC; root
+# Depends: R (>= 3.5.0)
+# Repository: CRAN
+# Date/Publication: 2019-06-21 08:20:02 UTC

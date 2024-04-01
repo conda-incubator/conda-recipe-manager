@@ -1,0 +1,166 @@
+{% set name = "rubrix" %}
+{% set version = "0.18.0" %}
+{% set build_num = 0 %}
+
+
+#######################################################
+
+## Subpackage Build Switches
+#  This serves as a meta-level build switch 
+#  for the subpackages.
+## How does this work?
+#  If "use_all_subpackages = True", this overrides all 
+#  other subpackage-specific switches. But, if you only 
+#  want to selectively create certain subpackages, then 
+#  set "use_all_subpackages = False" and 
+#  set "use_<subpackage_name> = True". 
+## Example: 
+#  To not build the server-subpackage, you will 
+#  set "use_server_packages = False" in addition to: 
+#  - setting "use_all_subpackages = False"
+#  - and all other subpackage-switches to "True".
+
+{% set use_all_subpackages = false %}
+
+{% set use_server_packages = true %}
+
+#######################################################
+
+
+#################### BEGIN RECIPE #####################
+
+package:
+  name: {{ name|lower }}-meta
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/rubrix-{{ version }}.tar.gz
+  sha256: 2f53c6d3d6b5481faf40e4c9bdd71c092e42c6b2214978a5c623f82e761f52a6
+
+build:
+  number: {{ build_num }}
+
+outputs:
+  ### base_packages
+  - name: {{ name|lower }}
+    build:
+      noarch: python
+    script: build_base.sh
+    requirements:
+      host:
+        - pip
+        - python >=3.7
+        - setuptools-scm
+      run:
+        - python >=3.7
+        # base_packages
+        - httpx >=0.15.0,<0.16.0
+        - numpy
+        - packaging >=20.0
+        - pandas >=1.0.0,<2.0.0
+        - pydantic >=1.7.1
+        - tqdm >=4.27.0
+        - wrapt >=1.13.0,<1.14.0
+    test:
+      imports:
+        - rubrix
+        - rubrix.client
+      commands:
+        - pip check
+      requires:
+        - pip
+
+  ### server_packages
+  {% if use_server_packages is defined %}
+  {% if use_server_packages or use_all_subpackages %}
+  {% with subpackage_id = "server" %}
+  - name: {{ name|lower }}-{{ subpackage_id }}
+    build:
+      noarch: generic
+      string: {{ build_num }}_{{ subpackage_id }}_extra
+    requirements:
+      run:
+        # RECIPE: 
+        # "server": base_packages + server_packages
+        - {{ name|lower }} {{ version }}
+        # server_packages
+        - Deprecated >=1.2.0,<1.3.0
+        - PyYAML >=5.4.1,<5.5.0
+        - aiofiles >=0.6.0,<0.7.0
+        - brotli-asgi >=1.1.0,<1.2.0
+        - fastapi >=0.75.0,<0.76.0
+        - hurry.filesize
+        - luqum >=0.11.0,<0.12.0
+        - opensearch-py >=1.0.0,<1.1.0
+        - passlib >=1.7.4,<1.8.0
+        - psutil >=5.8.0,<5.9.0
+        - python-jose >=3.2.0,<3.3.0
+        - python-multipart >=0.0.5,<0.1.0
+        - scikit-learn >=0.24.2
+        - smart_open
+        - stopwordsiso >=0.6.1,<0.7.0
+        - uvicorn-standard >0.15.0,<0.18.0
+        # necessary to pass "pip check"
+        - ecdsa <0.15.0
+        - pyasn1 ==0.4.8
+        - rsa ==4.8
+    test:
+      imports:
+        - rubrix
+        - rubrix.client
+        - rubrix.server.server
+      commands:
+        - pip check
+      requires:
+        - pip
+  {% endwith %}
+  {% endif %}
+  {% endif %}
+
+about:
+  home: https://recogn.ai
+  summary: Open-source tool for exploring, labeling, and monitoring data for NLP projects.
+  license: Apache-2.0
+  license_file: LICENSE
+  description: |
+    Rubrix is a **production-ready Python framework for exploring, annotating, and 
+    managing data** in NLP projects.
+
+    Key features:
+
+      - **Open**: Rubrix is free, open-source, and 100% compatible with major NLP 
+        libraries (Hugging Face transformers, spaCy, Stanford Stanza, Flair, etc.). 
+        In fact, you can use and combine your preferred libraries without implementing 
+        any specific interface.
+
+      - **End-to-end**: Most annotation tools treat data collection as a one-off 
+        activity at the beginning of each project. In real-world projects, data 
+        collection is a key activity of the iterative process of ML model development. 
+        Once a model goes into production, you want to monitor and analyze its 
+        predictions, and collect more data to improve your model over time. Rubrix 
+        is designed to close this gap, enabling you to iterate as much as you need.
+
+      - **User and Developer Experience**: The key to sustainable NLP solutions is to 
+        make it easier for everyone to contribute to projects. Domain experts should 
+        feel comfortable interpreting and annotating data. Data scientists should feel 
+        free to experiment and iterate. Engineers should feel in control of data 
+        pipelines. Rubrix optimizes the experience for these core users to make your 
+        teams more productive.
+
+      - **Beyond hand-labeling**: Classical hand labeling workflows are costly and 
+        inefficient, but having humans-in-the-loop is essential. Easily combine 
+        hand-labeling with active learning, bulk-labeling, zero-shot models, and 
+        weak-supervision in novel data annotation workflows.
+
+    PyPI: [https://pypi.org/project/rubrix](https://pypi.org/project/rubrix)
+
+  doc_url: https://rubrix.readthedocs.io/en/stable/
+  dev_url: https://github.com/recognai/rubrix
+
+extra:
+  recipe-maintainers:
+    - sugatoray
+    # Maintainers from rubrix repository
+    - dcfidalgo
+
+  feedstock-name: {{ name|lower }}

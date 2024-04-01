@@ -1,0 +1,57 @@
+{% set name = "PyTrack" %}
+{% set version = "2.0.8" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/cosbidev/PyTrack/archive/v{{ version }}.tar.gz
+  sha256: dbfb83a44e09ff2848bde4a77d7c224e68ad1d307cbdfaf1689d7143f4073e7c
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.7
+    - pip
+  run:
+    - python >=3.7
+    - folium ~=0.13.0
+    - networkx ~=2.8.6
+    - shapely ~=1.8.4
+    - pandas ~=1.4.4
+    - numpy ~=1.23.2
+    - requests ~=2.28.1
+    - pyproj ~=3.3.1
+    - scikit-learn ~=1.1.2
+    - matplotlib-base ~=3.5.3
+    - setuptools ~=65.3.0
+    - pydot ~=1.4.2
+    - python-graphviz ~=0.20.1
+
+test:
+  imports:
+    - pytrack
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/cosbidev/PyTrack
+  summary: a Map-Matching-based Python Toolbox for Vehicle Trajectory Reconstruction
+  description: |
+      PyTrack is a Python package that integrate the recorded GPS coordinates with data provided by the open-source OpenStreetMap (OSM). 
+      PyTrack can serve the intelligent transport research, e.g. to develop virtual simulation environments for the first training phase 
+      in self-driving vehicle applications, to reconstruct the video of a vehicle’s route by exploiting available data and without equipping 
+      it with camera sensors, to update the urban road network, and so on.
+  license: BSD-3-Clause
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - mtortora-ai

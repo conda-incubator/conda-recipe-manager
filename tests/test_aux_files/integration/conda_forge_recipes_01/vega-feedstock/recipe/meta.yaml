@@ -1,0 +1,48 @@
+{% set version = "4.0.0" %}
+
+package:
+  name: vega
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/v/vega/vega-{{ version }}.tar.gz
+  sha256: bf5ffcb5a1dd3759fdfa0cbb2fe83fc00276c7d1706026b166211d16a2dcb756
+
+build:
+  number: 0
+  skip: true  # [py<37]
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+  host:
+    - python
+    - pip
+    - poetry >=1.4.2
+  run:
+    - python
+    - jupyter >=1.0.0,<2.0.0
+    - pandas >=1.5.0,<2.0.0
+    - ipytablewidgets >=0.3.0,<0.4.0
+    # extras
+    # - jupyterlab
+    # - ipywidgets
+
+test:
+  imports:
+    - vega
+
+about:
+  home: https://github.com/vega/ipyvega
+  license: BSD-3-Clause
+  license_file: LICENSE
+  summary: A Jupyter widget for Vega 5 and Vega-Lite 4
+
+extra:
+  recipe-maintainers:
+    - jakevdp
+    - ellisonbg
+    - domoritz
+    - ocefpaf

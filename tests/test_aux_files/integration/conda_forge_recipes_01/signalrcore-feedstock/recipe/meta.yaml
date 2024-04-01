@@ -1,0 +1,48 @@
+{% set name = "signalrcore" %}
+{% set version = "0.9.5" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/signalrcore-{{ version }}.tar.gz
+  sha256: e057a9145afea6f7b372e46e5fd91f966597e34de5c43c1d0a5eb7dfa32331eb
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - python >=3.6
+    - requests >=2.22.0
+    - websocket-client ==1.0.0
+    - msgpack-python ==1.0.2
+
+test:
+  imports:
+    - signalrcore
+    - signalrcore.hub
+    - signalrcore.messages
+    - signalrcore.protocol
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/mandrewcito/signalrcore
+  summary: A Python SignalR Core client, with invocation auth and two way streaming. Compatible with azure / serverless functions. Also with automatic reconnect and manually reconnect.
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - synapticarbors

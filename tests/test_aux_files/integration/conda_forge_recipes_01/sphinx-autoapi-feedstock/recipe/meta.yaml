@@ -1,0 +1,45 @@
+{% set name = "sphinx-autoapi" %}
+{% set version = "3.0.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 09ebd674a32b44467222b0fb8a917b97c89523f20dbf05b52cb8a3f0e15714de
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - python >=3.8
+    - pip
+  run:
+    - python >=3.8
+    - astroid >=2.7
+    - jinja2
+    - pyyaml
+    - sphinx >=6.1.0
+    - anyascii
+
+test:
+  imports:
+    - autoapi
+
+about:
+  home: http://github.com/rtfd/sphinx-autoapi
+  license: MIT
+  license_family: MIT
+  license_file: {{ environ["RECIPE_DIR"] }}/LICENSE.mit
+  summary: Sphinx auto API documentation generator
+  doc_url: http://sphinx-autoapi.readthedocs.io/en/latest/
+  dev_url: https://github.com/rtfd/sphinx-autoapi
+
+extra:
+  recipe-maintainers:
+    - CurtLH
+    - ChrisBarker-NOAA

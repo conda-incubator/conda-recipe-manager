@@ -1,0 +1,49 @@
+{% set name = "qiskit-ibm-provider" %}
+{% set version = "0.10.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/qiskit-ibm-provider-{{ version }}.tar.gz
+  sha256: 99dc9fd48bee2e7ed633bc739e0935c91859f1c4b77080a31089ae92e6f110f1
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.8
+    - pip
+  run:
+    - qiskit >=0.45.0
+    - python >=3.8
+    - requests >=2.19
+    - requests_ntlm >=1.1.0
+    - numpy >=1.13
+    - urllib3 >=1.21.1
+    - python-dateutil >=2.8.0
+    - websocket-client >=1.5.1
+    - websockets >=10.0
+    - typing-extensions >=4.3
+
+test:
+  imports:
+    - qiskit_ibm_provider
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/Qiskit/qiskit-ibm-provider
+  summary: Qiskit IBM Quantum Provider for accessing the quantum devices and simulators at IBM
+  license: Apache-2.0
+  license_file: LICENSE.txt
+
+extra:
+  recipe-maintainers:
+    - wshanks

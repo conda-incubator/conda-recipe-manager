@@ -1,0 +1,56 @@
+{% set name = "jupyter-jaeger" %}
+{% set version = "1.0.4" %}
+{% set jaeger_version = "1.22.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name | replace("-", "_") }}/{{ name | replace("-", "_") }}-{{ version }}.tar.gz
+  sha256: 46628417163b28e67298af0f782d00e2f5e8d106a94785cca4cd454abc70e73d
+
+build:
+  noarch: python
+  number: 0
+  script: "{{ PYTHON }} -m pip install --no-deps . -vv"
+
+requirements:
+  host:
+    - python >=3.7
+    - pip
+    - jupyter-packaging 0.7.9
+    - jupyterlab 3.*
+    - nodejs
+    - setuptools >=40.8.0
+    - yarn
+    - wheel
+  run:
+    - python >=3.7
+    - jaeger <{{ jaeger_version }}
+    - jaeger-agent <{{ jaeger_version }}
+    - jaeger-all-in-one <{{ jaeger_version }}
+    - jaeger-collector <{{ jaeger_version }}
+    - jaeger-example-hotrod <{{ jaeger_version }}
+    - jaeger-ingester <{{ jaeger_version }}
+    - jaeger-query <{{ jaeger_version }}
+    - jaeger-browser
+    - jupyter-server-proxy
+    - jupyterlab 3.*
+    - notebook
+
+test:
+  imports:
+    - jupyter_jaeger
+
+about:
+  home: https://github.com/Quansight/jupyter-jaeger
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: 'Jupyter integration for Jaeger tracing'
+
+extra:
+  recipe-maintainers:
+    - scopatz
+    - xmnlab

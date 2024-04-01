@@ -1,0 +1,45 @@
+{% set name = "suitcase-utils" %}
+{% set version = "0.5.4" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 5c3fee0896d1ebf89d1a7b41198a14a09866065c62fe17adbb1cf1c15d636d89
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+  run:
+    - python >=3.6
+
+test:
+  imports:
+    - suitcase.utils
+    - suitcase.utils.tests
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://pypi.org/project/suitcase-utils
+  summary: This is a package of utility functions and test fixtures for suitcase packages.
+  license: BSD-3-Clause
+  license_file: LICENSE
+  dev_url: https://github.com/bluesky/suitcase-utils
+  doc_url: https://blueskyproject.io/suitcase
+
+extra:
+  recipe-maintainers:
+    - CJ-Wright
+    - mrakitin

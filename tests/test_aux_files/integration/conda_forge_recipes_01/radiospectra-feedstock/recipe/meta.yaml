@@ -1,0 +1,51 @@
+{% set name = "radiospectra" %}
+{% set version = "0.5.0" %}
+{% set sha256 = "fa3510f658d238d39f5dd359ef068e6751c5b705885dc81777b41c148f0a875b" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - python >=3.9
+    - setuptools
+    - pip
+  run:
+    - python >=3.9
+    - sunpy >=5.0.0
+    - numpy
+    - matplotlib-base
+    - scipy
+    - cdflib >=0.3.20
+
+test:
+  imports:
+    - radiospectra
+    - radiospectra.net
+    - radiospectra.spectrogram
+
+about:
+  home: http://sunpy.org
+  license: BSD-2-Clause
+  license_family: BSD
+  license_file: LICENSE.rst
+  summary: Provide support for some type of radio spectra on solar physics
+  doc_url: https://radiospectra.readthedocs.io/
+  dev_url: https://github.com/sunpy/radiospectra
+
+extra:
+  recipe-maintainers:
+    - wtbarnes
+    - cadair
+    - samaloney

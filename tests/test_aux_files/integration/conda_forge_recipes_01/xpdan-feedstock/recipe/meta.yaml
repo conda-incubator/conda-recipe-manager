@@ -1,0 +1,81 @@
+{% set name = "xpdan" %}
+{% set version = "0.8.2" %}
+{% set sha256 = "920a3d01abefdfb3716db13f135d3a0f770646be33418ed1073f0ecfa7508f04" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://github.com/xpdAcq/{{ name }}/releases/download/{{ version }}/xpdAn-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  noarch: python
+  number: 0
+  script: python -m pip install --no-deps --ignore-installed .
+  entry_points:
+    - save_server = xpdan.startup.save_server:run_main
+    - db_server = xpdan.startup.db_server:run_main
+    - portable_db_server = xpdan.startup.portable_db_server:run_main
+    - viz_server = xpdan.startup.viz_server:run_main
+    - analysis_server = xpdan.startup.analysis_server:run_main
+    - qoi_server = xpdan.startup.qoi_server:run_main
+    - tomo_server = xpdan.startup.tomo_server:run_main
+    - peak_server = xpdan.startup.peak_server:run_main
+    - intensity_server = xpdan.startup.intensity_server:run_main
+
+requirements:
+  build:
+    - python >=3
+    - pip
+  run:
+    - python >=3
+    - numpy
+    - scipy
+    - matplotlib
+    - pyyaml
+    - scikit-beam
+    - pyfai
+    - pyxdameraulevenshtein
+    - xray-vision
+    - databroker
+    - bluesky
+    - rapidz
+    - xpdsim
+    - shed
+    - xpdview
+    - ophyd
+    - xpdconf
+    - xpdtools
+    - mayavi
+
+test:
+  imports:
+    - xpdan
+    - xpdan.pipelines
+  commands:
+    - save_server -- --help
+    - db_server -- --help
+    - portable_db_server -- --help
+    - viz_server -- --help
+    - analysis_server -- --help
+    - qoi_server -- --help
+    - tomo_server -- --help
+    - peak_server -- --help
+    - intensity_server -- --help
+
+about:
+  home: http://github.com/xpdAcq/xpdAn
+  license: BSD-3-Clause 
+  license_family: BSD
+  license_file: LICENSE
+  summary: 'Analysis Tools for XPD'
+  doc_url: http://xpdacq.github.io/xpdAn/
+  dev_url: http://github.com/xpdAcq/xpdAn
+
+extra:
+  recipe-maintainers:
+    - st3107
+    - sbillinge

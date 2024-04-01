@@ -1,0 +1,64 @@
+{% set name = "yaff" %}
+{% set version = "1.6.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/molmod/yaff/archive/{{ version }}.tar.gz
+  sha256: a26cae3f8cdde16e735429657ac2a7d63edb6897947b6711e8ecb893be90cf81
+  patches:
+    - random.patch
+    - setup.patch
+
+build:
+  number: 4
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+  host:
+    - python
+    - pip
+    - setuptools
+    - numpy >=1.14,<1.24
+    - cython >=0.26
+  run:
+    - python
+    - pip
+    - nose
+    - matplotlib-base >1.0.0
+    - h5py >=2.0.0
+    - molmod >=1.4.8
+    - scipy >=0.17.1
+    - {{ pin_compatible("numpy") }}
+
+test:
+  imports:
+    - yaff
+  commands:
+    - pip check
+
+about:
+  home: http://molmod.github.io/yaff
+  license: GPL-3.0-or-later
+  license_family: GPL
+  license_file: COPYING
+  summary: 'Yaff is yet another force-field code'
+
+  description: |
+    Yaff stands for "Yet another force field". It is a pythonic force-field 
+    code used by Toon and Louis to test-drive their new models. The original 
+    motivation to develop Yaff was to provide a good reference implementation 
+    of the force fields developed at the Center for Molecular Modeling (CMM) 
+    at Ghent University. In its current version, Yaff is general and flexible 
+    enough to handle a large variety of force field models.
+  doc_url: http://molmod.github.io/yaff/
+  dev_url: https://github.com/molmod/yaff
+
+extra:
+  recipe-maintainers:
+    - jan-janssen
+    - tovrstra
+    - lvduyfhu

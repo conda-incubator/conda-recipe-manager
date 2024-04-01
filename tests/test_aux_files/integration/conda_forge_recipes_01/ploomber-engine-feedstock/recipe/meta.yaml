@@ -1,0 +1,49 @@
+{% set name = "ploomber-engine" %}
+{% set version = "0.0.31" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/ploomber-engine-{{ version }}.tar.gz
+  sha256: d0d2f64dab57e3ec630de75067f800d545a014f26d27000ef9d01b920592bb77
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - python >=3.6
+    - ploomber-core >=0.2
+    - debuglater >=1.4.4
+    - nbclient
+    - ipython
+    - parso
+    - nbformat
+    - click
+    - tqdm
+
+test:
+  imports:
+    - ploomber_engine
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://pypi.org/project/ploomber-engine/
+  summary: 'A toolbox for Jupyter notebooks: testing, experiment tracking, debugging, profiling, and more!'
+  license: BSD-3-Clause
+  license_file:
+    - LICENSE
+
+extra:
+  recipe-maintainers:
+    - edublancas

@@ -1,0 +1,52 @@
+{% set name = "aiobotocore" %}
+{% set version = "2.12.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 8706b28f16f93c541f6ed50352115a79d8f3499539f8d0bb70aa0f7a5379c1fe
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.8
+    - pip
+  run:
+    - python >=3.8
+    - aiohttp >=3.7.4.post0,<4.0.0
+    - aioitertools >=0.5.1,<1.0.0
+    - botocore >=1.34.41,<1.34.52
+    - wrapt >=1.10.10,<2.0.0
+
+test:
+  imports:
+    - aiobotocore
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/aio-libs/aiobotocore
+  license: Apache-2.0
+  license_family: Apache
+  license_file: LICENSE
+  summary: Async client for aws services using botocore and aiohttp
+  description: |
+    Main purpose of this library to support amazon s3 api, but other services
+    should work (may be with minor fixes). For now it has been tested only for
+    upload/download api for s3. It has been reported that SQS and Dynamo
+    services also work.
+  doc_url: http://aiobotocore.readthedocs.io
+  dev_url: https://github.com/aio-libs/aiobotocore
+
+extra:
+  recipe-maintainers:
+    - nehaljwani

@@ -1,0 +1,46 @@
+{% set name = "tplot" %}
+{% set version = "0.3.6" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/tplot-{{ version }}.tar.gz
+  sha256: 6b3564f591679e728d441693d0266630f5333210984d0a16de87f2d47ce21790
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - flit-core >=3.2,<4
+    - pip
+    - python >=3.8,<4
+  run:
+    - colorama >=0.4.3
+    - numpy >=1.11
+    - python >=3.8,<4
+    - termcolor >=1.1.0
+
+test:
+  imports:
+    - tplot
+  commands:
+    - pip list | grep -E '{{ name }}\s+{{ version }}'
+  requires:
+    - pip
+
+about:
+  home: https://github.com/JeroenDelcour/tplot
+  doc_url: https://tplot.readthedocs.io/en/latest/
+  summary: Create text-based graphs
+  license: MIT
+  license_file: LICENSE.txt
+
+extra:
+  recipe-maintainers:
+    - thewchan

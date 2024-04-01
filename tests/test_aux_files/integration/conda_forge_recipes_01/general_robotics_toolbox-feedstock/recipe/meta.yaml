@@ -1,0 +1,46 @@
+{% set name = "general_robotics_toolbox" %}
+{% set version = "0.7.2" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/rpiRobotics/rpi_general_robotics_toolbox_py/archive/refs/tags/{{ version }}.tar.gz
+  sha256: a75c8a3b505a7cd68fbc1b0d1844b104f5c35685da398838ffd639e7bbdac5b8
+
+build:
+  number: 0
+  script: "{{ PYTHON }} -m pip install . -vv"
+  noarch: python
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+    - numpy
+    - pyyaml
+  run:
+    - python >=3.6
+    - numpy
+    - pyyaml
+
+test:
+  requires:
+    - pytest
+  source_files:
+    - test/
+  imports:
+    - pytest
+  commands:
+    - pytest test/ --verbose --ignore test/test_urdf_loader.py
+
+about:
+  home: https://github.com/rpiRobotics/rpi_general_robotics_toolbox_py
+  license: BSD-3-Clause
+  license_file: LICENSE
+  summary: Python robotics toolbox
+
+extra:
+  recipe-maintainers:
+    - johnwason

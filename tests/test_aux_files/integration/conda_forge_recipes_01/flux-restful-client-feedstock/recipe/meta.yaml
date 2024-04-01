@@ -1,0 +1,49 @@
+{% set name = "flux-restful-client" %}
+{% set version = "0.2.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/flux-restful-client-{{ version }}.tar.gz
+  sha256: 8190720ae9bace70abafe82b32a217d44976a52ab48c1aff17c3a604b7018f52
+
+build:
+  entry_points:
+    - flux-restful-cli=flux_restful_client.client:run_flux_restful_client
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.6
+    - pytest-runner
+    - pip
+  run:
+    - python >=3.6
+    - ruamel.yaml
+    - requests
+    - jsonschema
+    - python-jose
+    - httpx
+
+test:
+  imports:
+    - flux_restful_client
+  commands:
+    - pip check
+    - flux-restful-cli --help
+  requires:
+    - pip
+
+about:
+  home: https://github.com/flux-framework/flux-restful-api/tree/main/clients/python
+  summary: Python functions and command line equivalent for interacting with Flux RESTful API.
+  license: LGPL-3.0-or-later
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - jan-janssen

@@ -1,0 +1,66 @@
+{% set version = "1.0-19" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-pspline
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/pspline_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/pspline/pspline_{{ version }}.tar.gz
+  sha256: ba55bf193f1df9785a0e13b7ef727d5fd2415b318cd6a26b48a2db490c4dfe40
+
+build:
+  merge_build_host: true  # [win]
+  number: 2
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ compiler('c') }}              # [not win]
+    - {{ compiler('m2w64_c') }}        # [win]
+    - {{ compiler('fortran') }}        # [not win]
+    - {{ compiler('m2w64_fortran') }}  # [win]
+    - {{ posix }}filesystem        # [win]
+    - {{ posix }}make
+    - {{ posix }}sed               # [win]
+    - {{ posix }}coreutils         # [win]
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+  run:
+    - r-base
+    - {{ native }}gcc-libs         # [win]
+
+test:
+  commands:
+    - $R -e "library('pspline')"           # [not win]
+    - "\"%R%\" -e \"library('pspline')\""  # [win]
+
+about:
+  home: https://CRAN.R-project.org/package=pspline
+  license: Unlimited
+  summary: Smoothing splines with penalties on order m derivatives.
+  license_family: OTHER
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+
+# Package: pspline
+# Version: 1.0-18
+# Date: 2017-06-12
+# Title: Penalized Smoothing Splines
+# Author: S original by Jim Ramsey <ramsay@psych.mcgill.ca>.  R port by  Brian Ripley <ripley@stats.ox.ac.uk>.
+# Maintainer: Brian Ripley <ripley@stats.ox.ac.uk>
+# Depends: R (>= 2.0.0), stats, graphics
+# Description: Smoothing splines with penalties on order m derivatives.
+# License: Unlimited
+# NeedsCompilation: yes
+# Packaged: 2017-06-12 07:54:59 UTC; ripley
+# Repository: CRAN
+# Date/Publication: 2017-06-12 10:10:40 UTC

@@ -1,0 +1,46 @@
+{% set name = "PyALE" %}
+{% set version = "1.2.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/PyALE-{{ version }}.tar.gz
+  sha256: 670a8582ff1522430f3f5b83324cb888f4c9fbfa920fe1f635193b4e41e77dc2
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  number: 0
+
+requirements:
+  host:
+    - python >=3.7
+    - pip
+  run:
+    - python >=3.7
+    - numpy
+    - pandas
+    - matplotlib-base
+    - scikit-learn
+    - scipy
+    - statsmodels
+
+test:
+  imports:
+    - PyALE
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/DanaJomar/PyALE
+  summary: ALE plots with python
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - DanaJomar

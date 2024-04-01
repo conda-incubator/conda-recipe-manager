@@ -1,0 +1,59 @@
+{% set name = "tensorboardX" %}
+{% set version = "2.6.2.2" %}
+{% set sha256 = "c6476d7cd0d529b0b72f4acadb1269f9ed8b22f441e87a84f2a3b940bb87b666" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - python >=3.8
+    - pip
+    - packaging
+    - setuptools
+    - setuptools-scm
+  run:
+    - python >=3.8
+    - numpy
+    - packaging
+    - protobuf >=3.20
+
+test:
+  imports:
+    - tensorboardX
+    - tensorboardX.crc32c
+    - tensorboardX.embedding
+    - tensorboardX.event_file_writer
+    - tensorboardX.onnx_graph
+    - tensorboardX.record_writer
+    - tensorboardX.summary
+    - tensorboardX.writer
+    - tensorboardX.x2num
+
+about:
+  home: https://github.com/lanpa/tensorboardx
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: tensorboard for pytorch
+
+  description: |
+    Write tensorboard events from PyTorch (and Chainer, MXNet, NumPy, ...)
+  doc_url: https://tensorboardx.readthedocs.io/en/latest/
+  dev_url: https://github.com/lanpa/tensorboardx
+
+extra:
+  recipe-maintainers:
+    - mdraw
+    - lanpa

@@ -1,0 +1,47 @@
+{% set name = "aalto-boss" %}
+{% set version = "1.9.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/aalto-boss-{{ version }}.tar.gz
+  sha256: b4cea327b234b36b2fc7d9736941ad4df7163e0d124e16fc51d0033fbfbba394
+
+build:
+  entry_points:
+    - boss=boss.__main__:main
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  number: 1
+
+requirements:
+  host:
+    - python >=3.7
+    - pip
+  run:
+    - python >=3.7
+    - numpy <=1.23.5
+    - gpy
+    - matplotlib-base >=3.0
+
+test:
+  imports:
+    - boss
+  commands:
+    - pip check
+    - boss --help
+  requires:
+    - pip
+    - cython
+
+about:
+  home: https://gitlab.com/cest-group/boss
+  summary: Bayesian optimization structure search
+  license: Apache-2.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - jan-janssen

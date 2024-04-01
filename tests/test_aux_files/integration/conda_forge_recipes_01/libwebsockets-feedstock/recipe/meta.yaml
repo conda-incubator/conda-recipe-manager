@@ -1,0 +1,60 @@
+{% set name = "libwebsockets" %}
+{% set version = "4.3.3" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/warmcat/{{ name }}/archive/v{{ version }}.tar.gz
+  sha256: 6fd33527b410a37ebc91bb64ca51bdabab12b076bc99d153d7c5dd405e4bdf90
+
+build:
+  number: 0
+  run_exports:
+    - {{ pin_subpackage(name, max_pin='x.x') }}
+  skip: true  # [not linux]
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    # hmaarrfk: 2022/03/20
+    # Without this, the compiler seems to bug out on a sign change
+    # fixed in
+    # https://netdev.vger.kernel.narkive.com/vOZI4oX0/patch-netlink-fix-gcc-wconversion-compilation-warning
+    - sysroot_linux-64  2.17  # [linux64]
+    - cmake
+    - make    # [unix]
+    - pkg-config
+  host:
+    - libuv
+    - openssl
+  run:
+    - openssl
+    - libuv
+
+test:
+  commands:
+    - test -d ${PREFIX}/include/libwebsockets
+    - test -e ${PREFIX}/lib/libwebsockets.so
+
+about:
+  home: https://libwebsockets.org
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: canonical libwebsockets.org websocket library
+
+  description: |
+    Libwebsockets is a simple-to-use, pure C library providing client and server
+    for **http/1**, **http/2**, **websockets** and other protocols in a security-minded,
+    lightweight, configurable, scalable and flexible way.  It's easy to build and
+    cross-build via cmake and is suitable for tasks from embedded RTOS through mass
+    cloud serving.
+  dev_url: https://github.com/warmcat/libwebsockets
+  doc_url: https://libwebsockets.org/lws-api-doc-master/html/index.html
+
+extra:
+  recipe-maintainers:
+    - sodre

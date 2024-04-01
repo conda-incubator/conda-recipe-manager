@@ -1,0 +1,61 @@
+{% set version = "0.2.9" %}
+
+package:
+  name: standard_names
+  version: {{ version }}
+
+source:
+  url: https://github.com/csdms/standard_names/archive/v{{ version }}.tar.gz
+  sha256: 8433bd157ae470d750cc1482726fe812744efe788df87a87ebbccba6b036c455
+
+build:
+  noarch: python
+  number: 0
+  script: "{{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv"
+  entry_points:
+    - standard-names = standard_names.cli.main:main
+
+requirements:
+  host:
+    - python >=3.10
+    - pip
+  run:
+    - python >=3.10
+    - packaging
+    - pyparsing
+
+test:
+  imports:
+    - standard_names
+  commands:
+    - standard-names --help
+    - standard-names --version
+    - standard-names build --help
+    - standard-names build
+    - standard-names dump --help
+    - standard-names dump
+    - standard-names scrape --help
+    - standard-names scrape
+    - standard-names sql --help
+    - standard-names sql
+    - standard-names validate --help
+    - standard-names validate
+
+
+about:
+  home: https://github.com/csdms/standard_names
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: Python utilities for working with CSDMS standard names.
+  description: |
+    The CSDMS Standard Names provide a comprehensive set of naming
+    rules and patterns that are not specific to any particular modeling
+    domain. They were also designed to have many other nice features
+    such as parsability and natural alphabetical grouping.
+  doc_url: https://standard-names.readthedocs.io
+  dev_url: https://github.com/csdms/standard_names
+
+extra:
+  recipe-maintainers:
+    - mcflugen

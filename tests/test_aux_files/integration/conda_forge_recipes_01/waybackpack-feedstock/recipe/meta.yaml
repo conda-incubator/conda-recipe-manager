@@ -1,0 +1,53 @@
+{% set name = "waybackpack" %}
+{% set version = "0.6.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: bd49bd1bfb9f552e7566603f7295f59be7cd1ee7b57bddc0b6ecf9f1b42f1bc6
+
+build:
+  noarch: python
+  entry_points:
+    - waybackpack = waybackpack.cli:main
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+    - setuptools
+
+  run:
+    - python >=3.6
+    - requests
+
+test:
+  imports:
+    - waybackpack
+
+  commands:
+    - waybackpack --help
+    - pip check
+
+  requires:
+    - pip
+
+about:
+  home: https://github.com/jsvine/waybackpack
+  # No MANIFEST.in - see https://github.com/jsvine/waybackpack/pull/25
+  license_file: {{ RECIPE_DIR }}/LICENSE.txt
+  license: MIT
+  license_family: MIT
+  summary: Command-line tool that lets you download the entire Wayback Machine archive for a given URL.
+  dev_url: https://github.com/jsvine/waybackpack
+  doc_url: https://github.com/jsvine/waybackpack
+
+extra:
+  recipe-maintainers:
+    - pmlandwehr
+    - jan-janssen

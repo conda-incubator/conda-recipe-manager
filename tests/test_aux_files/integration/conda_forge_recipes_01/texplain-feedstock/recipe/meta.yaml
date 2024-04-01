@@ -1,0 +1,57 @@
+{% set version = "0.8.11" %}
+
+package:
+  name: texplain
+  version: {{ version }}
+
+source:
+  url: https://github.com/tdegeus/texplain/archive/v{{ version }}.tar.gz
+  sha256: 4b3a73f10398f52d1ecefa4038194276537526109ff5f6087b548551528899d4
+
+build:
+  number: 0
+  noarch: python
+  script_env: SETUPTOOLS_SCM_PRETEND_VERSION={{ version }}
+  script: {{ PYTHON }} -m pip install . -vv
+  entry_points:
+    - texplain = texplain:_texplain_cli
+    - texcleanup = texplain:_texcleanup_cli
+    - texindent = texplain:_texindent_cli
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+    - setuptools >=45
+    - setuptools_scm >=6.2
+  run:
+    - click
+    - numpy
+    - python >=3.6
+    - typing_extensions
+
+test:
+  imports:
+    - texplain
+  commands:
+    - pip check
+    - python -c "import texplain; assert texplain.version == '{{ version }}'"
+    - texplain --version | grep {{ version }}
+    - texcleanup --version | grep {{ version }}
+    - texindent --version | grep {{ version }}
+  requires:
+    - pip
+
+about:
+  home: https://github.com/tdegeus/texplain
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: Formatting tools for TeX files
+  description: Formatting tools for TeX files
+  doc_url: https://github.com/tdegeus/texplain
+  dev_url: https://github.com/tdegeus/texplain
+
+extra:
+  recipe-maintainers:
+    - tdegeus

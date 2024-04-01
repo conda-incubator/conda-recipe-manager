@@ -1,0 +1,67 @@
+{% set version = "18.8.0" %}
+
+package:
+  name: cherrypy
+  version: {{ version }}
+
+source:
+  url: https://pypi.org/packages/source/C/CherryPy/CherryPy-{{ version }}.tar.gz
+  sha256: 9b48cfba8a2f16d5b6419cc657e6d51db005ba35c5e3824e4728bb03bbc7ef9b
+
+build:
+  number: 3
+  skip: true  # [py<35]
+  entry_points:
+    - cherryd = cherrypy.__main__:run
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+  host:
+    - python
+    - pip
+    - setuptools_scm
+  run:
+    - python
+    - more-itertools
+    - cheroot >=8.2.1
+    - portend >=2.1.1
+    - zc.lockfile
+    - jaraco.collections
+    - simplejson
+    - routes >=2.3.1
+    - pyopenssl
+    - pywin32  # [win]
+
+test:
+  imports:
+    - cherrypy
+    - cherrypy.lib
+    - cherrypy.process
+    - cherrypy.scaffold
+    - cherrypy.test
+    - cherrypy.tutorial
+  commands:
+    - cherryd -h
+
+about:
+  home: http://www.cherrypy.org
+  license: BSD-3-Clause
+  license_file: LICENSE.md
+  license_family: BSD
+  summary: Object-Oriented HTTP framework
+  description: |
+    CherryPy is a pythonic, object-oriented web framework.
+    It allows developers to build web applications in much the same way they would
+    build any other object-oriented Python program. This results in smaller source
+    code developed in less time.
+  dev_url: https://github.com/cherrypy/cherrypy
+  doc_url: http://docs.cherrypy.org/en/latest
+  doc_source_url: https://github.com/cherrypy/cherrypy/blob/master/docs/index.rst
+
+extra:
+  recipe-maintainers:
+    - pmlandwehr
+    - carlodri

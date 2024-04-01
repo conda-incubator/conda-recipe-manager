@@ -1,0 +1,40 @@
+{% set version = "0.3.0" %}
+
+package:
+  name: pymt_landlab
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/p/pymt_landlab/pymt_landlab-{{ version }}.tar.gz
+  sha256: 53ffa55dae57c43870db08f796f1f4b8e2c8802b20c8342f18e1810f2ca86cef
+
+build:
+  noarch: python
+  number: 0
+  script: "{{ PYTHON }} -m pip install . --no-deps -vv"
+
+requirements:
+  host:
+    - python
+    - pip
+    - model_metadata
+  run:
+    - python
+    - landlab
+
+test:
+  imports:
+    - pymt_landlab
+
+about:
+  home: http://github.com/pymt-lab/pymt_landlab
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: 'PyMT plugin for landlab components'
+  doc_url: http://github.com/pymt-lab/pymt_landlab
+  dev_url: http://github.com/pymt-lab/pymt_landlab
+
+extra:
+  recipe-maintainers:
+    - mcflugen

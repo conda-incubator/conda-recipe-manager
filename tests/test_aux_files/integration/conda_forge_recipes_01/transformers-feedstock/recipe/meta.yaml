@@ -1,0 +1,65 @@
+{% set name = "transformers" %}
+{% set version = "4.39.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: be0c7392cb92ab48efab2656f1cfd1cbda33b2b8a2917a18bd1196707dbebe14
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.8
+  run:
+    - python >=3.8
+    - datasets !=2.5.0  # Required for transformers-cli.
+    - filelock
+    - huggingface_hub >=0.19.3,<1.0
+    - numpy >=1.17
+    - regex !=2019.12.17
+    - requests
+    - safetensors >=0.4.1
+    - packaging >=20.0
+    - pyyaml >=5.1
+    - tqdm >=4.27
+    - tokenizers >=0.15,<0.19
+
+test:
+  imports:
+    - transformers
+    - transformers.benchmark
+    - transformers.commands
+    - transformers.data
+    - transformers.kernels
+    - transformers.models
+    - transformers.pipelines
+    - transformers.tools
+    - transformers.utils
+
+  commands:
+    - transformers-cli --help
+
+about:
+  home: https://github.com/huggingface/transformers
+  license: Apache-2.0
+  license_family: APACHE
+  license_file: LICENSE
+  summary: State-of-the-art Natural Language Processing for TensorFlow 2.0 and PyTorch
+  doc_url: https://huggingface.co/transformers/
+
+extra:
+  recipe-maintainers:
+    - mxr-conda
+    - roccqqck
+    - oblute
+    - rluria14
+    - ndmaxar
+    - setu4993

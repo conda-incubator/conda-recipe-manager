@@ -1,0 +1,117 @@
+{% set version = "0.4.2" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-ggforce
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/ggforce_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/ggforce/ggforce_{{ version }}.tar.gz
+  sha256: c145b0e6ed6847d409ed2fe103b81234855bc0661cde2bfb4410fb23680e51a8
+
+build:
+  merge_build_host: true  # [win]
+  number: 0
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - cross-r-base {{ r_base }}    # [build_platform != target_platform]
+    - r-ggplot2                    # [build_platform != target_platform]
+    - r-gtable                     # [build_platform != target_platform]
+    - r-mass                       # [build_platform != target_platform]
+    - r-polyclip                   # [build_platform != target_platform]
+    - r-rcpp                       # [build_platform != target_platform]
+    - r-rcppeigen                  # [build_platform != target_platform]
+    - r-rlang                      # [build_platform != target_platform]
+    - r-scales                     # [build_platform != target_platform]
+    - r-systemfonts                # [build_platform != target_platform]
+    - r-tidyselect                 # [build_platform != target_platform]
+    - r-tweenr                     # [build_platform != target_platform]
+    - r-withr                      # [build_platform != target_platform]
+    - {{ compiler('c') }}          # [not win]
+    - {{ compiler('m2w64_c') }}    # [win]
+    - {{ compiler('cxx') }}        # [not win]
+    - {{ compiler('m2w64_cxx') }}  # [win]
+    - {{ posix }}filesystem        # [win]
+    - {{ posix }}make
+    - {{ posix }}sed               # [win]
+    - {{ posix }}coreutils         # [win]
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+    - r-ggplot2 >=3.3.6
+    - r-gtable
+    - r-mass
+    - r-polyclip
+    - r-rcpp >=0.12.2
+    - r-rcppeigen
+    - r-rlang
+    - r-scales
+    - r-systemfonts
+    - r-tidyselect
+    - r-tweenr >=0.1.5
+    - r-withr
+  run:
+    - r-base
+    - {{ native }}gcc-libs         # [win]
+    - r-ggplot2 >=3.3.6
+    - r-gtable
+    - r-mass
+    - r-polyclip
+    - r-rcpp >=0.12.2
+    - r-rcppeigen
+    - r-rlang
+    - r-scales
+    - r-systemfonts
+    - r-tidyselect
+    - r-tweenr >=0.1.5
+    - r-withr
+
+test:
+  commands:
+    - $R -e "library('ggforce')"           # [not win]
+    - "\"%R%\" -e \"library('ggforce')\""  # [win]
+
+about:
+  home: https://ggforce.data-imaginist.com
+  license: MIT
+  summary: The aim of 'ggplot2' is to aid in visual data investigations. This focus has led to a lack of facilities for composing specialised plots. 'ggforce' aims to be a collection of mainly new stats and geoms that fills this gap. All additional functionality is aimed to come through the official extension system so using
+    'ggforce' should be a stable experience.
+  license_family: MIT
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/MIT
+    - LICENSE
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+
+# Package: ggforce
+# Type: Package
+# Title: Accelerating 'ggplot2'
+# Version: 0.3.1
+# Authors@R:  c(person(given = "Thomas Lin", family = "Pedersen", role = c("cre", "aut"), email = "thomasp85@gmail.com", comment = c(ORCID = "0000-0002-5147-4711")), person("RStudio", role = "cph"))
+# Maintainer: Thomas Lin Pedersen <thomasp85@gmail.com>
+# Description: The aim of 'ggplot2' is to aid in visual data investigations. This focus has led to a lack of facilities for composing specialised plots. 'ggforce' aims to be a collection of mainly new stats and geoms that fills this gap. All additional functionality is aimed to come through the official extension system so using 'ggforce' should be a stable experience.
+# URL: https://ggforce.data-imaginist.com
+# BugReports: https://github.com/thomasp85/ggforce/issues
+# License: MIT + file LICENSE
+# LazyData: TRUE
+# Encoding: UTF-8
+# Depends: ggplot2 (>= 3.0.0), R (>= 3.3.0)
+# Imports: Rcpp (>= 0.12.2), grid, scales, MASS, tweenr (>= 0.1.5), gtable, rlang, polyclip, stats, grDevices, tidyselect, withr, utils
+# LinkingTo: Rcpp, RcppEigen
+# RoxygenNote: 6.1.1
+# Suggests: sessioninfo, concaveman, deldir, reshape2, units (>= 0.4-6)
+# Collate: 'RcppExports.R' 'aaa.R' 'shape.R' 'arc_bar.R' 'arc.R' 'autodensity.R' 'autohistogram.R' 'autopoint.R' 'bezier.R' 'bspline.R' 'bspline_closed.R' 'circle.R' 'diagonal.R' 'diagonal_wide.R' 'ellipse.R' 'facet_grid_paginate.R' 'facet_matrix.R' 'facet_row.R' 'facet_stereo.R' 'facet_wrap_paginate.R' 'facet_zoom.R' 'ggforce_package.R' 'ggproto-classes.R' 'interpolate.R' 'link.R' 'mark_circle.R' 'mark_ellipse.R' 'mark_hull.R' 'mark_label.R' 'mark_rect.R' 'parallel_sets.R' 'position-jitternormal.R' 'position_auto.R' 'position_floatstack.R' 'regon.R' 'scale-depth.R' 'scale-unit.R' 'sina.R' 'spiro.R' 'themes.R' 'trans.R' 'trans_linear.R' 'utilities.R' 'voronoi.R'
+# NeedsCompilation: yes
+# Packaged: 2019-08-20 07:57:53 UTC; thomas
+# Author: Thomas Lin Pedersen [cre, aut] (<https://orcid.org/0000-0002-5147-4711>), RStudio [cph]
+# Repository: CRAN
+# Date/Publication: 2019-08-20 09:50:05 UTC

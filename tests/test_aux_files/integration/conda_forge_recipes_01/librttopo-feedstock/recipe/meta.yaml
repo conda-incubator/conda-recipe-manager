@@ -1,0 +1,56 @@
+{% set name = "librttopo" %}
+{% set version = "1.1.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+
+source:
+  url: http://www.gaia-gis.it/gaia-sins/{{ name }}-{{ version }}.tar.gz
+  sha256: 5b4002b2b6be1fe59a487cff6edbc81db773dd1e437beb966fac6ac68e849f19
+  patches:
+    - 0001-fix_msvc_paths.patch  # [win]
+
+build:
+  number: 15
+  run_exports:
+    # No idea.  Staying with minor version pin.
+    - {{ pin_subpackage('librttopo', max_pin='x.x') }}
+
+requirements:
+  build:
+    - gnuconfig  # [unix]
+    - make  # [unix]
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+  host:
+    - geos
+  run:
+    - geos
+
+about:
+  home: https://git.osgeo.org/gitea/rttopo/librttopo
+  license: GPL-2.0-or-later
+  license_file: COPYING
+  summary: |
+    The RT Topology Library exposes an API to create and manage standard
+    topologies using user-provided data stores.
+  description: |
+    The RT Topology Library exposes an API to create and manage standard (ISO
+    13249 aka SQL/MM) topologies using user-provided data stores and released
+    under the GNU GPL license (version 2 or later).
+
+    The code is derived from PostGIS liblwgeom library enhanced to provide
+    thread-safety, have less dependencies and be independent from PostGIS
+    release cycles.
+
+    The RT Topology Library was funded by “Regione Toscana - SITA” (CIG:
+    6445512CC1), which also funded many improvements in the originating
+    liblwgeom.
+  doc_url: https://git.osgeo.org/gitea/rttopo/librttopo
+  dev_url: https://git.osgeo.org/gitea/rttopo/librttopo
+
+extra:
+  recipe-maintainers:
+    - xylar

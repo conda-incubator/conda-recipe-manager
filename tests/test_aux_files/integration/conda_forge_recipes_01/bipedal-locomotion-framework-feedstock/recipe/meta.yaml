@@ -1,0 +1,191 @@
+{% set name = "bipedal-locomotion-framework" %}
+{% set namecxx = "libbipedal-locomotion-framework" %}
+{% set namepython = "bipedal-locomotion-framework-python" %}
+{% set version = "0.18.0" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/ami-iit/bipedal-locomotion-framework/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: 62de0cfd28c328098bc472a05fe6766f8290f96d0ba20a9ed53f17ba49ef8d8e
+  patches:
+
+build:
+  number: 4
+
+outputs:
+  - name: {{ namecxx }}
+    script: build_cxx.sh  # [unix]
+    script: bld_cxx.bat  # [win]
+    build:
+      run_exports:
+        - {{ pin_subpackage(namecxx, max_pin='x.x.x') }}
+    requirements:
+      build:
+        - {{ compiler('c') }}
+        - {{ compiler('cxx') }}
+        - cmake
+        - pkg-config
+        - ninja
+        - {{ cdt('mesa-libgl-devel') }}  # [linux]
+        - {{ cdt('mesa-dri-drivers') }}  # [linux]
+        - {{ cdt('libselinux') }}  # [linux]
+        - {{ cdt('libxdamage') }}  # [linux]
+        - {{ cdt('libxxf86vm') }}  # [linux]
+        - {{ cdt('libxext') }}     # [linux]
+        # YARP idl tools are used in this recipe
+        - libyarp  # [build_platform != target_platform]
+      host:
+        - eigen
+        - idyntree
+        - manif
+        - libyarp
+        - tomlplusplus
+        - librobometry
+        - fmt
+        - spdlog
+        - cppad
+        - manif
+        - nlohmann_json
+        - libosqp
+        - osqp-eigen
+        - libmatio-cpp
+        - tomlplusplus
+        - casadi
+        - qhull
+        - libopencv
+        - pcl >1.12
+        - onnxruntime-cpp
+        # transitive public dependency of pcl
+        - vtk-base
+        - liblie-group-controllers
+        - libunicycle-footstep-planner
+        - librealsense  # [not win]
+        - xorg-libxfixes  # [linux]
+      run:
+        # manif and eigen are mentioned in the headers so needed when building
+        # against libbipedal-locomotion-framework
+        - manif
+        - eigen
+        - liblie-group-controllers
+        - tomlplusplus
+
+
+    test:
+      commands:
+        - test -f ${PREFIX}/include/BipedalLocomotion/System/Advanceable.h  # [unix]
+        - test -f ${PREFIX}/lib/libBipedalLocomotionFrameworkSystem${SHLIB_EXT}  # [unix]
+        - test -f ${PREFIX}/lib/cmake/BipedalLocomotionFramework/BipedalLocomotionFrameworkConfig.cmake  # [not win]
+        - if not exist %PREFIX%\\Library\\include\\BipedalLocomotion\\System\\Advanceable.h exit 1  # [win]
+        - if not exist %PREFIX%\\Library\\lib\\BipedalLocomotionFrameworkSystem.lib exit 1  # [win]
+        - if not exist %PREFIX%\\Library\\bin\\BipedalLocomotionFrameworkSystem.dll exit 1  # [win]
+        - if not exist %PREFIX%\\Library\\CMake\\BipedalLocomotionFrameworkConfig.cmake exit 1  # [win]
+
+  - name: {{ namepython }}
+    script: build_py.sh  # [unix]
+    script: bld_py.bat  # [win]
+    build:
+      # icub-models is used just for tests, we do not actually link the C++ library
+      ignore_run_exports:
+        - icub-models
+    requirements:
+      build:
+        - {{ compiler('c') }}
+        - {{ compiler('cxx') }}
+        - pybind11
+        - pybind11-abi
+        - ninja
+        - cmake
+        - python                                 # [build_platform != target_platform]
+        - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+        - pybind11                               # [build_platform != target_platform]
+        - pybind11-abi                           # [build_platform != target_platform]
+        - {{ cdt('mesa-libgl-devel') }}  # [linux]
+        - {{ cdt('mesa-dri-drivers') }}  # [linux]
+        - {{ cdt('libselinux') }}  # [linux]
+        - {{ cdt('libxdamage') }}  # [linux]
+        - {{ cdt('libxxf86vm') }}  # [linux]
+        - {{ cdt('libxext') }}     # [linux]
+      host:
+        - {{ pin_subpackage(namecxx, exact=True) }}
+        - python
+        - pip
+        - pybind11
+        - pybind11-abi
+        - liblie-group-controllers
+        - libyarp
+        - tomlplusplus
+        - idyntree
+        - fmt
+        - spdlog
+        - libopencv
+        # Workaround for https://github.com/conda-forge/bipedal-locomotion-framework-feedstock/issues/37
+        - libmatio-cpp
+        # Workaround for https://github.com/conda-forge/bipedal-locomotion-framework-feedstock/pull/42#issuecomment-1804057782
+        - casadi
+        - libboost-devel
+        - pugixml
+        - pcl >1.12
+        - xorg-libxfixes  # [linux]
+        - icub-models # Requested just for tests
+        - scipy # Requested just for tests
+        - pytest # Requested just for tests
+        - manifpy # Requested just for tests
+      run:
+        - {{ pin_subpackage(namecxx, exact=True) }}
+        - python
+        - numpy
+        - manifpy
+        - idyntree
+    test:
+      commands:
+        - test $(pip list | grep bipedal_locomotion_framework | tr -s " " | grep $PKG_VERSION | wc -l) -eq 1  # [unix]
+        - pip check
+      requires:
+        - pip
+      imports:
+        - bipedal_locomotion_framework
+
+  - name: {{ name }}
+    build:
+      run_exports:
+        - {{ pin_subpackage(namecxx, max_pin='x.x.x') }}
+    requirements:
+      run:
+        - {{ pin_subpackage(namecxx, exact=True) }}
+        - {{ pin_subpackage(namepython, max_pin='x.x.x') }}
+    test:
+      imports:
+        - bipedal_locomotion_framework
+        - bipedal_locomotion_framework.bindings.contacts
+        - bipedal_locomotion_framework.bindings.continuous_dynamical_system
+        - bipedal_locomotion_framework.bindings.conversions
+        - bipedal_locomotion_framework.bindings.floating_base_estimators
+        - bipedal_locomotion_framework.bindings.ik
+        - bipedal_locomotion_framework.bindings.math
+        - bipedal_locomotion_framework.bindings.ml
+        - bipedal_locomotion_framework.bindings.parameters_handler
+        - bipedal_locomotion_framework.bindings.planners
+        - bipedal_locomotion_framework.bindings.reduced_model_controllers
+        - bipedal_locomotion_framework.bindings.robot_interface
+        - bipedal_locomotion_framework.bindings.simplified_model_controllers
+        - bipedal_locomotion_framework.bindings.system
+        - bipedal_locomotion_framework.bindings.text_logging
+        - bipedal_locomotion_framework.bindings.tsid
+        - bipedal_locomotion_framework.bindings.yarp_utilities
+
+
+about:
+  home: https://github.com/ami-iit/bipedal-locomotion-framework
+  license: BSD-3-Clause
+  license_file:
+    - LICENSE
+  summary: Suite of libraries for achieving bipedal locomotion on humanoid robots.
+
+
+extra:
+  recipe-maintainers:
+    - traversaro
+    - GiulioRomualdi

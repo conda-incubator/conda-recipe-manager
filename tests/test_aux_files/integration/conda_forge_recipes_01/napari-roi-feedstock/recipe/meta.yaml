@@ -1,0 +1,49 @@
+{% set name = "napari-roi" %}
+{% set version = "0.1.8" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/napari-roi-{{ version }}.tar.gz
+  sha256: 0123238ee652931ed0bc90421ddf76d1d58c0d4c89790a8512c5649e88620729
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.8
+    - setuptools-scm
+  run:
+    - napari >=0.4.13
+    - numpy
+    - pandas
+    - python >=3.8
+    - qtpy
+    - vispy
+
+test:
+  imports:
+    - napari_roi
+  commands:
+    - pip list
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/BodenmillerGroup/napari-roi
+  summary: Select regions of interest (ROIs) using napari
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - goanpeca
+    - jaimergp
+    - jwindhager

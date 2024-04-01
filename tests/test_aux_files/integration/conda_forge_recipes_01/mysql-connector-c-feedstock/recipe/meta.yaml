@@ -1,0 +1,64 @@
+{% set name = "mysql-connector-c" %}
+{% set version = "6.1.11" %}
+{% set sha256 = "c8664851487200162b38b6f3c8db69850bd4f0e4c5ff5a6d161dbfb5cb76b6c4" %}  # [not win]
+{% set sha256 = "44d7c9be33b148a7391c5e1690b4788de3ced3e79084f3a2787d103bd12cd495" %}  # [win]
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz  # [not win]
+  fn: {{ name }}-{{ version }}.zip  # [win]
+  url: https://dev.mysql.com/get/Downloads/Connector-C/{{ name|lower }}-{{ version }}-src.tar.gz  # [not win]
+  url: https://dev.mysql.com/get/Downloads/Connector-C/{{ name|lower }}-{{ version }}-src.zip  # [win]
+  sha256: {{ sha256 }}
+  patches:
+    - patches/0001-Add-definition-for-lldiv_t.patch  # [win and vc<14]
+    - patches/0002-CPPFLAGS-can-have-more-than-one-compiler-definition.patch
+    - patches/0003-GCC-7-Fix-empty-string-comparison-error.patch
+    # Copied from https://gitweb.gentoo.org/repo/gentoo.git/tree/dev-db/mysql-connector-c/files/6.1.11-openssl-1.1.patch
+    - patches/0004-Don-t-use-deprecated-API-with-openssl-1.1.patch  # [unix]
+    - patches/0005-fix-conditional-ordering.patch
+    - patches/0006-allow-openssl-3.patch
+
+build:
+  number: 1008
+  skip: true  # [win and vc<14]
+  run_exports:
+    # https://abi-laboratory.pro/tracker/timeline/mysql-connector-c/
+    # Scary symbol removal between patch versions
+    - {{ pin_subpackage('mysql-connector-c', max_pin='x.x.x.x.x') }}
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - cmake
+    - ninja       # [win]
+    - make        # [unix]
+  host:
+    - openssl     # [not win]
+    - msinttypes  # [win and vc<14]
+
+test:
+  commands:
+    - mysql_config --version  # [not win]
+    - my_print_defaults --version
+
+about:
+  home: https://dev.mysql.com/downloads/connector/c/
+  license: GPL-2.0-only
+  license_file: COPYING
+  summary: 'MySQL Connector/C, the C interface for communicating with MySQL servers.'
+
+  description: |
+    Connector/C is a client library that implements the C API for
+    client/server communication. It is a standalone replacement for
+    the MySQL client library shipped with MySQL Server distributions.
+
+extra:
+  recipe-maintainers:
+    - chrisburr
+    - druvus
+    - mfansler

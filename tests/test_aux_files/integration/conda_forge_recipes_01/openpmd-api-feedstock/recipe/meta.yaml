@@ -1,0 +1,133 @@
+{% set name = "openpmd-api" %}
+{% set version = "0.15.2" %}
+{% set build = 2 %}
+{% set sha256 = "fbe3b356fe6f4589c659027c8056844692c62382e3ec53b953bed1c87e58ba13" %}
+
+# ensure mpi is defined (needed for conda-smithy recipe-lint)
+{% set mpi = mpi or 'nompi' %}
+
+# prioritize nompi variant via build number
+{% if mpi == 'nompi' %}
+{% set build = build + 100 %}
+{% endif %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ version }}.tar.gz
+  url: https://github.com/openPMD/openPMD-api/archive/{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  number: {{ build }}
+  skip: true  # [py==27]
+
+  # add build string so packages can depend on
+  # mpi or nompi variants
+  # dependencies:
+  # `pkg * mpi_mpich_*` for mpich
+  # `pkg * mpi_*` for any mpi
+  # `pkg * nompi_*` for no mpi
+  {% if mpi == 'nompi' %}
+  {% set mpi_prefix = "nompi" %}
+  {% else %}
+  {% set mpi_prefix = "mpi_" + mpi %}
+  {% endif %}
+  string: {{ mpi_prefix }}_py{{ py }}h{{ PKG_HASH }}_{{ build }}
+
+  run_exports:
+    # strict runtime dependency on build-time MPI flavor
+    - {{ name }} * {{ mpi_prefix }}_*
+    # patch-releases are not (yet) ABI compatible:
+    #   https://docs.conda.io/projects/conda-build/en/latest/resources/variants.html#referencing-subpackages
+    #   https://abi-laboratory.pro/?view=timeline&l=openpmd-api
+    - openpmd-api {{ version }}
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - pybind11                               # [build_platform != target_platform]
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - make  # [unix]
+    - cmake
+    - curl
+    - pkg-config
+    # In OpenMPI, the compiler wrappers are binaries and the wrappers in build
+    # can use host libraries by adding OPAL_PREFIX and in mpich, compiler
+    # wrappers are bash scripts and wrappers in build can't use host libraries.
+    - openmpi  # [mpi == "openmpi" and (build_platform != target_platform)]
+  host:
+    - {{ mpi }}  # [mpi != 'nompi']
+    - python
+    - pybind11
+    - numpy  # for ctest tests
+    # need to list hdf5|adios|adios2 twice to get version pinning from
+    # conda_build_config and build pinning from {{ mpi_prefix }}
+    - adios                     # [unix]
+    - adios2                    # [python_impl != 'pypy']
+    # jumped by conda-forge, already at v3+
+    #- catch2 >=2.13.10,<3
+    - hdf5
+    - adios  * mpi_{{ mpi }}_*  # [unix and mpi != 'nompi']
+    - adios2 * mpi_{{ mpi }}_*  # [mpi != 'nompi' and python_impl != 'pypy']
+    - hdf5   * mpi_{{ mpi }}_*  # [mpi != 'nompi']
+    # missing in conda-forge
+    #- toml11>=3.7.1
+    # adios1 (static) deps
+    - blosc
+    - zlib
+    - bzip2
+  run:
+    - {{ mpi }}  # [mpi != 'nompi']
+    - mpi4py     # [mpi != 'nompi']
+    - python
+    - {{ pin_compatible('numpy') }}
+    # FIXME: for some reason warnings about this (ADIOS1 deps)
+    - blosc
+    - zlib
+    - bzip2
+
+test:
+  imports:
+    - openpmd_api
+  commands:
+    - python -c "import openpmd_api; print(openpmd_api.__version__);"
+    - python -c "import openpmd_api; print(openpmd_api.variants)"
+    - test -f ${PREFIX}/lib/cmake/openPMD/openPMDConfig.cmake                     # [unix]
+    - test -f ${PREFIX}/lib/libopenPMD.so                                         # [linux]
+    - otool -L ${PREFIX}/lib/libopenPMD.dylib                                     # [osx]
+    - if exist %LIBRARY_PREFIX%\bin\openPMD.dll (exit 0) else (exit 1)            # [win]
+    - otool -L ${PREFIX}/lib/libopenPMD.ADIOS1.Serial.dylib                       # [osx and mpi == 'nompi']
+    - ldd ${PREFIX}/lib/libopenPMD.ADIOS1.Serial.so                               # [linux and build_platform == target_platform]
+    - test -f ${PREFIX}/lib/libopenPMD.ADIOS1.Serial.so                           # [linux and build_platform != target_platform]
+    - if exist %LIBRARY_PREFIX%\cmake\openPMDConfig.cmake (exit 0) else (exit 1)  # [win]
+    - test -f ${PREFIX}/share/xeus-cling/tagfiles/openpmd-api-doxygen-web.tag.xml  # [unix]
+    - test -f ${PREFIX}/etc/xeus-cling/tags.d/openpmd-api.json                     # [unix]
+    - if exist %LIBRARY_PREFIX%\share\xeus-cling\tagfiles\openpmd-api-doxygen-web.tag.xml (exit 0) else (exit 1)  # [win]
+    - if exist %LIBRARY_PREFIX%\etc\xeus-cling\tags.d\openpmd-api.json (exit 0) else (exit 1)                     # [win]
+
+about:
+  home: https://www.openPMD.org
+  license: LGPL-3.0-or-later
+  license_family: LGPL
+  license_file: COPYING.LESSER
+  summary: C++ & Python API for writing & reading (.h5, .bp, .json, ...), serial & MPI parallel openPMD files.
+
+  description: |
+    This library provides a common high-level API for openPMD writing and
+    reading. It provides a common interface to I/O libraries and file formats
+    such as HDF5, ADIOS1, ADIOS2, and JSON.
+    Language bindings are provided for C++17 (or newer) and Python 3.
+    This conda-forge package provides serial and MPI-parallel I/O. Windows
+    support is limited to serial versions of HDF5, ADIOS2 and JSON.
+  doc_url: https://openpmd-api.readthedocs.io
+  dev_url: https://github.com/openPMD/openPMD-api
+
+extra:
+  recipe-maintainers:
+    - ax3l
+    - franzpoeschel

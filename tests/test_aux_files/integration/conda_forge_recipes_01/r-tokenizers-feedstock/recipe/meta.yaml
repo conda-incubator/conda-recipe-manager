@@ -1,0 +1,68 @@
+{% set version = "0.3.0" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-tokenizers
+  version: {{ version|replace("-", "_") }}
+
+source:
+  fn: tokenizers_{{ version }}.tar.gz
+  url:
+    - {{ cran_mirror }}/src/contrib/tokenizers_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/tokenizers/tokenizers_{{ version }}.tar.gz
+  sha256: 24571e4642a1a2d9f4f4c7a363b514eece74788d59c09012a5190ee718a91c29
+
+build:
+  merge_build_host: true  # [win]
+  number: 1
+  skip: true  # [win32]
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - cross-r-base {{ r_base }}  # [build_platform != target_platform]
+    - r-rcpp                     # [build_platform != target_platform]
+    - r-snowballc                # [build_platform != target_platform]
+    - r-stringi                  # [build_platform != target_platform]
+    - {{ compiler('c') }}        # [not win]
+    - {{ compiler('cxx') }}      # [not win]
+    - {{ compiler('m2w64_c') }}        # [win]
+    - {{ compiler('m2w64_cxx') }}        # [win]
+    - {{ posix }}filesystem        # [win]
+    - {{ posix }}make
+    - {{ posix }}sed               # [win]
+    - {{ posix }}coreutils         # [win]
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+    - r-rcpp >=0.12.3
+    - r-snowballc >=0.5.1
+    - r-stringi >=1.0.1
+  run:
+    - r-base
+    - {{ native }}gcc-libs         # [win]
+    - r-rcpp >=0.12.3
+    - r-snowballc >=0.5.1
+    - r-stringi >=1.0.1
+
+test:
+  commands:
+    - $R -e "library('tokenizers')"           # [not win]
+    - "\"%R%\" -e \"library('tokenizers')\""  # [win]
+
+about:
+  home: https://lincolnmullen.com/software/tokenizers/
+  license: MIT
+  summary: "Convert natural language text into tokens. Includes tokenizers for shingled n-grams, skip n-grams, words, word stems, sentences, paragraphs, characters, shingled characters, lines, tweets, Penn Treebank, regular expressions, as well as functions for counting characters, words, and sentences, and a function for\
+    \ splitting longer texts into separate documents, each with the same number of words.  The tokenizers have a consistent interface, and the package is built on the 'stringi' and 'Rcpp' packages for  fast yet correct tokenization in 'UTF-8'. "
+  license_family: MIT
+
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/MIT
+    - LICENSE
+extra:
+  recipe-maintainers:
+    - conda-forge/r

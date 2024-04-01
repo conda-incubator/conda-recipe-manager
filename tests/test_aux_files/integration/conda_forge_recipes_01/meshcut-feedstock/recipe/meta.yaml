@@ -1,0 +1,51 @@
+{% set name = "meshcut" %}
+{% set version = "0.3.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/meshcut-{{ version }}.tar.gz
+  sha256: c07b5ceac38ecd13987cf20aadc099dcfcf7103856ddff7cfd87fa9f05057f21
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - numpy
+    - numpy-stl
+    - python >=3.6
+    - scipy
+
+test:
+  imports:
+    - meshcut
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/julienr/meshcut
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: meshcut - Python utilities to slice 3D triangular meshes
+  description: |
+    For now, this computes the planar cross-section of a 3D mesh. Given a
+    3D mesh and a cut plane, this computes a (set of) polyline(s) that
+    results from cutting the mesh with the plane. Requires python and 
+    numpy. Mayavi is used for visualisation in the examples.
+  doc_url: https://github.com/julienr/meshcut
+  dev_url: https://github.com/julienr/meshcut
+
+extra:
+  recipe-maintainers:
+    - jan-janssen

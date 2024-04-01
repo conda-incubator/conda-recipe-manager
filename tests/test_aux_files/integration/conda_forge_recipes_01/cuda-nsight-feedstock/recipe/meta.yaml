@@ -1,0 +1,46 @@
+{% set name = "cuda-nsight" %}
+{% set version = "12.4.99" %}
+{% set cuda_version = "12.4" %}
+{% set platform = "linux-x86_64" %}  # [linux64]
+{% set platform = "linux-ppc64le" %}  # [ppc64le]
+{% set extension = "tar.xz" %}  # [not win]
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://developer.download.nvidia.com/compute/cuda/redist/cuda_nsight/{{ platform }}/cuda_nsight-{{ platform }}-{{ version }}-archive.{{ extension }}
+  sha256: 4139a121e4f37e1415dfbc15686753089be29ffcb58c0bc8ab73d73baed7c838  # [linux64]
+  sha256: 10801eea3c3c9e7d908d0c5c8a69df72b6d40a350d0df7501832dbe20673bdef  # [ppc64le]
+
+build:
+  number: 0
+  skip: true  # [aarch64 or osx or win]
+
+requirements:
+  host:
+    - cuda-version {{ cuda_version }}
+  run:
+    - {{ pin_compatible("cuda-version", max_pin="x.x") }}
+
+test:
+  commands:
+    - test -f $PREFIX/bin/nsight_ee_plugins_manage.sh
+    - test -d $PREFIX/nsightee_plugins
+
+about:
+  home: https://developer.nvidia.com/nsight-eclipse-edition
+  license_file: LICENSE
+  license: LicenseRef-NVIDIA-End-User-License-Agreement
+  license_url: https://docs.nvidia.com/cuda/eula/index.html
+  summary: A unified CPU plus GPU IDE for developing CUDA applications
+  description: |
+    NVIDIA Nsight Eclipse Edition is a unified CPU plus GPU integrated
+    development environment (IDE) for developing CUDA applications for
+    the x86, POWER and ARM platforms.
+  doc_url: https://developer.nvidia.com/nsight-eclipse-edition
+
+extra:
+  recipe-maintainers:
+    - conda-forge/cuda

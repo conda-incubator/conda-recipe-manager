@@ -1,0 +1,51 @@
+{% set name = "sphinx-nbexamples" %}
+{% set version = "0.4.1" %}
+{% set sha256 = "5de50d2ca1a21f3dc20d7b2d8a86ae02d8207a23c94f460ac700d79046bd0617" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  number: 0
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - python
+    - pip
+  run:
+    - python
+    - sphinx
+    - ipython
+    - nbconvert
+    - pillow
+    - jupyter_client
+    - ipykernel
+    - six
+    - pandoc
+
+test:
+  imports:
+    - sphinx_nbexamples
+
+about:
+  home: https://github.com/Chilipp/sphinx-nbexamples
+  license: MIT
+  license_file: LICENSE
+  summary: Create an examples gallery with sphinx from Jupyter Notebooks
+
+  description: |
+    This module creates an example gallery for your documentation out of a
+    bunch of jupyter notebooks using nbconvert.
+  doc_url: http://sphinx-nbexamples.readthedocs.io/
+  dev_url: https://github.com/Chilipp/sphinx-nbexamples
+
+extra:
+  recipe-maintainers:
+    - Chilipp

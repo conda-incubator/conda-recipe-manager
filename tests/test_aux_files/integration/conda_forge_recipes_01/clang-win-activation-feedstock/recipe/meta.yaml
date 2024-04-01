@@ -1,0 +1,145 @@
+{% if CLANG_VERSION is not defined %}
+{% set CLANG_VERSION = "16.0.6" %}
+{% set CL_VERSION = "19.29" %}
+{% set VCVER = "" %}
+{% endif %}
+{% set clang_major = CLANG_VERSION.split(".")[0] %}
+{% set cl_minor = CL_VERSION.split(".")[1] %}
+{% set vc_major = VCVER.split(".")[0] %}
+
+{% set build_number = 7 %}
+
+# separate builds number for headers & winsdk; reset when version increases (resp. all relevant versions)
+{% set headers_build_number = 4 %}
+{% set winsdk_build_number = 4 %}
+
+package:
+  name: clang-win-activation
+  version: {{ CLANG_VERSION }}
+
+source:
+  # not the main source, but a very useful download utility to determine
+  # necessary download urls of windows artefacts, see install-pkg.sh
+  - url: https://raw.githubusercontent.com/mstorsjo/msvc-wine/635a3aa148a42f701b3e46dd13791a01a3cf87f6/vsdownload.py
+    sha256: d33edb859d7b17ec1350f2b8c5dca8b7aa39375a4d206e2e8eef3fb95848c0b2
+    patches:
+      - patches/0001-show-payload-url.patch
+
+build:
+  number: {{ build_number }}
+
+outputs:
+  - name: winsdk
+    build:
+      skip: true  # [win]
+    script: install-pkg.sh
+    version: {{ WINSDK_VERSION }}
+    number: {{ winsdk_build_number }}
+    requirements:
+      build:
+        - sed
+      host:
+      run:
+        - curl *
+        - msitools
+        - p7zip
+    about:
+      license: LicenseRef-MICROSOFT_SDK
+      license_file: LICENSE_SDK.txt
+      license_family: Proprietary
+      summary: "Scripts to download Windows SDK headers"
+
+  - name: msvc-headers-libs
+    build:
+      skip: true  # [win]
+      ignore_run_exports:
+        - python_abi
+    script: install-pkg.sh
+    version: {{ MSVC_HEADERS_VERSION }}
+    number: {{ headers_build_number }}
+    requirements:
+      build:
+        - python *
+        - six
+        - grep
+        - ripgrep
+        - sed
+      host:
+      run:
+        - unzip
+        - curl *
+    about:
+      license: LicenseRef-MSVC_HEADERS
+      license_file: LICENSE_MSVC_HEADERS.txt
+      license_family: Proprietary
+      summary: "Scripts to download MSVC headers and libraries"
+
+  - name: clang_win-64
+    script: install-pkg.sh   # [not win]
+    script: install-pkg.bat  # [win]
+    build:
+      run_exports:
+        strong:
+          - vc >={{ VCVER }}
+          - vc{{ vc_major }}_runtime >={{ RUNTIME_VERSION }}
+          # Need ucrt for windows<10 and when the VC runtime does not bundle it
+          - ucrt >=10.0.20348.0
+    requirements:
+      build:
+        - m2-sed  # [win]
+        - sed     # [unix]
+      host:
+        # Needed to create the symlinks
+        - clangxx     {{ CLANG_VERSION }}
+        - llvm-tools  {{ CLANG_VERSION }}
+      run:
+        - {{ pin_subpackage("msvc-headers-libs", max_pin="x.x.x") }}  # [not win]
+        - {{ pin_subpackage("winsdk", max_pin="x.x.x") }}             # [not win]
+        - vs{{ VSYEAR }}_win-64 =={{ CL_VERSION }}                    # [win]
+        - vswhere                                                     # [win]
+        - clangxx             {{ CLANG_VERSION }}
+        - llvm-tools          {{ CLANG_VERSION }}
+        - lld                 {{ CLANG_VERSION }}
+        - compiler-rt         {{ CLANG_VERSION }}
+        - compiler-rt_win-64  {{ CLANG_VERSION }}
+        - clang_impl_{{ target_platform }}         # [osx]
+        - clangxx_impl_{{ target_platform }}       # [osx]
+        - gcc_impl_{{ target_platform }}           # [linux]
+        - gxx_impl_{{ target_platform }}           # [linux]
+    test:
+      files:
+        - test.c
+        - test.cpp
+        - run_test_clang.sh   # [not win]
+        - run_test_clang.bat  # [win]
+      commands:
+        - run_test_clang.bat      # [win]
+        - bash run_test_clang.sh  # [not win]
+
+about:
+  home: https://github.com/conda-forge/clang-win-activation-feedstock
+  license: BSD-3-Clause
+  license_file: LICENSE.txt
+  summary: 'clang (cross) compiler for windows with MSVC ABI compatbility'
+  description: |
+    To use this package in a normal conda environment, do the following
+
+       export CONDA_BUILD_WINSDK=/opt
+
+    To use this package in a conda-build environment, add the following
+
+       CONDA_BUILD_WINSDK:
+         - "/opt"
+
+    in $HOME/conda_build_config.yaml and use `clang_win-64` as the compiler.
+
+    By setting this variable, you are agreeing to the terms and conditions
+    of the Windows SDK and the MSVC headers. If the Windows SDK and MSVC
+    headers are not inside CONDA_BUILD_WINSDK, they would be automatically
+    downloaded.
+
+extra:
+  recipe-maintainers:
+    - isuruf
+    - xhochy
+    - h-vetinari

@@ -1,0 +1,46 @@
+{% set version = "0.10-108" %}
+
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-logging
+  version: {{ version|replace("-", "_") }}
+
+source:
+  fn: logging_{{ version }}.tar.gz
+  url:
+    - https://cran.r-project.org/src/contrib/logging_{{ version }}.tar.gz
+    - https://cran.r-project.org/src/contrib/Archive/logging/logging_{{ version }}.tar.gz
+  sha256: 85c91aa5a313f5f9fbb0394cda3f924a2495cca3cc5cd68dde0695fe3c20ed8d
+
+build:
+  noarch: generic
+  number: 4
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  host:
+    - r-base
+
+  run:
+    - r-base
+
+test:
+  commands:
+    - $R -e "library('logging')"  # [not win]
+    - "\"%R%\" -e \"library('logging')\""  # [win]
+
+about:
+  home: https://CRAN.R-project.org/package=logging
+  license: GPL-3.0-only
+  summary: logging is a pure R package that implements the ubiquitous log4j package.
+  license_family: GPL3
+
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-3
+extra:
+  recipe-maintainers:
+    - conda-forge/r

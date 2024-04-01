@@ -1,0 +1,57 @@
+{% set version = "1.20.4" %}
+
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-getopt
+  version: {{ version|replace("-", "_") }}
+
+source:
+  fn: getopt_{{ version }}.tar.gz
+  url:
+    - https://cran.r-project.org/src/contrib/getopt_{{ version }}.tar.gz
+    - https://cran.r-project.org/src/contrib/Archive/getopt/getopt_{{ version }}.tar.gz
+
+
+  sha256: 87d36cbe6dba41dbc1d78d845210266cdd08c7440d977d738a6e45db14221e8b
+
+build:
+  noarch: generic
+  number: 0
+
+
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - r-base
+
+  run:
+    - r-base
+
+test:
+  commands:
+    - $R -e "library('getopt')"  # [not win]
+    - "\"%R%\" -e \"library('getopt')\""  # [win]
+
+
+
+about:
+  home: https://github.com/trevorld/getopt
+  license: GPL-2.0-or-later
+  summary: Package designed to be used with Rscript to write ``#!'' shebang scripts that accept short and long flags/options. Many users will prefer using instead the packages optparse or argparse which add extra features like automatically generated help option and usage, support for default values, positional argument
+    support, etc.
+  license_family: GPL3
+
+
+
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-2
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+    - dpryan79
+    - croth1

@@ -1,0 +1,53 @@
+{% set name = "glom" %}
+{% set version = "23.5.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 06af5e3486aacc59382ba34e53ebeabd7a9345d78f7dbcbee26f03baa4b83bac
+
+build:
+  number: 0
+  entry_points:
+    - glom = glom.cli:console_main
+  script: '{{ PYTHON }} -m pip install . --no-deps --ignore-installed -vv '
+  noarch: python
+
+requirements:
+  host:
+    - pip
+    - python >=3.7
+  run:
+    - attrs
+    - boltons >=19.3.0
+    - face ==20.1.1
+    - python >=3.7
+
+test:
+  source_files:
+    - glom/test
+  imports:
+    - glom
+  commands:
+    - pip check
+    - glom --help
+    - pytest -vvv --capture=tee-sys -k "not test_error" glom/test
+  requires:
+    - pip
+    - pytest >=6.2.5
+    - pyyaml ==5.4.1
+
+about:
+  home: https://github.com/mahmoud/glom
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: A declarative object transformer and formatter, for conglomerating nested data.
+
+extra:
+  recipe-maintainers:
+    - CJ-Wright
+    - thewchan

@@ -1,0 +1,63 @@
+{% set version = "25.0.0" %}
+
+package:
+  name: keyring
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/k/keyring/keyring-{{ version }}.tar.gz
+  sha256: fc024ed53c7ea090e30723e6bd82f58a39dc25d9a6797d866203ecd0ee6306cb
+
+build:
+  number: 1
+  noarch: python
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+  entry_points:
+    - keyring = keyring.cli:main
+
+requirements:
+  host:
+    - python >=3.8
+    - pip
+    - setuptools_scm >=3.4.1
+    - setuptools >=56
+    - toml
+  run:
+    - python >=3.8
+    - pywin32-ctypes >=0.2.0  # [win]
+    - secretstorage >=3.2  # [linux]
+    - jeepney >=0.4.2  # [linux]
+    - importlib_metadata >=4.11.4
+    - jaraco.classes
+    - importlib_resources
+    - jaraco.functools
+    - jaraco.context
+    - __linux  # [linux]
+    - __win  # [win]
+    - __osx  # [osx]
+
+test:
+  requires:
+    - pip
+  imports:
+    - keyring
+    - keyring.backends
+    - keyring.util
+  commands:
+    - pip check
+    - keyring --help
+
+about:
+  home: https://github.com/jaraco/keyring
+  license: MIT
+  license_file: LICENSE
+  license_family: MIT
+  summary: Store and access your passwords safely
+  dev_url: https://github.com/jaraco/keyring
+  doc_url: https://pypi.org/project/keyring/
+
+extra:
+  recipe-maintainers:
+    - licode
+    - tacaswell
+    - ccordoba12

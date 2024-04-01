@@ -1,0 +1,82 @@
+{% set name = "pp-sketchlib" %}
+{% set version = "2.1.3" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/bacpop/{{ name|lower }}/archive/v{{ version }}.tar.gz
+  sha256: 093db6840caad909ddb5159ba0a64a4822155e0bc18d2cbabc0c8a5bcf351026
+  patches:
+    - 0001-Fix-for-type-of-index-on-llvm-compiler.patch
+
+build:
+  number: 0
+  skip: true  # [py<38 or win or cuda_compiler_version in ("9.2", "10.0", "10.1", "10.2", "11.0")]
+  script:
+    - export SKETCHLIB_INSTALL=conda  # [linux64 and cuda_compiler_version != "None"]
+    - {{ PYTHON }} -m pip install . --no-deps -vvv
+  missing_dso_whitelist:
+    - '*/libcuda.*'
+  ignore_run_exports:
+    - cudatoolkit
+  entry_points:
+    - sketchlib = pp_sketch.__main__:main
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - {{ compiler('cuda') }}  # [linux64 and cuda_compiler_version != "None"]
+    - cmake >=3.19
+    - make
+  host:
+    - python
+    - pip
+    - pybind11
+    - highfive
+    - zlib
+    - eigen
+    - hdf5
+    - openblas
+    - llvm-openmp  # [osx]
+    - libgomp      # [linux64]
+  run:
+    - python
+    - numpy
+    - scipy
+    - libblas * *openblas
+    - openblas
+    - zlib
+    - h5py
+    - docopt
+    - libgfortran-ng        # [linux64]
+    - gfortran_impl_osx-64  # [osx]
+
+test:
+  imports:
+    - pp_sketchlib
+  commands:
+    - sketchlib --version
+
+about:
+  home: https://github.com/bacpop/pp-sketchlib
+  license: Apache-2.0 AND MIT AND BSD-3-Clause
+  license_file:
+    - NOTICE
+    - LICENSE
+    - LICENSE_highfive
+    - LICENSE_bindash
+    - LICENSE_nthash
+    - LICENSE_kseq
+    - LICENSE_json.txt
+    - LICENSE_KMeansRex
+    - LICENSE_unordered_dense
+  summary: Library of sketching functions used by PopPUNK
+  doc_url: https://poppunk.bacpop.org/
+  dev_url: https://github.com/bacpop/pp-sketchlib
+
+extra:
+  recipe-maintainers:
+    - johnlees

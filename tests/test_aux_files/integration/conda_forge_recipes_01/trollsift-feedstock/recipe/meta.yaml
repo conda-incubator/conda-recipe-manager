@@ -1,0 +1,45 @@
+{% set name = "trollsift" %}
+{% set version = "0.5.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 59da1d217b5d95dea454cebca5099e4fed5d09ff96f9dbd6110e85ed66a51d9a
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+    - setuptools
+  run:
+    - python >=3.6
+    - six
+
+test:
+  imports:
+    - trollsift
+
+about:
+  home: https://github.com/pytroll/trollsift
+  license: GPL-3.0-or-later
+  license_family: GPL3
+  license_file: LICENSE.txt
+  summary: String parser/formatter for PyTroll packages
+  description: Filtering modules used in PyTroll packages
+  doc_url: http://trollsift.readthedocs.io
+  dev_url: https://github.com/pytroll/trollsift
+
+extra:
+  recipe-maintainers:
+    - djhoese
+    - mraspaud
+    - adybbroe
+    - pnuu

@@ -1,0 +1,56 @@
+{% set name = "molearn" %}
+{% set version = "2.0.3" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/Degiacomi-Lab/molearn/archive/v{{ version }}.tar.gz
+  sha256: b2e863f7991c24dbc0172e4c6730bcc1c6d5e71fae98c493ea5f5f09ba05a9c9
+
+build:
+  number: 4
+  script: {{ PYTHON }} -m pip install . -vv
+  skip: true  # [not linux]
+
+requirements:
+  host:
+    - python
+    - setuptools
+    - pip
+  run:
+    - __unix
+    - python
+    - numpy
+    - pytorch
+    - biobox
+    - openmmtorchplugin 1.1.8
+test:
+  imports:
+    - molearn
+  source_files:
+    - test
+  commands:
+    - pip check
+    - cd test
+    - python example_script.py
+  requires:
+    - pip
+
+about:
+  home: https://github.com/Degiacomi-Lab/molearn
+  license_file: LICENSE
+  license: GPL-3.0-only
+  summary: Molearn contains methods to train neural networks on ensembles of molecular conformations
+  description: |
+    This software trains a generative neural network on an ensemble of molecular conformations (typically
+    obtained by molecular dynamics). The trained model can be used to generate new, plausible
+    conformations repesentative of poorly sampled transition states.
+  doc_url: https://github.com/Degiacomi-Lab/molearn
+  dev_url: https://github.com/Degiacomi-Lab/molearn
+
+extra:
+  recipe-maintainers:
+    - SCMusson
+    - degiacom

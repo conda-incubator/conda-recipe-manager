@@ -1,0 +1,50 @@
+{% set version = "3.4.0" %}
+
+package:
+  name: threadpoolctl
+  version: {{ version }}
+
+source:
+  url: https://github.com/joblib/threadpoolctl/archive/{{ version }}.tar.gz
+  sha256: 1e41d84d443f27315566c4928bd0efa05abd38503031b05b3d3441e8945915f0
+
+build:
+  number: 0
+  noarch: python
+  script:
+    - {{ PYTHON }} -m flit install
+
+requirements:
+  host:
+    - python >=3.8
+    - flit
+  run:
+    - python >=3.8
+
+test:
+  requires:
+    - numpy
+  imports:
+    - threadpoolctl
+  commands:
+    - python -m threadpoolctl -i numpy
+
+about:
+  home: https://github.com/joblib/threadpoolctl
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: Python helpers to control the threadpools of native libraries
+
+  description: |
+    Python helpers to introspect and limit the number of threads used
+    in native libraries that handle their own internal threadpool
+    (BLAS and OpenMP implementations).
+  doc_url: https://github.com/joblib/threadpoolctl
+  dev_url: https://github.com/joblib/threadpoolctl
+
+extra:
+  recipe-maintainers:
+    - ogrisel
+    - tomMoral
+    - jeremiedbb

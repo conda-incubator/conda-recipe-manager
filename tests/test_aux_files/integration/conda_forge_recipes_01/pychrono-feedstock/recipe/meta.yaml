@@ -1,0 +1,76 @@
+{% set name = "chrono" %}
+{% set version = "7.0.0" %}
+{% set build = 0 %}
+{% set sha256 = "3151a800a3e9546134f1eaeb8b186f1ea5270b348b3bd8edc23d19a1f08f3683" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/projectchrono/chrono/archive/{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  number: {{ build }}
+  skip: true  # [win or py2k]
+  run_exports:
+    - {{ pin_subpackage('chrono', max_pin='x.x' ) }}
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - cmake
+    - swig 3.0.12
+    - llvm-openmp  # [osx]
+    - libgomp      # [linux and not aarch64]
+  host:
+    - eigen
+    - python
+    - llvm-openmp  # [osx]
+  run:
+    - llvm-openmp  # [osx]
+
+outputs:
+  - name: chrono
+    script: clean_python.sh
+    test:
+      commands:
+        - test -f ${PREFIX}/lib/libChronoEngine${SHLIB_EXT}
+  - name: pychrono
+    script: py_install.sh
+    requirements:
+      build:
+        - {{ compiler('c') }}
+        - {{ compiler('cxx') }}
+        - cmake
+        - swig 3.0.12
+        - llvm-openmp  # [osx]
+        - libgomp      # [linux and not aarch64]
+      host:
+        - {{ pin_subpackage('chrono', exact=True) }}
+        - python
+        - eigen
+        - llvm-openmp  # [osx]
+      run:
+        - {{ pin_subpackage('chrono', exact=True) }}
+        - python
+        - llvm-openmp  # [osx]
+
+    test:
+      imports:
+        - pychrono
+
+about:
+  home: https://github.com/projectchrono/chrono
+  license: BSD 3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: A physics engine for constrained multi-flexible-body dynamics
+
+extra:
+  recipe-maintainers:
+    - davidbrochart
+    - SylvainCorlay
+    - wolfv

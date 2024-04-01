@@ -1,0 +1,56 @@
+{% set name = "lidar" %}
+{% set version = "0.8.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 654883a5015bec5be3e185572fae240d58ed91b2935267e3ebe3167e96c8203a
+
+build:
+  number: 0
+  entry_points:
+    - lidar=lidar.cli:main
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.8
+  run:
+    - click >=6.0
+    - gdal
+    - gdown
+    - geopandas
+    - matplotlib-base
+    - numpy
+    # - pysimplegui
+    - python >=3.8
+    - rasterio
+    - richdem
+    - scikit-image
+    - scipy
+    - pyshp
+    - whitebox
+
+test:
+  imports:
+    - numpy
+  # commands:
+  #   - lidar --help
+
+about:
+  home: https://github.com/giswqs/lidar
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: A Python package for delineating nested surface depressions from digital elevation data
+  doc_url: https://lidar.gishub.org
+  dev_url: https://github.com/giswqs/lidar
+
+extra:
+  recipe-maintainers:
+    - giswqs

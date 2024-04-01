@@ -1,0 +1,46 @@
+{% set name = "ncar-jobqueue" %}
+{% set version = "2021.4.14" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/ncar-jobqueue-{{ version }}.tar.gz
+  sha256: c5e6e61f7acb013a9714257ee32f68073e4d803ee484312cabe4c5d38599caf9
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python
+    - setuptools >=30.3.0
+    - setuptools_scm
+  run:
+    - dask-jobqueue >=0.7.2
+    - python >=3.6
+
+test:
+  imports:
+    - ncar_jobqueue
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/NCAR/ncar-jobqueue
+  summary: Utilities for configuring [dask-jobqueue](https://jobqueue.dask.org) with appropriate settings for NCAR clusters
+  license: Apache-2.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - andersy005
+    - matt-long
+    - mgrover1

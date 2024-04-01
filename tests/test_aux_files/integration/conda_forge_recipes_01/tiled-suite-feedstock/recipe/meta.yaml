@@ -1,0 +1,211 @@
+{% set name = "tiled" %}
+{% set version = "0.1.0a116" %}
+
+package:
+  name: tiled-suite
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/tiled-{{ version }}.tar.gz
+  sha256: a5e0fa9991c78740f619950e9308cf471f88ee560bae0bae73c2a36a817dcce2
+
+build:
+  number: 0
+
+outputs:
+  # Categorized requirements
+  - name: tiled-base
+    script: build-tiled.sh  # [unix]
+    script: bld-tiled.bat  # [win]
+    build:
+      noarch: python
+      # TODO: Make noarch when tiled-server is noarch
+      entry_points:
+        - tiled = tiled.commandline.main:main
+    requirements:
+      host:
+        - python >=3.8
+        - pip
+        - hatchling
+        - hatch-vcs
+      run:
+        - python >=3.8
+        - appdirs
+        - blosc
+        - click !=8.1.0
+        - dask
+        - httpx >=0.20.0
+        - jsonschema
+        - lz4
+        - msgpack-python >=1.0.0
+        - ndindex
+        - numpy
+        - pandas
+        - pyarrow
+        - pyyaml
+        - sparse >=0.13.0
+        - typer
+        - xarray
+        - zstandard
+
+  - name: tiled-client
+    build:
+      noarch: python
+    requirements:
+      run:
+        - entrypoints
+        - heapdict
+        - {{ pin_subpackage('tiled-base', exact=True) }}
+    test:
+      imports:
+        - tiled
+        - tiled.client
+        - tiled.client.array
+        - tiled.client.base
+        - tiled.client.cache
+        - tiled.client.constructors
+        - tiled.client.context
+        - tiled.client.dataframe
+        - tiled.client.node
+        - tiled.client.sparse
+        - tiled.client.utils
+        - tiled.client.xarray
+      commands:
+        - tiled --help
+
+  - name: tiled-server
+    build:
+      noarch: python
+    requirements:
+      run:
+        - aiofiles
+        - alembic
+        - anyio
+        - asgi-correlation-id
+        - cachey
+        - cachetools
+        - dask
+        - fastapi
+        - jinja2
+        - jmespath
+        - openpyxl
+        - orjson
+        - packaging
+        - pandas
+        - psutil
+        - prometheus_client
+        - pydantic >=1.8.2,<2
+        - python-dateutil
+        - python-jose
+        - python-multipart
+        - sqlalchemy
+        - starlette
+        - toolz
+        - uvicorn
+        - watchgod
+        - {{ pin_subpackage('tiled-base', exact=True) }}
+    test:
+      imports:
+        - tiled
+        - tiled.server
+        - tiled.server.app
+        - tiled.server.authentication
+        - tiled.server.compression
+        - tiled.server.core
+        - tiled.server.dependencies
+        - tiled.server.etag
+        - tiled.server.object_cache
+        - tiled.server.router
+        - tiled.server.schemas
+        - tiled.server.settings
+        - tiled.server.utils
+      commands:
+        - tiled --help
+
+  - name: tiled-formats
+    build:
+      noarch: python
+    requirements:
+      run:
+        - h5py
+        - h5netcdf
+        - openpyxl
+        - pillow
+        - tifffile
+        - {{ pin_subpackage('tiled-base', exact=True) }}
+    test:
+      imports:
+        - tiled
+
+  # All:
+  - name: tiled
+    build:
+      noarch: python
+    requirements:
+      run:
+        - {{ pin_subpackage('tiled-client', exact=True) }}
+        - {{ pin_subpackage('tiled-server', exact=True) }}
+        - {{ pin_subpackage('tiled-formats', exact=True) }}
+    test:
+      imports:
+        - tiled
+        - tiled.adapters
+        - tiled.adapters.array
+        - tiled.adapters.dataframe
+        - tiled.adapters.excel
+        - tiled.adapters.hdf5
+        - tiled.adapters.mapping
+        - tiled.adapters.tiff
+        - tiled.adapters.utils
+        - tiled.adapters.xarray
+        - tiled.authenticators
+        - tiled.authn_database
+        - tiled.authn_database.alembic_constants
+        - tiled.authn_database.base
+        - tiled.authn_database.connection_pool
+        - tiled.authn_database.core
+        - tiled.authn_database.orm
+        - tiled.client
+        - tiled.client.sparse
+        - tiled.commandline
+        - tiled.commandline.main
+        - tiled.config
+        - tiled.media_type_registration
+        - tiled.profiles
+        - tiled.queries
+        - tiled.query_registration
+        - tiled.scopes
+        - tiled.serialization.array
+        - tiled.serialization.container
+        - tiled.serialization.image_serializer_helpers
+        - tiled.serialization.sparse
+        - tiled.serialization.table
+        - tiled.serialization.xarray
+        - tiled.server
+        - tiled.server.pydantic_sparse
+        - tiled.structures
+        - tiled.structures.array
+        - tiled.structures.core
+        - tiled.structures.sparse
+        - tiled.structures.table
+        - tiled.utils
+      commands:
+        - pip check
+        - tiled --help
+      requires:
+        - pip
+        - pytest  # [not win]
+        # broken build of httpcore package fails pipcheck
+        - httpcore !=0.13.3
+
+about:
+  home: https://github.com/bluesky/tiled
+  summary: Tile-based access to SciPy/PyData data structures over the web in many formats
+  license: BSD-3-Clause
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - danielballan
+    - gwbischof
+    - mrakitin

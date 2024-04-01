@@ -1,0 +1,42 @@
+{% set name = "abi3info" %}
+{% set version = "2024.3.26" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/abi3info-{{ version }}.tar.gz
+  sha256: 6088d6d7920104309ab55877d2b2bfc8ace18c78cc89f9dedd9e92933308551d
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - flit-core >=3.2,<4
+    - python >=3.8
+    - pip
+  run:
+    - python >=3.8
+
+test:
+  imports:
+    - abi3info
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://pypi.org/project/abi3info/
+  summary: A library for abi3 and other CPython API information
+  dev_url: https://github.com/woodruffw/abi3info
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - BastianZim

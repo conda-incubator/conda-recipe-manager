@@ -1,0 +1,76 @@
+{% set min_python = "python >=3.8" %}
+{% set version = "0.18.1" %}
+{% set min_python = "python >=3.8" %}
+
+package:
+  name: terminado
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/t/terminado/terminado-{{ version }}.tar.gz
+  sha256: de09f2c4b85de4765f7714688fff57d3e75bad1f909b589fde880460c753fd2e
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+
+requirements:
+  host:
+    - {{ min_python }}
+    - hatchling >=1.5
+    - pip
+  run:
+    - __{{ noarch_platform }}
+    - {{ min_python }}
+    - tornado >=6.1.0
+    {% if noarch_platform != "win" %}- ptyprocess{% endif %}
+    {% if noarch_platform == "win" %}- pywinpty >=1.1.0{% endif %}
+
+test:
+  files:
+    - test_of_terminado.py
+  source_files:
+    - tests
+  requires:
+    # seems odd, but is needed
+    - __{{ noarch_platform }}
+    # version/dependency checking
+    - pip
+    {% if noarch_platform == "win" %}
+    - m2-grep
+    {% endif %}
+    # type checking
+    - mypy >=1.6,<1.7  # [unix]
+    - traitlets >=5.11.1  # [unix]
+    # test with coverage
+    - pytest >=7.0
+    - coverage
+    - pytest-timeout
+  imports:
+    - terminado
+  commands:
+    # see run_test.py for more
+    - pip check
+    - mypy -p terminado  # [unix]
+    - pip list
+    - pip list | grep -iE "terminado\s*{{ version.replace(".", "\.") }}"
+
+about:
+  home: https://github.com/jupyter/terminado
+  license: BSD-2-Clause
+  license_file: LICENSE
+  summary: Terminals served by tornado websockets
+  description: |
+    This is a Tornado websocket backend for the Xterm.js Javascript terminal emulator library.
+  doc_url: http://terminado.readthedocs.org/en/latest/
+  doc_source_url: https://github.com/jupyter/terminado/blob/master/doc/index.rst
+  dev_url: https://github.com/jupyter/terminado
+
+extra:
+  recipe-maintainers:
+    - blink1073
+    - pelson
+    - takluyver
+    - ocefpaf
+    - bollwyvl

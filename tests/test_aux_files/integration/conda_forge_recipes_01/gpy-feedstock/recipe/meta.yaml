@@ -1,0 +1,55 @@
+{% set name = "GPy" %}
+{% set version = "1.10.0" %}
+{% set sha256 = "a2b793ef8d0ac71739e7ba1c203bc8a5afa191058b42caa617e0e29aa52aa6fb" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  number: 3
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - numpy                                  # [build_platform != target_platform]
+    - {{ compiler('c') }}
+  host:
+    - python
+    - pip
+    - numpy
+    - scipy >=0.16
+    - six
+  run:
+    - python
+    - paramz >=0.9.0
+    - {{ pin_compatible('numpy') }}
+    - scipy >=0.16
+    - six
+    - matplotlib-base
+
+test:
+  commands:
+    - export MPLBACKEND="AGG"  # [linux and py2k]
+    - python -c "import GPy"
+
+about:
+  home: http://github.com/SheffieldML/GPy
+  license: BSD-3-Clause
+  license_file: LICENSE.txt
+  summary: The Gaussian Process Toolbox
+  doc_url: https://pythonhosted.org/GPy/
+  dev_url: https://github.com/SheffieldML/GPy
+
+extra:
+  recipe-maintainers:
+    - dirmeier
+    - thompsonsed

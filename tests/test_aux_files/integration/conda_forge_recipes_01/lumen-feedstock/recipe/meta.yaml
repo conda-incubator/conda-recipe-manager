@@ -1,0 +1,63 @@
+{% set name = "lumen" %}
+{% set version = "0.6.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 16e5196e66013f7fb03fbd892524a5247b98773a061f4da021aa3f6608fb703c
+
+build:
+  noarch: python
+  number: 0
+  entry_points:
+    - lumen = lumen.command:main
+  script:
+    - {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.7
+    - pip
+    - param >=1.7.0
+    - pyct >=0.4.4
+    - setuptools >=30.3.0
+  run:
+    - python >=3.9
+    - panel >=1.3.0
+    - hvplot
+    - holoviews >=1.17
+    - pandas
+    - packaging
+    - intake
+    - jinja2 >3.0
+    - pyyaml
+
+test:
+  imports:
+    - lumen
+  requires:
+    - pip
+  commands:
+    - pip check
+    - lumen --help
+
+about:
+  home: https://github.com/holoviz/lumen
+  summary: Illuminate your data. A monitoring solution built on Panel
+  description: |
+    The Lumen project provides a framework for visual analytics, which allows users to
+    build data-driven dashboards from a simple yaml specification. The power of
+    Lumen comes from the ability to leverage the powerful data intake, data processing
+    and data visualization libraries available in the PyData ecosystem.
+  license: BSD-3-Clause
+  license_file: LICENSE
+  doc_url: https://lumen.holoviz.org/
+  dev_url: https://github.com/holoviz/lumen
+
+extra:
+  recipe-maintainers:
+    - Hoxbro
+    - philippjfr

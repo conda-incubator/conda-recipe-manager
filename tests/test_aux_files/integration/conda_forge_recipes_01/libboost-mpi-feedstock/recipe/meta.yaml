@@ -1,0 +1,51 @@
+{% set version = "1.84.0" %}
+
+package:
+  name: libboost-mpi
+  version: {{ version }}
+
+source:
+  url: https://boostorg.jfrog.io/artifactory/main/release/{{ version }}/source/boost_{{ version|replace(".", "_") }}.tar.bz2
+  sha256: cc4b893acf645c9d4b698e9a0f08ca8846aa5d6c68275c14c3e7949c24109454
+  patches:
+    - 5eff1ecc8413b0dc93a1ab047d7fed751e6cb40e.patch  # [not win]
+
+build:
+  number: 1
+
+requirements:
+  build:
+    - {{ compiler('cxx') }}
+    - {{ stdlib("c") }}
+
+  host:
+    - libboost-devel {{ version }}.*
+    - {{ mpi }}
+
+  run:
+    # explicitly depend on -devel version because we need the headers
+    - libboost-devel {{ version }}.*
+    - {{ mpi }}
+
+  run_constrained:
+    - libboost {{ version }}.*
+
+test:
+  commands:
+    # Verify library
+    - test ! -f $PREFIX/lib/libboost_mpi.a                                               # [unix]
+    - test -f $PREFIX/lib/libboost_mpi.dylib                                             # [osx]
+    - test -f $PREFIX/lib/libboost_mpi.so                                                # [linux]
+    - if not exist %PREFIX%\\Library\\bin\\boost_mpi.dll exit 1                          # [win]
+    - if not exist %PREFIX%\\Library\\lib\\boost_mpi.lib exit 1                          # [win]
+    - if exist %PREFIX%\\Library\\lib\\libboost_mpi.lib exit 1                           # [win]
+
+about:
+  home: http://www.boost.org/
+  license: BSL-1.0
+  license_file: LICENSE_1_0.txt
+  summary: Free peer-reviewed portable C++ source libraries.
+
+extra:
+  recipe-maintainers:
+    - sdebionne

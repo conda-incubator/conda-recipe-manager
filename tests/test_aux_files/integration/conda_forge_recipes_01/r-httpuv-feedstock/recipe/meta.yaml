@@ -1,0 +1,99 @@
+{% set version = "1.6.15" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-httpuv
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/httpuv_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/httpuv/httpuv_{{ version }}.tar.gz
+  sha256: 5e6ded3623a39df3e1db6cb7e7292b4c03c80b3c6c5faaac3b78b711cb205ed0
+
+build:
+  merge_build_host: true  # [win]
+  number: 0
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - cross-r-base {{ r_base }}  # [build_platform != target_platform]
+    - r-rcpp                     # [build_platform != target_platform]
+    - r-later                    # [build_platform != target_platform]
+    - r-r6                       # [build_platform != target_platform]
+    - r-promises                 # [build_platform != target_platform]
+    - gnuconfig  # [unix]
+    - {{ compiler('c') }}              # [not win]
+    - {{ compiler('m2w64_c') }}        # [win]
+    - {{ compiler('cxx') }}            # [not win]
+    - {{ compiler('m2w64_cxx') }}      # [win]
+    - {{ posix }}filesystem        # [win]
+    - {{ posix }}sed               # [win]
+    - {{ posix }}grep              # [win]
+    - {{ posix }}autoconf
+    - {{ posix }}automake          # [not win]
+    - {{ posix }}automake-wrapper  # [win]
+    - {{ posix }}pkg-config
+    - {{ posix }}make
+    - {{ posix }}coreutils         # [win]
+    - {{ posix }}zip               # [win]
+    - cross-r-base {{ r_base }}    # [build_platform != target_platform]
+  host:
+    - r-base
+    - r-r6
+    - r-rcpp >=1.0.7
+    - r-later >=0.8.0
+    - r-promises
+  run:
+    - r-base
+    - {{ native }}gcc-libs         # [win]
+    - r-r6
+    - r-rcpp >=1.0.7
+    - r-later >=0.8.0
+    - r-promises
+
+test:
+  commands:
+    - $R -e "library('httpuv')"           # [not win]
+    - "\"%R%\" -e \"library('httpuv')\""  # [win]
+
+about:
+  home: https://github.com/rstudio/httpuv
+  license: GPL-2.0-or-later
+  summary: Provides low-level socket and protocol support for handling HTTP and WebSocket requests directly from within R. It is primarily intended as a building block for other packages, rather than making it particularly easy to create complete web applications using httpuv alone. httpuv is built on top of the libuv and
+    http-parser C libraries, both of which were developed by Joyent, Inc. (See LICENSE file for libuv and http-parser license information.)
+  license_family: GPL3
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-2
+    - LICENSE
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+    - halldc
+
+# Package: httpuv
+# Type: Package
+# Title: HTTP and WebSocket Server Library
+# Version: 1.5.1
+# Author: Joe Cheng, Hector Corrada Bravo [ctb], Jeroen Ooms [ctb], Winston Chang [ctb]
+# Copyright: RStudio, Inc.; Joyent, Inc.; Nginx Inc.; Igor Sysoev; Niels Provos; Internet Systems Consortium, Inc.; Alexander Chemeris
+# Maintainer: Joe Cheng <joe@rstudio.com>
+# Description: Provides low-level socket and protocol support for handling HTTP and WebSocket requests directly from within R. It is primarily intended as a building block for other packages, rather than making it particularly easy to create complete web applications using httpuv alone. httpuv is built on top of the libuv and http-parser C libraries, both of which were developed by Joyent, Inc. (See LICENSE file for libuv and http-parser license information.)
+# License: GPL (>= 2) | file LICENSE
+# Depends: R (>= 2.15.1)
+# Imports: Rcpp (>= 0.11.0), utils, R6, promises, later (>= 0.8.0)
+# LinkingTo: Rcpp, BH, later
+# URL: https://github.com/rstudio/httpuv
+# SystemRequirements: GNU make
+# RoxygenNote: 6.1.1
+# Suggests: testthat, callr, curl
+# Collate: 'RcppExports.R' 'httpuv.R' 'server.R' 'static_paths.R' 'utils.R'
+# NeedsCompilation: yes
+# Packaged: 2019-04-05 20:06:25 UTC; winston
+# Repository: CRAN
+# Date/Publication: 2019-04-05 22:10:03 UTC

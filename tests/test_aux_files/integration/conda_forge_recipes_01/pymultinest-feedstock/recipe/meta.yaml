@@ -1,0 +1,49 @@
+{% set name = "pymultinest" %}
+{% set version = "2.12" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/pymultinest-{{ version }}.tar.gz
+  sha256: a8ac6787fa0dd9b374a3a2e981d48a1975e935ac846a8083d209078443d3e90c
+
+build:
+  noarch: python
+  number: 0
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+    - pytest-runner
+    - setuptools
+  run:
+    - python >=3.6
+    - matplotlib-base
+    - multinest
+    - numpy >=1.11,<2.0a0
+    - scipy
+    # doesn't work on windows
+    - __unix
+
+test:
+  imports:
+    - pymultinest
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: http://johannesbuchner.github.com/PyMultiNest/
+  dev_url: https://github.com/JohannesBuchner/PyMultiNest
+  license: GPL-3.0-only
+  license_file: LICENSE
+  summary: Bayesian computations with the nested sampling algorithm MultiNest.
+
+extra:
+  recipe-maintainers:
+    - giacomov
+    - JohannesBuchner

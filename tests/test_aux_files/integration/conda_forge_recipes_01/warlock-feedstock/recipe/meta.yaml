@@ -1,0 +1,47 @@
+{% set name = "warlock" %}
+{% set version = "2.0.1" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 99abbf9525b2a77f2cde896d3a9f18a5b4590db063db65e08207694d2e0137fc
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.7
+    - poetry
+
+  run:
+    - python >=3.7
+    - jsonschema >=4
+    - jsonpatch >=1,<2
+
+test:
+  imports:
+    - warlock
+  requires:
+    - pip
+  commands:
+    - pip check
+
+about:
+  home: http://github.com/bcwaldon/warlock
+  license: Apache-2.0
+  license_family: Apache
+  license_file: LICENSE
+  summary: Python object model built on JSON schema and JSON patch.
+
+extra:
+  recipe-maintainers:
+    - anguslees
+    - tschoonj

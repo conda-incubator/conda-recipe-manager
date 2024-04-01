@@ -1,0 +1,50 @@
+{% set name = "numericalunits" %}
+{% set version = "1.25" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: c32a482adae818a1a8d6c799bf9fb153326461d490c0de9deab9c694a6537eec
+
+build:
+  number: 5
+  script: "{{ PYTHON }} -m pip install . -vv"
+  skip: true  # [py2k]
+
+requirements:
+  host:
+    - python
+    - pip
+  run:
+    - python
+    - pip
+
+test:
+  imports:
+    - numericalunits
+  commands:
+    - pip check
+
+about:
+  home: https://github.com/sbyrnes321/numericalunits
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE.txt
+  summary: 'numericalunits: Units and dimensional analysis compatible with everything'
+
+  description: |
+    This package implements units and dimensional analysis in an 
+    unconventional way that has the following unique advantages:
+    Compatible with everything, Modular and non-intrusive, 
+    Powerful tool for debugging, Zero storage overhead and 
+    Zero calculation overhead
+  doc_url: https://github.com/sbyrnes321/numericalunits
+  dev_url: https://github.com/sbyrnes321/numericalunits
+
+extra:
+  recipe-maintainers:
+    - jan-janssen
+    - lmhale99

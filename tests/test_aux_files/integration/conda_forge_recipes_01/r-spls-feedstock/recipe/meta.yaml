@@ -1,0 +1,67 @@
+{% set version = '2.2-3' %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-spls
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/spls_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/spls/spls_{{ version }}.tar.gz
+  sha256: bbd693da80487eef2939c37aba199f6d811ec289828c763d9416a05fa202ab2e
+
+build:
+  merge_build_host: True  # [win]
+  number: 4
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+    - r-mass
+    - r-nnet
+    - r-pls
+  run:
+    - r-base
+    - r-mass
+    - r-nnet
+    - r-pls
+
+test:
+  commands:
+    - $R -e "library('spls')"           # [not win]
+    - "\"%R%\" -e \"library('spls')\""  # [win]
+
+about:
+  home: https://CRAN.R-project.org/package=spls
+  license: GPL (>= 2)
+  summary: Provides functions for fitting a sparse partial least squares (SPLS) regression and
+    classification (Chun and Keles (2010) <doi:10.1111/j.1467-9868.2009.00723.x>).
+  license_family: GPL3
+  license_file: '{{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-2'
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+
+# Package: spls
+# Version: 2.2-3
+# Date: 2019-05-04
+# Title: Sparse Partial Least Squares (SPLS) Regression and Classification
+# Author: Dongjun Chung <chungdon@stat.wisc.edu>, Hyonho Chun <chun@stat.wisc.edu>, Sunduz Keles <keles@stat.wisc.edu>
+# Maintainer: Valentin Todorov <valentin.todorov@chello.at>
+# Depends: R (>= 2.14)
+# Imports: MASS, nnet, parallel, pls
+# Description: Provides functions for fitting a sparse partial least squares (SPLS) regression and classification (Chun and Keles (2010) <doi:10.1111/j.1467-9868.2009.00723.x>).
+# License: GPL (>= 2)
+# NeedsCompilation: no
+# Packaged: 2019-05-04 21:53:24 UTC; Share
+# Repository: CRAN
+# Date/Publication: 2019-05-04 23:10:03 UTC

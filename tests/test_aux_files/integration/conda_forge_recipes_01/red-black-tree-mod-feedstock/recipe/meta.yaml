@@ -1,0 +1,41 @@
+{% set name = "red-black-tree-mod" %}
+{% set version = "1.22" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/red-black-tree-mod-{{ version }}.tar.gz
+  sha256: 38e3652903a2bf96379c27c2082ca0b7b905158662dd7ef0c97f4fd93a9aa908
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+  run:
+    - python >=3.6
+
+test:
+  imports:
+    - red_black_dict_mod
+    - red_black_set_mod
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: http://stromberg.dnsalias.org/~strombrg/red-black-tree-mod/
+  summary: Flexible python implementation of red black trees
+  license: MIT
+  license_file: COPYING
+
+extra:
+  recipe-maintainers:
+    - jan-janssen

@@ -1,0 +1,69 @@
+{% set name = "dm-control" %}
+{% set version = "1.0.17" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/d/dm_control/dm_control-{{ version }}.tar.gz
+  sha256: 7a8a87ec3df332d3f809487c09a181c38fe49bb392f544885bd9d59503a155ca
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps
+  number: 0
+
+requirements:
+  build:
+    - mujoco
+  host:
+    - python >=3.7
+    - mujoco
+    - pip
+    - pyparsing >=3.0.0
+
+  run:
+    - python >=3.8
+    - absl-py >=0.7.0
+    - dm-env
+    - dm-tree !=0.1.2
+    - glfw
+    - pyglfw
+    - labmaze
+    - lxml
+    - mujoco >=3.1.1
+    - numpy >=1.9.0
+    - protobuf >=3.19.4
+    - pyopengl >=3.1.4
+    - pyparsing >=3.0.0
+    - requests
+    - setuptools !=50.0.0
+    - scipy
+    - tqdm
+
+test:
+  imports:
+    - dm_control
+  commands:
+    - pip check
+    # All tests excluded (except for the test_physics_error_message_in_debug_mode and ExportWithAssetsAsZipTest) are excluded as they required to create a GL context
+    # test_physics_error_message_in_debug_mode and ExportWithAssetsAsZipTest are excluded due to some Windows failures in loading test assets
+    - pytest --pyargs dm_control -v -k "not (viewer or render or glfw or Camera or cmu or rodent or termination or escape or maze or ant or ball or task or Depth or Scene or Overlay or Context or 39 or visualize or Pixels or test_physics_error_message_in_debug_mode or ExportWithAssetsAsZipTest or test_environment_is_deterministic40
+      or test_initial_state_is_randomized40 or test_observation_arrays_dont_share_memory40)"
+  requires:
+    - pip
+    - pytest
+    - mock
+    - h5py
+    - pillow
+
+about:
+  home: https://github.com/deepmind/dm_control
+  summary: Continuous control environments and MuJoCo Python bindings.
+  license: Apache-2.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - traversaro

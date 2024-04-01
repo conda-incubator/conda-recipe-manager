@@ -1,0 +1,64 @@
+{% set name = "oci-cli" %}
+{% set version = "3.38.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/oci-cli-{{ version }}.tar.gz
+  sha256: d65345a01e9271246a1e668af4f6dbed681f68651fb38c10f4092a1ec0ae151b
+  # https://github.com/oracle/oci-cli
+
+build:
+  entry_points:
+    - oci=oci_cli.cli:cli
+    - create_backup_from_onprem=oci_cli.scripts.database.dbaas:create_backup_from_onprem
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+  # https://github.com/oracle/oci-cli/blob/master/setup.py
+  run:
+    - python >=3.6
+    - oci ==2.125.0
+    - arrow >=1.0.0
+    - certifi
+    - click ==8.0.4
+    - cryptography >=3.2.1,<42.0.0
+    - jmespath ==0.10.0
+    - python-dateutil >=2.5.3,<3.0.0
+    - pytz >=2016.10
+    - six >=1.15.0
+    - terminaltables ==3.1.10
+    - pyopenssl >=17.5.0,<24.0.0
+    - pyyaml >=5.4,<=6.0.1
+    - prompt-toolkit ==3.0.29
+
+test:
+  imports:
+    - common_util
+    - interactive
+    - oci_cli
+    - services
+  commands:
+    - pip check
+    - oci --help
+    # Requires cx_Oracle, not needed for Oracle Cloud
+    # - create_backup_from_onprem --help
+  requires:
+    - pip
+
+about:
+  home: https://github.com/oracle/oci-cli
+  summary: Oracle Cloud Infrastructure CLI
+  license: Apache-2.0 OR UPL-1.0
+  license_file: LICENSE.txt
+
+extra:
+  recipe-maintainers:
+    - manics

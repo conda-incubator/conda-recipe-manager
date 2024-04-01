@@ -1,0 +1,72 @@
+{% set name = "mshr" %}
+{% set version = "2019.1.0" %}
+{% set sha256 = "0be8f261e7370404863067badadd230dbd55d54f6ffeba15728f4a9bfc856173" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://bitbucket.org/fenics-project/{{ name }}/downloads/{{ name }}-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+  patches:
+    # Link boost_thread on macOS. Doesn't appear to be needed
+    # on recent versions (10.12), but seems needed on Travis (Xcode 6.4, currently).
+    - boost-thread.patch  # [osx]
+
+build:
+  number: 9
+  skip: true  # [win or py2k or (linux and py == 37 and c_compiler == 'toolchain_c')]
+
+requirements:
+  build:
+    - cmake
+    - make
+    - {{ compiler('fortran') }}
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+  host:
+    - libboost-devel
+    - python
+    - pip
+    - fenics-dolfin {{ version }}
+    - {{ mpi }}
+    - gmp
+    - mpfr
+    - pybind11
+  run:
+    - python
+    - fenics-dolfin
+    # should be replaced by a run-export for `fenics-dolfin` --> `fenics-libdolfin`
+    - {{ pin_compatible("fenics-libdolfin", max_pin='x.x.x') }}
+    - gmp
+    - mpfr
+
+test:
+  source_files:
+    - test
+  commands:
+    - export OMPI_MCA_plm=isolated
+    - export OMPI_MCA_rmaps_base_oversubscribe=yes
+    - export OMPI_MCA_btl_vader_single_copy_mechanism=none
+    - python -c "import mshr"
+
+about:
+  home: https://bitbucket.org/fenics-project/mshr
+  license: GPL-3.0
+  license_family: GPL3
+  license_file: COPYING
+  summary: mshr is the mesh generation component of FEniCS
+  description: |
+    mshr is the mesh generation component of FEniCS. It generates simplicial DOLFIN
+    meshes in 2D and 3D from geometries described by Constructive Solid Geometry (CSG) or from
+    surface files, utilizing CGAL and Tetgen as mesh generation backends.
+  doc_url: http://fenics.readthedocs.io/projects/mshr
+  dev_url: https://bitbucket.org/fenics-project/mshr
+
+extra:
+  recipe-maintainers:
+    - minrk
+    - jbweston
+    - jan-janssen

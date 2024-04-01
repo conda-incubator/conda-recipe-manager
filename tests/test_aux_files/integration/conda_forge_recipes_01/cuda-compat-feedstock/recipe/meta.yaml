@@ -1,0 +1,91 @@
+{% set name = "cuda-compat" %}
+{% set driver_version = "550.54.14" %}
+{% set cuda_version = "12.4.0" %}
+{% set platform = "linux-x86_64" %}  # [linux64]
+{% set platform = "linux-ppc64le" %}  # [ppc64le]
+{% set platform = "linux-sbsa" %}  # [aarch64]
+{% set extension = "tar.xz" %}  # [not win]
+
+package:
+  name: {{ name|lower }}
+  version: {{ cuda_version }}
+
+source:
+  url: https://developer.download.nvidia.com/compute/cuda/redist/nvidia_driver/{{ platform }}/nvidia_driver-{{ platform }}-{{ driver_version }}-archive.{{ extension }}
+  sha256: de89627ec616b58623be16448142a2d5fe771ee32536cd19be8ea97d7609b49a  # [linux64]
+  sha256: 65ccbb95d21a14197b4a97cda79ab059499edd1e69900af1db1d0e796f22d0f5  # [ppc64le]
+  sha256: d74189ff668b279a1e02b7a9a5389cfa7ae3b080f78d4b2f33e106e99f2fc1e3  # [aarch64]
+
+build:
+  number: 0
+  skip: true  # [osx or win]
+  script_env:
+    - DRV_VERSION={{ driver_version }}
+
+outputs:
+  - name: cuda-compat
+    requirements:
+      run:
+        - {{ pin_subpackage("cuda-compat-impl", exact=True) }}
+    test:
+      commands:
+        - exit 0
+    about:
+      home: https://developer.nvidia.com/cuda-toolkit
+      license_file: LICENSE
+      license: LicenseRef-NVIDIA-End-User-License-Agreement
+      license_url: https://docs.nvidia.com/cuda/eula/index.html
+      summary: CUDA Compatibility Platform
+      description: |
+          Package containing all the necessary CUDA driver files related to forward
+          compatibility. This compatibility enables newer CUDA runtimes to work with
+          older display drivers. Used for Tesla cards only.
+      doc_url: https://docs.nvidia.com/cuda/index.html
+
+  - name: cuda-compat-impl
+    version: {{ driver_version }}
+    files:
+      - cuda-compat
+    requirements:
+      build:
+        - {{ compiler("c") }}
+        - {{ compiler("cxx") }}
+    test:
+      commands:
+        - test -f $PREFIX/cuda-compat/libcuda.so.{{ driver_version }}
+        - test -L $PREFIX/cuda-compat/libcuda.so.1
+        - test -L $PREFIX/cuda-compat/libcuda.so
+        - test -f $PREFIX/cuda-compat/libnvidia-nvvm.so.{{ driver_version }}
+        - test -L $PREFIX/cuda-compat/libnvidia-nvvm.so.4
+        - test -L $PREFIX/cuda-compat/libnvidia-nvvm.so
+        - test -f $PREFIX/cuda-compat/libnvidia-ptxjitcompiler.so.{{ driver_version }}
+        - test -L $PREFIX/cuda-compat/libnvidia-ptxjitcompiler.so.1
+        - test -f $PREFIX/cuda-compat/libcudadebugger.so.{{ driver_version }}
+        - test -L $PREFIX/cuda-compat/libcudadebugger.so.1
+    about:
+      home: https://developer.nvidia.com/cuda-toolkit
+      license_file: LICENSE
+      license: LicenseRef-NVIDIA-End-User-License-Agreement
+      license_url: https://docs.nvidia.com/cuda/eula/index.html
+      summary: CUDA Compatibility Platform
+      description: |
+          Package containing all the necessary CUDA driver files related to forward
+          compatibility. This compatibility enables newer CUDA runtimes to work with
+          older display drivers. Used for Tesla cards only.
+      doc_url: https://docs.nvidia.com/cuda/index.html
+
+about:
+  home: https://developer.nvidia.com/cuda-toolkit
+  license_file: LICENSE
+  license: LicenseRef-NVIDIA-End-User-License-Agreement
+  license_url: https://docs.nvidia.com/cuda/eula/index.html
+  summary: CUDA Compatibility Platform
+  description: |
+      Package containing all the necessary CUDA driver files related to forward
+      compatibility. This compatibility enables newer CUDA runtimes to work with
+      older display drivers. Used for Tesla cards only.
+  doc_url: https://docs.nvidia.com/cuda/index.html
+
+extra:
+  recipe-maintainers:
+    - conda-forge/cuda

@@ -1,0 +1,54 @@
+{% set name = "cuda-cuobjdump" %}
+{% set version = "12.4.99" %}
+{% set cuda_version = "12.4" %}
+{% set platform = "linux-x86_64" %}  # [linux64]
+{% set platform = "linux-ppc64le" %}  # [ppc64le]
+{% set platform = "linux-sbsa" %}  # [aarch64]
+{% set platform = "windows-x86_64" %}  # [win]
+{% set extension = "tar.xz" %}  # [not win]
+{% set extension = "zip" %}  # [win]
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://developer.download.nvidia.com/compute/cuda/redist/cuda_cuobjdump/{{ platform }}/cuda_cuobjdump-{{ platform }}-{{ version }}-archive.{{ extension }}
+  sha256: 2f0ece49051460b493384f80239ab1345b0dc4bce169a3261fd070d1465a7089  # [linux64]
+  sha256: eda005b8d78e4e260ee5fb03c1776b9c7c1c6736b28de6553897a501d14715b7  # [ppc64le]
+  sha256: 52a344b372598a305199047f280e360fc45f95192b6d544340587c05acaa74a5  # [aarch64]
+  sha256: 4280af9aca3351b4b3ce8962c76bd446b9aff1617698c0cf178e13df78bda8ab  # [win]
+
+build:
+  number: 0
+  skip: true  # [osx]
+
+requirements:
+  build:
+    - {{ compiler("c") }}
+    - {{ compiler("cxx") }}
+  host:
+    - cuda-version {{ cuda_version }}
+  run:
+    - {{ pin_compatible("cuda-version", max_pin="x.x") }}
+    - cuda-nvdisasm
+
+test:
+  commands:
+    - test -f $PREFIX/bin/cuobjdump  # [linux]
+    - if not exist %LIBRARY_BIN%\\cuobjdump.exe exit 1  # [win]
+
+about:
+  home: https://developer.nvidia.com/cuda-toolkit
+  license_file: LICENSE
+  license: LicenseRef-NVIDIA-End-User-License-Agreement
+  license_url: https://docs.nvidia.com/cuda/eula/index.html
+  summary: Extracts information from CUDA binary files
+  description: |
+    Extracts information from CUDA binary files and presents them in human
+    readable format.
+  doc_url: https://docs.nvidia.com/cuda/index.html
+
+extra:
+  recipe-maintainers:
+    - conda-forge/cuda

@@ -1,0 +1,78 @@
+{% set name = "cppyy" %}
+{% set version = "3.1.2" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/c/cppyy/cppyy-{{ version }}.tar.gz
+  sha256: 7937d184af02e1510f44d5655e0bcc3c6a7888ef5b3f06c3dd09ba93d1c1f19b
+  patches:
+    - add_default_paths_on_pypy.patch
+    - alldict.patch
+
+build:
+  number: 2
+  skip: true  # [win]
+  # compiler flags set by cppyy-cling do not work on aarch64, https://github.com/conda-forge/cppyy-cling-feedstock/pull/52
+  skip: true  # [aarch64]
+  # ppc64 build fails with
+  # "IncrementalExecutor::executeFunction: symbol 'DW.ref.__gxx_personality_v0' unresolved while linking [cling interface function]!"
+  # It's not clear what's the problem.
+  skip: true  # [ppc64le]
+  # cross-python does not support pypy yet
+  skip: true  # [build_platform != target_platform and python_impl == "pypy"]
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+  detect_binary_files_with_prefix: false
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - {{ compiler('cxx') }}
+  host:
+    - python
+    - pip
+    # cppyy-cling, cppyy-backend, cpycppyy and cppyy are essentially a single package, so we always pin exactly between these.
+    - cpycppyy ==1.12.16  # [python_impl=="cpython"]
+    # cppyy-cling, cppyy-backend, cpycppyy and cppyy are essentially a single package, so we always pin exactly between these.
+    - cppyy-backend ==1.15.2
+    # cppyy-cling, cppyy-backend, cpycppyy and cppyy are essentially a single package, so we always pin exactly between these.
+    - cppyy-cling ==6.30.0
+  run:
+    - python
+    # cppyy-cling, cppyy-backend, cpycppyy and cppyy are essentially a single package, so we always pin exactly between these.
+    - cpycppyy ==1.12.16  # [python_impl=="cpython"]
+    # cppyy-cling, cppyy-backend, cpycppyy and cppyy are essentially a single package, so we always pin exactly between these.
+    - cppyy-backend ==1.15.2
+    # cppyy-cling, cppyy-backend, cpycppyy and cppyy are essentially a single package, so we always pin exactly between these.
+    - cppyy-cling ==6.30.0
+
+test:
+  requires:
+    - gmp
+  imports:
+    - cppyy
+  commands:
+    - $PYTHON -c 'import cppyy;V = cppyy.gbl.std.vector[int]();V.push_back(1)'
+    - $PYTHON -c 'import cppyy;cppyy.load_library("gmp")'
+    - $PYTHON -c 'import cppyy;cppyy.include("gmp.h")'
+
+about:
+  home: https://pypi.org/project/cppyy/
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE.txt
+  summary: Python-C++ bindings interface based on Cling/LLVM
+  description: |
+    An automatic Python-C++ bindings generator, for calling C++ from Python and
+    Python from C++, designed for large scale programs in high performance
+    computing that use modern C++. 
+  doc_url: http://cppyy.readthedocs.io/
+  dev_url: https://bitbucket.org/wlav/cppyy/src
+
+extra:
+  recipe-maintainers:
+    - saraedum
+    - isuruf

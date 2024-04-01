@@ -1,0 +1,54 @@
+{% set name = "tiledb-bioimg" %}
+{% set version = "0.2.6" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/tiledb-bioimg-{{ version }}.tar.gz
+  sha256: 604a097fdf0e821538e8586990423f39f94d0ff9d3e8e56467afcfc77ba25b72
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.7
+    - setuptools-scm
+  run:
+    - pyeditdistance
+    - python >=3.7
+    - tifffile
+    - tiledb-py >=0.19
+    - tqdm
+    - scikit-image
+    # Optional dependencies
+    - imagecodecs
+    - jsonpickle
+    - ome-zarr
+    - openslide-python
+    # - tiledb-cloud
+
+test:
+  imports:
+    - tiledb
+  commands:
+    - pip list
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://pypi.org/project/tiledb-bioimg
+  summary: Package supports all bio-imaging functionality provided by TileDB
+  license: MIT
+  license_file: LICENSE
+  dev_url: https://github.com/TileDB-Inc/TileDB-Bioimaging
+
+extra:
+  recipe-maintainers:
+    - goanpeca

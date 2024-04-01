@@ -1,0 +1,65 @@
+{% set version = "2.3.4" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-extremevalues
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/extremevalues_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/extremevalues/extremevalues_{{ version }}.tar.gz
+  sha256: a6d6ed53a480fcb0c7ff498fdd39b45ae59ad9d67c359e90285040b40691444d
+
+build:
+  merge_build_host: true  # [win]
+  number: 0
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+    - r-gwidgets2
+    - r-gwidgets2tcltk
+  run:
+    - r-base
+    - r-gwidgets2
+    - r-gwidgets2tcltk
+
+test:
+  commands:
+    - $R -e "library('extremevalues')"           # [not win]
+    - "\"%R%\" -e \"library('extremevalues')\""  # [win]
+
+about:
+  home: https://www.github.com/markvanderloo/extremevalues
+  license: GPL-2.0-only
+  summary: Detect outliers in one-dimensional data.
+  license_family: GPL2
+  license_file:
+    - '{{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-2'
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+
+# Package: extremevalues
+# Description: Detect outliers in one-dimensional data.
+# Version: 2.3.3
+# Title: Univariate Outlier Detection
+# Author: Mark van der Loo <mark.vanderloo@gmail.com>
+# Maintainer: Mark van der Loo <mark.vanderloo@gmail.com>
+# Depends: R (>= 2.8.0)
+# Imports: gWidgets2, gWidgets2tcltk, utils, stats, graphics
+# License: GPL-2
+# URL: https://www.github.com/markvanderloo/extremevalues
+# Repository: CRAN
+# NeedsCompilation: no
+# Packaged: 2020-05-18 13:52:37 UTC; mark
+# Date/Publication: 2020-05-18 14:30:02 UTC

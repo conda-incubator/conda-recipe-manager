@@ -1,0 +1,47 @@
+{% set name = "pyzenhub" %}
+{% set version = "0.3.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 26ecafccbd00edd652fbc8204fa218c25eaa89fc827db70e3fa9a4ea7384c910
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.8
+    - setuptools-scm
+  run:
+    - packaging
+    - pydantic <2
+    - python >=3.8
+    - requests
+    - types-requests
+    - typing-extensions
+
+test:
+  imports:
+    - zenhub
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/goanpeca/pyzenhub
+  summary: Python bindings to the Zenhub API
+  dev_url: https://github.com/goanpeca/pyzenhub
+  license: MIT
+  license_file: LICENSE.txt
+
+extra:
+  recipe-maintainers:
+    - goanpeca

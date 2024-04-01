@@ -1,0 +1,50 @@
+{% set version = "1.55.1" %}
+
+package:
+  name: grpc_java_plugin
+  version: {{ version }}
+
+source:
+  - url: https://github.com/grpc/grpc-java/archive/refs/tags/v{{ version }}.tar.gz
+    sha256: be779db38a72a0c693706c433133189538b04979eba1b728eaa21f4fd0f967d8
+    patches:
+      - patches/0001-Build-against-system-libprotobuf.patch
+      - patches/0002-use-C-17.patch
+      - patches/0003-Add-abseil-libs-for-newer-protobuf-versions.patch
+  - url: https://github.com/bazelbuild/bazel/releases/download/{{ bazel_version }}/bazel_nojdk-{{ bazel_version }}-{{ bazel_arch }}
+    sha256: {{ bazel_sha }}
+    fn: bazel
+
+build:
+  number: 7
+  skip: true  # [win]
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - openjdk
+    - openjdk 17  # [linux]
+    - bazel-toolchain
+    - libprotobuf
+    - sed  # [osx]
+  host:
+    - libabseil  # [libprotobuf != "3.21"]
+    - libprotobuf
+
+test:
+  commands:
+    - test -f $PREFIX/bin/grpc_java_plugin
+
+about:
+  home: https://github.com/grpc/grpc-java/tree/master/compiler
+  license: Apache-2.0
+  license_family: MIT
+  license_file: LICENSE
+  summary: gRPC Java Codegen Plugin for Protobuf Compiler
+
+extra:
+  recipe-maintainers:
+    - xhochy
+    - conda-forge/bazel
+    - conda-forge/grpc-cpp

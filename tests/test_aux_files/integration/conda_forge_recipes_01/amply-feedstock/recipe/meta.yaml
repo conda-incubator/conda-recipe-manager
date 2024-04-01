@@ -1,0 +1,44 @@
+{% set name = "amply" %}
+{% set version = "0.1.6" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 61421103ccf8e1066717115fe7917610d831d551c68d31a110876a5b6c78aea4
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.4
+    - pip
+    - setuptools_scm
+  run:
+    - python >=3.4
+    - docutils >=0.3
+    - pyparsing
+
+test:
+  imports:
+    - amply
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: http://github.com/willu47/amply
+  summary: Amply allows you to load and manipulate AMPL/GLPK data as Python data structures
+  license: EPL-2.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - ocefpaf

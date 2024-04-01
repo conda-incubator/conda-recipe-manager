@@ -1,0 +1,48 @@
+{% set name = "reverse-geocode" %}
+{% set version = "1.4.1" %}
+
+package:
+  name: "{{ name|lower }}"
+  version: "{{ version }}"
+
+source:
+  url: "https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/reverse_geocode-{{ version }}.tar.gz"
+  sha256: b0ca8fdd529c999db4d344c2e4075f5dac7db7d3cc8aeb82709091ff340c11a6
+  patches:
+    - 0001_python_int_too_large_for_c_long.patch  # [win]
+
+build:
+  noarch: python
+  number: 0
+  script: "{{ PYTHON }} -m pip install . -vv"
+
+requirements:
+  host:
+    - pip
+    - python >=2.7
+
+  run:
+    - future
+    - numpy
+    - python >=2.7
+    - scipy
+
+test:
+  imports:
+    - reverse_geocode
+
+about:
+  home: "https://bitbucket.org/richardpenman/reverse_geocode"
+  license: "LGPL-2.0-only"
+  license_family: "LGPL"
+  license_file: "LICENSE"
+  summary: "Reverse geocode the given latitude / longitude"
+  doc_url: "https://pypi.org/project/reverse-geocode/"
+  dev_url: "https://bitbucket.org/richardpenman/reverse_geocode/src/default/"
+
+extra:
+  recipe-maintainers:
+    - mwilson8
+    - rluria14
+    - Walter-0
+    - mxr-conda

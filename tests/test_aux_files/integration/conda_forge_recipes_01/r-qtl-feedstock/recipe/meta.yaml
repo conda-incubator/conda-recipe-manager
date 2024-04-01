@@ -1,0 +1,79 @@
+{% set version = "1.66" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-qtl
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/qtl_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/qtl/qtl_{{ version }}.tar.gz
+  sha256: d46a7d49f2d0875c0c1cba77c993f995e7cac4db5796dfb1c62d9fa4eb60d681
+
+build:
+  merge_build_host: true  # [win]
+  number: 0
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ compiler('c') }}              # [not win]
+    - {{ compiler('m2w64_c') }}        # [win]
+    - {{ compiler('cxx') }}            # [not win]
+    - {{ compiler('m2w64_cxx') }}      # [win]
+    - {{ posix }}filesystem        # [win]
+    - {{ posix }}make
+    - {{ posix }}sed               # [win]
+    - {{ posix }}coreutils         # [win]
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+    - libblas
+    - liblapack
+  run:
+    - r-base
+    - {{ native }}gcc-libs         # [win]
+
+test:
+  commands:
+    - $R -e "library('qtl')"           # [not win]
+    - "\"%R%\" -e \"library('qtl')\""  # [win]
+
+about:
+  home: https://rqtl.org, https://github.com/kbroman/qtl
+  license: GPL-3.0-only
+  summary: Analysis of experimental crosses to identify genes (called quantitative trait loci, QTLs) contributing to variation in quantitative traits. Broman et al. (2003) <doi:10.1093/bioinformatics/btg112>.
+  license_family: GPL3
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-3
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+    - MathiasHaudgaard
+    - FrodePedersen
+    - ArneKr
+
+# Package: qtl
+# Version: 1.45-11
+# Date: 2020-02-01
+# Title: Tools for Analyzing QTL Experiments
+# Author: Karl W Broman <broman@wisc.edu> and Hao Wu, with ideas from Gary Churchill and Saunak Sen and contributions from Danny Arends, Robert Corty, Timothee Flutre, Ritsert Jansen, Pjotr Prins, Lars Ronnegard, Rohan Shah, Laura Shannon, Quoc Tran, Aaron Wolen, and Brian Yandell
+# Maintainer: Karl W Broman <broman@wisc.edu>
+# Description: Analysis of experimental crosses to identify genes (called quantitative trait loci, QTLs) contributing to variation in quantitative traits. Broman et al. (2003) <doi:10.1093/bioinformatics/btg112>.
+# Depends: R (>= 2.14.0)
+# Imports: parallel, graphics, stats, utils, grDevices
+# Suggests: testthat
+# License: GPL-3
+# URL: https://rqtl.org, https://github.com/kbroman/qtl
+# BugReports: https://github.com/kbroman/qtl/issues
+# Encoding: UTF-8
+# ByteCompile: true
+# NeedsCompilation: yes
+# Packaged: 2020-02-01 18:45:36 UTC; kbroman
+# Repository: CRAN
+# Date/Publication: 2020-02-02 16:40:05 UTC

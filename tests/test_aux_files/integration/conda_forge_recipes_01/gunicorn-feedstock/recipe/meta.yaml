@@ -1,0 +1,56 @@
+{% set version = "21.2.0" %}
+
+package:
+  name: gunicorn
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/g/gunicorn/gunicorn-{{ version }}.tar.gz
+  sha256: 88ec8bff1d634f98e61b9f65bc4bf3cd918a90806c6f5c48bc5603849ec81033
+
+build:
+  skip: true  # [win]
+  skip: true  # [py<38]
+  number: 1
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+  preserve_egg_dir: true
+  entry_points:
+    - gunicorn=gunicorn.app.wsgiapp:run
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+  host:
+    - python
+    - pip
+  run:
+    - python
+    - setuptools >=3.0
+    - packaging
+
+test:
+  imports:
+    - gunicorn
+    - gunicorn.app
+    - gunicorn.http
+    - gunicorn.instrument
+    - gunicorn.workers
+  commands:
+    - gunicorn --help
+  requires:
+    - paste
+    - pastedeploy
+
+about:
+  home: http://gunicorn.org
+  license: MIT
+  license_file: LICENSE
+  summary: WSGI HTTP Server for UNIX
+
+extra:
+  recipe-maintainers:
+    - kwilcox
+    - daf
+    - jakirkham
+    - sodre

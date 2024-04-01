@@ -1,0 +1,69 @@
+{% set version = "0.10.27" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-rmysql
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/RMySQL_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/RMySQL/RMySQL_{{ version }}.tar.gz
+  sha256: f1735b689cd9bdb9c776a16138eaa1f6c5cbdbab5c1d292e1240e3bbf105bfab
+
+build:
+  merge_build_host: true  # [win]
+  skip: true  # [win]
+  number: 0
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ compiler('c') }}          # [unix]
+    - {{ compiler('m2w64_c') }}    # [win]
+    - {{ posix }}filesystem        # [win]
+    - {{ posix }}sed               # [win]
+    - {{ posix }}grep              # [win]
+    - {{ posix }}autoconf
+    - {{ posix }}automake          # [not win]
+    - {{ posix }}automake-wrapper  # [win]
+    - {{ posix }}pkg-config
+    - {{ posix }}make
+    - {{ posix }}coreutils         # [win]
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+    - mysql-connector-c
+    - r-dbi >=0.4
+  run:
+    - r-base
+    - mysql-connector-c
+    - {{ native }}gcc-libs         # [win]
+    - r-dbi >=0.4
+
+test:
+  requires:
+    - r-testthat
+  source_files:
+    - tests/
+  commands:
+    - $R -e "library('RMySQL')"                                                       # [not win]
+    - $R -e "testthat::test_file('tests/testthat.R', stop_on_failure=TRUE)"           # [not win]
+    - "\"%R%\" -e \"library('RMySQL')\""                                              # [win]
+    - "\"%R%\" -e \"testthat::test_file('tests/testthat.R', stop_on_failure=TRUE)\""  # [win]
+
+about:
+  home: https://downloads.mariadb.org/connector-c/
+  dev_url: https://github.com/r-dbi/rmysql
+  license: GPL-2.0-only
+  summary: Legacy 'DBI' interface to 'MySQL' / 'MariaDB' based on old code ported from S-PLUS. A modern 'MySQL' client based on 'Rcpp' is available  from the 'RMariaDB' package.
+  license_family: GPL2
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-2
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r

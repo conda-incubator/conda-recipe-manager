@@ -1,0 +1,68 @@
+{% set version = "3.2.1" %}
+
+package:
+  name: triqs_tprf
+  version: {{ version }}
+
+source:
+  url: https://github.com/TRIQS/tprf/archive/refs/tags/{{ version }}.tar.gz
+  sha256: f1d4dd5986af4b37dc65f3af2a0be507455f0b4a74ea7d4de892739ccd86158c
+
+build:
+  number: 3
+  skip: true  # [win or py<30]
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - numpy                                  # [build_platform != target_platform]
+    - cmake
+    - make
+    - llvm-openmp  # [osx]
+    - libgomp      # [linux]
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - {{ mpi }}                              # [mpi == 'openmpi' and build_platform != target_platform]
+    - setuptools  # [py>=312]
+  host:
+    - triqs {{ '.'.join(version.split('.')[:2]) }}
+    - libboost-headers
+    - fftw
+    - {{ mpi }}
+    - libblas
+    - liblapack
+    - numpy
+    - python
+    - setuptools  # [py>=312]
+  run:
+    - {{ pin_compatible("triqs", max_pin="x.x") }}
+    - fftw
+    - {{ mpi }}
+    - libblas
+    - liblapack
+    - {{ pin_compatible("numpy") }}
+    - python
+    - setuptools  # [py>=312]
+
+test:
+  commands:
+    - export OMPI_MCA_btl=self,tcp
+    - export OMPI_MCA_plm=isolated
+    - export OMPI_MCA_rmaps_base_oversubscribe=yes
+    - export OMPI_MCA_btl_vader_single_copy_mechanism=none
+    - export mpiexec="mpiexec --allow-run-as-root"
+    - python -c "import triqs_tprf"
+
+about:
+  home: https://triqs.github.io/tprf
+  license: GPL-3.0-or-later
+  license_family: GPL
+  license_file: LICENSE.txt
+  summary: The Two-Particle Response Function tool box for TRIQS
+
+extra:
+  recipe-maintainers:
+    - wentzell
+    - pgunn
+    - thoemi09

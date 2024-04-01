@@ -1,0 +1,75 @@
+{% set version = "2.2.0" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-janitor
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/janitor_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/janitor/janitor_{{ version }}.tar.gz
+  sha256: 29d5d0185e4e824bb38f905b158162a12f52dc01c2e8a487fc730ce46bf6baae
+
+build:
+  merge_build_host: true  # [win]
+  number: 1
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+    - r-dplyr >=1.0.0
+    - r-hms
+    - r-lifecycle
+    - r-lubridate
+    - r-magrittr
+    - r-purrr
+    - r-rlang
+    - r-stringi
+    - r-stringr
+    - r-snakecase >=0.9.2
+    - r-tidyselect >=1.0.0
+    - r-tidyr >=0.7.0
+  run:
+    - r-base
+    - r-dplyr >=1.0.0
+    - r-hms
+    - r-lifecycle
+    - r-lubridate
+    - r-magrittr
+    - r-purrr
+    - r-rlang
+    - r-stringi
+    - r-stringr
+    - r-snakecase >=0.9.2
+    - r-tidyselect >=1.0.0
+    - r-tidyr >=0.7.0
+
+test:
+  commands:
+    - $R -e "library('janitor')"           # [not win]
+    - "\"%R%\" -e \"library('janitor')\""  # [win]
+
+about:
+  home: https://github.com/sfirke/janitor
+  license: MIT
+  summary: 'The main janitor functions can: perfectly format data.frame column names; provide quick counts of variable combinations (i.e., frequency tables and crosstabs); and isolate duplicate records. Other janitor functions nicely format the tabulation results. These tabulate-and-report functions approximate popular features
+    of SPSS and Microsoft Excel. This package follows the principles of the "tidyverse" and works well with the pipe function %>%. janitor was built with beginning-to-intermediate R users in mind and is optimized for user-friendliness. Advanced R users can already do everything covered here, but with janitor they can do
+    it faster and save their thinking for the fun stuff.'
+  license_family: MIT
+  license_file: 
+    - '{{ environ["PREFIX"] }}/lib/R/share/licenses/MIT'
+    - LICENSE
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+
+# Date/Publication: 2019-04-21 04:20:13 UTC

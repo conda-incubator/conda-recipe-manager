@@ -1,0 +1,47 @@
+{% set name = "flake8-pie" %}
+{% set version = "0.16.0" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/flake8-pie-{{ version }}.tar.gz
+  sha256: b8dcb7b92706fa33d05d92a4b3e49b7a9fd3f0041849166275b646ba50e515ba
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - poetry
+    - python >=3.7
+  run:
+    - python >=3.7
+    - typing_extensions
+
+test:
+  imports:
+    - flake8_pie
+  commands:
+    - pip check
+    - flake8 --version | grep flake8-pie
+  requires:
+    - flake8
+    - m2-grep  # [win]
+    - pip
+
+about:
+  home: https://github.com/sbdchd/flake8-pie
+  summary: A flake8 extension that implements misc. lints
+  license: BSD-2-Clause
+  # PR made upstream to include license file in package: https://github.com/sbdchd/flake8-pie/pull/110
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - thewchan

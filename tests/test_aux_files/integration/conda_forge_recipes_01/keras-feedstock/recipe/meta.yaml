@@ -1,0 +1,61 @@
+{% set version = "3.1.1" %}
+# Version bump reminder: Must manually check the file constraints to ensure 
+# they match those similar to
+# 2024/01 hmaarrfk -- However we have found that these get somewhat stale
+# https://keras.io/getting_started/#compatibility-matrix
+
+package:
+  name: keras
+  version: {{ version }}
+
+source:
+  url: https://github.com/keras-team/keras/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: 852bdbf9d9945997626dc9102cd1187ab44cf8130e89465ef90fdf22bb226f18
+
+build:
+  script: {{ PYTHON }} -m pip install . -vv
+  noarch: python
+  number: 0
+
+requirements:
+  host:
+    # see https://github.com/keras-team/keras/blob/master/oss_setup.py
+    - python >=3.9
+    - pip
+  run:
+    - python >=3.9
+    - absl-py
+    - numpy
+    - rich
+    - namex
+    - h5py
+    - optree
+    - ml_dtypes
+  run_constrained:
+    - tensorflow >=2.15.0,<2.17.0a
+    - jax 0.4.*
+    - pytorch 2.1.*
+
+test:
+  requires:
+    - pip
+    - jax
+  commands:
+    - pip check
+    - KERAS_BACKEND=numpy python -c "import keras"
+    - KERAS_BACKEND=jax python -c "import keras"
+
+about:
+  home: https://github.com/keras-team/keras
+  license: Apache-2.0
+  license_file: LICENSE
+  summary: Deep Learning for Python
+
+extra:
+  recipe-maintainers:
+    - ngam
+    - mariusvniekerk
+    - croth1
+    - ocefpaf
+    - xhochy
+    - hmaarrfk

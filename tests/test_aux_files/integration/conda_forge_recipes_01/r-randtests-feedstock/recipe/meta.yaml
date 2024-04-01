@@ -1,0 +1,60 @@
+{% set version = "1.0.1" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-randtests
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/randtests_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/randtests/randtests_{{ version }}.tar.gz
+  sha256: 479558010cc7aa44d83bfa51d35f8f1d814958e405408f71395a539c9e392be4
+
+build:
+  noarch: generic
+  merge_build_host: true  # [win]
+  number: 2
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+
+  host:
+    - r-base
+  run:
+    - r-base
+
+test:
+  commands:
+    - $R -e "library('randtests')"           # [not win]
+    - "\"%R%\" -e \"library('randtests')\""  # [win]
+
+about:
+  home: https://CRAN.R-project.org/package=randtests
+  license: GPL (>= 2)
+  summary: Several non parametric randomness tests for numeric sequences
+  license_family: GPL3
+  license_file: {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-2
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+
+# Package: randtests
+# Type: Package
+# Title: Testing randomness in R
+# Version: 1.0
+# Date: 2014-11-16
+# Author: Frederico Caeiro and Ayana Mateus
+# Maintainer: Frederico Caeiro <fac@fct.unl.pt>
+# Description: Several non parametric randomness tests for numeric sequences
+# License: GPL (>= 2)
+# LazyLoad: yes
+# Packaged: 2014-11-16 22:29:17 UTC; fac
+# NeedsCompilation: no
+# Repository: CRAN
+# Date/Publication: 2014-11-17 00:02:16

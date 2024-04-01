@@ -1,0 +1,40 @@
+{% set name = "xontrib-readable-traceback" %}
+{% set version = "0.3.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: d43feeca2037035767f483da9238a085c9194f9232d9638cae80642cca7f1593
+
+build:
+  noarch: python
+  number: 0
+  script: "{{ PYTHON }} -m pip install . -vv"
+
+requirements:
+  host:
+    - python
+    - pip
+  run:
+    - python
+    - colorama
+    - python-backtrace
+    - xonsh
+
+test:
+  commands:
+    - test -f "${SP_DIR}/xontrib/readable-traceback.xsh"
+
+about:
+  home: https://github.com/6syun9/xontrib-readable-traceback
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: 'Make traceback easier to see for xonsh'
+
+extra:
+  recipe-maintainers:
+    - scopatz

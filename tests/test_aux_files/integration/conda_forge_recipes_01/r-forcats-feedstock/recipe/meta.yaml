@@ -1,0 +1,64 @@
+{% set version = "1.0.0" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-forcats
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/forcats_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/forcats/forcats_{{ version }}.tar.gz
+  sha256: c5bb157909d92e1e1a427c0dc5cb358ea00a43a14918a9088fa4f6630962254e
+
+build:
+  merge_build_host: true  # [win]
+  number: 1
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+    - cross-r-base {{ r_base }}    # [build_platform != target_platform]
+  host:
+    - r-base
+    - r-cli
+    - r-ellipsis
+    - r-glue
+    - r-lifecycle
+    - r-magrittr
+    - r-rlang >=1.0.0
+    - r-tibble
+    - r-withr
+  run:
+    - r-base
+    - r-cli
+    - r-ellipsis
+    - r-glue
+    - r-lifecycle
+    - r-magrittr
+    - r-rlang >=1.0.0
+    - r-tibble
+    - r-withr
+
+test:
+  commands:
+    - $R -e "library('forcats')"           # [not win]
+    - "\"%R%\" -e \"library('forcats')\""  # [win]
+
+about:
+  home: http://forcats.tidyverse.org, https://github.com/tidyverse/forcats
+  license: MIT
+  summary: Helpers for reordering factor levels (including moving specified levels to front, ordering by first appearance, reversing, and randomly shuffling), and tools for modifying factor levels (including collapsing rare levels into other, 'anonymising', and manually 'recoding').
+  license_family: MIT
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/MIT
+    - LICENSE
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r

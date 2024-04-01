@@ -1,0 +1,55 @@
+{% set version = "2.6.1" %}
+
+package:
+  name: mapclassify
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/m/mapclassify/mapclassify-{{ version }}.tar.gz
+  sha256: 4441798d55a051e75206bf46dccfc8a8f8323aac8596d19961d11660c98677ca
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.9
+    - pip
+    - setuptools >=61.0
+    - setuptools-scm >=6.2
+  run:
+    - python >=3.9
+    - scipy >=1.8
+    - numpy >=1.23
+    - scikit-learn >=1.0
+    - pandas >=1.4,!=1.5.0
+    - networkx >=2.7
+
+test:
+  imports:
+    - mapclassify
+    - mapclassify.datasets
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/pysal/mapclassify
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE.txt
+  summary: Classification schemes for choropleth maps
+  dev_url: https://github.com/pysal/mapclassify
+
+extra:
+  recipe-maintainers:
+    - jGaboardi
+    - sjsrey
+    - ljwolf
+    - jorisvandenbossche
+    - ocefpaf
+    - martinfleis
+    - knaaptime

@@ -1,0 +1,44 @@
+{% set version = "0.7.0" %}
+
+package:
+  name: glog
+  version: {{ version }}
+
+source:
+  fn: glog-{{ version }}.tar.gz
+  url: https://github.com/google/glog/archive/v{{ version }}.tar.gz
+  sha256: 375106b5976231b92e66879c1a92ce062923b9ae573c42b56ba28b112ee4cc11
+
+build:
+  number: 0
+  run_exports:
+    # Recent releases have been stable
+    # https://abi-laboratory.pro/index.php?view=timeline&l=glog
+    - {{ pin_subpackage('glog', max_pin="x.x") }}
+
+requirements:
+  build:
+    - cmake
+    - ninja
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+  host:
+    - gflags
+  run:
+    - __osx >={{ MACOSX_DEPLOYMENT_TARGET|default("10.9") }}  # [osx and x86_64]
+
+test:
+  commands:
+    - test -f ${PREFIX}/lib/libglog${SHLIB_EXT}  # [unix]
+    - if not exist %PREFIX%\\Library\\bin\\glog.dll exit 1  # [win]
+
+about:
+  home: https://github.com/google/glog
+  license: BSD-3-Clause
+  license_file: COPYING
+  summary: C++ implementation of the Google logging module.
+
+extra:
+  recipe-maintainers:
+    - jakirkham
+    - xhochy

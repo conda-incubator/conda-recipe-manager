@@ -1,0 +1,91 @@
+{% set name = "river" %}
+{% set version = "0.13.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/river-{{ version }}.tar.gz
+  sha256: 9d068b7a9db32302fbd581af81315681dfe61774a5d777fb3d5982d3c3061340
+
+build:
+  skip: true  # [py<38]
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 3
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('rust') }}
+  host:
+    - python
+    - setuptools-rust
+    - numpy
+    - cython
+    - pip
+  run:
+    - python
+    - scipy >=1.5
+    - pandas >=1.3
+    - {{ pin_compatible('numpy') }}
+
+test:
+  imports:
+    - river
+    - river._bandit
+    - river.anomaly
+    - river.base
+    - river.checks
+    - river.cluster
+    - river.compat
+    - river.compose
+    - river.covariance
+    - river.datasets
+    - river.datasets.synth
+    - river.drift
+    - river.ensemble
+    - river.evaluate
+    - river.facto
+    - river.feature_extraction
+    - river.feature_selection
+    - river.imblearn
+    - river.linear_model
+    - river.metrics
+    - river.metrics.multioutput
+    - river.misc
+    - river.model_selection
+    - river.multiclass
+    - river.multioutput
+    - river.naive_bayes
+    - river.neighbors
+    - river.neural_net
+    - river.optim
+    - river.preprocessing
+    - river.proba
+    - river.reco
+    - river.rules
+    - river.stats
+    - river.stream
+    - river.time_series
+    - river.tree
+    - river.tree.nodes
+    - river.tree.split_criterion
+    - river.tree.splitter
+    - river.utils
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/online-ml/river
+  summary: Online machine learning in Python
+  license: BSD-3-Clause
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - mxr-conda
+    - bubblyorca
+    - synapticarbors

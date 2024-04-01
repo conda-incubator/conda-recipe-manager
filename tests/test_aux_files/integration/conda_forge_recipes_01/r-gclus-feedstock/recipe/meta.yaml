@@ -1,0 +1,67 @@
+{% set version = '1.3.2' %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-gclus
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/gclus_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/gclus/gclus_{{ version }}.tar.gz
+  sha256: 9cc61cdff206c11213e73afca3d570a7234250cf6044a9202c2589932278e0b3
+
+build:
+  merge_build_host: True  # [win]
+  number: 4
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+    - r-cluster
+  run:
+    - r-base
+    - r-cluster
+
+test:
+  commands:
+    - $R -e "library('gclus')"           # [not win]
+    - "\"%R%\" -e \"library('gclus')\""  # [win]
+
+about:
+  home: https://CRAN.R-project.org/package=gclus
+  license: GPL-2.0-or-later
+  summary: Orders panels in scatterplot matrices and parallel coordinate displays by some merit
+    index. Package contains various indices of merit, ordering functions, and enhanced
+    versions of pairs and parcoord which color panels according to their merit level.
+  license_family: GPL3
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-2
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+
+# Package: gclus
+# Version: 1.3.2
+# Author: Catherine Hurley
+# Date: 2019-01-07
+# Maintainer: Catherine Hurley <catherine.hurley@mu.ie>
+# Title: Clustering Graphics
+# Description: Orders panels in scatterplot matrices and parallel coordinate displays by some merit index. Package contains various indices of merit, ordering functions, and enhanced versions of pairs and parcoord which color panels according to their merit level.
+# Depends: R (>= 2.10), cluster
+# License: GPL (>= 2)
+# Suggests: knitr, rmarkdown
+# VignetteBuilder: knitr
+# RoxygenNote: 6.1.0
+# NeedsCompilation: no
+# Packaged: 2019-01-07 17:20:54 UTC; catherine
+# Repository: CRAN
+# Date/Publication: 2019-01-07 20:00:09 UTC

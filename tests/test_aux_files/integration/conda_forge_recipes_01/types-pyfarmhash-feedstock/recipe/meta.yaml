@@ -1,0 +1,39 @@
+{% set name = "types-pyfarmhash" %}
+{% set version = "0.3.1.20240311" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/types-pyfarmhash-{{ version }}.tar.gz
+  sha256: 358b94bd2976fcc2eeb453d0ca69566ae2a797f85e5034c1d4c6fc8545bd815a
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - python >=3.6
+
+test:
+  commands:
+    - test -f $SP_DIR/farmhash-stubs/__init__.pyi
+
+
+about:
+  home: https://github.com/python/typeshed
+  summary: Typing stubs for pyfarmhash
+  license: Apache-2.0 AND MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - fhoehle
+    - conda-forge/mypy

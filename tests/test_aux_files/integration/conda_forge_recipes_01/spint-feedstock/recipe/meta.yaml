@@ -1,0 +1,59 @@
+{% set name = "spint" %}
+{% set version = "1.0.7" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/spint-{{ version }}.tar.gz
+  sha256: 7ee6bfc725f8b507abd43f3d397bde8eaf6d85b8052f9ecb0c69f613bfeac4ca
+
+build:
+  number: 1
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+  run:
+    - python >=3.6
+    - libpysal >=4.0.0
+    - numpy >=1.3
+    - scipy >=0.11
+    - spglm >=1.0.6
+    - spreg
+
+test:
+  imports:
+    - spint
+    - spint.tests
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: http://pysal.org/
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE.txt
+  summary: 'Efficient calibration of spatial interaction models in Python'
+
+  description: |
+    The Spatial Interaction Modeling (SpInt) module provides a collection of
+    tools to study spatial interaction processes and analyze spatial
+    interaction data.
+  doc_url: https://spint.readthedocs.io/
+  dev_url: http://github.com/pysal/spint
+
+extra:
+  recipe-maintainers:
+    - jGaboardi
+    - knaaptime
+    - martinfleis
+    - TaylorOshan
+    - ocefpaf

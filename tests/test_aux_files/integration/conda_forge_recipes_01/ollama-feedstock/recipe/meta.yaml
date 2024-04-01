@@ -1,0 +1,108 @@
+{% set name = "ollama" %}
+{% set goname = "github.com/jmorganca/ollama" %}
+{% set version = "0.1.17" %}
+# DO NOT AUTO MERGE WITHOUT VERIFYING THE GIT_REVISIONS OF ggml AND gguf
+{% set ggml_version = "master-9e232f0" %}
+{% set gguf_version = "b1661" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  - url: https://{{ goname }}/archive/v{{ version }}.tar.gz
+    sha256: 5be6f90941a27cc61e9ad1a76dcfd2702f9d520758571ec4784a6f08de794ac2
+    folder: .
+    patches:
+      # Use the same build options from llama.cpp-feedstock
+      - 0001-remove-submodule.patch
+      - 0001-linux_all-do-not-copy-cuda.patch
+      - 0002-darwin_all-cmake-flags.patch
+      - 0002-linux_all-disable-cuda.patch  # [linux and cuda_compiler_version in (undefined, "None")]
+      # - 0002-win_all-use-ninja-paths.patch
+  - url: https://github.com/ggerganov/llama.cpp/archive/{{ ggml_version }}.tar.gz
+    folder: llm/llama.cpp/ggml
+    sha256: e93334c097c7b6ce17eed47d44934b9354ee29b5ab4f572999547c2d1a2d46ef 
+    patches:
+      - ggml-metal-pick-device.patch
+  - url: https://github.com/ggerganov/llama.cpp/archive/{{ gguf_version }}.tar.gz
+    folder: llm/llama.cpp/gguf
+    sha256: 88b4befe7d44b18e9419a0604adad2c130bfea9af45100b8531822bb2e1184fb
+    patches:
+      - gguf-metal-pick-device.patch
+
+build:
+  skip: true  # [win and cuda_compiler_version not in ("None", )]
+  number: 0
+  string: cuda{{ cuda_compiler_version | replace('.', '') }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version != "None"]
+  string: cpu_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [(osx and x86_64) or cuda_compiler_version == "None"]
+  string: mps_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [osx and arm64]
+  script:
+    - git config --system user.email "conda-forge@numfocus.org"
+    - git config --system user.name "Conda Forge"
+    - git config --global init.defaultBranch main
+    {% for framework in ["ggml", "gguf"] %}
+    - |
+      pushd llm{{ os.sep }}llama.cpp{{ os.sep }}{{ framework }}
+      git init
+      git add .
+      git commit -m "conda-forge build"
+      popd
+    {% endfor %}
+
+    - export GOFLAGS="'-ldflags=-X=github.com/jmorganca/ollama/version.Version={{ version }} -X=github.com/jmorganca/ollama/server.mode=release'"  # [unix]
+    - set GOFLAGS='-ldflags=-X=github.com/jmorganca/ollama/version.Version={{ version }} -X=github.com/jmorganca/ollama/server.mode=release'       # [win]
+
+    - go generate ./... || exit 1
+    - go install . || exit 1                                                                                                  # [build_platform == target_platform]
+    # TODO: This is due to a bug in our go-lang patch 
+    #       Error message is go install can't write to GOBIN when cross compiling
+    - unset CONDA_GO_COMPILER; GOPATH=$SRC_DIR/gopath go install .; mkdir -p $PREFIX/bin; cp gopath/bin/*/ollama $PREFIX/bin  # [build_platform != target_platform]
+    - go-licenses save --save_path licenses ./... || exit 1
+
+  ignore_run_exports_from:
+    # llama.cpp server is staticially linked on osx
+    - {{ compiler('cxx') }}  # [osx]
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - {{ compiler('cuda') }}                    # [cuda_compiler_version not in (undefined, "None")]
+    - {{ compiler('go') }} 1.21
+    - go-licenses
+
+    - git
+    - cmake
+    - make
+
+    # Tool can't find cudart/cublas in the host-environment
+    - cuda-cudart-dev  {{ cuda_compiler_version }}  # [(cuda_compiler_version or "").startswith("12")]
+    - libcublas-dev    {{ cuda_compiler_version }}  # [(cuda_compiler_version or "").startswith("12")]
+  host:
+    # NOTE: Without cuda-version, we are installing cuda-toolkit 11.8 instead of 11.2!
+    - cuda-version     {{ cuda_compiler_version }}  # [cuda_compiler_version != "None" and not (cuda_compiler_version or "").startswith("12")]
+    - cuda-cudart-dev  {{ cuda_compiler_version }}  # [(cuda_compiler_version or "").startswith("12")]
+    - libcublas-dev    {{ cuda_compiler_version }}  # [(cuda_compiler_version or "").startswith("12")]
+  run:
+    # NOTE: Without cuda-version, we are installing cuda-toolkit 11.8 instead of 11.2!
+    - cuda-version     {{ cuda_compiler_version }}  # [cuda_compiler_version != "None" and not (cuda_compiler_version or "").startswith("12")]
+
+test:
+  commands:
+    - ollama --version
+    - ollama --help
+
+about:
+  home: https://ollama.ai
+  summary: Get up and running with Llama 2 and other large language models locally
+  license: MIT
+  license_family: MIT
+  license_file:
+    - LICENSE
+    - licenses/
+  dev_url: https://{{ goname }}
+
+extra:
+  recipe-maintainers:
+    - sodre

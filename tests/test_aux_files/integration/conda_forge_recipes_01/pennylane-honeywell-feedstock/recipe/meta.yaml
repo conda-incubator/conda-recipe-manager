@@ -1,0 +1,45 @@
+{% set name = "pennylane-honeywell" %}
+{% set version = "0.34.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/PennyLaneAI/pennylane-honeywell/archive/v{{ version }}.tar.gz
+  sha256: aae3a418b3d331b4bfb2e8b766bdd239ebf825c326477ecb597411c24b93fabf
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.9
+  run:
+    - pennylane >=0.30,<0.35
+    - pyjwt
+    - python >=3.9
+    - requests
+    - toml
+    - setuptools
+
+test:
+  imports:
+    - pennylane_honeywell
+
+about:
+  home: http://xanadu.ai
+  summary: |
+    The PennyLane-Honeywell plugin integrates Honeywell Quantum Solutions' ion-trap
+    quantum computing hardware with with PennyLane's quantum machine learning capabilities.
+  license: Apache-2.0
+  license_file: LICENSE
+  dev_url: https://github.com/PennyLaneAI/pennylane-honeywell
+  doc_url: https://pennylane-honeywell.readthedocs.io/
+
+extra:
+  recipe-maintainers:
+    - BastianZim

@@ -1,0 +1,43 @@
+{% set name = "simple-websocket" %}
+{% set version = "1.0.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/simple-websocket-{{ version }}.tar.gz
+  sha256: 17d2c72f4a2bd85174a97e3e4c88b01c40c3f81b7b648b0cc3ce1305968928c8
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  number: 1
+
+requirements:
+  host:
+    - python >=3.7
+    - setuptools >=42
+    - wheel
+    - pip
+  run:
+    - python >=3.7
+    - wsproto
+
+test:
+  imports:
+    - simple_websocket
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/miguelgrinberg/simple-websocket
+  summary: Simple WebSocket server and client for Python
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - woutdenolf

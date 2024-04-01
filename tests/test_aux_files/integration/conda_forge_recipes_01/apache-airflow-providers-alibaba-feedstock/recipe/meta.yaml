@@ -1,0 +1,48 @@
+{% set name = "apache-airflow-providers-alibaba" %}
+{% set version = "2.7.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/apache_airflow_providers_alibaba-{{ version }}.tar.gz
+  sha256: e9507c527aee4e47fd043c2714ef69de9dfda2c303a98003d758a41693407b89
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.8,<4.dev0
+    - flit-core >=3.2,<4
+    - pip
+  run:
+    - python >=3.8
+    - alibabacloud-adb20211201 >=1.0.0
+    - alibabacloud-tea-openapi >=0.3.7
+    - apache-airflow >=2.6.0
+    - oss2 >=2.14.0
+
+test:
+  imports:
+    - airflow.providers.alibaba
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/apache/airflow/
+  summary: Provider package apache-airflow-providers-alibaba for Apache Airflow
+  license: Apache-2.0
+  license_file: airflow/providers/alibaba/LICENSE
+  license_family: Apache
+  doc_url: https://airflow.apache.org/docs/apache-airflow-providers-alibaba/stable/index.html
+  dev_url: https://github.com/apache/airflow/
+
+extra:
+  recipe-maintainers:
+    - xylar

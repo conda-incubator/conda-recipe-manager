@@ -1,0 +1,44 @@
+{% set name = "rtoml" %}
+{% set version = "0.10.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/rtoml-{{ version }}.tar.gz
+  sha256: e1c9af50c6e8c53bc07fdf3277ab1b90e83648c689ea73dadae7d78d1e18d752
+
+build:
+  skip: true  # [py<38]
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  number: 1
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('rust') }}
+  host:
+    - python
+    - maturin >=1,<2
+    - pip
+  run:
+    - python
+
+test:
+  imports:
+    - rtoml
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/samuelcolvin/rtoml
+  license: MIT
+  license_file: LICENSE
+  summary: A fast TOML library for python implemented in rust.
+
+extra:
+  recipe-maintainers:
+    - thewchan

@@ -1,0 +1,50 @@
+{% set name = "ipyaladin" %}
+{% set version = "0.2.1" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/ipyaladin-{{ version }}.tar.gz
+  sha256: 8503ce32a2570e36e351c5c65d63ac5b6a681963cb3e560cadc9efa1cd301e60
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.7
+    - jupyter-packaging
+    - jupyterlab
+  run:
+    - python >=3.7
+    - jupyterlab
+    - jupyter
+    - ipywidgets >=7.6.0,<9
+
+test:
+  imports:
+    - ipyaladin
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/cds-astro/ipyaladin
+  license: BSD-3-Clause
+  license_file: ipyaladin-LICENSE-BSD-3
+  summary: ipyaladin
+  description: ipyaladin, a Jupyter widget for Aladin Lite
+  doc_url: https://aladin.u-strasbg.fr/AladinLite/doc/API/
+  dev_url: https://github.com/cds-astro/ipyaladin
+
+extra:
+  recipe-maintainers:
+    - bmatthieu3
+    - tboch

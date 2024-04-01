@@ -1,0 +1,45 @@
+{% set name = "terminaltables" %}
+{% set version = "3.1.10" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/terminaltables-{{ version }}.tar.gz
+  sha256: ba6eca5cb5ba02bba4c9f4f985af80c54ec3dccf94cfcd190154386255e47543
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+    - poetry
+  run:
+    - python >=3.6
+
+test:
+  imports:
+    - terminaltables
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://robpol86.github.io/terminaltables
+  license: MIT
+  license_file: LICENSE
+  license_family: MIT
+  summary: Generate simple tables in terminals from a nested list of strings.
+  doc_url: https://robpol86.github.io/terminaltables
+  dev_url: https://github.com/Robpol86/terminaltables
+
+extra:
+  recipe-maintainers:
+    - mariusvniekerk

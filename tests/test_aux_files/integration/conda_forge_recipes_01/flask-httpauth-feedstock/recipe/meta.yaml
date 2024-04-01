@@ -1,0 +1,41 @@
+{% set name = "Flask-HTTPAuth" %}
+{% set version = "4.8.0" %}
+{% set sha256 = "66568a05bc73942c65f1e2201ae746295816dc009edd84b482c44c758d75097a" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.5
+    - pip
+  run:
+    - python >=3.5
+    - flask
+
+test:
+  imports:
+    - flask_httpauth
+
+about:
+  home: http://github.com/miguelgrinberg/flask-httpauth/
+  license: MIT
+  license_file: LICENSE
+  summary: Basic and Digest HTTP authentication for Flask routes
+  dev_url: http://github.com/miguelgrinberg/flask-httpauth/
+  doc_url: http://flask-httpauth.readthedocs.io
+
+extra:
+  recipe-maintainers:
+    - synapticarbors

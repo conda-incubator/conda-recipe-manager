@@ -1,0 +1,69 @@
+{% set name = "voila" %}
+{% set version = "0.5.5" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 35c7ef6ea4b8beb3e01844f34b6a19d925f69eed1b71e43dd9bf07ced9f0ee39
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv
+  entry_points:
+    - voila = voila.app:main
+
+requirements:
+  host:
+    - python >=3.8
+    - pip
+    - nodejs >=18,<19
+    - hatch-jupyter-builder >=0.3.2
+    - hatchling >=1.8.1
+  run:
+    - python >=3.8
+    - nbconvert >=6.4.5,<8
+    - jupyter_core >=4.11.0
+    - jupyterlab_server >=2.3.0,<3
+    - jupyter_client >=7.4.4,<=9
+    - jupyter_server >=2.0.0,<3
+    - nbclient >=0.4.0,<0.8
+    - websockets >=9
+    - traitlets >=5.0.3,<6
+  run_constrained:
+    - ipywidgets =8
+
+test:
+  imports:
+    - voila
+  commands:
+    - voila --help
+
+
+about:
+  home: https://github.com/voila-dashboards/voila
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: Rendering of live Jupyter notebooks with interactive widgets
+  description: |
+    Voila serves live Jupyter notebooks including Jupyter interactive widgets.
+    Unlike the usual HTML-converted notebooks, each user connecting to the
+    Voila tornado application is associated with a dedicated Jupyter kernel
+    which can execute triggered by Jupyter interactive widgets.
+
+    By default, voila disallows execute requests from the front-end, disabling
+    the ability to execute arbitrary code.
+  dev_url: https://github.com/voila-dashboards/voila
+
+extra:
+  recipe-maintainers:
+    - SylvainCorlay
+    - maartenbreddels
+    - JohanMabille
+    - jtpio
+    - trungleduc
+    - martinRenou

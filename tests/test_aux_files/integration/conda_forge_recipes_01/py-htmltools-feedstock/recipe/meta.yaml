@@ -1,0 +1,56 @@
+{% set name = "htmltools" %}
+{% set version = "0.5.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/htmltools-{{ version }}.tar.gz
+  sha256: 6788e1ee3e0a9239fb83bf023ee380adaab071394fc453591cecd1f0bcbf634d
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.7
+    - setuptools
+  run:
+    - python >=3.7
+    - packaging >=20.9
+    - typing-extensions >=3.10.0.0
+
+test:
+  imports:
+    - htmltools
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/posit-dev/py-htmltools
+  summary: Tools for HTML generation and output.
+  license: MIT
+  license_file:
+    - LICENSE
+  description: |
+    # `htmltools` for Python
+
+    Tools for creating, manipulating, and writing HTML from Python.
+
+    PyPI: [https://pypi.org/project/htmltools](https://pypi.org/project/htmltools)
+
+  doc_url: https://github.com/posit-dev/py-htmltools
+  dev_url: https://github.com/posit-dev/py-htmltools
+
+extra:
+  recipe-maintainers:
+    - wch
+    - sugatoray
+
+  feedstock-name: py-{{ name|lower }}

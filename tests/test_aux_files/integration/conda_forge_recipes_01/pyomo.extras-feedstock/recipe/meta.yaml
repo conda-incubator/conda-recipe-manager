@@ -1,0 +1,56 @@
+# Do metapackages have a version?
+# Do metapackages have a license?
+
+package:
+  name: pyomo.extras
+  version: 3.3
+
+build:
+  number: 182212
+
+requirements:
+  build:
+    - python
+  run:
+    - python
+    - numpy
+    - scipy
+    - ipython
+    - openpyxl
+    - sympy
+    - pymysql
+    - pyodbc
+    - pyro4
+    - pyyaml
+    - networkx
+    - xlrd
+    - pandas
+    - matplotlib
+    - dill
+
+test:
+  imports:
+    - numpy
+    - IPython
+    - openpyxl
+    - sympy
+    - pymysql
+    - pyodbc
+    - Pyro4
+    - yaml
+    - networkx
+    - xlrd
+    - pandas
+    - matplotlib
+    - dill
+
+about:
+  home: http://pyomo.org
+  license: BSD 3-clause
+  summary: 'Extra Python packages that enhance the functionality of Pyomo'
+
+extra:
+  recipe-maintainers:
+    - whart222
+    - Juanlu001
+    - jsiirola

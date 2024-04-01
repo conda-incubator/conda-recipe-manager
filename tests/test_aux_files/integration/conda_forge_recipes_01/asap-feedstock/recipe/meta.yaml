@@ -1,0 +1,54 @@
+{% set name = "asap" %}
+{% set version = "3.12.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/asap3/asap3-{{ version }}.tar.gz
+  sha256: b6c03c790ba4c9f0d231659078c26ce8193fa21314bf2fe4adaa7899d5cd9dbe
+
+build:
+  number: 4
+  script: {{ PYTHON }} -m pip install . -vv
+  skip: true  # [win]
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+  host:
+    - numpy
+    - pip
+    - python
+  run:
+    - ase
+    - python
+    - {{ pin_compatible('numpy') }}
+
+test:
+  imports:
+    - asap3
+
+about:
+  home: https://pypi.org/project/asap3
+  license: LGPL-3.0-only
+  license_file:
+    - LICENSE
+    - LICENSE.LESSER
+  summary: ASAP is a calculator for doing large-scale molecular dynamics (MD) within the Atomic Simulation Environment.
+
+  description: |
+    ASAP (Atomic SimulAtion Program or As Soon As Possible) is a
+    package for large-scale molecular dynamics within the Atomic
+    Simulation Environment (ASE).  It implements a number of 'classical'
+    potentials, most importantly the Effective Medium Theory, and also the
+    mechanisms for domain-decomposition of the atoms.
+
+  doc_url: https://wiki.fysik.dtu.dk/asap
+  dev_url: https://gitlab.com/asap/asap
+
+extra:
+  recipe-maintainers:
+    - Anthchirp

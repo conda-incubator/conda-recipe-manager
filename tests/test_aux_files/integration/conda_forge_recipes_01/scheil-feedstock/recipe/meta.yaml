@@ -1,0 +1,49 @@
+{% set name = "scheil" %}
+{% set version = "0.1.6" %}
+{% set sha256 = "b619fe59ef446f684dd3095741bfd6e20beff3e285890e601fceaf167f37909b" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  noarch: python
+  number: 1
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.7
+    - pip
+  run:
+    - python >=3.7
+    - importlib_metadata
+    - numpy
+    - scipy
+    - setuptools_scm >=6.0
+    - pycalphad >=0.9.1
+
+test:
+  imports:
+    - scheil
+    - scheil.simulate
+    - scheil.solidification_result
+    - scheil.utils
+
+about:
+  home: https://scheil.readthedocs.io
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: A Scheil-Gulliver simulation tool using pycalphad
+  doc_url: A Scheil-Gulliver simulation tool using pycalphad
+  dev_url: https://github.com/pycalphad/scheil
+
+extra:
+  recipe-maintainers:
+    - bocklund
+    - richardotis

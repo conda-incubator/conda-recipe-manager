@@ -1,0 +1,49 @@
+{% set name = "hatch-jupyter-builder" %}
+{% set version = "0.9.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/hatch_jupyter_builder-{{ version }}.tar.gz
+  sha256: 79278198d124c646b799c5e8dca8504aed9dcaaa88d071a09eb0b5c2009a58ad
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.7
+    - hatchling >=1.0
+  run:
+    - python >=3.7
+    - hatchling >=1.0
+
+test:
+  source_files:
+    - .
+  imports:
+    - hatch_jupyter_builder
+  commands:
+    - pip check
+    - pip install -e ".[test]"
+    - python -m pytest -vv
+  requires:
+    - pip
+
+about:
+  home: https://pypi.org/project/hatch-jupyter-builder/
+  summary: A hatch plugin to help build Jupyter packages
+  dev_url: https://github.com/blink0173/hatch-jupyter
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE.txt
+
+extra:
+  recipe-maintainers:
+    - blink1073
+    - zsailer

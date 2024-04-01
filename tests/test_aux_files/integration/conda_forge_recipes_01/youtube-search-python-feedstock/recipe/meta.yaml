@@ -1,0 +1,45 @@
+{% set name = "youtube-search-python" %}
+{% set version = "1.6.6" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/youtube-search-python-{{ version }}.tar.gz
+  sha256: 4568d1d769ecd7eb4bb8365f04eec6e364c5f70eec7b3765f543daebb135fcf5
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - httpx >=0.14.2
+    - python >=3.6
+    - yt-dlp
+
+test:
+  imports:
+    - youtubesearchpython
+    - youtubesearchpython.__future__
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/alexmercerind/youtube-search-python
+  summary: Search for YouTube videos, channels & playlists & get video information using link WITHOUT YouTube Data API v3
+  license: MIT
+  license_file: LICENSE
+  dev_url: https://github.com/alexmercerind/youtube-search-python
+
+extra:
+  recipe-maintainers:
+    - HeavyTony2

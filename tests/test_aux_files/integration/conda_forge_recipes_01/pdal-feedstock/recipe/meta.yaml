@@ -1,0 +1,80 @@
+{% set version = "2.7.1" %}
+
+package:
+  name: pdal
+  version: {{ version }}
+
+source:
+  url: https://github.com/PDAL/PDAL/releases/download/{{ version }}/PDAL-{{ version }}-src.tar.bz2
+  sha256: 7769aaacfc26daeb559b511c73c241a5e9a2f31e26ef3a736204b83e791c5453
+
+build:
+  number: 1
+  run_exports:
+    - {{ pin_subpackage('pdal', max_pin='x.x.x') }}
+
+requirements:
+  build:
+    - {{ compiler('cxx') }}
+    - {{ compiler('c') }}
+    - cmake
+    - make
+    - pkg-config
+
+  host:
+    - libgdal
+    - geotiff
+    - libpq
+    - libkml
+    - eigen
+    - nitro
+    - curl
+    - zlib
+    - hdf5
+    - tiledb
+    - zstd
+    - libxml2
+    - draco
+    - ceres-solver
+    - mkl  # [win]
+    - blas  # [win]
+
+  run:
+    - libgdal
+    - geotiff
+    - libpq
+    - libkml
+    - eigen
+    - nitro
+    - curl
+    - zlib
+    - hdf5
+    - tiledb
+    - zstd
+    - libxml2
+    - draco
+    - ceres-solver
+    - mkl  # [win]
+    - blas  # [win]
+
+  run_constrained:   # [osx and x86_64]
+    - __osx >={{ MACOSX_DEPLOYMENT_TARGET|default("10.9") }}  # [osx and x86_64]
+
+test:
+  commands:
+    - pdal --version
+    - pdal --drivers --debug
+
+about:
+  home: https://www.pdal.io
+  license: BSD-3-Clause
+  license_file: LICENSE.txt
+  summary: Point Data Abstraction Library (PDAL)
+  description: Point cloud data processing.
+  doc_url: https://pdal.io
+  dev_url: https://github.com/pdal/pdal
+
+extra:
+  recipe-maintainers:
+    - chambbj
+    - hobu

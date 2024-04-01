@@ -1,0 +1,45 @@
+{% set version = "0.34.2" %}
+
+package:
+  name: larray
+  version: {{ version }}
+
+source:
+  url: https://github.com/larray-project/larray/archive/{{ version }}.tar.gz
+  sha256: ba230392fe3b4a10dd35c2bcc613bf0c757dcf7f388b8f1daf8455698be15574
+
+build:
+  noarch: python
+  number: 0
+  script: "{{ PYTHON }} -m pip install . --no-deps -vv"
+
+requirements:
+  host:
+    - python >=3.7
+    - pip
+
+  run:
+    - python >=3.7
+    - numpy >=1.22
+    - pandas >=0.20
+
+test:
+  imports:
+    - larray
+
+about:
+  home: http://github.com/larray-project/larray
+  license: GPL-3.0-only
+  license_family: GPL
+  license_file: LICENSE
+  summary: "N-dimensional labelled arrays in Python"
+  description: |
+    LArray is an open source Python library that aims to provide tools for
+    easy exploration and manipulation of N-dimensional labelled data structures.
+  doc_url: https://larray.readthedocs.io/
+  dev_url: https://github.com/larray-project/larray
+
+extra:
+  recipe-maintainers:
+    - alixdamman
+    - gdementen

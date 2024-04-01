@@ -1,0 +1,45 @@
+{% set name = "taskflow" %}
+{% set version = "3.6.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/taskflow/{{ name }}/archive/v{{ version }}.tar.gz
+  sha256: 5a1cd9cf89f93a97fcace58fd73ed2fc8ee2053bcb43e047acb6bc121c3edf4c
+
+build:
+  number: 0
+  skip: true  # [win and vc<14]
+
+requirements:
+  build:
+    - make
+    - cmake
+    - {{ compiler('cxx') }}
+
+test:
+  commands:
+    - test -d ${PREFIX}/include/taskflow  # [unix]
+    - test -f ${PREFIX}/include/taskflow/taskflow.hpp  # [unix]
+    - test -f ${PREFIX}/lib/cmake/Taskflow/TaskflowConfig.cmake  # [osx]
+    - test -f ${PREFIX}/lib/cmake/Taskflow/TaskflowConfigVersion.cmake  # [osx]
+    - test -f ${PREFIX}/lib/cmake/Taskflow/TaskflowConfig.cmake  # [linux]
+    - test -f ${PREFIX}/lib/cmake/Taskflow/TaskflowConfigVersion.cmake  # [linux]
+    - if not exist %LIBRARY_PREFIX%\include\taskflow\taskflow.hpp (exit 1)  # [win]
+    - if not exist %LIBRARY_PREFIX%\lib\cmake\Taskflow\TaskflowConfig.cmake (exit 1)  # [win]
+    - if not exist %LIBRARY_PREFIX%\lib\cmake\Taskflow\TaskflowConfigVersion.cmake (exit 1)  # [win]
+
+about:
+  home: https://github.com/taskflow/taskflow
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: Parallel and Heterogeneous Task Programming in Modern C++
+  doc_url: https://taskflow.github.io/taskflow/index.html
+  dev_url: https://github.com/taskflow/taskflow
+
+extra:
+  recipe-maintainers:
+    - davidbrochart

@@ -1,0 +1,61 @@
+{% set name = "igwn-auth-utils" %}
+{% set version = "1.1.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: f993f0ed8b83538a14df7dda540eb2dcaebd26aa0b058fffa105cd6de2d16e69
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+    - setuptools >=42
+    - setuptools-scm >=3.4.3
+    - wheel
+  run:
+    - cryptography >=2.3
+    - python >=3.6
+    - requests >=2.14
+    - safe-netrc >=1.0.0
+    - scitokens >=1.7.0
+
+test:
+  requires:
+    - pip
+    - pytest >=3.6.3
+    - python < 3.12.0a0
+    - requests
+    - requests-mock
+  commands:
+    # check requirements
+    - python -m pip check igwn-auth-utils
+    - python -m pip show igwn-auth-utils
+    # run test suite
+    - python -m pytest --pyargs igwn_auth_utils.tests
+
+about:
+  home: https://igwn-auth-utils.readthedocs.io
+  dev_url: https://git.ligo.org/computing/igwn-auth-utils.git
+  doc_url: https://igwn-auth-utils.readthedocs.io
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: Authorisation utilities for IGWN
+  description: |
+    Python library functions to simplify using IGWN authorisation credentials.
+
+    This project is primarily aimed at discovering X.509 credentials and
+    SciTokens for use with HTTP(S) requests to IGWN-operated services.
+
+extra:
+  recipe-maintainers:
+    - duncanmmacleod

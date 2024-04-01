@@ -1,0 +1,45 @@
+{% set name = "ansitable" %}
+{% set version = "0.9.10" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/ansitable-{{ version }}.tar.gz
+  sha256: 7cb55000c0bbb5a9157b5d28482f265f3047f9fce8788447277eab2ce97e8b46
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.4
+  run:
+    - colored
+    - python >=3.4
+    - numpy
+
+test:
+  imports:
+    - ansitable
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/petercorke/ansitable
+  summary: Quick and easy display of tabular data and matrices with optional ANSI color and borders.
+  dev_url: https://github.com/petercorke/ansitable
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - Tobias-Fischer
+    - petercorke

@@ -1,0 +1,47 @@
+{% set version = "0.3.5" %}
+
+package:
+  name: xbpch
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/x/xbpch/xbpch-{{ version }}.tar.gz
+  sha256: 122b2089b5130917b6b1d828ff66d0f4047778c241073da5e2804aafa1bfb8a4
+
+build:
+  noarch: python
+  number: 0
+  script: "{{ PYTHON }} -m pip install . --no-deps -vv"
+
+requirements:
+  host:
+    - python >=3
+    - pip
+  run:
+    - python >=3
+    - dask
+    - future
+    - xarray
+
+test:
+  imports:
+    - xbpch
+
+about:
+  home: http://github.com/darothen/xbpch
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: 'xarray interface for bpch files'
+
+  description: |
+    xbpch is a simple utility for reading binary-format outputs (bpch)
+    used in versions of GEOS-Chem earlier than v11-02. The utility allows
+    a user to load this output into an xarray/dask-powered workflow
+    without having to pre-process using GAMAP, IDL, or Matlab.
+  doc_url: http://xbpch.readthedocs.io/
+  dev_url: https://github.com/darothen/xbpch
+
+extra:
+  recipe-maintainers:
+    - darothen

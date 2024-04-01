@@ -1,0 +1,51 @@
+{% set name = "returns" %}
+{% set version = "0.22.0" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/returns-{{ version }}.tar.gz
+  sha256: c7bd85bd1e0041b44fe46c7e2f68fcc76a0546142c876229e395174bcd674f37
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - poetry-core >=1.6.0
+    - python >=3.8.1,<4.0
+  run:
+    - python >=3.8.1,<4.0
+    - typing_extensions >=4.0,<5.0
+
+test:
+  imports:
+    - returns
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/dry-python/returns
+  summary: Make your functions return something meaningful, typed, and safe!
+  license: BSD-2-Clause
+  license_file: LICENSE
+  doc_url: https://returns.readthedocs.io
+  description: |
+    Brings functional programming to Python land by providing a bunch of
+     primitives to write declarative business logic. Also enforces better
+     architecture with fully typed with annotations and checked with mypy.
+     This package is PEP561 compatible and adds emulated Higher Kinded Types
+     support. It also provides type-safe interfaces to create your own data-types
+     with enforced laws, and has a bunch of helpers for better composition. 
+
+extra:
+  recipe-maintainers:
+    - thewchan

@@ -1,0 +1,47 @@
+{% set name = "brukerapi" %}
+{% set version = "0.1.8" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/brukerapi-{{ version }}.tar.gz
+  sha256: 2bcfeedd65c859b4a2b4a670ea23a1ae19a3c5ad02ff3249f8f5b25a6b0027ce
+
+build:
+  number: 0
+  noarch: python
+  entry_points:
+    - bruker=brukerapi.cli:main
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - numpy
+    - python >=3.6
+    - pyyaml
+
+test:
+  imports:
+    - brukerapi
+  commands:
+    - pip check
+    - bruker --help
+  requires:
+    - pip
+
+about:
+  home: https://github.com/isi-nmr/brukerapi-python
+  summary: Python package providing I/O interface for MR datasets in the Bruker proprietary data format
+  license: MIT
+  license_file: LICENSE
+  doc_url: https://bruker-api.readthedocs.io/
+
+extra:
+  recipe-maintainers:
+    - tomas-psorn

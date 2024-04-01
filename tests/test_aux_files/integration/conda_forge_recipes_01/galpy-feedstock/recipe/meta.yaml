@@ -1,0 +1,70 @@
+{% set name = "galpy" %}
+{% set version = "1.9.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: cf13e166b046e07cdcc663acf5412dd2f2649a5ae06985ee040f109325a92e5a
+
+build:
+  number: 0
+  skip: true  # [win and vc<14]
+  script:
+    - rm gsl-config.bat  # [win and py2k]
+    - python setup.py install --single-version-externally-managed --record=record.txt  # [win and py2k]
+  script: python setup.py install --single-version-externally-managed --record=record.txt --no-openmp  # [win and py>=3.6]
+  script: CPATH="$PREFIX/include:$CPATH" python setup.py install --single-version-externally-managed --record=record.txt --no-openmp  # [osx]
+  script: CPATH="$PREFIX/include:$CPATH" python setup.py install --single-version-externally-managed --record=record.txt  # [not win and not osx]
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - numpy                                  # [build_platform != target_platform]
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+  host:
+    - python
+    - setuptools
+    - packaging
+    - numpy
+    - scipy
+    - matplotlib-base
+    - gsl
+  run:
+    - python
+    - packaging
+    - numpy
+    - scipy
+    - matplotlib-base
+    - gsl
+
+test:
+  imports:
+    - galpy
+
+about:
+  home: http://github.com/jobovy/galpy
+  license: BSD-3-clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: Galactic Dynamics in python
+  description: |
+    galpy is a Python 2 and 3 package for galactic dynamics. It supports orbit
+    integration in a variety of potentials, evaluating and sampling various
+    distribution functions, and the calculation of action-angle coordinates
+    for all static potentials. galpy is an astropy affiliated package and
+    provides full support for astropy’s Quantity framework for variables with
+    units.
+  doc_url: http://galpy.readthedocs.io/en/latest/
+  dev_url: http://github.com/jobovy/galpy
+
+extra:
+  recipe-maintainers:
+    - mwcraig
+    - bsipocz
+    - jobovy

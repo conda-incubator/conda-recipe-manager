@@ -1,0 +1,41 @@
+{% set version = "1.9.8" %}
+
+package:
+  name: django-autoslug
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/d/django-autoslug/django-autoslug-{{ version }}.tar.gz
+  sha256: bae66c27d35615f472865b99c4d107f3b3add3d22ee337e84960fc07694abd45
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python
+    - pip
+  run:
+    - python
+    - django >=1.11
+
+test:
+  commands:
+    - pip check
+    - python -c "import django; from django.conf import settings; settings.configure(); django.setup(); import autoslug"
+  requires:
+    - pip
+
+about:
+  home: http://bitbucket.org/neithere/django-autoslug/
+  license: LGPL-3.0-or-later
+  license_file: COPYING.LESSER
+  summary: An automated slug field for Django
+
+extra:
+  recipe-maintainers:
+    - ocefpaf
+    - kwilcox
+    - kcemenike

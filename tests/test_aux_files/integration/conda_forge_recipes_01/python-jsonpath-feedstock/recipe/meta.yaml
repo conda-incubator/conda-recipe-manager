@@ -1,0 +1,43 @@
+{% set name = "python-jsonpath" %}
+{% set version = "1.1.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/python_jsonpath-{{ version }}.tar.gz
+  sha256: d2944e1f7a1d6c8fa958724f9570b8f04a4e00ab6bf1e4733346ab8dcef1f74f
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.7
+    - hatchling
+    - pip
+  run:
+    - python >=3.7
+
+test:
+  imports:
+    - jsonpath
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/jg-rp/python-jsonpath
+  summary: Another JSONPath implementation for Python.
+  dev_url: https://github.com/jg-rp/python-jsonpath
+  license: MIT
+  license_file: LICENSE.txt
+
+extra:
+  recipe-maintainers:
+    - jacobtomlinson
+    - jg-rp

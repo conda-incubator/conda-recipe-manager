@@ -1,0 +1,47 @@
+{% set name = "dogpile.cache" %}
+{% set version = "1.3.2" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/dogpile.cache-{{ version }}.tar.gz
+  sha256: 4f71dc0333ad351c9c6f704f5ba2a37bf51c6eed0437d1adf56e075959afe63b
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - decorator >=4.0.0
+    - python >=3.6
+    - stevedore >=3.0.0
+    - typing_extensions >=4.0.1
+
+test:
+  imports:
+    - dogpile
+    - dogpile.cache
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/sqlalchemy/dogpile.cache
+  summary: A caching front-end based on the Dogpile lock.
+  doc_url: https://pythonhosted.org/dogpile.cache/
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - asford
+    - brainstorm

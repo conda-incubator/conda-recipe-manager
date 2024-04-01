@@ -1,0 +1,71 @@
+{% set name = "libapparmor" %}
+{% set version = "3.1.7" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://gitlab.com/apparmor/apparmor/-/archive/v{{ version }}/apparmor-v{{ version }}.tar.gz
+  sha256: 64494bd99fa6547a9cbdb4fc6bc732451a02dd19e6eb70eab977b239632151eb
+
+build:
+  skip: true  # [not linux]
+  number: 0
+  script:
+    - export PYTHONPATH=$(realpath libraries/libapparmor/swig/python)
+    - cd ./libraries/libapparmor
+    - ./autogen.sh
+    - ./configure --prefix=$PREFIX
+    - make
+    - make check
+    - make install
+
+requirements:
+  build:
+    - perl
+    - python >=3.3
+    - psutil
+    - {{ compiler('fortran') }}
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - sysroot_linux-64 2.17  # [linux64]
+    - make
+    - cmake
+    - autoconf
+    - automake
+    - libtool
+    - swig
+    - python-configuration
+    - bison
+    - flex
+    - pkgconfig
+    - pkg-config
+
+test:
+  commands:
+    - echo "testing..."
+
+about:
+  home: https://apparmor.net/
+  license: GPL-2.0-or-later
+  license_file: LICENSE
+  summary: Linux kernel security module
+  description: |
+    AppArmor protects systems from insecure or untrusted processes
+    by running them in restricted confinement, while still allowing
+    processes to share files, exercise privilege and communicate with
+    other processes. AppArmor is a Mandatory Access Control (MAC)
+    mechanism which uses the Linux Security Module (LSM) framework.
+    The confinement's restrictions are mandatory and are not bound to
+    identity, group membership, or object ownership. The protections
+    provided are in addition to the kernel's regular access control
+    mechanisms (including DAC) and can be used to restrict the
+    superuser.
+
+  dev_url: https://gitlab.com/apparmor
+  doc_url: https://gitlab.com/apparmor/apparmor/-/wikis/Documentation
+
+extra:
+  recipe-maintainers:
+    - ngam

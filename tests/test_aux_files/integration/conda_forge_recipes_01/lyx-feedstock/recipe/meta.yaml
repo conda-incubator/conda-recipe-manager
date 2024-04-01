@@ -1,0 +1,63 @@
+{% set name = "lyx" %}
+{% set version = "2.3.6.2" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  url: https://ftp.lip6.fr/pub/lyx/stable/2.3.x/lyx-{{ version }}.tar.gz
+  sha256: 56a481f0a8d44348d9c226ead2e9d020d9ca9040210dca3f603703d5aaf730e3
+
+build:
+  skip: true  # [not linux]
+  number: 0
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - bc
+    - make
+    - pkg-config
+    - {{ cdt('mesa-libgl-devel') }}  # [linux]
+    - {{ cdt('mesa-dri-drivers') }}  # [linux]
+    - {{ cdt('libselinux') }}  # [linux]
+    - {{ cdt('libxdamage') }}  # [linux]
+    - {{ cdt('libxxf86vm') }}  # [linux]
+    - {{ cdt('libxext') }}  # [linux]
+    - {{ cdt('libxcb') }}  # [linux]
+  host:
+    - boost
+    - hunspell
+    - imagemagick
+    - libiconv
+    - libxcb
+    - qt-main
+    - zlib
+    - xorg-libxfixes  # [linux]
+  run:
+    - python
+    - boost
+    - hunspell
+    - imagemagick
+    - libiconv
+    - libxcb
+    - texlive-core
+    - qt-main
+    - zlib
+
+test:
+  commands:
+    - lyx --version
+
+about:
+  home: https://www.lyx.org/
+  license: GPL-2.0-or-later
+  license_family: GPL2
+  license_file: COPYING
+  summary: An advanced WYSIWYM document processor & LaTeX front-end
+
+extra:
+  recipe-maintainers:
+    - izahn

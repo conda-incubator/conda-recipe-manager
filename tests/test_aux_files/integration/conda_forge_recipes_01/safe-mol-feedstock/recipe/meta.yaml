@@ -1,0 +1,57 @@
+{% set name = "safe-mol" %}
+{% set version = "0.1.5" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/safe-mol-{{ version }}.tar.gz
+  sha256: f57db4f1e949c2b3d7bd971f751fca60d064c8c9a30acbcd44bafbe22c187e1f
+
+build:
+  entry_points:
+    - safe-train = safe.trainer.cli:main
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  number: 0
+
+requirements:
+  host:
+    - python >=3.9
+    - setuptools
+    - setuptools-scm
+    - pip
+  run:
+    - python >=3.9
+    - tqdm
+    - loguru
+    - typer
+    - universal_pathlib
+    - datamol
+    - numpy
+    - pytorch >=2.0
+    - transformers
+    - datasets
+    - tokenizers
+    - accelerate
+    - evaluate
+    - wandb
+    - huggingface_hub
+
+test:
+  imports:
+    - safe
+  commands:
+    - safe-train --help
+
+about:
+  home: https://github.com/datamol-io/safe
+  summary: "A single model for all your molecular design tasks"
+  license: Apache-2.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - hadim
+    - maclandrol

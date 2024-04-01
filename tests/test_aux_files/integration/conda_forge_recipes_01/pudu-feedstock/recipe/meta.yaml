@@ -1,0 +1,45 @@
+{% set name = "pudu" %}
+{% set version = "0.3.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: "https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz"
+  sha256: 6803e3f29a83bbb03c9af58d27c1933b3cf7c8dbbd6730ad6a225945be25c562
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - matplotlib-base
+    - numpy
+    - pandas
+    - python >=3.6
+    - scikit-learn
+    - spectrapepper
+    - tensorflow
+
+test:
+  imports:
+    - pudu
+
+about:
+  home: https://github.com/pudu-py/pudu
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: A Python library for explainability of machine learinng algorithms in an agnostic, deterministic, and simple way.
+  doc_url: https://pudu-py.github.io/pudu/
+  dev_url: https://github.com/pudu-py/pudu
+
+extra:
+  recipe-maintainers:
+    - enricgrau

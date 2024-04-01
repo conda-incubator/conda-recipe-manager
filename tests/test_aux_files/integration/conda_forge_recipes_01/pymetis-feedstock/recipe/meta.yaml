@@ -1,0 +1,55 @@
+{% set name = "PyMetis" %}
+{% set version = "2023.1.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: dc065dbb782ee5b1816341488e68eda74ffe320ae1c9efd35ee5e5d6da119a3f
+
+build:
+  number: 2
+  script: |
+    {{ PYTHON }} ./configure.py --no-use-shipped-metis --metis-inc-dir=$PREFIX/include --metis-lib-dir=$PREFIX/lib
+    {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  build:
+    - {{ compiler('cxx') }}
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - pybind11
+    - python
+  host:
+    - pip
+    - metis
+    - pybind11
+    - python
+  run:
+    - python
+    - metis
+
+test:
+  imports:
+    - pymetis
+  requires:
+    - pip
+    - pytest
+    - numpy
+    - metis
+    - meshpy  # [unix and x86_64]
+  source_files:
+    - test
+  commands:
+    - cd test && python -m pytest
+
+about:
+  home: https://github.com/inducer/pymetis
+  summary: A Graph Partitioning Package
+  license: Apache-2.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - inducer

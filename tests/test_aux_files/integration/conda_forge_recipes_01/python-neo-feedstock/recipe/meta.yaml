@@ -1,0 +1,55 @@
+{% set name = "neo" %}
+{% set version = "0.13.0" %}
+
+package:
+  name: python-{{ name }}
+  version: {{ version }}
+
+source:
+  fn: python-{{ name }}-{{ version }}.tar.gz
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 5675d1fa381a53c2c7eeb8b5e929ec0399de20bb0b52453e1b99ec6d66dc91f3
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - python
+    - pip
+
+  run:
+    - python >=3.8
+    # Needed for pkg_resources
+    - setuptools
+    - packaging
+    - numpy >=1.19.5
+    - quantities >=0.14.1
+
+test:
+  imports:
+    - neo
+    - neo.core
+    - neo.io
+    - neo.rawio
+    - neo.test
+    - neo.test.coretest
+    - neo.test.iotest
+    - neo.test.rawiotest
+
+about:
+  home: http://neuralensemble.org/neo
+  license: BSD-3-Clause
+  license_file: LICENSE.txt
+  summary: A Python package for representing and reading electrophysiology data.
+  doc_url: https://neo.readthedocs.io/
+  dev_url: https://github.com/NeuralEnsemble/python-neo
+
+extra:
+  recipe-maintainers:
+    - apdavison
+    - jakirkham
+    - samuelgarcia
+    - zm711

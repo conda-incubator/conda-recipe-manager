@@ -1,0 +1,62 @@
+{% set name = "nginx" %}
+{% set version = "1.25.3" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  # url: https://github.com/{{ name }}/{{ name }}/archive/refs/tags/release-{{ version }}.tar.gz
+  url: https://nginx.org/download/{{ name }}-{{ version }}.tar.gz
+  sha256: 64c5b975ca287939e828303fa857d22f142b251f17808dfe41733512d9cded86
+
+  patches:
+    - test.patch  # [osx and arm64]
+    - pcre-config.patch  # find pcre in PREFIX instead of /usr
+
+build:
+  number: 1
+  no_link:
+    - etc/*
+    - var/log/nginx/*
+  skip: true  # [win]
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - {{ compiler('fortran') }}
+    - make
+    - gnuconfig
+  host:
+    - libgd
+    - libxslt
+    - openssl
+    - pcre2
+    - zlib
+
+test:
+  commands:
+    - nginx -h
+  requires:
+    - curl
+
+about:
+  home: http://www.nginx.org
+  license: BSD-2-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: Nginx is an HTTP and reverse proxy server
+  description: |
+    Nginx can act as a reverse proxy server for TCP, UDP, HTTP, HTTPS, SMTP,
+    POP3, IMAP, and gRPC protocols, as well as a load balancer and an HTTP cache.
+    Nginx uses an asynchronous event-driven approach to handling requests.
+  doc_url: http://nginx.org/en/docs
+  dev_url: http://hg.nginx.org/nginx
+
+extra:
+  recipe-maintainers:
+    - sodre
+    - fhoehle
+    - pavelzw

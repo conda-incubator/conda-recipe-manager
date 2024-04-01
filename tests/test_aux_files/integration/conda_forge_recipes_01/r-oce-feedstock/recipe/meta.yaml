@@ -1,0 +1,66 @@
+{% set version = "1.8-2" %}
+
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-oce
+  version: {{ version.replace("-", "_") }}
+
+source:
+  fn: oce_{{ version }}.tar.gz
+  url:
+    - http://cran.r-project.org/src/contrib/oce_{{ version }}.tar.gz
+    - http://cran.r-project.org/src/contrib/Archive/oce/oce_{{ version }}.tar.gz
+  sha256: cf5fee1b44f1f972d496c005993eab5267878177c4ce8bf74a3b018047a33fa9
+
+build:
+  merge_build_host: true  # [win]
+  number: 0
+  script: R CMD INSTALL --build .
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ compiler('c') }}        # [not win]
+    - {{ compiler('cxx') }}      # [not win]
+    - {{ compiler('fortran') }}  # [not win]
+    - {{ compiler('m2w64_c') }}        # [win]
+    - {{ compiler('m2w64_cxx') }}        # [win]
+    - {{ compiler('m2w64_fortran') }}        # [win]
+    - {{ posix }}filesystem        # [win]
+    - {{ posix }}make
+    - {{ posix }}sed               # [win]
+    - {{ posix }}coreutils         # [win]
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+    - r-rcpp
+    - r-gsw
+    - r-testthat
+    - r-sf
+  run:
+    - r-base
+    - {{ native }}gcc-libs         # [win]
+    - r-rcpp
+    - r-gsw
+    - r-testthat
+    - r-sf
+
+test:
+  commands:
+    - R -e "library('oce')"  # [not win]
+    - R -e \"library('oce')\"  # [win]
+
+about:
+  home: http://dankelley.github.com/oce/
+  license: GPL-3.0
+  license_file: {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-3
+  summary: Supports the analysis of Oceanographic data, including 'ADCP' measurements, measurements made with 'argo' floats, 'CTD' measurements, sectional data, sea-level time series, coastline and topographic data, etc. Provides specialized functions for calculating seawater properties such as potential temperature in either
+    the 'UNESCO' or 'TEOS-10' equation of state. Produces graphical displays that conform to the conventions of the Oceanographic literature.
+
+extra:
+  recipe-maintainers:
+    - ocefpaf

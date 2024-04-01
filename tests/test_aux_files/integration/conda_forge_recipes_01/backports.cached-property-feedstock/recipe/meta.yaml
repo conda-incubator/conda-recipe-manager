@@ -1,0 +1,49 @@
+{% set version = "1.0.2" %}
+
+package:
+  name: backports.cached-property
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/b/backports.cached-property/backports.cached-property-{{ version }}.tar.gz
+  sha256: 9306f9eed6ec55fd156ace6bc1094e2c86fae5fb2bf07b6a9c00745c656e75dd
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+    - setuptools_scm
+    - wheel
+  run:
+    - python >=3.6
+    - typing >=3.6
+
+test:
+  requires:
+    - pip
+    - m2-grep  # [win]
+  imports:
+    - backports.cached_property
+  commands:
+    - pip check
+    # ensure no 0.0.0 creeps back in from build-system churn
+    - python -c "assert __import__('backports.cached_property').cached_property.__version__ == '{{ version }}'"
+    - pip list | grep -E "backports.cached-property {{ version.replace('.', '\.') }}"
+
+about:
+  home: https://github.com/penguinolog/backports.cached_property
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: Python 3.8 functools.cached_property backport to python 3.6 and 3.7
+  dev_url: https://github.com/penguinolog/backports.cached_property
+
+extra:
+  recipe-maintainers:
+    - martinRenou
+    - bollwyvl

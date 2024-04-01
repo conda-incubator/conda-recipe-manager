@@ -1,0 +1,45 @@
+{% set name = "jsonpath" %}
+{% set version = "0.82" %}
+
+package:
+  name: "{{ name|lower }}"
+  version: "{{ version }}"
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 46d3fd2016cd5b842283d547877a02c418a0fe9aa7a6b0ae344115a2c990fef4
+
+build:
+  noarch: python
+  number: 0
+  script: "{{ PYTHON }} -m pip install --no-deps . -vv"
+
+requirements:
+  host:
+    - python
+    - pip
+  run:
+    - python
+
+test:
+  imports:
+    - jsonpath
+  requires:
+    - pytest
+  source_files:
+    - test
+  commands:
+    - pytest test/test1.py test/test2.py test/test3.py
+
+about:
+  home: https://pypi.org/project/jsonpath
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE.txt
+  summary: A port of the Perl, and JavaScript versions of JSONPath
+  doc_url: https://goessner.net/articles/JsonPath/
+  dev_url: http://www.ultimate.com/phil/python/#jsonpath
+
+extra:
+  recipe-maintainers:
+    - hoishing

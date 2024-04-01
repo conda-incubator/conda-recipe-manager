@@ -1,0 +1,60 @@
+{% set name = "amazon-braket-sdk" %}
+{% set version = "1.76.0" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/amazon-braket-sdk-{{ version }}.tar.gz
+  sha256: 554e149889b5755948b73d4d1ebf874eb8954249d256117253223338b49cceff
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.9
+  run:
+    - cloudpickle ==2.2.1
+    - setuptools
+    - openpulse
+    - openqasm3
+    - oqpy >=0.3.5,<0.4.dev0
+    - amazon-braket-schemas >=1.21.0
+    - amazon-braket-default-simulator >=1.21.2
+    - backoff
+    - boltons
+    - boto3 >=1.28.53
+    - nest-asyncio
+    - networkx
+    - numpy <2
+    - python >=3.9
+    - sympy
+
+test:
+  imports:
+    - braket
+    - braket._sdk
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/aws/amazon-braket-sdk-python
+  summary: An open source library for interacting with quantum computing devices on Amazon Braket
+  license: Apache-2.0
+  license_family: Apache
+  license_file:
+    - LICENSE
+    - NOTICE
+  doc_url: https://amazon-braket-sdk-python.readthedocs.io/en/latest/
+
+extra:
+  recipe-maintainers:
+    - BastianZim

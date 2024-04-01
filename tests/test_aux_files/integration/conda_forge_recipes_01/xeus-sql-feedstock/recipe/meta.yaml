@@ -1,0 +1,53 @@
+{% set name = "xeus-sql" %}
+{% set version = "0.2.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/jupyter-xeus/xeus-sql/archive/{{ version }}.tar.gz
+  sha256: f4d28fd1b07849b32a3424c0f9bc876eab32be2ea133ea49b607424b6eb92d02
+
+build:
+  number: 2
+
+requirements:
+  build:
+    - {{ compiler('cxx') }}
+    - cmake
+    - make  # [unix]
+  host:
+    # cpp-tabulate 1.5 is backward incompatible ...
+    - cpp-tabulate >=1.3,<1.5
+    - cppzmq
+    - nlohmann_json
+    - soci-core
+    - xeus-zmq >=1.0.2,<2
+    - xproperty >=0.11.0,<0.12.0
+    - xtl
+    - xvega >=0.0.10
+    - xvega-bindings >=0.0.10
+  run:
+    # xvega and xvega-bindings are missing run exports
+    - {{ pin_compatible('xvega', max_pin='x.x') }}
+    - {{ pin_compatible('xvega-bindings', max_pin='x.x') }}
+
+test:
+  commands:
+    - test -f ${PREFIX}/bin/xsql  # [unix]
+    - if exist %LIBRARY_PREFIX%\bin\xsql.exe (exit 0) else (exit 1)  # [win]
+
+about:
+  home: https://github.com/jupyter-xeus/xeus-xsql
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: Jupyter kernel for SQL based on xeus and SOCI
+  doc_url: https://xeus-sql.readthedocs.io
+
+extra:
+  recipe-maintainers:
+    - SylvainCorlay
+    - JohanMabille
+    - marimeireles

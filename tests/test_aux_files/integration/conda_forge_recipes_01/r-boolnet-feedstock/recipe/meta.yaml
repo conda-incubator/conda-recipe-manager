@@ -1,0 +1,75 @@
+{% set version = "2.1.9" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-boolnet
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/BoolNet_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/BoolNet/BoolNet_{{ version }}.tar.gz
+  sha256: 2e887189871fd9f274037013271d737c72357b18297ea476989b22dccaafb6a7
+
+build:
+  merge_build_host: true  # [win]
+  skip: true  # [win]
+  number: 0
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ compiler('c') }}        # [not win]
+    - {{ compiler('m2w64_c') }}  # [win]
+    - {{ posix }}filesystem        # [win]
+    - {{ posix }}make
+    - {{ posix }}sed               # [win]
+    - {{ posix }}coreutils         # [win]
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+    - r-xml
+    - r-igraph >=0.6
+  run:
+    - r-base
+    - {{ native }}gcc-libs         # [win]
+    - r-xml
+    - r-igraph >=0.6
+
+test:
+  commands:
+    - $R -e "library('BoolNet')"           # [not win]
+    - "\"%R%\" -e \"library('BoolNet')\""  # [win]
+
+about:
+  home: https://CRAN.R-project.org/package=BoolNet
+  license: Artistic-2.0
+  summary: Provides methods to reconstruct and generate synchronous, asynchronous, probabilistic and temporal Boolean networks, and to analyze and visualize attractors in Boolean networks.
+  license_family: OTHER
+  license_file: {{ environ["PREFIX"] }}/lib/R/share/licenses/Artistic-2.0
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+
+# Package: BoolNet
+# Type: Package
+# Title: Construction, Simulation and Analysis of Boolean Networks
+# Version: 2.1.5
+# Date: 2019-04-15
+# Authors@R: c(person("Christoph", "Mussel", role = "aut"), person("Martin", "Hopfensitz", role = "aut"), person("Dao", "Zhou", role = "aut"), person(c("Hans", "A."), "Kestler", email = "hans.kestler@uni-ulm.de", role = c("aut", "cre")), person("Armin", "Biere", role = "ctb", comment="contributed PicoSAT code"), person(c("Troy", "D."), "Hanson", role = "ctb", comment="contributed uthash macros"))
+# Imports: igraph (>= 0.6), XML
+# Description: Provides methods to reconstruct and generate synchronous, asynchronous, probabilistic and temporal Boolean networks, and to analyze and visualize attractors in Boolean networks.
+# License: Artistic-2.0
+# LazyLoad: yes
+# ByteCompile: TRUE
+# Encoding: UTF-8
+# NeedsCompilation: yes
+# Packaged: 2019-04-15 14:43:01 UTC; julian_schwab
+# Author: Christoph Mussel [aut], Martin Hopfensitz [aut], Dao Zhou [aut], Hans A. Kestler [aut, cre], Armin Biere [ctb] (contributed PicoSAT code), Troy D. Hanson [ctb] (contributed uthash macros)
+# Maintainer: Hans A. Kestler <hans.kestler@uni-ulm.de>
+# Repository: CRAN
+# Date/Publication: 2019-04-16 13:05:46 UTC

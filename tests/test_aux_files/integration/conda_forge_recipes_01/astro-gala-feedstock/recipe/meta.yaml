@@ -1,0 +1,76 @@
+{% set name = "astro-gala" %}
+{% set version = "1.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 24bc8333046ae05bd4dbb00512525033df128f07f33876d43e5ecbcc4b7d06e1
+
+build:
+  number: 0
+  skip: true  # [win or py<36]
+  script: {{ PYTHON }} -m pip install --no-deps --ignore-installed .
+
+requirements:
+  build: {{ compiler('c') }}
+  host:
+    - python
+    - pip
+    - setuptools
+    - setuptools_scm
+    - numpy
+    - gsl
+    - extension-helpers
+    - cython
+  run:
+    - python
+    - astropy
+    - gsl
+    - pyyaml
+    - scipy
+    - {{ pin_compatible('numpy') }}
+
+test:
+  requires:
+    - pytest-astropy
+  imports:
+    - gala
+    - gala.coordinates
+    - gala.dynamics
+    - gala.dynamics._genfunc
+    - gala.dynamics.lyapunov
+    - gala.dynamics.mockstream
+    - gala.integrate
+    - gala.integrate.cyintegrators
+    - gala.integrate.cyintegrators.dopri
+    - gala.integrate.pyintegrators
+    - gala.potential
+    - gala.potential.frame
+    - gala.potential.frame.builtin
+    - gala.potential.hamiltonian
+    - gala.potential.potential
+    - gala.potential.potential.builtin
+    - gala.potential.scf
+
+about:
+  home: http://gala.adrian.pw/
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: Galactic and gravitational dynamics in Python
+  description: |
+    Gala is a Python package for Galactic astronomy and gravitational
+    dynamics. The bulk of the package centers around implementations of
+    gravitational potentials, numerical integration, and nonlinear dynamics.
+  doc_url: http://gala.adrian.pw
+  dev_url: https://github.com/adrn/gala
+
+extra:
+  recipe-maintainers:
+    - mwcraig
+    - bsipocz
+    - adrn

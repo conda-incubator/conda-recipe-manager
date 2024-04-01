@@ -1,0 +1,43 @@
+{% set name = "seamm-dashboard-client" %}
+{% set version = "2023.11.15" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/seamm_dashboard_client-{{ version }}.tar.gz
+  sha256: 8f30876bfd6dd271e334ca5ed3414f7d34d74c42fe852fab8ccb8b8111c9ae20
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python
+    - pip
+  run:
+    - python >=3.6
+    - requests
+    - requests-toolbelt
+
+test:
+  imports:
+    - seamm_dashboard_client
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/molssi-seamm/seamm_dashboard_client
+  summary: A Python client for the SEAMM Dashboard RESTful API.
+  license: BSD-3-Clause
+  license_file:
+    - LICENSE
+
+extra:
+  recipe-maintainers:
+    - paulsaxe

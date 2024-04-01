@@ -1,0 +1,45 @@
+{% set name = "apache-airflow-providers-imap" %}
+{% set version = "3.5.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name.replace('-', '_') }}-{{ version }}.tar.gz
+  sha256: d50929801cb9b7abcea33799e8b3cd64b756bd42530a44281febaffcdb30998f
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.8,<4.dev0
+    - flit-core >=3.2,<4
+    - pip
+  run:
+    - python >=3.8
+    - apache-airflow >=2.6.0
+
+test:
+  imports:
+    - airflow.providers.imap
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/apache/airflow/
+  summary: Provider package apache-airflow-providers-imap for Apache Airflow
+  license: Apache-2.0
+  license_file: airflow/providers/imap/LICENSE
+  license_family: Apache
+  doc_url: https://airflow.apache.org/docs/apache-airflow-providers-imap/stable/index.html
+  dev_url: https://github.com/apache/airflow/
+
+extra:
+  recipe-maintainers:
+    - xylar

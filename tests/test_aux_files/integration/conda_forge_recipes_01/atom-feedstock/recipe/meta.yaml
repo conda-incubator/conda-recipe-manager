@@ -1,0 +1,45 @@
+{% set name = "atom" %}
+{% set version = "0.10.4" %}
+{% set sha256 = "7e493fbcf7b58e7e991d5bdabb4b8d5ed5be2c2a36a21ca892dee8db3086a155" %}
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  number: 0
+  skip: true  # [py<38]
+
+requirements:
+  build:
+    - {{ compiler('cxx') }}
+  host:
+    - python
+    - pip
+    - setuptools
+    - cppy
+  run:
+    - python
+
+test:
+  imports:
+    - atom
+    - atom.datastructures
+
+about:
+  home: https://github.com/nucleic/atom
+  license: BSD-3-Clause
+  license_file: LICENSE
+  summary: Memory efficient Python objects
+
+extra:
+  recipe-maintainers:
+    - blink1073
+    - licode
+    - MatthieuDartiailh
+    - sccolbert
+    - tacaswell

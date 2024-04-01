@@ -1,0 +1,43 @@
+{% set name = "apeye-core" %}
+{% set version = "1.1.5" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/apeye_core-{{ version }}.tar.gz
+  sha256: 5de72ed3d00cc9b20fea55e54b7ab8f5ef8500eb33a5368bc162a5585e238a55
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - hatch-requirements-txt
+    - pip
+    - python >=3.6
+  run:
+    - domdf-python-tools >=2.6.0
+    - idna >=2.5
+    - python >=3.6
+
+test:
+  imports:
+    - apeye_core
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://pypi.org/project/apeye-core/
+  summary: Core (offline) functionality for the apeye library.
+  license: BSD-3-Clause
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - domdfcoding

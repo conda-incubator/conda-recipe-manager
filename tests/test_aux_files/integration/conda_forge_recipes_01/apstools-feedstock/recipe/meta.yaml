@@ -1,0 +1,79 @@
+{% set name = "apstools" %}
+{% set version = "1.6.18" %}
+{% set sha256 = "4597bc227d882a01863d9259fea3017cf71563f20a6ef570a872744de40d1843" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  entry_points:
+    - spec2ophyd = apstools.migration.spec2ophyd:main
+  # per https://github.com/pypa/setuptools_scm/issues/357#issuecomment-846476165
+  # SETUPTOOLS_SCM_PRETEND_VERSION="$(python3 setup.py --version)" pip install .
+  script: SETUPTOOLS_SCM_DEBUG=1 SETUPTOOLS_SCM_PRETEND_VERSION="$(python3 setup.py --version)" {{ PYTHON }} -m pip install . -vv
+  # skip: true  # [py<38 and py>310]
+  number: 0
+  noarch: python
+
+requirements:
+  host:
+    - python >=3.8, <=3.11
+    - conda-verify
+    - setuptools-scm
+    - setuptools-scm >=6.2
+    - pip
+  run:
+    - python >=3.8
+    - area-detector-handlers
+    - bluesky >=1.6.7, !=1.11.0
+    - databroker =1.2.5
+    - databroker-pack
+    - h5py
+    - intake
+    - matplotlib-base
+    - mongoquery >=1.3.6
+    - numpy
+    - openpyxl
+    - ophyd >=1.6.1
+    - pandas
+    - pint
+    - pip
+    - prompt-toolkit
+    - psutil
+    - pyepics >=3.4.3
+    - pymongo
+    - pyqt =5
+    - pyRestTable >=2020.0.8
+    - pysumreg
+    - qt =5
+    - readline !=8.1.2
+    - spec2nexus
+    - sphinx >=5
+    - xlrd
+    - xorg-libx11
+
+test:
+  imports:
+    - apstools
+    - apstools.devices
+  commands:
+    # - pip check
+    - spec2ophyd --help
+  requires:
+    - pip
+
+about:
+  home: https://bcda-aps.github.io/apstools/latest/
+  summary: Various Python tools for use with the Bluesky Framework at the APS
+  license: BSD-4-Clause
+  license_file:
+    - LICENSE.txt
+
+extra:
+  recipe-maintainers:
+    - prjemian

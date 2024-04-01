@@ -1,0 +1,49 @@
+{% set name = "LTTL" %}
+{% set version = "2.0.12" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/LTTL-{{ version }}.zip
+  sha256: 3450330cbc78e9dead81f5b8ffefc198f4857c568990c6e7a2118c27c812c3b9
+
+build:
+  number: 1
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - backports.functools_lru_cache
+    - future
+    - numpy
+    - python >=3.6
+    - scipy
+    - setuptools
+
+test:
+  imports:
+    - LTTL
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/axanthos/LTTL
+  summary: LangTech Text Library (LTTL) for text processing and analysis
+  license: GPL-3.0-or-later
+  license_file: LICENSE
+  dev_url: https://github.com/axanthos/LTTL
+  description: |
+    LTTL is an open-source python package for text processing and analysis. LTTL consists of (i) a set of classes for representing segmental analyses of text strings (= “segmentations”), whereby portions of text strings are delineated and possibly annotated with specific labels; (ii) a set of classes for creating and manipulating segmentations, in order to produce either modified version of the original text data, or data tables summarizing properties of these data (e.g. unit frequency, complexity measures, concordances, and so on). LTTL was designed and implemented by LangTech Sarl.
+
+extra:
+  recipe-maintainers:
+    - HeavyTony2

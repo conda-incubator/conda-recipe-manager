@@ -1,0 +1,228 @@
+{% set version = "0.28.0" %}
+{% set pypi_package_name = "u8darts" %}
+
+package:
+  name: u8darts
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ pypi_package_name[0] }}/{{ pypi_package_name }}/{{ pypi_package_name }}-{{ version }}.tar.gz
+  sha256: 5d7e4f3f5cce4df311f230f107534a7838a3e9faa71e3f9900c9c44dc171444e
+
+build:
+  number: 0
+  noarch: python
+
+outputs:
+  - name: u8darts
+    build:
+      noarch: python
+      script: python -m pip install . --no-deps -vv
+    requirements:
+      host:
+        - python >=3.8
+        - pip
+      run:
+        - python >=3.8
+        - holidays >=0.11.1
+        - joblib >=0.16.0
+        - matplotlib-base >=3.3.0
+        - nfoursid >=1.0.0
+        - numpy >=1.19.0
+        - pandas>=1.0.5
+        - pmdarima >=1.8.0
+        - pyod >=0.9.5
+        - requests >=2.22.0
+        - scikit-learn >=1.0.1
+        - scipy >=1.3.2
+        - shap >=0.40.0
+        - statsforecast >=1.4.0
+        - statsmodels >=0.14.0
+        - tbats >=1.1.0
+        - tqdm >=4.60.0
+        - typing-extensions
+        - xarray >=0.17.0
+        - xgboost >=1.6.0
+    test:
+      imports:
+        - darts
+        - darts.ad
+        - darts.ad.aggregators
+        - darts.ad.anomaly_model
+        - darts.ad.detectors
+        - darts.ad.scorers
+        - darts.dataprocessing
+        - darts.dataprocessing.dtw
+        - darts.dataprocessing.encoders
+        - darts.dataprocessing.transformers
+        - darts.datasets
+        - darts.explainability
+        - darts.metrics
+        - darts.models
+        - darts.tests
+        - darts.tests.dataprocessing
+        - darts.tests.dataprocessing.transformers
+        - darts.tests.utils
+        - darts.utils
+        - darts.utils.data
+        - darts.utils.historical_forecasts
+      source_files:
+        - darts
+      commands:
+        - pytest darts/tests -k "not test_component_specific_lags_forecasts"
+      requires:
+        - pip
+        - testfixtures
+        - pytest
+
+  - name: u8darts-notorch
+    build:
+      noarch: python
+    requirements:
+      host:
+        - python >=3.8
+      run:
+        - python >=3.8
+        - {{ pin_subpackage("u8darts", exact=True) }}
+        - catboost >=1.0.6
+        - lightgbm >=3.2.0
+        - prophet >=1.1.1
+
+    test:
+      imports:
+        - darts
+        - darts.ad
+        - darts.ad.aggregators
+        - darts.ad.anomaly_model
+        - darts.ad.detectors
+        - darts.ad.scorers
+        - darts.dataprocessing
+        - darts.dataprocessing.dtw
+        - darts.dataprocessing.encoders
+        - darts.dataprocessing.transformers
+        - darts.datasets
+        - darts.explainability
+        - darts.metrics
+        - darts.models
+        - darts.tests
+        - darts.tests.dataprocessing
+        - darts.tests.dataprocessing.transformers
+        - darts.tests.utils
+        - darts.utils
+        - darts.utils.data
+        - darts.utils.historical_forecasts
+      source_files:
+        - darts
+      commands:
+        - pytest darts/tests -k "not test_component_specific_lags_forecasts"
+      requires:
+        - pip
+        - testfixtures
+        - pytest
+
+  - name: u8darts-torch
+    build:
+      noarch: python
+    requirements:
+      host:
+        - python >=3.8
+      run:
+        - python >=3.8
+        - {{ pin_subpackage("u8darts", exact=True) }}
+        - pytorch-lightning >=1.5.0
+        - tensorboardx >=2.1
+        - pytorch >=1.8.0
+
+    test:
+      imports:
+        - darts
+        - darts.ad
+        - darts.ad.aggregators
+        - darts.ad.anomaly_model
+        - darts.ad.detectors
+        - darts.ad.scorers
+        - darts.dataprocessing
+        - darts.dataprocessing.dtw
+        - darts.dataprocessing.encoders
+        - darts.dataprocessing.transformers
+        - darts.datasets
+        - darts.explainability
+        - darts.metrics
+        - darts.models
+        - darts.tests
+        - darts.tests.dataprocessing
+        - darts.tests.dataprocessing.transformers
+        - darts.tests.utils
+        - darts.utils
+        - darts.utils.data
+        - darts.utils.historical_forecasts
+      source_files:
+        - darts
+      commands:
+        - pytest darts/tests -k "not test_component_specific_lags_forecasts"
+      requires:
+        - pip
+        - testfixtures
+        - pytest
+
+  - name: u8darts-all
+    build:
+      noarch: python
+    requirements:
+      host:
+        - python >=3.8
+      run:
+        - python >=3.8
+        - {{ pin_subpackage("u8darts", exact=True) }}
+        - pytorch-lightning >=1.5.0
+        - tensorboardx >=2.1
+        - pytorch >=1.8.0
+        - catboost >=1.0.6
+        - lightgbm >=3.2.0
+        - prophet >=1.1.1
+
+    test:
+      imports:
+        - darts
+        - darts.ad
+        - darts.ad.aggregators
+        - darts.ad.anomaly_model
+        - darts.ad.detectors
+        - darts.ad.scorers
+        - darts.dataprocessing
+        - darts.dataprocessing.dtw
+        - darts.dataprocessing.encoders
+        - darts.dataprocessing.transformers
+        - darts.datasets
+        - darts.explainability
+        - darts.metrics
+        - darts.models
+        - darts.tests
+        - darts.tests.dataprocessing
+        - darts.tests.dataprocessing.transformers
+        - darts.tests.utils
+        - darts.utils
+        - darts.utils.data
+        - darts.utils.historical_forecasts
+      source_files:
+        - darts
+      commands:
+        - pytest darts/tests -k "not test_component_specific_lags_forecasts"
+      requires:
+        - pip
+        - testfixtures
+        - pytest
+
+about:
+  home: https://unit8co.github.io/darts/
+  license: Apache-2.0
+  license_family: APACHE
+  license_file: LICENSE
+  summary: A python library for user-friendly forecasting and anomaly detection on time series.
+  dev_url: https://github.com/unit8co/darts
+  doc_url: https://unit8co.github.io/darts/
+
+extra:
+  recipe-maintainers:
+    - hrzn
+    - dennisbader

@@ -1,0 +1,89 @@
+{% set name = "Magics" %}
+{% set version = "4.15.3" %}
+
+package:
+  name: magics-metview
+  version: {{ version }}
+
+source:
+  url: https://confluence.ecmwf.int/download/attachments/3473464/{{ name }}-{{ version }}-Source.tar.gz
+  sha256: 1836e1e37534c556f55b5b13812a513091c2fa508b8c4f5a8b6842f07741f1a7
+
+build:
+  number: 1
+  skip: true  # [win]
+  detect_binary_files_with_prefix: true
+  run_exports:
+    # See https://docs.conda.io/projects/conda-build/en/latest/resources/define-metadata.html#export-runtime-requirements
+    - {{ pin_subpackage('magics-metview', max_pin='x.x') }}
+
+requirements:
+  build:
+    - cmake
+    - make
+    - pkg-config
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    # the CDTs below are needed when building with Metview enabled
+    - {{ cdt('mesa-libgl-devel') }}  # [linux]
+    - {{ cdt('mesa-dri-drivers') }}  # [linux]
+    - {{ cdt('libselinux') }}  # [linux]
+    - {{ cdt('libxdamage') }}  # [linux]
+    - {{ cdt('libxfixes') }}  # [linux]
+    - {{ cdt('libxxf86vm') }}  # [linux]
+    - {{ cdt('libxcb') }}  # [linux]
+  host:
+    - pkg-config
+    - expat
+    - glib
+    - pango
+    - cairo
+    - proj
+    - eccodes >=2.21.0
+    - libnetcdf
+    - qt-main
+    - zlib
+    # See https://conda-forge.org/docs/maintainer/knowledge_base.html#libgl
+    - xorg-libxfixes  # [linux]
+  run:
+    - expat
+    - pango
+    - cairo
+    - proj
+    - eccodes >=2.21.0
+    - simplejson
+    - libnetcdf
+    - qt-main
+    - zlib
+    - __osx >={{ MACOSX_DEPLOYMENT_TARGET|default("10.9") }}  # [osx and x86_64]
+  run_constrained:
+    # magics-metview is incompatible with magics
+    - magics ==9999999999
+
+test:
+  commands:
+    - printf "%s\n" "${MAGPLUS_HOME:?MAGPLUS_HOME is not set}"
+    - which magjsonx
+    - test -f $PREFIX/lib/libMagPlus${SHLIB_EXT}  # [linux]
+    - test -f $PREFIX/lib/libMagPlusSingle${SHLIB_EXT}  # [linux]
+    - test -f $PREFIX/lib/libMagPlusDouble${SHLIB_EXT}  # [linux]
+    - test -f $PREFIX/lib/libMagPlus${SHLIB_EXT}  # [osx]
+    - test -f $PREFIX/lib/libMagPlusSingle${SHLIB_EXT}  # [osx]
+    - test -f $PREFIX/lib/libMagPlusDouble${SHLIB_EXT}  # [osx]
+about:
+  home: https://confluence.ecmwf.int/display/MAGP/
+  license: Apache-2.0
+  license_file:
+    - LICENSE_for_source_files
+    - COPYING
+    - LICENSE
+
+  license_family: Apache
+  summary: ECMWF's Meteorological plotting software Magics built with Metview enabled
+
+extra:
+  recipe-maintainers:
+    - dtip
+    - StephanSiemen
+    - sylvielamythepaut
+    - iainrussell

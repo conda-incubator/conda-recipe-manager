@@ -1,0 +1,41 @@
+{% set name = "python-redmine" %}
+{% set version = "2.4.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/python-redmine-{{ version }}.tar.gz
+  sha256: 29e1c479e6bedc4b193f84dda25121a1a0fcc30969c7f0f6e729c5638749e9d8
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - python >=3.6
+    - requests >=2.23.0
+
+test:
+  imports:
+    - redminelib
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/maxtepkeev/python-redmine
+  summary: Library for communicating with a Redmine project management application
+  license: Apache-2.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - uwefladrich

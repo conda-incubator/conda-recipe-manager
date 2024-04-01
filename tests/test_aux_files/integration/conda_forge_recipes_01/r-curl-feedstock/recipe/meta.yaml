@@ -1,0 +1,74 @@
+{% set version = "5.1.0" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-curl
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/curl_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/curl/curl_{{ version }}.tar.gz
+  sha256: 57218da84b85bd01ce7daa4bca3e271eda1bf688e0cdb211c397ccb272ecba97
+
+build:
+  merge_build_host: true  # [win]
+  skip: true  # [win]
+  number: 0
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - cross-r-base {{ r_base }}      # [build_platform != target_platform]
+    - {{ compiler('c') }}            # [not win]
+    - {{ compiler('m2w64_c') }}      # [win]
+    - {{ posix }}filesystem          # [win]
+    - {{ posix }}sed                 # [win]
+    - {{ posix }}grep                # [win]
+    - {{ posix }}autoconf
+    - {{ posix }}automake            # [not win]
+    - {{ posix }}automake-wrapper    # [win]
+    - {{ posix }}pkg-config
+    - {{ posix }}make
+    - {{ posix }}coreutils           # [win]
+    - {{ posix }}zip                 # [win]
+  host:
+    - r-base
+    - libcurl                        # [not win]
+  run:
+    - r-base
+    - {{ native }}gcc-libs           # [win]
+    - {{ native }}libwinpthread-git  # [win]
+    - {{ native }}zlib               # [win]
+
+test:
+  requires:
+    - r-httpuv
+    - r-testthat
+    # NB: r-webutils creates a circular dependency; it should be temporarily disabled during migrations
+    - r-webutils
+  source_files:
+    - tests/
+    - tests/testthat
+  commands:
+    - $R -e "library('curl')"                                                                 # [not win]
+    - $R -e "testthat::test_file('tests/testthat.R', stop_on_failure=TRUE)"                   # [not win]
+    - $R -e "invisible(curl::curl_fetch_memory('http://rest.kegg.jp/conv/ncbi-geneid/dme'))"  # [not win]
+    - "\"%R%\" -e \"library('curl')\""                                                 # [win]
+    - "\"%R%\" -e \"testthat::test_file('tests/testthat.R')\""  # [win]
+about:
+  home: https://github.com/jeroen/curl#readme
+  license: MIT
+  summary: The curl() and curl_download() functions provide highly configurable drop-in replacements for base url() and download.file() with better performance, support for encryption (https, ftps), gzip compression, authentication, and other 'libcurl' goodies. The core of the package implements a framework for performing
+    fully customized requests where data can be processed either in memory, on disk, or streaming via the callback or connection interfaces. Some knowledge of 'libcurl' is recommended; for a more-user-friendly web client see the 'httr' package which builds on this package with http specific tools and logic.
+  license_family: MIT
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/MIT
+    - LICENSE
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r

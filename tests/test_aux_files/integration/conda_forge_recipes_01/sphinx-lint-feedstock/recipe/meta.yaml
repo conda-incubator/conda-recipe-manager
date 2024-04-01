@@ -1,0 +1,61 @@
+{% set name = "sphinx-lint" %}
+{% set import = "sphinxlint" %}
+{% set entrypoint = "sphinx-lint" %}
+{% set version = "0.9.1" %}
+{% set sha256 = "185cee19ff1129549c45e15a3b25404daeb47c54d15112dda589cedad82957aa" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0]|lower }}/{{ name|lower }}/{{ name.replace('-', '_') }}-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+  entry_points:
+    - {{ entrypoint }} = {{ import }}.cli:main
+
+requirements:
+  host:
+    - python >=3.8
+    - hatch-vcs
+    - hatchling
+    - pip
+  run:
+    - python >=3.8
+    - polib
+    - regex
+
+test:
+  imports:
+    - {{ import }}
+  commands:
+    - pip check
+    - {{ entrypoint }} --help
+    - {{ entrypoint }} --version
+    - {{ entrypoint }} --list --verbose
+  requires:
+    - pip
+
+about:
+  home: https://github.com/sphinx-contrib/sphinx-lint
+  license: PSF-2.0
+  license_file: LICENSE
+  summary: Check for stylistic and formal issues in .rst and .py files included in the documentation.
+  description: |
+    Sphinx Lint is based on rstlint.py from CPython.
+    It should be reasonably fast so it's comfortable to use as a linter in your editor,
+    be usable on a single file,
+    not give any false positives (probably a utopia, but let's try),
+    not spend too much effort finding errors that sphinx-build already finds (or can easily find),
+    and focus on finding errors that are not visible to sphinx-build.
+  doc_url: https://github.com/sphinx-contrib/sphinx-lint/blob/main/README.md
+  dev_url: https://github.com/sphinx-contrib/sphinx-lint
+
+extra:
+  recipe-maintainers:
+    - CAM-Gerlach

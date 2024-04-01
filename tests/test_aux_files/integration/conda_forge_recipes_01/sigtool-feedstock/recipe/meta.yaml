@@ -1,0 +1,38 @@
+{% set version = "0.1.3" %}
+
+package:
+  name: sigtool
+  version: {{ version }}
+
+source:
+  url: https://github.com/thefloweringash/sigtool/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: 462e7daf144740910dacadab1f1cfde154b405480cf7ec45b5d648f9d293851d
+  patches:
+    - 0001-find-codesign_allocate-next-to-it.patch
+
+build:
+  number: 0
+  skip: true  # [win]
+
+requirements:
+  build:
+    - {{ compiler('cxx') }}                   # [not osx]
+    - clang_bootstrap_{{ target_platform }}   # [osx]
+    - cmake
+    - make
+  host:
+    - openssl
+
+test:
+  commands:
+    - codesign -h
+
+about:
+  home: https://github.com/thefloweringash/sigtool
+  license: MIT
+  license_file: LICENSE
+  summary: A minimal multicall binary providing helpers for working with embedded signatures in Mach-O files.
+
+extra:
+  recipe-maintainers:
+    - isuruf

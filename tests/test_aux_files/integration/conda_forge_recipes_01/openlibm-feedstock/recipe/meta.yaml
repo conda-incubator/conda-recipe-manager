@@ -1,0 +1,120 @@
+{% set name = "openlibm" %}
+{% set version = "0.8.1" %}
+{% set so_version = "4.0" %}
+{% set so_major_version = so_version.split('.')[0] %}
+{% set sha256 = "ba8a282ecd92d0033f5656bb20dfc6ea3fb83f90ba69291ac8f7beba42dcffcf" %}
+
+package:
+  name: {{ name|lower }}-split
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://github.com/JuliaLang/openlibm/archive/v{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  number: 1
+  skip: true  # [win]
+
+requirements:
+  build:
+    - {{ compiler("c") }}  # [not win]
+    - {{ compiler("m2w64_c") }}  # [win]
+    - make
+
+outputs:
+
+  - name: openlibm
+    build:
+      run_exports:
+        - {{ pin_subpackage('libopenlibm' ~ so_major_version) }}  # [unix]
+        - {{ pin_subpackage('libopenlibm', max_pin='x.x') }}      # [win]
+    files:
+      - include/openlibm  # [unix]
+      - lib/pkgconfig/openlibm.pc  # [unix]
+      - lib/libopenlibm.so  # [linux]
+      - lib/libopenlibm.dylib  # [osx]
+      - Library\\include\\openlibm  # [win]
+      - Library\\lib\\pkgconfig\\openlibm.pc  # [win]
+    requirements:
+      build:
+        - {{ compiler("c") }}  # [not win]
+        - {{ compiler("m2w64_c") }}  # [win]
+      run:
+        - {{ pin_subpackage('libopenlibm' ~ so_major_version, exact=True) }}  # [unix]
+        - {{ pin_subpackage('libopenlibm', exact=True) }}  # [win]
+    test:
+      requires:
+        - {{ compiler("c") }}
+      files:
+        - test_openlibm.c
+      commands:
+        - test -d "${PREFIX}/include/openlibm"                         # [unix]
+        - test ! -f "${PREFIX}/lib/libopenlibm.a"                      # [unix]
+        - test -f "${PREFIX}/lib/libopenlibm${SHLIB_EXT}"              # [unix]
+        - if not exist "%LIBRARY_INC%\\openlibm\\openlibm.h" exit 1    # [win]
+        - if exist "%LIBRARY_LIB%\\libopenlibm_static.lib" exit 1      # [win]
+        - if not exist "%LIBRARY_BIN%\\libopenlibm.dll" exit 1         # [win]
+        - if not exist "%LIBRARY_LIB%\\libopenlibm.lib" exit 1         # [win]
+        - echo on  # [win]
+        - cl /Tc test_openlibm.c /I %CONDA_PREFIX%\Library\include\openlibm /link /LIBPATH:"%CONDA_PREFIX%\Library\lib" libopenlibm.lib /out:test_openlibm.exe  # [win]
+        - test_openlibm.exe  # [win]
+        - ${CC} -o test_openlibm test_openlibm.c -I${CONDA_PREFIX}/include/openlibm -L${CONDA_PREFIX}/lib -lopenlibm ${CFLAGS} ${LDFLAGS}  # [unix]
+        - ./test_openlibm  # [unix]
+
+  - name: libopenlibm{{ so_major_version }}  # [unix]
+  - name: libopenlibm                        # [win]
+    build:
+      run_exports:
+        - {{ pin_subpackage('libopenlibm' ~ so_major_version) }}  # [unix]
+        - {{ pin_subpackage('libopenlibm', max_pin='x.x') }}      # [win]
+    files:
+      - lib/libopenlibm.so.{{ so_major_version }}  # [linux]
+      - lib/libopenlibm.so.{{ so_version }}  # [linux]
+      - lib/libopenlibm.{{ so_major_version }}.dylib  # [osx]
+      - lib/libopenlibm.{{ so_version }}.dylib  # [osx]
+      - Library\\bin\\libopenlibm.dll  # [win]
+      - Library\\lib\\libopenlibm.lib  # [win]
+    requirements:
+      build:
+        - {{ compiler("c") }}  # [not win]
+        - {{ compiler("m2w64_c") }}  # [win]
+    test:
+      commands:
+        - test -f $PREFIX/lib/libopenlibm.so.{{ so_major_version }}  # [linux]
+        - test -f $PREFIX/lib/libopenlibm.so.{{ so_version }}        # [linux]
+        - test -f $PREFIX/lib/libopenlibm.{{ so_major_version }}.dylib  # [osx]
+        - test -f $PREFIX/lib/libopenlibm.{{ so_version }}.dylib        # [osx]
+        - if not exist "%LIBRARY_BIN%\\libopenlibm.dll" exit 1         # [win]
+        - if not exist "%LIBRARY_LIB%\\libopenlibm.lib" exit 1         # [win]
+
+  - name: libopenlibm-static
+    files:
+      - lib/libopenlibm.a                     # [unix]
+      - Library\\lib\\libopenlibm_static.lib  # [win]
+    requirements:
+      build:
+        - {{ compiler("c") }}  # [not win]
+        - {{ compiler("m2w64_c") }}  # [win]
+      run:
+        - {{ pin_subpackage('openlibm', exact=True) }}
+    test:
+      commands:
+        - test -f "${PREFIX}/lib/libopenlibm.a"              # [unix]
+        - if not exist "%LIBRARY_LIB%\\libopenlibm_static.lib" exit 1  # [win]
+
+about:
+  home: http://openlibm.org/
+  license: MIT AND ISC AND BSD-2-Clause
+  license_file: LICENSE.md
+  summary: High quality system independent, portable, open source libm implementation
+  dev_url: https://github.com/JuliaLang/openlibm
+
+extra:
+  recipe-maintainers:
+    - ngam
+    - dfornika
+    - jakirkham
+    - SylvainCorlay
+  feedstock-name: {{ name|lower }}

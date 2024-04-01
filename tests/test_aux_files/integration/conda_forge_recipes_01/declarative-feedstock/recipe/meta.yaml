@@ -1,0 +1,55 @@
+{% set name = "declarative" %}
+{% set version = "1.3.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/mccullerlp/python-declarative/archive/refs/tags/{{ version }}.tar.gz
+  sha256: a7d057a29c4ae97fab85e290eb4abc115e203e0a6f82ff544950956af1187d8a
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.4
+    - setuptools
+  run:
+    - numpy
+    - python >=3.4
+
+test:
+  imports:
+    - declarative
+    - declarative.argparse
+  requires:
+    - pip
+    - pytest
+  source_files:
+    - test/
+  commands:
+    # check requirements
+    - python -m pip check
+    # run test suite
+    - python -m pytest -ra test
+
+about:
+  home: https://github.com/mccullerlp/python-declarative
+  summary: Collection of decorators and base classes to allow a declarative style of programming.
+  license: Apache-2.0
+  license_file: LICENSE
+  description: |
+    Collection of decorators and base classes to allow a declarative
+    style of programming. Excellent for event-loop task registration.
+    Also included are nesting attribute-access dictionaries (Bunches)
+    as well as value storage with callbacks. Relatively Magic-Free.
+
+extra:
+  recipe-maintainers:
+    - duncanmmacleod
+    - mccullerlp

@@ -1,0 +1,81 @@
+{% set name = "parcels" %}
+{% set version = "3.0.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/oceanparcels/{{ name }}/archive/v{{ version }}.tar.gz
+  sha256: 30d3d6f8a0ed65f7999e5454d7067bff79822fc877a3350492306e48076f0de0
+
+build:
+  number: 0
+  noarch: python
+  script:
+    - {{ PYTHON }} -m pip install .
+
+requirements:
+  host:
+    - python >=3.8
+    - pip
+    - setuptools
+    - setuptools_scm
+    - setuptools_scm_git_archive
+    - wheel
+  run:
+    - python  >=3.8
+    - cftime
+    - cgen
+    - dask
+    - __unix           # [unix]
+    - __win            # [win]
+    - c-compiler       # [unix]
+    - m2w64-toolchain  # [win]
+    - matplotlib-base >=2.0.2
+    - netcdf4 >=1.1.9
+    - numpy >=1.11
+    - platformdirs
+    - psutil
+    - pymbolic
+    - pytest
+    - scipy >=0.16.0
+    - trajan
+    - tqdm
+    - xarray >=0.10.8
+    - zarr >=2.11.0
+
+test:
+  requires:
+    - pip
+    - curl
+  imports:
+    - parcels
+  commands:
+    - pip check
+    - if [ -z ${CC+x} ]; then echo "\$CC not set"; exit 1; else echo "CC is set to $CC"; fi  # [unix]
+    - curl https://raw.githubusercontent.com/OceanParcels/parcels/master/docs/examples/example_peninsula.py > example_peninsula.py
+    - python example_peninsula.py
+
+about:
+  home: https://github.com/OceanParcels/parcels
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE.md
+  summary: Probably A Really Computationally Efficient Lagrangian Simulator
+
+  description: |
+    Parcels (Probably A Really Computationally Efficient Lagrangian Simulator)
+    is a set of Python classes and methods to create customisable particle
+    tracking simulations using output from Ocean Circulation models.
+    Parcels can be used to track passive and active particulates such as
+    water, nutrients, plankton, plastic and fish.
+  doc_url: https://oceanparcels.org/
+  dev_url: https://github.com/OceanParcels/parcels
+
+extra:
+  recipe-maintainers:
+    - erikvansebille
+    - delandmeterp
+    - ckehl
+    - willirath

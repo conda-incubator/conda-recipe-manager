@@ -1,0 +1,63 @@
+{% set name = "amundsen-metadata" %}
+{% set version = "3.13.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/amundsen-metadata-{{ version }}.tar.gz
+  sha256: 6472903a6e994d685703733d89c5056d7c76e001731f317a9446e79291d58c8d
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  number: 0
+
+requirements:
+  host:
+    - python >=3.8
+    - pip
+  run:
+    - python >=3.8
+    - neo4j-python-driver >=4.4.5
+    - apache-atlas >=0.0.11
+    - beaker >=1.10.0
+    - overrides >=2.5
+    - amundsen-common >=0.27.0
+    - attrs >=19.1.0
+    - boto3 >=1.17.23
+    - click >=8.1.7
+    - flasgger >=0.9.5
+    - flask >=2.2.5
+    - flask-restful >=0.3.9
+    - flask-cors >=3.0.10
+    - itsdangerous >=2.1.2
+    - jinja2 >=3.1.2
+    - jsonschema >=3.0.1,<4.0
+    - marshmallow >=3.0,<=3.6
+    - marshmallow3-annotations >=1.1.0
+    - pytz >=2021.1
+    - requests >=2.25.0
+    - requests-aws4auth >=1.1.0
+    - statsd >=3.2.1
+    - typing >=3.6.4
+    - werkzeug >=2.0.3
+    - wheel >=0.36.2
+
+test:
+  imports:
+    - metadata_service
+  requires:
+    - pip
+
+about:
+  home: https://www.github.com/amundsen-io/amundsen/tree/main/metadata
+  summary: Metadata service for Amundsen
+  license: Apache-2.0
+  license_file:
+    - LICENSE
+
+extra:
+  recipe-maintainers:
+    - rxm7706

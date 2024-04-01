@@ -1,0 +1,61 @@
+{% set version = "3.0.0" %}
+{% set js_version = version.replace("a", "-alpha.").replace("b", "-beta.").replace("rc", "-rc.") %}
+{% set ns = "@deathbeds" %}
+{% set extensions = [
+  "jupyterlab-fonts",
+  "jupyterlab-font-anonymous-pro",
+  "jupyterlab-font-atkinson-hyperlegible",
+  "jupyterlab-font-dejavu-sans-mono",
+  "jupyterlab-font-fira-code",
+] %}
+
+package:
+  name: jupyterlab-fonts
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/j/jupyterlab-fonts/jupyterlab_fonts-{{ version }}.tar.gz
+  sha256: 9f98258fb80c5fe86e4996e7cbf1089c0837ffe19c49afd5f929f0762dfaf961
+
+build:
+  number: 0
+  noarch: python
+  script:
+    - {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+
+requirements:
+  host:
+    - pip
+    - python >=3.8
+    - flit-core >=3.9,<4.0
+  run:
+    - jupyterlab >=3.5,<5.0.0a0
+    - python >=3.8
+
+test:
+  requires:
+    - pip
+    - m2-git  # [win]
+  imports:
+    - jupyterlab_fonts
+  commands:
+    - pip check
+    - jupyter labextension list
+    - jupyter labextension list 1>labextensions 2>&1
+    {% for ext in extensions %}
+    - grep -iE "{{ ns }}/{{ ext }} v{{ js_version.replace('.', '\\.') }}.*OK.*" labextensions
+    {% endfor %}
+
+about:
+  home: https://github.com/deathbeds/jupyterlab-fonts
+  summary: Interactive Typography and Style for JupyterLab
+  license: BSD-3-Clause
+  license_file:
+    - LICENSE
+    {% for ext in extensions %}
+    - src/_d/share/jupyter/labextensions/{{ ns }}/{{ ext }}/static/third-party-licenses.json
+    {% endfor %}
+
+extra:
+  recipe-maintainers:
+    - bollwyvl

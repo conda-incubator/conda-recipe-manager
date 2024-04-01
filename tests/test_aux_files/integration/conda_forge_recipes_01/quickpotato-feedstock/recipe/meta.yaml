@@ -1,0 +1,59 @@
+{% set name = "QuickPotato" %}
+{% set version = "1.0.1" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/QuickPotato-{{ version }}.tar.gz
+  sha256: 9ddae0ad2f730ecf1647ff95e18c0a6532df3bb43c68fd59891196a5e6e610e3
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.7
+  run:
+    - jinja2
+    - numpy
+    - pandas
+    - plotly
+    - pymysql
+    - python >=3.7
+    - pyyaml
+    - scipy
+    - sqlalchemy
+    - sqlalchemy-utils
+
+test:
+  imports:
+    - QuickPotato
+    - QuickPotato.configuration
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/JoeyHendricks/QuickPotato
+  summary: Making performance testing within Python easy and understandable.
+  license: MIT
+  license_file: LICENSE.md
+  description: |
+    QuickPotato is a Python library that aims to make it easier to rapidly
+     profile your software and produce powerful code visualizations that enables
+     you to quickly investigate where potential performance bottlenecks are
+     hidden. Also, QuickPotato is trying to provide you with a path to add an
+     automated performance testing angle to your regular unit tests or
+     test-driven development test cases allowing you to test your code early in
+     the development life cycle in a simple, reliable, and fast way.\
+
+extra:
+  recipe-maintainers:
+    - thewchan

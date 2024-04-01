@@ -1,0 +1,50 @@
+{% set name = "tiptop" %}
+{% set version = "0.2.8" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/tiptop-{{ version }}.tar.gz
+  sha256: 1a94d2b42da333badcea60c57d7a16c9e57d0b7ab723345416052279a5e945f8
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+  entry_points:
+    - tiptop = tiptop._app:run
+
+requirements:
+  host:
+    - pip
+    - python >=3.7
+    - setuptools >=61
+  run:
+    - distro
+    - psutil
+    - py-cpuinfo
+    - python >=3.7
+    - rich >=11.0.0
+    - textual >=0.1.15,<0.2
+
+test:
+  imports:
+    - tiptop
+  commands:
+    - pip check
+    - tiptop -h
+  requires:
+    - pip
+
+about:
+  home: https://github.com/nschloe/tiptop
+  summary: A command-line system monitoring tool in the spirit of top.
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - thewchan

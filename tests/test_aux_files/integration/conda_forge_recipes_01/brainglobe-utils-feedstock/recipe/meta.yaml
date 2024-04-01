@@ -1,0 +1,63 @@
+{% set name = "brainglobe-utils" %}
+{% set version = "0.4.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/brainglobe-utils-{{ version }}.tar.gz
+  sha256: 4d10b4be6e8701c5a6db2f64ad5d66a9cc653ef83804606bf8d766b685fbf8bc
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.8.0
+    - setuptools >=45
+    - wheel
+    - setuptools-scm >=6.2
+    - pip
+  run:
+    - python >=3.8.0
+    - natsort
+    - pandas
+    - psutil
+    - pyarrow
+    - pynrrd
+    - slurmio
+    - configobj
+    - tqdm
+    - nibabel
+    - pyyaml
+    - scipy
+    - scikit-image
+    - tifffile
+    - numpy
+    - qtpy
+    - superqt
+    - brainglobe-atlasapi >=2.0.1
+    - brainglobe-space
+
+test:
+  imports:
+    - brainglobe_utils
+  commands:
+    - pip list
+    - pip check
+  requires:
+    - pip
+
+about:
+  summary: Shared general purpose tools for the BrainGlobe project
+  home: https://github.com/brainglobe/BrainGlobe-utils
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - willGraham01
+    - adamltyson

@@ -1,0 +1,42 @@
+{% set name = "spotipy2" %}
+{% set version = "0.6" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/CyanBook/spotipy2/archive/v{{ version }}.tar.gz
+  sha256: f230999c0a9ddceed8c69f30324e4d936faefe5c5145d79147b4b059caa6e50a
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.7
+  run:
+    - aiohttp
+    - python >=3.7
+
+test:
+  imports:
+    - spotipy2
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://spotipy2.org/
+  summary: The next generation Spotify Web API wrapper for Python
+  dev_url: https://github.com/CyanBook/spotipy2
+  license: LGPL-3.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - captivus

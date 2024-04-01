@@ -1,0 +1,52 @@
+{% set name = "h3pandas" %}
+{% set version = "0.2.6" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/h3pandas-{{ version }}.tar.gz
+  sha256: eda3430a88e81c03791c6f7e393d3a3af797b6f0b69d7d5496f35e35ab2557d0
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.8
+  run:
+    - geopandas
+    - h3-py
+    - numpy
+    - pandas
+    - python >=3.8
+    - shapely
+    - typing-extensions
+
+test:
+  imports:
+    - h3pandas
+    - h3pandas.util
+  commands:
+    - pytest tests/
+  requires:
+    - pytest
+  source_files:
+    - tests
+
+about:
+  home: https://github.com/DahnJ/H3-Pandas
+  summary: Integration of H3 and GeoPandas
+  license: MIT
+  license_file: LICENSE
+  doc_url: https://h3-pandas.readthedocs.io/en/latest/
+  dev_url: https://github.com/DahnJ/H3-Pandas
+
+extra:
+  recipe-maintainers:
+    - DahnJ

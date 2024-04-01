@@ -1,0 +1,46 @@
+{% set version = "0.0.4" %}
+
+package:
+  name: pymodsecurity
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/p/pymodsecurity/pymodsecurity-{{ version }}.tar.gz
+  sha256: 63a74c1f2fcadf140f03b088cfd3c41233c72dbdc5de4ef3a77ae0ab5c1fb72b
+
+build:
+  number: 2
+  skip: true  # [not linux or py<35]
+  script:
+    - CFLAGS="-I$PREFIX/include -L$PREFIX/lib"
+    - "{{ PYTHON }} -m pip install . --no-deps -vv"
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+  host:
+    - python
+    - pip
+    - modsecurity
+    - pybind11 >=2.2
+  run:
+    - modsecurity
+    - python
+    # remove this pin once the dependencies are rebuilt
+    - icu 58
+
+test:
+  imports:
+    - ModSecurity
+
+about:
+  home: https://github.com/actions-security/pymodsecurity
+  summary: Python bindings to libmodsecurity
+  license: Apache-2.0
+  license_family: APACHE
+  license_file: LICENSE.txt
+
+extra:
+  recipe-maintainers:
+    - GustavoKatel

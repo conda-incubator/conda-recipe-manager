@@ -1,0 +1,41 @@
+{% set name = "rarfile" %}
+{% set version = "4.0" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 67548769229c5bda0827c1663dce3f54644f9dbfba4ae86d4da2b2afd3e602a1
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python
+  run:
+    - python
+
+test:
+  imports:
+    - rarfile
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://pypi.org/project/rarfile/
+  summary: RAR archive reader for Python
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - marcelotrevisani

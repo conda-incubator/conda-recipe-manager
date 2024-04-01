@@ -1,0 +1,47 @@
+{% set name = "mediafile" %}
+{% set version = "0.12.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/mediafile-{{ version }}.tar.gz
+  sha256: d75d805a06ed56150dbcea76505e700f9809abd9e98f98117ae46f5df2ccf1d7
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.7
+    - flit-core
+  run:
+    - mutagen >=1.46
+    - python >=3.7
+    - six >=1.9
+
+test:
+  imports:
+    - mediafile
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  dev_url: https://github.com/beetbox/mediafile
+  summary: Handles low-level interfacing for files' tags.
+  license: MIT
+  license_file: LICENSE
+  doc_url: https://mediafile.readthedocs.io/
+  home: https://github.com/beetbox/mediafile
+  description: |
+    MediaFile is a simple interface to the metadata tags for many audio file formats. It wraps Mutagen, a high-quality library for low-level tag manipulation, with a high-level, format-independent interface for a common set of tags.
+
+extra:
+  recipe-maintainers:
+    - HeavyTony2

@@ -1,0 +1,40 @@
+{% set name = "iterators" %}
+{% set version = "0.2.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/iterators-{{ version }}.tar.gz
+  sha256: e9927a1ea1ef081830fd1512f3916857c36bd4b37272819a6cd29d0f44431b97
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - python >=3.6
+
+test:
+  imports:
+    - iterators
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/leangaurav/pypi_iterator
+  summary: Iterator utility classes and functions
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - thewchan

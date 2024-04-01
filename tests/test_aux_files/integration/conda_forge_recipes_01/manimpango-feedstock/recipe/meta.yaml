@@ -1,0 +1,56 @@
+{% set name = "manimpango" %}
+{% set version = "0.5.0" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/ManimPango-{{ version }}.tar.gz
+  sha256: 299913bbccb0f15954b64401cf9df24607e1a01edda589ea77de1ed4cc2bc284
+
+build:
+  number: 0
+  skip: true  # [py<36]
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - cython                                 # [build_platform != target_platform]
+    - pkg-config                             # [build_platform != target_platform]
+    - {{ compiler('c') }}
+  host:
+    - python
+    - cython >=0.27
+    - pip
+    - pango
+    - cairo
+    - glib
+    - pkg-config
+  run:
+    - python
+    - pango
+    - cairo
+    - glib
+
+test:
+  imports:
+    - manimpango
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://manimpango.manim.community/
+  summary: Bindings for Pango for using with Manim.
+  dev_url: https://github.com/ManimCommunity/manimpango
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - ocefpaf

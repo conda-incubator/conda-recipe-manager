@@ -1,0 +1,102 @@
+{% set name = "finesse" %}
+{% set version = "3.0a21" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/finesse-{{ version }}.tar.gz
+  sha256: 8dae28db4565ab8554dfd473c6d291625956de2a2d1615b4783b79f9ecd5bd0d
+  patches:
+    # The scipy checks are causing issues when importing scipy during the installation
+    # procedure
+    - ignore-scipy-checks.patch
+    # force windows cythonize
+    - force-cythonize.patch  # [win]
+
+build:
+  number: 1
+  skip: true  # [py<39]
+  entry_points:
+    - kat3 = finesse.__main__:cli
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - libgomp  # [linux]
+    - llvm-openmp  # [osx]
+    - cython >=0.29.36
+    # extras for cross-compiling
+    - cross-python_{{ target_platform }}  # [build_platform != target_platform]
+    - cython >=0.29.36                    # [build_platform != target_platform]
+    - numpy                               # [build_platform != target_platform]
+    - python                              # [build_platform != target_platform]
+  host:
+    - cython >=0.29.36
+    - libpython  # [win]
+    - numpy
+    - pip
+    - python
+    - scipy >=1.4
+    - setuptools
+    - setuptools-scm
+    - tqdm
+    - wheel
+    - suitesparse
+    - quantiphy
+  run:
+    - cython >=0.29.36
+    - click >=7.1
+    - click-default-group >=1.2.2
+    - control >=0.9
+    - deprecated >=1.2
+    - h5py >=3.0
+    - matplotlib-base >=3.5
+    - more-itertools >=8.7
+    - networkx >=2.4
+    - {{ pin_compatible('numpy') }}
+    - pyspellchecker >=0.6
+    - python
+    - scipy >=1.4
+    - sly >=0.4
+    - sympy >=1.6
+    - tqdm
+    - quantiphy
+#    - blockdiag >=3.0  # [py<311] this filter should be removed when https://github.com/conda-forge/funcparserlib-feedstock/pull/13 has been resolved
+#    - pillow <10.0 # blockdiag issues: site-packages/blockdiag/imagedraw/png.py:282: DeprecationWarning: getsize is deprecated and will be removed in Pillow 10 (2023-07-01). Use getbbox or getlength instead.
+
+test:
+  requires:
+    - faker
+    - hypothesis
+    - pip
+    - pytest
+  source_files:
+    - tests/
+  imports:
+    - finesse
+    - finesse.analysis
+  commands:
+    # check requirements
+    - python -m pip check
+    # check entry points
+    - kat3 --help
+    # run unit tests
+    - python -m pytest tests --import-mode=importlib
+
+about:
+  home: https://www.gwoptics.org/finesse
+  dev_url: https://git.ligo.org/finesse/finesse3.git
+  doc_url: https://finesse.docs.ligo.org/finesse3/
+  license: GPL-3.0-or-later
+  license_file: LICENSE.md
+  summary: A simulation tool for modelling laser interferometers
+  description: |
+    Finesse 3 is a Python based interferometer simulation software.
+
+extra:
+  recipe-maintainers:
+    - danielbrown2
+    - duncanmmacleod
+    - freise

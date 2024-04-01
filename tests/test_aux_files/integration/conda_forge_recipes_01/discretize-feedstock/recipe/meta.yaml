@@ -1,0 +1,57 @@
+{% set version = "0.10.0" %}
+
+package:
+  name: discretize
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/d/discretize/discretize-{{ version }}.tar.gz
+  sha256: 00893a29d2a870500967bf99aa3cf31a35d867976c28e983788e4abad19cf608
+
+build:
+  number: 1
+  # script: {{ PYTHON }} -m pip install --no-deps -vv --no-build-isolation .
+
+requirements:
+  build:
+    - {{ compiler('cxx') }}
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - cython                                 # [build_platform != target_platform]
+    - numpy                                  # [build_platform != target_platform]
+    - ninja                                  # [unix]
+    - pkg-config                             # [unix]
+  host:
+    - python
+    - python-build
+    - pip
+    - cython >=0.29.35,!=3.0.3
+    - meson-python
+    - numpy
+    - setuptools_scm
+  run:
+    - python
+    - {{ pin_compatible('numpy') }}
+    - scipy >=1.8
+
+test:
+  imports:
+    - discretize
+  requires:
+    - setuptools  # [py<38]
+  commands:
+    - python -c "import discretize; print(discretize.__version__)"
+    - python -c "from importlib.metadata import version; print(version('discretize'))"  # [py>=38]
+    - python -c "from pkg_resources import get_distribution; print(get_distribution('discretize').version)"  # [py<38]
+
+about:
+  home: http://github.com/simpeg/discretize
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: Discretization tools for finite volume and inverse problems
+
+extra:
+  recipe-maintainers:
+    - lheagy
+    - jcapriot

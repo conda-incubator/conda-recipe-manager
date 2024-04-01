@@ -1,0 +1,78 @@
+{% set version = "0.6-30" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-latticeextra
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/latticeExtra_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/latticeExtra/latticeExtra_{{ version }}.tar.gz
+  sha256: c550a76913624818482bf237d48883c58e368ba356ced8ed5e76146672279eed
+
+build:
+  merge_build_host: true  # [win]
+  number: 2
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+    - cross-r-base {{ r_base }}    # [build_platform != target_platform]
+  host:
+    - r-base
+    - r-mass
+    - r-rcolorbrewer
+    - r-interp
+    - r-jpeg
+    - r-lattice
+    - r-png
+  run:
+    - r-base
+    - r-mass
+    - r-rcolorbrewer
+    - r-interp
+    - r-jpeg
+    - r-lattice
+    - r-png
+
+test:
+  commands:
+    - $R -e "library('latticeExtra')"           # [not win]
+    - "\"%R%\" -e \"library('latticeExtra')\""  # [win]
+
+about:
+  home: http://latticeextra.r-forge.r-project.org/
+  license: GPL-2.0-or-later
+  summary: Building on the infrastructure provided by the lattice package, this package provides several new high-level functions and methods, as well as additional utilities such as panel and axis annotation functions.
+  license_family: GPL2
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-2
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+
+# Package: latticeExtra
+# Version: 0.6-29
+# Date: 2019-12-18
+# Title: Extra Graphical Utilities Based on Lattice
+# Author: Deepayan Sarkar <deepayan.sarkar@r-project.org>, Felix Andrews <felix@nfrac.org>
+# Maintainer: Deepayan Sarkar <deepayan.sarkar@r-project.org>
+# Description: Building on the infrastructure provided by the lattice package, this package provides several new high-level functions and methods, as well as additional utilities such as panel and axis annotation functions.
+# Depends: R (>= 3.6.0), lattice
+# Imports: grid, stats, utils, grDevices, png, jpeg, RColorBrewer
+# Suggests: maps, mapproj, deldir, tripack, quantreg, zoo, MASS, mgcv
+# URL: http://latticeextra.r-forge.r-project.org/
+# LazyLoad: yes
+# LazyData: yes
+# License: GPL (>= 2)
+# NeedsCompilation: no
+# Packaged: 2019-12-19 13:11:49 UTC; deepayan
+# Repository: CRAN
+# Date/Publication: 2019-12-19 13:50:05 UTC

@@ -1,0 +1,44 @@
+{% set name = "google-cloud-audit-log" %}
+{% set version = "0.2.5" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/google-cloud-audit-log-{{ version }}.tar.gz
+  sha256: 86e2faba3383adc8fd04a5bd7fd4f960b3e4aedaa7ed950f2f891ce16902eb6b
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.7
+    - pip
+  run:
+    - python >=3.7
+    - protobuf >=3.19.5,<5.0.0dev,!=3.20.0,!=3.20.1,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5
+    - googleapis-common-protos >=1.56.2,<2.0dev
+
+test:
+  imports:
+    - google.cloud.audit.audit_log_pb2
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/googleapis/python-audit-log
+  summary: Google Cloud Audit Protos
+  license: Apache-2.0
+  license_file: LICENSE
+  doc_url: https://github.com/googleapis/python-audit-log
+  dev_url: https://github.com/googleapis/python-audit-log
+
+extra:
+  recipe-maintainers:
+    - xylar

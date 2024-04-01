@@ -1,0 +1,64 @@
+{% set version = "5.1.0" %}
+
+package:
+  name: compliance-checker
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/c/compliance-checker/compliance-checker-{{ version }}.tar.gz
+  sha256: 471704e86926b8ac3f5469c1a0a14cc6febdc7603489472349afb1ff9b936563
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  entry_points:
+    - compliance-checker = cchecker:main
+
+requirements:
+  host:
+    - python >=3.7
+    - pip
+    - setuptools-scm
+  run:
+    - python >=3.7
+    - cf-units >=2
+    - cftime >=1.1.0
+    - isodate >=0.5.4
+    - jinja2 >=2.7.3
+    - lxml >=3.2.1
+    - netcdf4 >=1.5.7
+    - owslib >=0.8.3
+    - pendulum >=1.2.4
+    - pygeoif >=0.6
+    - pyproj >=2.2.1
+    - regex >=2017.07.28
+    - requests >=2.2.1
+    - setuptools >=15.0
+    - shapely >=1.7.1
+    - validators >=0.14.2
+
+test:
+  source_files:
+    - compliance_checker
+  requires:
+    - pytest
+  imports:
+    - compliance_checker
+    - compliance_checker.cf
+  commands:
+    - compliance-checker --help
+
+about:
+  home: https://github.com/ioos/compliance-checker
+  license: Apache-2.0
+  license_file: LICENSE
+  summary: Checks Datasets and SOS endpoints for standards compliance
+
+extra:
+  recipe-maintainers:
+    - benjwadams
+    - daf
+    - kwilcox
+    - lukecampbell
+    - ocefpaf

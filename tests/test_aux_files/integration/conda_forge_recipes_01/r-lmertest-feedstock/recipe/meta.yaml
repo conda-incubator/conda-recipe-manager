@@ -1,0 +1,77 @@
+{% set version = "3.1-3" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-lmertest
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/lmerTest_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/lmerTest/lmerTest_{{ version }}.tar.gz
+  sha256: 35aa75e9f5f2871398ff56a482b013e6828135ef04916ced7d1d7e35257ea8fd
+
+build:
+  merge_build_host: true  # [win]
+  number: 2
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+    - r-mass
+    - r-ggplot2
+    - r-lme4 >=1.1_10
+    - r-numderiv
+  run:
+    - r-base
+    - r-mass
+    - r-ggplot2
+    - r-lme4 >=1.1_10
+    - r-numderiv
+
+test:
+  commands:
+    - $R -e "library('lmerTest')"           # [not win]
+    - "\"%R%\" -e \"library('lmerTest')\""  # [win]
+
+about:
+  home: https://github.com/runehaubo/lmerTestR
+  license: GPL (>= 2)
+  summary: Provides p-values in type I, II or III anova and summary tables for lmer model fits (cf. lme4) via Satterthwaite's degrees of freedom method. A Kenward-Roger method is also available via the pbkrtest package. Model selection methods include step, drop1 and anova-like tables for random effects (ranova). Methods
+    for Least-Square means (LS-means) and tests of linear contrasts of fixed effects are also available.
+  license_family: GPL3
+  license_file: {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-2
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+
+# Package: lmerTest
+# Type: Package
+# Title: Tests in Linear Mixed Effects Models
+# Version: 3.1-0
+# Authors@R: c(person("Alexandra", "Kuznetsova", role = c("aut")), person("Per", "Bruun Brockhoff", role = c("aut", "ths", "cre"), email = "perbb@dtu.dk"), person("Rune", "Haubo Bojesen Christensen", role =  c("aut"), email = "Rune@ChristensenStatistics.dk"))
+# Depends: R (>= 3.2.5), lme4 (>= 1.1-10), stats, methods
+# Imports: numDeriv, MASS, ggplot2
+# Suggests: pbkrtest (>= 0.4-3), tools
+# Description: Provides p-values in type I, II or III anova and summary tables for lmer model fits (cf. lme4) via Satterthwaite's degrees of freedom method. A Kenward-Roger method is also available via the pbkrtest package. Model selection methods include step, drop1 and anova-like tables for random effects (ranova). Methods for Least-Square means (LS-means) and tests of linear contrasts of fixed effects are also available.
+# License: GPL (>= 2)
+# Encoding: UTF-8
+# LazyData: true
+# URL: https://github.com/runehaubo/lmerTestR
+# BugReports: https://github.com/runehaubo/lmerTestR/issues
+# RoxygenNote: 6.1.1
+# Collate: 'anova_contrasts.R' 'contest.R' 'contrast_utils.R' 'data_documentation.R' 'drop1.R' 'estimability.R' 'legacy.R' 'lmer.R' 'lmerTest.R' 'lmer_anova.R' 'lmer_summary.R' 'ls_means.R' 'ranova.R' 'step.R' 'terms_utils.R' 'utils.R'
+# NeedsCompilation: no
+# Packaged: 2019-02-06 17:26:37 UTC; rhbc
+# Author: Alexandra Kuznetsova [aut], Per Bruun Brockhoff [aut, ths, cre], Rune Haubo Bojesen Christensen [aut]
+# Maintainer: Per Bruun Brockhoff <perbb@dtu.dk>
+# Repository: CRAN
+# Date/Publication: 2019-02-11 08:50:13 UTC

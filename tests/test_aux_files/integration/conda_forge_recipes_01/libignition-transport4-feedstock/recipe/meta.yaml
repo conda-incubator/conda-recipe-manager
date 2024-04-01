@@ -1,0 +1,64 @@
+{% set base_name = "libignition-transport" %}
+{% set version = "11.4.1" %}
+{% set major_version = version.split('.')[0] %}
+{% set name = base_name + major_version %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  - url: https://github.com/ignitionrobotics/ign-transport/archive/ignition-transport{{ major_version }}_{{ version }}.tar.gz
+    sha256: dad9553f68076c466a5fa4d575c1910b13a6b32e7dfe3e29e81f93ae5bec07ac
+
+build:
+  number: 6
+  run_exports:
+    - {{ pin_subpackage(name, max_pin='x') }}
+
+requirements:
+  build:
+    - {{ compiler('cxx') }}
+    - {{ compiler('c') }}
+    - make                               # [not win]
+    - cmake
+    - pkg-config
+  host:
+    - libignition-cmake2
+    - libignition-msgs8
+    - libignition-tools1
+    - libignition-utils1
+    - cppzmq
+    - zeromq
+    - libuuid                            # [linux]
+    - libabseil
+    - libprotobuf
+    - sqlite
+  run:
+    - cppzmq
+  run_constrained:
+    - __osx >={{ MACOSX_DEPLOYMENT_TARGET|default("10.9") }}  # [osx and x86_64]
+
+test:
+  commands:
+    - test -f ${PREFIX}/include/ignition/transport{{ major_version }}/ignition/transport.hh  # [not win]
+    - test -f ${PREFIX}/lib/libignition-transport{{ major_version }}.so  # [linux]
+    - test -f ${PREFIX}/lib/libignition-transport{{ major_version }}.dylib  # [osx]
+    - test -f ${PREFIX}/lib/cmake/ignition-transport{{ major_version }}/ignition-transport{{ major_version }}-config.cmake  # [not win]
+    - if exist %PREFIX%\\Library\\include\\ignition\\transport{{ major_version }}\\ignition\\transport.hh (exit 0) else (exit 1)  # [win]
+    - if exist $PREFIX$\\Library\\lib\\ignition-transport{{ major_version }}.lib (exit 0) else (exit 1)  # [win]
+    - if exist $PREFIX$\\Library\\bin\\ignition-transport{{ major_version }}.dll (exit 0) else (exit 1)  # [win]
+    - if exist %PREFIX%\\Library\\lib\\cmake\\ignition-transport{{ major_version }}\\ignition-transport{{ major_version }}-config.cmake (exit 0) else (exit 1)  # [win]
+
+about:
+  home: https://github.com/ignitionrobotics/ign-transport
+  license: Apache-2.0
+  license_file: LICENSE
+  summary: Ignition Transport
+
+extra:
+  recipe-maintainers:
+    - seanyen
+    - wolfv
+    - traversaro
+    - j-rivero

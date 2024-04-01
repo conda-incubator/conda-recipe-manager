@@ -1,0 +1,50 @@
+{% set name = "pyplis" %}
+{% set version = "1.4.4" %}
+
+package:
+  name: "{{ name|lower }}"
+  version: "{{ version }}"
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 341a393a614de621e5376b29f4154f80a3fa07c754d89051c4604d7439e013c0
+
+build:
+  noarch: python
+  number: 1
+  script: "{{ PYTHON }} -m pip install . --no-deps -vv"
+
+requirements:
+  host:
+    - pip
+    - python
+  run:
+    - python
+    - numpy >=1.11
+    - scipy
+    - pandas
+    - astropy
+    - matplotlib-base >=1.5
+    - basemap
+    - opencv
+    - geonum
+    - pydoas
+    - six
+
+test:
+  imports:
+    - pyplis
+    - pyplis.test
+
+about:
+  license: GPL-3.0
+  home: https://github.com/jgliss/pyplis
+  license_family: GPL
+  license_file: LICENSE
+  summary: Python library for the analysis UV SO2 camera data
+  doc_url: https://pyplis.readthedocs.io/
+  dev_url: https://github.com/jgliss/pyplis
+
+extra:
+  recipe-maintainers:
+    - jgliss

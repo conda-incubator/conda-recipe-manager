@@ -1,0 +1,75 @@
+{% set name = "openff-interchange" %}
+{% set version = "0.3.25" %}
+
+package:
+  name: openff-interchange-split
+  version: {{ version }}
+
+source:
+  path: ./build_base.sh
+  url: https://github.com/openforcefield/openff-interchange/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: 231d8142b2f9a1c1f0835a914bd75ba2aa4b61653808fb91c88afb7d181288f5
+
+build:
+  number: 0
+
+outputs:
+  - name: openff-interchange-base
+    script: build_base.sh
+    build:
+      noarch: python
+
+    requirements:
+      host:
+        - python >=3.9,<3.13.0a0
+        - pip
+      run:
+        - python >=3.9,<3.13.0a0
+        - pydantic >=1.10,<3.0.0a0
+        - openff-toolkit-base ~=0.15.2
+        - openff-units =0.2
+        - openff-utilities >=0.1.5
+        - openff-models ~=0.1.2
+      run_constrained:
+        - foyer >=0.12.1
+        - jax >=0.3
+        - jaxlib >=0.3
+
+    test:
+      imports:
+        - openff.interchange
+
+  - name: openff-interchange
+    build:
+      noarch: python
+
+    requirements:
+      host:
+        - python >=3.9,<3.13.0a0
+      run:
+        - python >=3.9,<3.13.0a0
+        - openmm >=7.6,<9
+        - {{ pin_subpackage('openff-interchange-base', exact=True) }}
+        - openff-toolkit  # Should respect constraint in base package
+        - panedr
+
+    test:
+      imports:
+        - openff.interchange
+      files:
+        - test_stack_imports.py
+      commands:
+        - python test_stack_imports.py
+
+about:
+  home: https://openforcefield.org/
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: A project (and object) for storing, manipulating, and converting molecular mechanics data.
+  dev_url: https://github.com/openforcefield/openff-interchange
+
+extra:
+  recipe-maintainers:
+    - mattwthompson
+    - j-wags

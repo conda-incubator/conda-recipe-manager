@@ -1,0 +1,44 @@
+{% set name = "arabic_reshaper" %}
+{% set version = "3.0.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: ffcd13ba5ec007db71c072f5b23f420da92ac7f268512065d49e790e62237099
+
+build:
+  noarch: python
+  number: 0
+  # Note: --no-deps is currently required due to https://github.com/conda/conda-build/issues/3254
+  # Once resolved, it should be removed.
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+  run:
+    - python >=3.6
+    - setuptools
+    - configparser
+    - future
+
+test:
+  imports:
+    - arabic_reshaper
+
+about:
+  home: https://github.com/mpcabd/python-arabic-reshaper
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: Reconstruct Arabic sentences to be used in applications that don't support Arabic
+
+extra:
+  recipe-maintainers:
+    - hoechenberger
+    - kastman
+    - mrakitin

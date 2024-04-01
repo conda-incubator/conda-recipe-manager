@@ -1,0 +1,52 @@
+{% set name = "lsdtt-xtensor-python" %}
+{% set version = "0.0.4.16" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/lsdtt_xtensor_python-{{ version }}.tar.gz
+  sha256: 86b5fc35d268c5e14532314d37f51251d348d104b4e71f67e8819eab196942ab
+
+build:
+  number: 5
+  skip: true   # [py<37]
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+  host:
+    - xtensor 
+    - xtensor-python 
+    - numpy >=1.14
+    - pip
+    - pybind11
+    - python
+    - fftw >=3
+
+  run:
+    - pybind11 >=2.0.1
+    - python
+    - {{ pin_compatible('numpy') }}
+
+test:
+  imports:
+    - lsdtt_xtensor_python
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://lsdtopotools.github.io
+  summary: This is an attempt to port LSDTT to Python
+  license: GPL-3.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - bgailleton

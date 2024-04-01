@@ -1,0 +1,57 @@
+{% set name = "uranography" %}
+{% set version = "1.1.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/uranography-{{ version }}.tar.gz
+  sha256: 62ad723c223eaec13ed5739c7650fd855375b69502b8b9237201a8fc4eb814aa
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  number: 1
+
+requirements:
+  host:
+    - python >=3.9
+    - setuptools
+    - setuptools-scm
+    - pip
+  run:
+    - python >=3.9
+    - numpy
+    - pandas
+    - astropy >=5.3
+    - healpy
+    - healsparse
+    - bokeh >=3.1.1
+    - panel >=1.1.0
+    - colorcet
+    - jupyter
+    - nbconvert
+    - selenium
+
+test:
+  imports:
+    - uranography
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/lsst/uranography
+  summary: Tools for visualization of the celestial sphere.
+  doc_url: https://uranography.lsst.io
+  license: GPL-3.0-or-later
+  license_file:
+    - LICENSE
+    - COPYRIGHT
+
+extra:
+  recipe-maintainers:
+    - rhiannonlynne
+    - ehneilsen

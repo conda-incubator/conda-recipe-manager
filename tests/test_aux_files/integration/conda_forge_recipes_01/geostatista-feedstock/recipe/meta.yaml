@@ -1,0 +1,47 @@
+{% set name = "geostatista" %}
+{% set version = "0.1.6" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/MAfarrag/geostatista/archive/{{ version }}.tar.gz
+  sha256: 611086eb22264781c2d79bc8113e618032733fcc0922598c1515972f9d846144
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.9,<3.11
+    - pip >=22.3.1
+  run:
+    - python >=3.9,<3.11
+    - numpy >=1.24.1
+    - pip >=22.3.1
+    - statista >=0.1.8
+    - pyramids >=0.3.2
+    - loguru >=0.6.0
+
+test:
+  imports:
+    - geostatista
+
+about:
+  home: https://github.com/MAfarrag/geostatista
+  license:  GPL-3.0-only
+  license_family: GPL
+  license_file: LICENSE.md
+  summary: Geo-spatial statistical package
+  description: |
+    Geo-spatial statistical package.
+  dev_url: https://github.com/MAfarrag/geostatista
+  doc_url: https://geostatista.readthedocs.io/
+  doc_source_url: https://github.com/MAfarrag/geostatista/main/README.md
+
+extra:
+  recipe-maintainers:
+    - MAfarrag

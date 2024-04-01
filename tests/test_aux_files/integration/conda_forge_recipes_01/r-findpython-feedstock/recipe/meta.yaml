@@ -1,0 +1,65 @@
+{% set version = "1.0.8" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-findpython
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/findpython_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/findpython/findpython_{{ version }}.tar.gz
+  sha256: 0f8a90cbafd4949c0333a86808383a358fb7ec3268953d8a4887d5d22264cdb7
+
+build:
+  merge_build_host: true  # [win]
+  number: 1
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+  run:
+    - r-base
+
+test:
+  commands:
+    - $R -e "library('findpython')"           # [not win]
+    - "\"%R%\" -e \"library('findpython')\""  # [win]
+
+about:
+  home: https://github.com/trevorld/findpython
+  license: MIT
+  summary: Package designed to find an acceptable python binary.
+  license_family: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+    - croth1
+
+# Package: findpython
+# Type: Package
+# Title: Functions to Find an Acceptable Python Binary
+# Version: 1.0.5
+# Authors@R: c(person("Trevor L", "Davis", role=c("aut", "cre"), email="trevor.l.davis@gmail.com"), person("Paul", "Gilbert", role="aut"))
+# URL: https://github.com/trevorld/findpython
+# BugReports: https://github.com/trevorld/findpython/issues
+# Description: Package designed to find an acceptable python binary.
+# Suggests: covr, reticulate, testthat
+# License: MIT + file LICENSE
+# Collate: 'find_python_cmd.r'
+# RoxygenNote: 6.1.1
+# NeedsCompilation: no
+# Packaged: 2019-03-08 20:15:49 UTC; trevorld
+# Author: Trevor L Davis [aut, cre], Paul Gilbert [aut]
+# Maintainer: Trevor L Davis <trevor.l.davis@gmail.com>
+# Repository: CRAN
+# Date/Publication: 2019-03-08 21:02:48 UTC

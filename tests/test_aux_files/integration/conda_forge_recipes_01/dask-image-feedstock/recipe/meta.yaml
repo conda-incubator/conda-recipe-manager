@@ -1,0 +1,63 @@
+{% set name = "dask-image" %}
+{% set version = "2023.8.1" %}
+{% set sha256 = "5e9a8985b0527a1b5942c6a7e744e0e57d264e222c7058f05baeb81c374d04b6" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.9
+    - setuptools
+
+  run:
+    - python >=3.9
+    - dask >=2023.2.0
+    - numpy >=1.18
+    - scipy >=0.19.1
+    - pims >=0.4.1
+    - tifffile >=2018.10.18
+    - pandas >=2.0.0
+
+test:
+  source_files:
+    - tests
+
+  imports:
+    - dask_image
+
+  requires:
+    - pytest >=3.0.5
+
+  commands:
+    # Disable newer Arrow strings with dask-image.
+    # xref: https://github.com/dask/dask-image/issues/335
+    - export DASK_DATAFRAME__CONVERT_STRING="False"  # [unix]
+    - set "DASK_DATAFRAME__CONVERT_STRING=False"     # [win]
+    - pytest
+
+about:
+  home: https://github.com/dask/dask-image
+  license: BSD-3-Clause
+  license_file: LICENSE.txt
+  summary: Distributed image processing
+  doc_url: https://dask-image.readthedocs.io/
+  dev_url: https://github.com/dask/dask-image
+
+extra:
+  recipe-maintainers:
+    - GenevieveBuckley
+    - jakirkham
+    - m-albert

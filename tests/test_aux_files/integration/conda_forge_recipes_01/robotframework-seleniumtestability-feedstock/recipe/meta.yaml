@@ -1,0 +1,44 @@
+{% set name = "robotframework-seleniumtestability" %}
+{% set version = "2.1.0" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/robotframework-seleniumtestability-{{ version }}.tar.gz
+  sha256: 2398489992a8b6cbfb5b6da38b76178c03826eff26a0e1d20f473f284efcc8ae
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - furl
+    - python >=3.6
+    - robotframework-seleniumlibrary >=4.0.0
+    - wrapt
+
+test:
+  imports:
+    - SeleniumTestability
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/rasjani/robotframework-seleniumtestability
+  summary: SeleniumTestability library that helps speed up tests withasyncronous evens
+  license: Apache-2.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - conda-forge/rpaframework-core

@@ -1,0 +1,44 @@
+{% set name = "dataretrieval" %}
+{% set version = "1.0.6" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/dataretrieval-{{ version }}.tar.gz
+  sha256: 8f6323b66fd4a5fc800888c85eb350d60335085c3eefc5784b5ed50de6bd37bd
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - pandas
+    - python >=3.6
+    - requests
+
+test:
+  imports:
+    - dataretrieval
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://pypi.org/project/dataretrieval/
+  license: CC0-1.0
+  license_file: LICENSE.md
+  summary: Package to obtain USGS or EPA water quality, streamflow, and metadata from web services.
+
+extra:
+  recipe-maintainers:
+    - thodson-usgs
+    - elbeejay
+    - jsta

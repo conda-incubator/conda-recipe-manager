@@ -1,0 +1,51 @@
+{% set name = "yaspin" %}
+{% set version = "2.2.0" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/yaspin-{{ version }}.tar.gz
+  sha256: febdf35f3e0e45845dc2caa79a18780f9ec7a85a37a9a2c0389b314ba82d8912
+  patches:
+    # Conda-forge provides a package for termcolor
+    # let us just manage the dependency ourselves
+    - no_termcolor_whl_on_conda-forge.patch
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.7,<4.0
+    - poetry
+  run:
+    - python >=3.7,<4.0
+    # Upstream doesn't think it supports termcolor 2
+    # but it really does. No code was changed as part 
+    # of the dependecy update
+    # https://github.com/pavdmyt/yaspin/pull/212
+    - termcolor >=1.1.0,<3.0.0
+
+test:
+  imports:
+    - yaspin
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/pavdmyt/yaspin
+  summary: Yet Another Terminal Spinner
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - ickc

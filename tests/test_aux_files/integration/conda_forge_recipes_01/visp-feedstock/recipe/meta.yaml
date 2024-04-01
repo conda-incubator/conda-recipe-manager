@@ -1,0 +1,89 @@
+{% set name = "visp" %}
+{% set version = "3.6.0" %}
+{% set major_minor_version = version.split('.')[0] + version.split('.')[1] + version.split('.')[2] %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/lagadic/visp/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: eec93f56b89fd7c0d472b019e01c3fe03a09eda47f3903c38dc53a27cbfae532
+  patches:
+    # Current version of this package do not enable AVX support. The Windows build uses
+    # the Clang-cl compiler wich fails to build the embedded Simd library on AVX instructions
+    # even when AVX flags are not on for some unknown reason, so we have to force
+    # disabling AVX support at the Simd library level.
+    - patches/0002-Disable-AVX-and-AVX2-for-Simd-embedded-lib.patch  # [win]
+
+build:
+  number: 4
+  run_exports:
+    - {{ pin_subpackage(name, max_pin='x.x') }}
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - cmake
+    - make                           # [not win]
+    - clang                          # [win]
+    - ninja                          # [win]
+    - {{ cdt('mesa-libgl-devel') }}  # [linux]
+    - {{ cdt('mesa-dri-drivers') }}  # [linux]
+    - {{ cdt('libselinux') }}        # [linux]
+    - {{ cdt('libxdamage') }}        # [linux]
+    - {{ cdt('libxxf86vm') }}        # [linux]
+    - {{ cdt('libxext') }}           # [linux]
+    - libgomp                        # [linux]
+  host:
+    - xorg-libx11                    # [unix]
+    - xorg-libxfixes                 # [unix]
+    - libxml2                        # [unix]
+    - libdc1394 >=2.2.6              # [unix]
+    - librealsense                   # [unix]
+    - libopenblas                    # [osx]
+    - llvm-openmp                    # [win or osx]
+    - openmp                         # [win]
+    - pthreads-win32                 # [win]
+    - libgomp                        # [linux]
+    - libopencv
+    - eigen
+    - libjpeg-turbo
+    - libpng
+    - mkl-devel
+
+  run:
+    - libgomp                        # [linux]
+    - pthreads-win32                 # [win]
+    - libcxx                         # [osx]
+    - mkl
+    - eigen
+
+test:
+  commands:
+    - visp-config --version                                                                  # [unix]
+    - test -f $PREFIX/include/visp3/visp.h                                                   # [unix]
+    - test -f $PREFIX/lib/cmake/visp/VISPConfig.cmake                                        # [unix]
+    - test -f $PREFIX/lib/cmake/visp/VISPConfig-version.cmake                                # [unix]
+    - test -f $PREFIX/lib/lib{{ name }}_core${SHLIB_EXT}                                     # [unix]
+    - call %LIBRARY_PREFIX%\bin\visp-config.bat --version                                    # [win]
+    - if not exist %LIBRARY_PREFIX%\include\visp3\visp.h exit 1                              # [win]
+    - if not exist %LIBRARY_PREFIX%\cmake\VISPConfig.cmake exit 1                            # [win]
+    - if not exist %LIBRARY_PREFIX%\cmake\VISPConfig-version.cmake exit 1                    # [win]
+    - if not exist %LIBRARY_PREFIX%\lib\{{ name }}_core{{ major_minor_version }}.lib exit 1  # [win]
+    - if not exist %LIBRARY_PREFIX%\bin\{{ name }}_core{{ major_minor_version }}.dll exit 1  # [win]
+
+about:
+  home: https://visp.inria.fr/
+  summary: 'A cross-platform library for prototyping and developing applications using visual tracking and visual servoing technic.'
+  license: GPL-2.0-only
+  license_family: GPL
+  license_file: LICENSE.txt
+  doc_url: https://visp-doc.inria.fr/doxygen/visp-{{ version }}/
+  dev_url: https://github.com/lagadic/visp
+
+extra:
+  recipe-maintainers:
+    - olivier-roussel
+    - fspindle

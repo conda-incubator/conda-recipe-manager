@@ -1,0 +1,46 @@
+{% set name = "wiutils" %}
+{% set version = "1.1.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/wiutils-{{ version }}.tar.gz
+  sha256: 2d99167c7ed278d47718a77dab21308cb6fcc77f0030a82a2eb9febdf83caf1b
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - ffmpeg-python
+    - matplotlib-base
+    - numpy
+    - opencv
+    - openpyxl
+    - pandas
+    - pillow
+    - python >=3.6
+    - seaborn
+
+test:
+  imports:
+    - wiutils
+  requires:
+    - pip
+
+about:
+  home: https://github.com/PEM-Humboldt/wiutils
+  summary: Exploration utilities for Wildlife Insights projects.
+  license: MIT
+  license_file: LICENSE.txt
+
+extra:
+  recipe-maintainers:
+    - marcelovilla

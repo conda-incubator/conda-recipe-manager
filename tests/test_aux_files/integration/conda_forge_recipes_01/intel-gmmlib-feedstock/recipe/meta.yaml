@@ -1,0 +1,35 @@
+{% set name = "gmmlib" %}
+{% set version = "22.3.18" %}
+
+package:
+  name: intel-gmmlib
+  version: {{ version }}
+
+source:
+  url: https://github.com/intel/gmmlib/archive/refs/tags/intel-gmmlib-{{ version }}.tar.gz
+  sha256: 381f7ad104e3d0d8dd6c3ec0c8304e410a479c439e72db35c83fb7e2b0ec556f
+
+build:
+  number: 0
+  skip: true  # [not linux]
+
+requirements:
+  build:
+    - {{ compiler('cxx') }}
+    - cmake
+    - make
+
+test:
+  commands:
+    - test -f ${PREFIX}/lib/libigdgmm${SHLIB_EXT}  # [unix]
+
+about:
+  home: https://github.com/intel/gmmlib
+  license: MIT
+  license_file: LICENSE.md
+  license_family: MIT
+  summary: Intel(R) Graphics Memory Management Library
+
+extra:
+  recipe-maintainers:
+    - isuruf

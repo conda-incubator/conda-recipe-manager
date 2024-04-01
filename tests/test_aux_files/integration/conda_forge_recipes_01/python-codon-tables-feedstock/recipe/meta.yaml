@@ -1,0 +1,92 @@
+{% set name = "python-codon-tables" %}
+{% set version = "0.1.12" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/python_codon_tables-{{ version }}.tar.gz
+  sha256: a733e8479e6753c39b3efd62204e76aa9a83e7119d60b9b5b86de7083e88e3a6
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+  run:
+    - python >=3.6
+
+test:
+  imports:
+    - python_codon_tables
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/Edinburgh-Genome-Foundry/codon-usage-tables
+  summary: Codon Usage Tables for Python, from kazusa.or.jp
+  license: CC0-1.0
+  license_file: LICENSE
+  description: |
+    Provides codon usage tables as dictionnaries, for Python 3+.
+
+    Tables for the following organisms are provided with the 
+    library (any other table can be downloaded using a TaxID):
+
+    - B. subtilis
+    - C. elegans
+    - D. melanogaster
+    - E. coli
+    - G. gallus
+    - H. sapiens
+    - M. musculus
+    - M. musculus domesticus
+    - S. cerevisiae
+
+    PyPI: [https://pypi.org/project/python-codon-tables/](https://pypi.org/project/python-codon-tables/)
+
+  doc_url: https://github.com/Edinburgh-Genome-Foundry/codon-usage-tables
+  dev_url: https://github.com/Edinburgh-Genome-Foundry/codon-usage-tables
+
+extra:
+  recipe-maintainers:
+    - sugatoray
+    ## Maintainers from bioconda
+    # - tjacobs2
+
+## RECIPE END
+#
+## NOTE: >> DO NOT REMOVE THIS NOTE TO AVOIDE PLAUSIBLE CONFUSION IN FUTURE
+#
+#  SUMMARY: The three recipes (seqlike, weblogo, python-codon-tables) 
+#           were managed by bioconda channel. Since the creators of 
+#           seqlike wanted it on conda-forge, we ported all three 
+#           libraries from bioconda channel to conda-forge channel, 
+#           with permission from bioconda-core-team. The other two 
+#           libraries (weblogo, python-codon-tables) are dependencies 
+#           of `seqlike`.
+#
+#  TODO: 
+#         1. Remind bioconda team to remove "seqlike" from 
+#            bioconda channel, to complete the transfer of 
+#            "seqlike" from bioconda to conda-forge.
+#
+#         2. Ask the maintainers of bioconda:seqlike whether 
+#            to add them to the maintainers' list here.
+#
+#  See: 
+#    - Comment: 
+#      https://github.com/conda-forge/staged-recipes/pull/17283#issuecomment-1001016875
+#      By: dpryan79 (from bioconda team)
+#    - For more information see this:
+#      https://github.com/conda-forge/staged-recipes/pull/17283#issuecomment-1000523651
+#      
+##-------------------------------------------------------------------------

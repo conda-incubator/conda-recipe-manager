@@ -1,0 +1,64 @@
+{% set name = "fastrlock" %}
+{% set version = "0.8.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 644ec9215cf9c4df8028d8511379a15d9c1af3e16d80e47f1b6fdc6ba118356a
+
+build:
+  number: 2
+  # We need to pass --with-cython to force cython to regenerate the .c file
+  script: {{ PYTHON }} -m pip install . --global-option="--with-cython" -vv
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - cython                                 # [build_platform != target_platform]
+    - {{ compiler("c") }}
+    - {{ compiler("cxx") }}
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+  host:
+    - python
+    - pip
+    - cython
+  run:
+    - python
+
+test:
+  imports:
+    - fastrlock
+
+about:
+  home: https://github.com/scoder/fastrlock
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: This is a C-level implementation of a fast, re-entrant, optimistic lock for CPython
+  description: |
+    This is a C-level implementation of a fast, re-entrant,
+    optimistic lock for CPython. It is a drop-in replacement for
+    threading.RLock. FastRLock is implemented in Cython and also provides a
+    C-API for direct use from Cython code via from fastrlock cimport rlock.
+
+    Under normal conditions, it is about 10x faster than threading.RLock in
+    Python 2.7 because it avoids all locking unless two or more threads try to
+    acquire it at the same time. Under congestion, it is still about 10% faster
+    than RLock due to being implemented in Cython.
+
+    This is mostly equivalent to the revised RLock implementation in Python
+    3.2, but still faster due to being implemented in Cython. Note that the
+    threading.RLock implementation in Python 3.4 and later tends to be as fast
+    or even faster than the lock provided by this package, when called through
+    the Python API. FastRLock is still faster also on these systems when called
+    through its Cython API.
+  dev_url: https://github.com/scoder/fastrlock
+
+extra:
+  recipe-maintainers:
+    - hmaarrfk

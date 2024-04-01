@@ -1,0 +1,83 @@
+{% set version = '0.2.5' %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-anomalydetection
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/anomalyDetection_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/anomalyDetection/anomalyDetection_{{ version }}.tar.gz
+  sha256: e127eefdd9db3c83624dd1779d4f026e66430a164b0074fa58f113f03b585c8c
+
+build:
+  merge_build_host: True  # [win]
+  number: 1004
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ compiler('c') }}              # [not win]
+    - {{ compiler('m2w64_c') }}        # [win]
+    - {{ compiler('cxx') }}            # [not win]
+    - {{ compiler('m2w64_cxx') }}      # [win]
+    - {{ posix }}filesystem        # [win]
+    - {{ posix }}make
+    - {{ posix }}sed               # [win]
+    - {{ posix }}coreutils         # [win]
+    - {{ posix }}zip               # [win]
+    - llvm-openmp                # [osx] 
+  host:
+    - r-base
+    - r-mass
+    - r-rcpp >=0.12.11
+    - r-rcpparmadillo
+    - r-caret
+    - r-dplyr
+    - r-ggplot2
+    - r-gmp
+    - r-magrittr
+    - r-plyr
+    - r-purrr
+    - r-tibble
+    - r-tidyr
+  run:
+    - r-base
+    - {{ native }}gcc-libs         # [win]
+    - llvm-openmp                # [osx]
+    - r-mass
+    - r-rcpp >=0.12.11
+    - r-rcpparmadillo
+    - r-caret
+    - r-dplyr
+    - r-ggplot2
+    - r-gmp
+    - r-magrittr
+    - r-plyr
+    - r-purrr
+    - r-tibble
+    - r-tidyr
+
+test:
+  commands:
+    - $R -e "library('anomalyDetection')"           # [not win]
+    - "\"%R%\" -e \"library('anomalyDetection')\""  # [win]
+
+about:
+  home: https://github.com/koalaverse/anomalyDetection
+  license: GPL-2.0-or-later
+  summary: Implements procedures developed by Gutierrez et al. (2017, <https://journal.r-project.org/archive/2017/RJ-2017-039/index.html>)  to
+    aid in detecting network log anomalies. By combining various multivariate  analytic
+    approaches relevant to network anomaly detection, it provides cyber  analysts efficient
+    means to detect suspected anomalies requiring further evaluation.
+  license_family: GPL3
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-3
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r

@@ -1,0 +1,119 @@
+{% set repo_name = "sdformat" %}
+{% set version = "14.0.0" %}
+{% set major_version = version.split('.')[0] %}
+{% set name = repo_name  + major_version %}
+{% set cxx_name = "lib" + name %}
+{% set python_name = name + "-python" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  - url: https://github.com/osrf/sdformat/archive/sdformat{{ major_version }}_{{ version }}.tar.gz
+    sha256: a4f38865f7e8b79559c238a1aba7bab1a4ff46c22a67bb91325ad48ba7d25728
+    patches:
+      - standalone_bindings.patch
+      - standalone_bindings_tests.patch
+      - fixgzsdfcommandonwin32.patch
+
+build:
+  number: 2
+
+
+outputs:
+  - name: {{ cxx_name }}
+    script: build_cxx.sh  # [unix]
+    script: bld_cxx.bat  # [win]
+    build:
+      run_exports:
+        - {{ pin_subpackage(cxx_name, max_pin='x') }}
+
+    requirements:
+      build:
+        - {{ compiler('cxx') }}
+        - {{ compiler('c') }}
+        - ninja                              # [not win]
+        - cmake
+        - pkg-config
+        - python
+      host:
+        - libgz-cmake3
+        - libgz-math7
+        - libgz-tools2
+        - libgz-utils2
+        - urdfdom
+        - tinyxml2
+
+    test:
+      commands:
+        - test -f ${PREFIX}/include/gz/sdformat{{ version.split('.')[0] }}/sdf/sdf.hh  # [not win]
+        - test -f ${PREFIX}/lib/libsdformat{{ version.split('.')[0] }}${SHLIB_EXT}  # [unix]
+        - test -f ${PREFIX}/lib/cmake/sdformat{{ version.split('.')[0] }}/sdformat{{ version.split('.')[0] }}-config.cmake  # [not win]
+        - if not exist %LIBRARY_INC%\\gz\\sdformat{{ version.split('.')[0] }}\\sdf\\sdf.hh exit 1  # [win]
+        - if not exist %LIBRARY_LIB%\\sdformat{{ version.split('.')[0] }}.lib exit 1  # [win]
+        - if not exist %LIBRARY_BIN%\\sdformat{{ version.split('.')[0] }}.dll exit 1  # [win]
+        - if not exist %LIBRARY_LIB%\\cmake\\sdformat{{ version.split('.')[0] }}\\sdformat{{ version.split('.')[0] }}-config.cmake exit 1  # [win]
+
+  - name: {{ python_name }}
+    script: build_py.sh  # [unix]
+    script: bld_py.bat  # [win]
+    requirements:
+      build:
+        - {{ compiler('c') }}
+        - {{ compiler('cxx') }}
+        - ninja
+        - cmake
+        - pkg-config
+        - python                                 # [build_platform != target_platform]
+        - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+        - pybind11                               # [build_platform != target_platform]
+        - pybind11-abi                           # [build_platform != target_platform]
+        - pytest                                 # [build_platform != target_platform]
+      host:
+        - {{ pin_subpackage(cxx_name, exact=True) }}
+        - python
+        - pip
+        - pybind11
+        - pybind11-abi
+        - pytest
+        - gz-math7-python
+      run:
+        - {{ pin_subpackage(cxx_name, exact=True) }}
+        - python
+        - gz-math7-python
+    test:
+      commands:
+        - pip check
+      requires:
+        - pip
+      imports:
+        - sdformat14
+
+  - name: {{ name }}
+    build:
+      run_exports:
+        - {{ pin_subpackage(cxx_name, max_pin='x') }}
+    requirements:
+      run:
+        - {{ pin_subpackage(cxx_name, exact=True) }}
+        - {{ pin_subpackage(python_name, max_pin='x.x.x') }}
+    test:
+      imports:
+        - sdformat14
+
+
+about:
+  home: http://sdformat.org/
+  license: Apache-2.0
+  license_file: LICENSE
+  summary: |
+    Simulation Description Format (SDF) parser and description files.
+
+extra:
+  recipe-maintainers:
+    - seanyen
+    - j-rivero
+    - conda-forge/ros-core
+    - Tobias-Fischer
+    - traversaro

@@ -1,0 +1,95 @@
+{% set version = "1.3-3" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-spdep
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/spdep_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/spdep/spdep_{{ version }}.tar.gz
+  sha256: dc9b3d1a11858ba9d7619d770aecc899828f600696054c63817e8fc1c136421a
+
+build:
+  merge_build_host: true  # [win]
+  number: 0
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ compiler('c') }}              # [not win]
+    - {{ compiler('m2w64_c') }}        # [win]
+    - {{ posix }}filesystem        # [win]
+    - {{ posix }}make
+    - {{ posix }}sed               # [win]
+    - {{ posix }}coreutils         # [win]
+    - {{ posix }}zip               # [win]
+    - cross-r-base {{ r_base }}    # [build_platform != target_platform]
+  host:
+    - r-base
+    - r-boot >=1.3_1
+    - r-deldir
+    - r-e1071
+    - r-s2
+    - r-sf
+    - r-sp >=1.0
+    - r-spdata >=0.2.6.0
+    - r-units
+  run:
+    - r-base
+    - {{ native }}gcc-libs         # [win]
+    - r-boot >=1.3_1
+    - r-deldir
+    - r-e1071
+    - r-s2
+    - r-sf
+    - r-sp >=1.0
+    - r-spdata >=0.2.6.0
+    - r-units
+
+test:
+  commands:
+    - $R -e "library('spdep')"           # [not win]
+    - "\"%R%\" -e \"library('spdep')\""  # [win]
+
+about:
+  home: https://github.com/r-spatial/spdep/, https://r-spatial.github.io/spdep/
+  license: GPL-2.0-or-later
+  summary: "A collection of functions to create spatial weights matrix objects from polygon 'contiguities', from point patterns by distance and tessellations, for summarizing these objects, and for permitting their use in spatial data analysis, including regional aggregation by minimum spanning tree; a collection of tests
+    for spatial 'autocorrelation', including global 'Morans I' and 'Gearys C' proposed by 'Cliff' and 'Ord' (1973, ISBN: 0850860369) and (1981, ISBN: 0850860814), 'Hubert/Mantel' general cross product statistic, Empirical Bayes estimates and 'Assunção/Reis' (1999) <doi:10.1002/(SICI)1097-0258(19990830)18:16%3C2147::AID-SIM179%3E3.0.CO;2-I>
+    Index, 'Getis/Ord' G ('Getis' and 'Ord' 1992) <doi:10.1111/j.1538-4632.1992.tb00261.x> and multicoloured join count statistics, 'APLE' ('Li 'et al.' ) <doi:10.1111/j.1538-4632.2007.00708.x>, local 'Moran's I', 'Gearys C' ('Anselin' 1995) <doi:10.1111/j.1538-4632.1995.tb00338.x> and 'Getis/Ord' G ('Ord' and 'Getis' 1995)
+    <doi:10.1111/j.1538-4632.1995.tb00912.x>, 'saddlepoint' approximations ('Tiefelsdorf' 2002) <doi:10.1111/j.1538-4632.2002.tb01084.x> and exact tests for global and local 'Moran's I' ('Bivand et al.' 2009) <doi:10.1016/j.csda.2008.07.021> and 'LOSH' local indicators of spatial heteroscedasticity ('Ord' and 'Getis') <doi:10.1007/s00168-011-0492-y>.
+    The implementation of most of the measures is described in 'Bivand' and 'Wong' (2018) <doi:10.1007/s11749-018-0599-x>. From 'spdep' and 'spatialreg' versions >= 1.2-1, the model fitting functions previously present in this package are defunct in 'spdep' and may be found in 'spatialreg'."
+  license_family: GPL2
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-2
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+
+# Package: spdep
+# Version: 1.2-2
+# Date: 2022-01-28
+# Title: Spatial Dependence: Weighting Schemes, Statistics
+# Encoding: UTF-8
+# Authors@R: c(person("Roger", "Bivand", role = c("cre", "aut"), email = "Roger.Bivand@nhh.no", comment=c(ORCID="0000-0003-2392-6140")),	person("Micah", "Altman", role = "ctb"), person("Luc", "Anselin", role = "ctb"), person("Renato", "Assuncao", role = "ctb"), person("Olaf", "Berke", role = "ctb"), person("Guillaume", "Blanchet", role = "ctb"), person("Marilia", "Carvalho", role = "ctb"), person("Bjarke", "Christensen", role = "ctb"), person("Yongwan", "Chun", role = "ctb"), person("Carsten", "Dormann", role = "ctb"), person("Stephane", "Dray", role = "ctb"), person("Virgilio", "Gomez-Rubio", role = "ctb"), person("Elias", "Krainski", role = "ctb"), person("Pierre", "Legendre", role = "ctb"), person("Nicholas", "Lewin-Koh", role = "ctb"), person("Angela", "Li", role = "ctb"), person("Giovanni", "Millo", role = "ctb"), person("Werner", "Mueller", role = "ctb"), person("Hisaji", "Ono", role = "ctb"), person("Josiah", "Parry", role = "ctb", comment = c(ORCID = "0000-0001-9910-865X")), person("Pedro", "Peres-Neto", role = "ctb"), person("Gianfranco", "Piras", role = "ctb"), person("Markus", "Reder", role = "ctb"), person("Jeff", "Sauer", role = "ctb"), person("Michael", "Tiefelsdorf", role = "ctb"), person("Rene", "Westerholt", role="ctb"), person("Levi", "Wolf", role = "ctb"), person("Danlin", "Yu", role = "ctb"))
+# Depends: R (>= 3.3.0), methods, sp (>= 1.0), spData (>= 0.2.6.0), sf
+# Imports: stats, deldir, boot (>= 1.3-1), graphics, utils, grDevices, units, s2, e1071
+# Suggests: spatialreg (>= 1.2-1), Matrix, parallel, dbscan, rgeos, RColorBrewer, lattice, xtable, maptools (>= 0.5-4), foreign, igraph, RSpectra, knitr, rgdal, classInt, tmap, spam, ggplot2, rmarkdown, tinytest, rgeoda
+# URL: https://github.com/r-spatial/spdep/, https://r-spatial.github.io/spdep/
+# BugReports: https://github.com/r-spatial/spdep/issues/
+# Description: A collection of functions to create spatial weights matrix objects from polygon 'contiguities', from point patterns by distance and tessellations, for summarizing these objects, and for permitting their use in spatial data analysis, including regional aggregation by minimum spanning tree; a collection of tests for spatial 'autocorrelation', including global 'Morans I' and 'Gearys C' proposed by 'Cliff' and 'Ord' (1973, ISBN: 0850860369) and (1981, ISBN: 0850860814), 'Hubert/Mantel' general cross product statistic, Empirical Bayes estimates and 'Assuncao/Reis' (1999) <doi:10.1002/(SICI)1097-0258(19990830)18:16%3C2147::AID-SIM179%3E3.0.CO;2-I> Index, 'Getis/Ord' G ('Getis' and 'Ord' 1992) <doi:10.1111/j.1538-4632.1992.tb00261.x> and multicoloured join count statistics, 'APLE' ('Li 'et al.' ) <doi:10.1111/j.1538-4632.2007.00708.x>, local 'Moran's I', 'Gearys C' ('Anselin' 1995) <doi:10.1111/j.1538-4632.1995.tb00338.x> and 'Getis/Ord' G ('Ord' and 'Getis' 1995) <doi:10.1111/j.1538-4632.1995.tb00912.x>, 'saddlepoint' approximations ('Tiefelsdorf' 2002) <doi:10.1111/j.1538-4632.2002.tb01084.x> and exact tests for global and local 'Moran's I' ('Bivand et al.' 2009) <doi:10.1016/j.csda.2008.07.021> and 'LOSH' local indicators of spatial heteroscedasticity ('Ord' and 'Getis') <doi:10.1007/s00168-011-0492-y>. The implementation of most of the measures is described in 'Bivand' and 'Wong' (2018) <doi:10.1007/s11749-018-0599-x>. From 'spdep' and 'spatialreg' versions >= 1.2-1, the model fitting functions previously present in this package are defunct in 'spdep' and may be found in 'spatialreg'.
+# License: GPL (>= 2)
+# VignetteBuilder: knitr
+# RoxygenNote: RoxygenNote: 6.1.1
+# NeedsCompilation: yes
+# Packaged: 2022-01-28 15:16:35 UTC; rsb
+# Author: Roger Bivand [cre, aut] (<https://orcid.org/0000-0003-2392-6140>), Micah Altman [ctb], Luc Anselin [ctb], Renato Assuncao [ctb], Olaf Berke [ctb], Guillaume Blanchet [ctb], Marilia Carvalho [ctb], Bjarke Christensen [ctb], Yongwan Chun [ctb], Carsten Dormann [ctb], Stephane Dray [ctb], Virgilio Gomez-Rubio [ctb], Elias Krainski [ctb], Pierre Legendre [ctb], Nicholas Lewin-Koh [ctb], Angela Li [ctb], Giovanni Millo [ctb], Werner Mueller [ctb], Hisaji Ono [ctb], Josiah Parry [ctb] (<https://orcid.org/0000-0001-9910-865X>), Pedro Peres-Neto [ctb], Gianfranco Piras [ctb], Markus Reder [ctb], Jeff Sauer [ctb], Michael Tiefelsdorf [ctb], Rene Westerholt [ctb], Levi Wolf [ctb], Danlin Yu [ctb]
+# Maintainer: Roger Bivand <Roger.Bivand@nhh.no>
+# Repository: CRAN
+# Date/Publication: 2022-01-28 23:10:02 UTC

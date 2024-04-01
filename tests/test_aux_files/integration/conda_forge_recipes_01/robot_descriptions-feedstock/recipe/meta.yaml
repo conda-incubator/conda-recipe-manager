@@ -1,0 +1,47 @@
+{% set name = "robot_descriptions" %}
+{% set version = "1.9.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/robot_descriptions-{{ version }}.tar.gz
+  sha256: 637a0178eb856bf85a36991d43ac5e7b34903cbc9d169b138fcc447b9ca651f9
+
+build:
+  entry_points:
+    - robot_descriptions = robot_descriptions._command_line:main
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.7
+    - flit
+    - pip
+  run:
+    - python >=3.7
+    - gitpython >=3.1.18
+    - tqdm >=4.64.0
+
+test:
+  imports:
+    - robot_descriptions
+  commands:
+    - pip check
+    - robot_descriptions --help
+  requires:
+    - pip
+
+about:
+  home: https://github.com/robot-descriptions/robot_descriptions.py
+  summary: Import open source robot description as Python modules.
+  license: Apache-2.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - GiulioRomualdi
+    - stephane-caron

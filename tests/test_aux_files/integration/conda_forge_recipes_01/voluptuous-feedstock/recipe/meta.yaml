@@ -1,0 +1,43 @@
+{% set name = "voluptuous" %}
+{% set version = "0.14.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/voluptuous-{{ version }}.tar.gz
+  sha256: 533e36175967a310f1b73170d091232bf881403e4ebe52a9b4ade8404d151f5d
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  number: 0
+
+requirements:
+  host:
+    - python >=3.6
+    - wheel
+    - pip
+  run:
+    - python >=3.6
+
+test:
+  imports:
+    - voluptuous
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/alecthomas/voluptuous
+  summary: Python data validation library
+  license: BSD-3-Clause
+  license_file: COPYING
+
+extra:
+  recipe-maintainers:
+    - tusharmakkar08
+    - vamega
+    - jan-janssen

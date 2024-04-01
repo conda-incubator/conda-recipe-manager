@@ -1,0 +1,45 @@
+{% set name = "penaltymodel" %}
+{% set version = "1.0.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/penaltymodel-{{ version }}.tar.gz
+  sha256: 551e1a04ebf4ae18613cac52e37b6fa8c1959972756705354cdccee66a3ef461
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.7
+  run:
+    - dimod >=0.10.9,<0.13.0
+    - homebase >=1.0.1,<2.0.0
+    - networkx >=2.4,<3.0
+    - numpy >=1.20.0
+    - python >=3.7
+    - scipy >=1.6.0
+
+test:
+  imports:
+    - penaltymodel
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/dwavesystems/penaltymodel
+  summary: Package for creating penalty models.
+  license: Apache-2.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - BastianZim

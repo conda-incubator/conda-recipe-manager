@@ -1,0 +1,56 @@
+{% set name = "TSDB" %}
+{% set version = "0.3.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/WenjieDu/TSDB/archive/v{{ version }}.tar.gz
+  sha256: fe490a12c06eb63e7391bf7606d939eeac94321cd4827650d9ec01ef89d78176
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+    - numpy
+    - scikit-learn
+    - pandas
+    - scipy
+    - pyarrow
+  run:
+    - python >=3.6
+
+test:
+  imports:
+    - tsdb
+  requires:
+    - pip
+    - numpy
+    - scikit-learn
+    - pandas
+    - scipy
+    - pyarrow
+  commands:
+    - pip check
+
+about:
+  home: https://github.com/WenjieDu/TSDB
+  summary: a python toolbox helping load time-series datasets easily
+  description: |
+    Project TSDB is created to help researchers and engineers get rid of data collecting and downloading, 
+    and focus back on data processing details. TSDB provides all-in-one-stop convenience for downloading 
+    and loading open-source time-series datasets.
+  license: BSD-3-Clause
+  license_file: LICENSE
+  doc_url: https://tsdb.readthedocs.io
+  dev_url: https://github.com/WenjieDu/TSDB
+
+extra:
+  recipe-maintainers:
+    - WenjieDu

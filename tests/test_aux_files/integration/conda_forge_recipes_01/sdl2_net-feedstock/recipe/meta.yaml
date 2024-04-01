@@ -1,0 +1,51 @@
+{% set version = "2.2.0" %}
+
+package:
+  name: sdl2_net
+  version: {{ version }}
+
+source:
+  url: https://github.com/libsdl-org/SDL_net/archive/refs/tags/release-{{ version }}.tar.gz
+  sha256: 08d741282c0c22b82ed134f09cd319803132289cae06fb47b5ada2752faf0493
+
+build:
+  number: 1
+  run_exports:
+    - {{ pin_subpackage("sdl2_net", max_pin="x") }}
+
+requirements:
+  build:
+    - gnuconfig  # [unix]
+    - {{ compiler('c') }}
+    - cmake
+    - ninja
+  host:
+    - sdl2
+
+test:
+  commands:
+    # shared libs
+    - test -f $PREFIX/lib/libSDL2_net.so                # [linux]
+    - test -f $PREFIX/lib/libSDL2_net.dylib             # [osx]
+    - if not exist %LIBRARY_LIB%\SDL2_net.lib exit 1    # [win]
+    - if not exist %LIBRARY_BIN%\SDL2_net.dll exit 1    # [win]
+
+    # absence of static libs
+    - test ! -f $PREFIX/lib/libSDL2_net.a               # [unix]
+
+    # headers
+    - test -f $PREFIX/include/SDL2/SDL_net.h            # [unix]
+    - if not exist %LIBRARY_INC%\SDL2\SDL_net.h exit 1  # [win]
+
+about:
+  home: https://github.com/libsdl-org/SDL_net
+  license: Zlib
+  license_file: LICENSE.txt
+  summary: A simple, cross-platform wrapper over TCP/IP sockets.
+  doc_url: https://wiki.libsdl.org/SDL_net
+  dev_url: https://github.com/libsdl-org/SDL_net
+
+extra:
+  recipe-maintainers:
+    - dschreij
+    - h-vetinari

@@ -1,0 +1,347 @@
+{% set version = "3.8.4" %}
+
+package:
+  name: gdal-split
+  version: {{ version }}
+
+source:
+  url: http://download.osgeo.org/gdal/{{ version }}/gdal-{{ version }}.tar.xz
+  sha256: 0c53ced95d29474236487202709b49015854f8e02e35e44ed0f4f4e12a7966ce
+
+build:
+  number: 6
+  skip_compile_pyc:
+    - share/bash-completion/completions/*.py
+
+requirements:
+  build:
+    - cmake
+    - pkg-config >=0.21  # [not win]
+    - make  # [not win]
+    - ninja  # [win]
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - sysroot_linux-64 2.17  # [linux64]
+    - swig
+  host:
+    - blosc
+    - cfitsio
+    - expat
+    - freexl
+    - geos
+    - geotiff
+    - giflib  # [not win]
+    - hdf4
+    - hdf5
+    - libjpeg-turbo
+    - json-c  # [not win]
+    - kealib
+    - lerc
+    - libarchive
+    - libaec  # for GRIB driver
+    - libcurl
+    - libdeflate
+    - libiconv
+    - libkml
+    - libnetcdf
+    - libpng
+    - libpq
+    - libspatialite
+    - libtiff
+    - libuuid  # [linux]
+    - libwebp-base
+    - libxml2
+    - lz4-c
+    - openjpeg
+    - openssl
+    - pcre2
+    - poppler
+    - postgresql
+    - proj
+    # qhull disabled because of https://github.com/conda-forge/qgis-feedstock/issues/284#issuecomment-1356490896
+    # - qhull
+    - sqlite
+    - tiledb
+    - xerces-c
+    - xz
+    - zlib
+    - zstd
+
+outputs:
+  - name: libgdal
+    script: install_lib.sh  # [unix]
+    script: install_lib.bat  # [win]
+    build:
+      run_exports:
+        # no idea, going with minor pin
+        - {{ pin_subpackage('libgdal', max_pin='x.x') }}
+    requirements:
+      build:
+        - cmake
+        # ranlib used at install time
+        - {{ compiler('c') }}
+        # libstdc++ is needed in requirements/run
+        - {{ compiler('cxx') }}
+        - pkg-config  # [not win]
+        - make  # [unix]
+        - ninja  # [win]
+        - sysroot_linux-64 2.17  # [linux64]
+      host:
+        - blosc
+        - cfitsio
+        - expat
+        - freexl
+        - geos
+        - geotiff
+        - giflib  # [not win]
+        - hdf4
+        - hdf5
+        - libjpeg-turbo
+        - json-c  # [not win]
+        - kealib
+        - lerc
+        - libarchive
+        - libaec
+        - libcurl
+        - libdeflate
+        - libiconv
+        - libkml
+        - libnetcdf
+        - libpng
+        - libpq
+        - libspatialite
+        - libtiff
+        - libuuid  # [linux]
+        - libwebp-base
+        - libxml2
+        - lz4-c
+        - openjpeg
+        - openssl
+        - pcre2
+        - poppler
+        - postgresql
+        - proj
+        # qhull disabled because of https://github.com/conda-forge/qgis-feedstock/issues/284#issuecomment-1356490896
+        # - qhull
+        - sqlite
+        - tiledb
+        - xerces-c
+        - xz
+        - zlib
+        - zstd
+      run:
+        - cfitsio
+        - geotiff
+        - giflib  # [not win]
+        - json-c  # [not win]
+        - libpq
+        - libspatialite
+        - libuuid  # [linux]
+        - libwebp-base
+        - poppler
+        - postgresql
+        - proj
+        - tiledb
+        - xz
+        - zstd
+    test:
+      files:
+        - test_data
+        - run_test.bat
+        - run_test.sh
+    about:
+      summary: The Geospatial Data Abstraction Library (GDAL)
+      license: MIT
+      license_file: LICENSE.TXT
+
+  - name: libgdal-arrow-parquet
+    script: build_arrow_parquet.sh  # [unix]
+    script: build_arrow_parquet.bat  # [win]
+    requirements:
+      build:
+        - cmake
+        # ranlib used at install time
+        - {{ compiler('c') }}
+        # libstdc++ is needed in requirements/run
+        - {{ compiler('cxx') }}
+        - pkg-config  # [not win]
+        - make  # [unix]
+        - ninja  # [win]
+        - sysroot_linux-64 2.17  # [linux64]
+      host:
+        - {{ pin_subpackage('libgdal', exact=True) }}
+        - blosc
+        - cfitsio
+        - curl
+        - expat
+        - freexl
+        - geos
+        - geotiff
+        - giflib  # [not win]
+        - hdf4
+        - hdf5
+        - libjpeg-turbo
+        - json-c  # [not win]
+        - kealib
+        - libarchive
+        - libarrow
+        # appease linter
+        {% if libarrow is undefined %}
+        {% set libarrow = "14" %}
+        {% endif %}
+        {% if libarrow.split(".")[0] | int >= 14 %}
+        - libarrow-dataset
+        - libparquet
+        {% endif %}
+        - libkml
+        - libnetcdf
+        - libpng
+        - libpq
+        - libspatialite
+        - libtiff
+        - libuuid  # [linux]
+        - libwebp-base
+        - libxml2
+        - openjpeg
+        - openssl
+        - pcre2
+        - poppler
+        - postgresql
+        - proj
+        - qhull
+        - sqlite
+        - tiledb
+        - xerces-c
+        - xz
+        - zlib
+        - zstd
+      run:
+        - {{ pin_subpackage('libgdal', exact=True) }}
+        - cfitsio
+        - geotiff
+        - giflib  # [not win]
+        - json-c  # [not win]
+        - libpq
+        - libspatialite
+        - libuuid  # [linux]
+        - libwebp-base
+        - poppler
+        - postgresql
+        - proj
+        - tiledb
+        - xz
+        - zstd
+    test:
+      files:
+        - test_arrow_parquet.sh   # [unix]
+        - test_arrow_parquet.bat  # [win]
+      commands:
+        - sh test_arrow_parquet.sh   # [unix]
+        - test_arrow_parquet.bat  # [win]
+    about:
+      summary: Arrow and Parquet drivers for the Geospatial Data Abstraction Library (GDAL)
+      license: MIT
+      license_file: LICENSE.TXT
+
+  - name: gdal
+    script: install_python.sh  # [unix]
+    script: install_python.bat  # [win]
+    build:
+      skip_compile_pyc:
+        - share/bash-completion/completions/*.py
+    requirements:
+      build:
+        - {{ compiler('c') }}
+        - {{ compiler('cxx') }}
+        - cmake
+        - make  # [unix]
+        - ninja  # [win]
+        - python                                 # [build_platform != target_platform]
+        - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+        - numpy                                  # [build_platform != target_platform]
+        - swig
+      host:
+        - python
+        - pip
+        - numpy
+        - {{ pin_subpackage('libgdal', exact=True) }}
+        # Workaround to prevent run depending on "libgfortran5 9.3.0" despite "hdf5"
+        # having not been migrated yet causing conflicts with the "libgdal" output
+        # See: https://github.com/conda-forge/gdal-feedstock/pull/415
+        - hdf5
+        - libxml2
+        # Workaround to prevent conflicts seen in
+        #  https://github.com/conda-forge/gdal-feedstock/pull/543
+        - openssl
+      run:
+        - python
+        - {{ pin_compatible('numpy') }}
+        - {{ pin_subpackage('libgdal', exact=True) }}
+    test:
+      files:
+        - test_data
+        - extra_tests.py
+        - run_test.py
+        - test_script_exist.bat
+      imports:
+        - osgeo
+        - osgeo.ogr
+        - osgeo.gdal
+        - osgeo._gdal
+        - osgeo._gdalconst
+        - osgeo._ogr
+        - osgeo._osr
+      commands:
+        - python run_test.py
+        # Check Python-implemented GDAL utilities.
+        # A number of these utilities unexpectedly return an error value when
+        # called with --help, and are thus called with --version below.
+        # gdalattachpct.py is checked only for existence as it unexpectedly
+        # returns an error code on --version, too. For easier debugging, this
+        # existence check is performed in a separate .bat file on Windows.
+        # This existence check should be replaced by a regular call once
+        # behavior is fixed in GDAL itself.
+        - rgb2pct.py --help
+        - pct2rgb.py --help
+        # Both --help and --version seem to cause an error return value
+        - test -f $PREFIX/bin/gdalattachpct.py  # [unix]
+        - gdal_merge.py --help
+        - gdal2tiles.py --help
+        - gdal2xyz.py --help
+        - gdal_retile.py --help
+        - gdal_proximity.py --help
+        - gdal_polygonize.py --help
+        - gdal_sieve.py --version
+        - gdal_fillnodata.py --help
+        - gdalmove.py --version
+        - gdal_edit.py --help
+        - gdal_calc.py --help
+        - gdal_pansharpen.py --help
+        - gdalcompare.py --version
+        - ogrmerge.py --help
+        - ogr_layer_algebra.py --help
+        # Use separate .bat file for file existence check on Windows
+        - test_script_exist.bat  # [win]
+      about:
+        summary: Python wrapper for the Geospatial Data Abstraction Library (GDAL)
+        license: MIT
+        license_file: LICENSE.TXT
+
+about:
+  home: http://www.gdal.org
+  license: MIT
+  license_file: LICENSE.TXT
+  summary: |
+    GDAL is a translator library for raster and vector geospatial data formats that is released under an
+    X/MIT style Open Source license by the Open Source Geospatial Foundation.
+
+extra:
+  recipe-maintainers:
+    - zklaus
+    - akrherz
+    - gillins
+    - kmuehlbauer
+    - mingwandroid
+    - msarahan
+    - ocefpaf
+    - xylar

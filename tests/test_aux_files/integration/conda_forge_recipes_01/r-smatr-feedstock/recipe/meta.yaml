@@ -1,0 +1,68 @@
+{% set version = '3.4-8' %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-smatr
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/smatr_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/smatr/smatr_{{ version }}.tar.gz
+  sha256: 3669388f4abc41fac7bf008680c2fa8eddf5dffe20f5c33522b05357cc5b1863
+
+build:
+  merge_build_host: True  # [win]
+  number: 4
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+  run:
+    - r-base
+
+test:
+  commands:
+    - $R -e "library('smatr')"           # [not win]
+    - "\"%R%\" -e \"library('smatr')\""  # [win]
+
+about:
+  home: http://web.maths.unsw.edu.au/~dwarton, http://www.bitbucket.org/remkoduursma/smatr
+  license: GPL-2.0-only
+  summary: Methods for fitting bivariate lines in allometry using the major axis (MA) or standardised
+    major axis (SMA), and for making inferences about such lines. The available methods
+    of inference include confidence intervals and one-sample tests for slope and elevation,
+    testing for a common slope or elevation amongst several allometric lines, constructing
+    a confidence interval for a common slope or elevation, and testing for no shift
+    along a common axis, amongst several samples.  See Warton et al. 2012 <doi:10.1111/j.2041-210X.2011.00153.x>
+    for methods description.
+  license_family: GPL2
+  license_file: '{{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-2'
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+    - MathiasHaudgaard
+    - FrodePedersen
+    - ArneKr
+
+# Package: smatr
+# Version: 3.4-8
+# Title: (Standardised) Major Axis Estimation and Testing Routines
+# Author: David Warton <David.Warton@unsw.edu.au>, Remko Duursma, Daniel Falster and Sara Taskinen.
+# Maintainer: Remko Duursma <remkoduursma@gmail.com>
+# Description: Methods for fitting bivariate lines in allometry using the major axis (MA) or standardised major axis (SMA), and for making inferences about such lines. The available methods of inference include confidence intervals and one-sample tests for slope and elevation, testing for a common slope or elevation amongst several allometric lines, constructing a confidence interval for a common slope or elevation, and testing for no shift along a common axis, amongst several samples.  See Warton et al. 2012 <doi:10.1111/j.2041-210X.2011.00153.x> for methods description.
+# License: GPL-2
+# URL: http://web.maths.unsw.edu.au/~dwarton, http://www.bitbucket.org/remkoduursma/smatr
+# Collate: 'alpha.fun.R' 'b.com.est.R' 'coef.sma.R' 'com.ci.R' 'defineAxis.R' 'elev.com.R' 'elev.test.R' 'fitted.sma.R' 'huber.M.R' 'line.cis.R' 'logLik_sma.R' 'lr.b.com.R' 'ma.R' 'makeLogMinor.R' 'meas.est.R' 'multcompmatrix.R' 'nicePlot.R' 'plot.sma.R' 'predict.sma.R' 'print.sma.R' 'residuals.sma.R' 'robust.factor.R' 'seqLog.R' 'shift.com.R' 'slope.com.R' 'slope.test.R' 'sma.R' 'summary.sma.R'
+# NeedsCompilation: no
+# Packaged: 2018-03-18 20:51:38 UTC; remko
+# Repository: CRAN
+# Date/Publication: 2018-03-18 21:15:22 UTC

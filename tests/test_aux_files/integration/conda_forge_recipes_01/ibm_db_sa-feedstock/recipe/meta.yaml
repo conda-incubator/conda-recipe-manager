@@ -1,0 +1,53 @@
+{% set name = "ibm_db_sa" %}
+{% set version = "0.4.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 75d536407e5966f1dc747b6322938c4ad5d63b104edb834d667d03e64efef15b
+
+build:
+  number: 2
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - sysroot_linux-64 2.17  # [linux64]
+  host:
+    - python
+    - pip
+    - setuptools
+    - libxml2
+
+  run:
+    - python
+    - setuptools
+    - sqlalchemy
+
+test:
+  imports:
+    - ibm_db_sa
+
+about:
+  home: https://pypi.org/project/ibm-db-sa/
+  license: Apache-2.0
+  license_family: Apache
+  license_file: LICENSE
+  summary: Python SQLAlchemy driver for DB2 (LUW, zOS, i5) and IDS
+
+  description: |
+    This extension is the implementation of Python Alchmey driver for sqlAlchemy.
+    The extension supports DB2 (LUW, zOS, i5)
+  doc_url: https://github.com/ibmdb/python-ibmdbsa/blob/master/README.md
+  dev_url: https://github.com/ibmdb/python-ibmdbsa
+
+extra:
+  recipe-maintainers:
+    - '0xbe7a'
+    - windiana42
+    - amukherjee28

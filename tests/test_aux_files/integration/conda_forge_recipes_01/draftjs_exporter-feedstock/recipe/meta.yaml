@@ -1,0 +1,72 @@
+{% set name = "draftjs_exporter" %}
+{% set version = "5.0.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/draftjs_exporter-{{ version }}.tar.gz
+  sha256: 2efee45d4bb4c0aaacc3e5ea2983a29a29381e02037f3f92a6b12706d7b87e1e
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  number: 0
+
+requirements:
+  host:
+    - python >=3.8
+    - pip
+  run:
+    - python >=3.8
+
+test:
+  imports:
+    - draftjs_exporter
+    - draftjs_exporter.engines
+    - draftjs_exporter.utils
+  commands:
+    - pip check
+  requires:
+    - pip
+## Required for running the tests.
+#    - pytest ==7.4.3
+#    - pytest-cov ==4.1.0
+#    - pytest-memray ==1.5.0
+#    - tox ==4.11.4
+#    - python-build ==1.0.3
+#    - setuptools ==69.0.3
+## HTML builders.
+## Keep this in sync with the dependencies in setup.py, requirements.txt, tox.ini.
+#    - lxml >=4.2.0,<5
+#    - beautifulsoup4 >=4.4.1,<5
+#    - html5lib >=0.999,<2
+## Benchmark dependencies.
+#    - markov_draftjs ==0.2.0
+#    - memray ==1.11.0
+#    - psutil ==5.9.7
+#    #- memory_profiler ==0.47
+#    #- coverage >=4.1.0
+#    #- flake8 >=3.2.0
+#    #- isort ==4.2.5
+## For linting and formatting.
+#    - ruff ==0.1.9
+#    - mypy ==1.8.0
+
+about:
+  home: https://github.com/springload/draftjs_exporter
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: Library to convert rich text from Draft.js raw ContentState to HTML
+  description: 
+    Library to convert Draft.js ContentState to HTML
+  doc_url: https://github.com/springload/draftjs_exporter
+  dev_url: https://github.com/springload/draftjs_exporter
+
+extra:
+  recipe-maintainers:
+    - cshaley
+    - rxm7706
+    - sannykr

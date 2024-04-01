@@ -1,0 +1,73 @@
+{% set name = "spymicmac" %}
+{% set version = "0.2.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: f05b3c9b8948433e2a94d3b9416b59ea2ebcc68f49396f2e9781b3e08e508900
+
+build:
+  noarch: python
+  entry_points:
+    - "balance_images = spymicmac.tools.balance_images:main"
+    - "block_orientation = spymicmac.tools.block_orientation:main"
+    - "combine_auto_measures = spymicmac.tools.combine_auto_measures:main"
+    - "create_localchantier_xml = spymicmac.tools.create_localchantier_xml:main"
+    - "download_cop30_vrt = spymicmac.tools.download_cop30_vrt:main"
+    - "find_reseau_grid = spymicmac.tools.find_reseau_grid:main"
+    - "generate_micmac_measures = spymicmac.tools.generate_micmac_measures:main"
+    - "join_hexagon = spymicmac.tools.join_hexagon:main"
+    - "mosaic_micmac_tiles = spymicmac.tools.mosaic_micmac_tiles:main"
+    - "move_bad_tapas = spymicmac.tools.move_bad_tapas:main"
+    - "preprocess_kh9 = spymicmac.tools.preprocess_kh9:main"
+    - "post_process_micmac = spymicmac.tools.post_process_micmac:main"
+    - "register_ortho = spymicmac.tools.register_ortho:main"
+    - "remove_crosses = spymicmac.tools.remove_crosses:main"
+    - "remove_measures = spymicmac.tools.remove_measures:main"
+    - "resample_hexagon = spymicmac.tools.resample_hexagon:main"
+    - "write_micmac_xml = spymicmac.tools.write_micmac_xml:main"
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.10
+    - pip
+  run:
+    - earthengine-api
+    - gdal
+    - geopandas
+    - lxml
+    - matplotlib-base
+    - numpy
+    - numba
+    - opencv
+    - pillow >9.1.0
+    - pyasn1
+    - pybob >=0.26.2
+    - python >=3.10
+    - scikit-image >=0.19,<0.20.0   
+    - scipy
+    - shapely
+    - usgs
+
+test:
+  imports:
+    - spymicmac
+  requires:
+    - pip
+
+about:
+  home: https://github.com/iamdonovan/sPyMicMac
+  license: GPL-3.0-or-later
+  license_family: GPL3
+  license_file: LICENSE
+  summary: a python package for processing KH-9 imagery using MicMac
+  doc_url: https://spymicmac.readthedocs.io
+
+extra:
+  recipe-maintainers:
+    - iamdonovan

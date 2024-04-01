@@ -1,0 +1,51 @@
+{% set name = "materials-learning-algorithms" %}
+{% set version = "1.2.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/mala-project/mala/archive/v{{ version }}.tar.gz
+  sha256: 5514a2f1d46037166fbd03accf71fdb55128487831325679b46653b098a1cc5f
+  patches:
+    - requirements.patch
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+  run:
+    - python >=3.6
+    - ase
+    - mpmath
+    - numpy
+    - optuna
+    - scipy
+    - pandas
+    - tensorboard
+    - pytorch
+    - openpmd-api
+
+test:
+  imports:
+    - mala
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/mala-project/mala
+  summary: Materials Learning Algorithms. A framework for machine learning materials properties from first-principles data.
+  license: BSD-3-Clause
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - jan-janssen

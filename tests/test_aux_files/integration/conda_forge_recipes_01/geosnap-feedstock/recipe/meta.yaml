@@ -1,0 +1,70 @@
+{% set name = "geosnap" %}
+{% set version = "0.14.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 3ef75ef510934e5eb30b0e9c80cd94952a1266a05a5987ae06945781e97eac1f
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - python >=3.8
+    - pip
+    - setuptools >=61.0
+    - setuptools-scm >=6.2
+  run:
+    - python >=3.8
+    - pandas
+    - giddy >=2.2.1
+    - libpysal
+    - geopandas
+    - matplotlib-base
+    - scikit-learn
+    - seaborn
+    - pyarrow >=0.14.1
+    - platformdirs
+    - tqdm
+    - quilt3 >=3.1.11
+    - xlrd
+    - mapclassify
+    - tobler >=0.8.2
+    - contextily
+    - spopt >=0.1.1
+    - fsspec
+    - s3fs
+    - segregation >=2.1
+    - pooch
+    - pandana >=0.7
+
+test:
+  imports:
+    - geosnap
+
+about:
+  home: http://github.com/spatialucr/geosnap
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE.txt
+  summary: Geospatial Neighborhood Analysis in Python
+
+  description: |
+    geosnap is an open-source, Python package for exploring, modeling, and visualizing neighborhood 
+    dynamics. It provides a suite of tools for creating socio-spatial datasets, harmonizing those 
+    datasets into consistent set of time-static boundaries, and modeling neighborhood change using 
+    classic and spatial statistical methods.
+  doc_url: http://spatialucr.github.io/geosnap
+  dev_url: https://github.com/spatialucr/geosnap
+
+extra:
+  recipe-maintainers:
+    - jGaboardi
+    - knaaptime
+    - sjsrey

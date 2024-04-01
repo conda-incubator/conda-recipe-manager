@@ -1,0 +1,47 @@
+{% set name = "tsod" %}
+{% set version = "0.2.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 101289a3798727ae41686b552be8d492581a026373e6a61e6872c16e7706e49c
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python  >=3.6
+    - pip
+  run:
+    - python  >=3.6
+    - numpy
+    - pandas
+    - joblib
+    - numba
+
+test:
+  imports:
+    - tsod
+  requires:
+    - pip
+  commands:
+    - pip check
+
+about:
+  home: https://github.com/DHI/tsod
+
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: Anomaly Detection for time series data
+  doc_url: https://dhi.github.io/tsod/
+
+extra:
+  recipe-maintainers:
+    - ecomodeller

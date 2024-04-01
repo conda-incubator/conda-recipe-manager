@@ -1,0 +1,63 @@
+{% set name = "kosh" %}
+{% set version = "3.1" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/LLNL/kosh/archive/v{{ version }}.tar.gz
+  sha256: 279b073df8882f6468c1922d890a66819ca45d86fb0bc609bdb605bf44c309c2
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+    - llnl-sina >=1.14.0
+    - networkx >=2.6
+    - numpy
+    - matplotlib-base
+    - scipy
+    - h5py >=3
+    - scikit-learn >=1.0.2
+    - pandas
+    - hdbscan
+    - tqdm
+    - cython <3
+  run:
+    - python >=3.6
+    - llnl-sina >=1.14.0
+    - networkx >=2.6
+    - numpy
+    - matplotlib-base
+    - scipy
+    - h5py >=3
+    - scikit-learn >=1.0.2
+    - pandas
+    - hdbscan
+    - tqdm
+    - cython <3
+
+test:
+  imports:
+    - kosh
+  commands:
+    - pip check
+    - kosh --help
+  requires:
+    - pip
+
+about:
+  home: https://github.com/LLNL/kosh
+  summary: Kosh allows codes to store, query, share and manipulate data via an easy-to-use Python API. Kosh lies on top of Sina and as a result can use any database backend supported by Sina. In adition Kosh aims to make data access and sharing as simple as possible.
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - doutriaux1

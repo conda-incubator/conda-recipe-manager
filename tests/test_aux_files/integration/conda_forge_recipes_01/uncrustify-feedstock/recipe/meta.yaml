@@ -1,0 +1,38 @@
+{% set name = "uncrustify" %}
+{% set version = "0.74.0" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  - url: https://github.com/uncrustify/uncrustify/archive/{{ name }}-{{ version }}.tar.gz
+    sha256: b7d24e256e7f919aa96289ac8167ac98340df7faa2d34b60d2242dc54700caaa
+
+build:
+  number: 0
+  run_exports:
+    - {{ pin_subpackage(name, max_pin='x.x') }}
+
+requirements:
+  build:
+    - {{ compiler('cxx') }}              # [not win]
+    - {{ compiler('c') }}                # [not win]
+    - ninja
+    - cmake
+
+test:
+  commands:
+    - uncrustify --version
+
+about:
+  home: http://uncrustify.sourceforge.net/
+  license: GPL-2.0-only
+  license_file: COPYING
+  summary: |
+    A source code beautifier for C, C++, C#, ObjectiveC, D, Java, Pawn and VALA
+
+extra:
+  recipe-maintainers:
+    - seanyen
+    - wolfv

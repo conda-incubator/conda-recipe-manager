@@ -1,0 +1,59 @@
+{% set name = "iterativeWGCNA" %}
+{% set version = "1.1.6" %}
+
+package:
+  name: "{{ name|lower }}"
+  version: "{{ version }}"
+
+source:
+  url: "https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz"
+  sha256: 1ee490a1b7a0e1164fda08d38053a17f974f82f0237b8c2864bd12a28f3a8efb
+
+build:
+
+
+  number: 20
+
+  skip: True  # [(win and vc < 14)]
+  skip: True  # [(win and py>=38)]
+  script: {{ PYTHON }} -m pip install . -vv 
+  
+requirements:
+  build:
+  host:
+    - pip
+    - python
+  run:
+    - matplotlib-base
+    - python
+    - rpy2
+    - r-base
+    - r-nlme
+    - r-hmisc
+    - r-rcpp >=0.11.0
+    - r-doparallel
+    - r-dynamictreecut >=1.62
+    - r-fastcluster
+    - r-foreach
+    - r-matrixstats >=0.8.1
+    - r-survival
+
+test:
+  imports:
+    - iterativeWGCNA
+
+  
+
+about:
+  home: "http://github.com/cstoeckert/iterativeWGCNA"
+  license: "GPL-2.0-only"
+  license_family: "GPL"
+  license_file: "LICENSE.txt"
+  summary: iterativeWGCNA provides a Python-wrapped extension for the R program Weighted 
+    Gene Correlation Network Analysis (WGCNA) that improves the robustness of network-based 
+    classifications (modules) inferred from whole-transcriptome gene expression datasets.
+  doc_url: "https://www.biorxiv.org/content/10.1101/234062v1"
+
+extra:
+  recipe-maintainers:
+    - thompsonsed

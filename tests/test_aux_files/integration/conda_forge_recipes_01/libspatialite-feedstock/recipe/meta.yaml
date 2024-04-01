@@ -1,0 +1,68 @@
+{% set version = "5.1.0" %}
+
+package:
+  name: libspatialite
+  version: {{ version }}
+
+source:
+  url: https://www.gaia-gis.it/gaia-sins/libspatialite-sources/libspatialite-{{ version }}.tar.gz
+  sha256: 43be2dd349daffe016dd1400c5d11285828c22fea35ca5109f21f3ed50605080
+  patches:
+    # Patch Win to fix build path
+    - 0001-win_fix_paths.patch  # [win]
+    # Patch configure for OSX to make sure we get dylib, not so
+    - 0002-osx_fix_lib_ext.patch  # [osx]
+    # Skip some tests that fail
+    - skip_tests.patch
+    # GH71 build issue
+    #- gh71_check_drop_rename.patch
+
+build:
+  number: 5
+  skip: true  # [win and vc<14]
+  run_exports:
+    # No idea.  Staying with minor version pin.
+    - {{ pin_subpackage('libspatialite', max_pin='x.x') }}
+
+requirements:
+  build:
+    - autoconf  # [linux]
+    - automake  # [linux]
+    - libtool   # [linux]
+    - pkg-config  # [not win]
+    - make  # [unix]
+    - gnuconfig  # [unix]
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+  host:
+    - libiconv  # [osx]
+    - sqlite
+    - geos
+    - proj
+    - freexl >=2
+    - zlib
+    - libxml2
+    - librttopo
+  run:
+    - libiconv  # [osx]
+    - sqlite
+    - geos
+    - proj
+    - freexl >=2
+    - zlib
+    - libxml2
+    - librttopo
+
+about:
+  home: https://www.gaia-gis.it/fossil/libspatialite/index
+  license: MPL-1.1
+  license_file: COPYING
+  summary: Extend the SQLite core to support fully fledged Spatial SQL capabilities
+
+extra:
+  recipe-maintainers:
+    - akrherz
+    - danclewley
+    - gillins
+    - ocefpaf
+    - xylar

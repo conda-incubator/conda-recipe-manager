@@ -1,0 +1,45 @@
+{% set name = "pytest-datadir" %}
+{% set version = "1.5.0" %}
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 1617ed92f9afda0c877e4eac91904b5f779d24ba8f5e438752e3ae39d8d2ee3f
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.8
+    - setuptools_scm
+  run:
+    - python >=3.8
+    - pytest
+
+test:
+  requires:
+    - pytest
+  imports:
+    - pytest_datadir
+  commands:
+    - pytest --help
+
+about:
+  home: https://github.com/gabrielcnr/pytest-datadir
+  license: MIT
+  license_file: LICENSE
+  summary: pytest plugin for manipulating test data directories and files.
+
+extra:
+  recipe-maintainers:
+    - nicoddemus
+    - gabrielcnr
+    - edisongustavo
+    - gqmelo
+    - IgorTG

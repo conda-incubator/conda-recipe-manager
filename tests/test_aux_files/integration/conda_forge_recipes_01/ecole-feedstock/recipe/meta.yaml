@@ -1,0 +1,120 @@
+{% set version = "0.8.1" %}
+
+package:
+  name: ecole
+  version: {{ version }}
+
+source:
+  url: https://github.com/ds4dm/ecole/archive/v{{ version }}.tar.gz
+  sha256: 952f2b74fc44fac2d6a0a3156470045f77d31de2e584f27f2ae39259d96befea
+
+build:
+  number: 3
+  skip: true  # [win]
+
+requirements:
+  build:
+    - {{ compiler('cxx') }}
+    - cmake >=3.15
+    - ninja
+    # FIXME We don't need both Ninja and Make but somehow scikit-build does not find ninja.
+    # Try setting scikit-build `--generator` through pip `--install-option`...
+    - make
+  host:
+    - scip
+    - fmt
+    - xtensor
+    # Waiting for an xsimd=10 compatible release of xtensor
+    # https://github.com/xtensor-stack/xsimd/issues/810
+    - xsimd <9.0,>=8.0
+    - python
+    - pip
+    - scikit-build
+    - pybind11 >=2.7
+    - numpy >=1.11
+    - xtensor-python
+
+outputs:
+
+  - name: libecole
+    version: {{ version }}
+    build:
+      run_exports:
+        - {{ pin_subpackage('libecole', exact=True) }}
+    requirements:
+      build:
+        - {{ compiler('cxx') }}
+        - cmake >=3.15
+        - ninja
+      host:
+        - scip
+        - fmt
+        - xtensor
+        - xsimd <9.0,>=8.0
+      run:
+        - __osx >={{ MACOSX_DEPLOYMENT_TARGET|default("10.9") }}  # [osx and x86_64]
+      run_constrained:
+        - pin_compatible('xsimd')
+        - pin_compatible('xtensor')
+    files:
+      - include/ecole
+      - lib/libecole*
+      - lib/cmake/Ecole
+    test:
+      script: test-libecole.sh
+      source_files:
+        - examples/libecole/
+      requires:
+        - {{ compiler('cxx') }}
+        - cmake >=3.15
+        - ninja
+        - xsimd <9.0,>=8.0
+        - xtensor
+
+  - name: ecole
+    version: {{ version }}
+    requirements:
+      build:
+        - {{ compiler('cxx') }}
+        - cmake >=3.15
+        - ninja
+        - make
+      host:
+        - scip
+        - fmt
+        - xtensor
+        - xsimd <9.0,>=8.0
+        - python
+        - pip
+        - scikit-build
+        - pybind11 >=2.7
+        - numpy >=1.11
+        - xtensor-python
+      run:
+        - {{ pin_subpackage('libecole', exact=True) }}
+        - __osx >={{ MACOSX_DEPLOYMENT_TARGET|default("10.9") }}  # [osx and x86_64]
+        - python
+        - numpy
+      run_constrained:
+        - pin_compatible('xtensor-python')
+        - pyscipopt >=3.0.1
+    script: install_ecole.sh
+    test:
+      imports:
+        - ecole
+        - ecole.reward
+        - ecole.environment
+      commands:
+        - python -c 'import ecole; next(ecole.instance.SetCoverGenerator())'
+
+about:
+  home: https://www.ecole.ai/
+  license: BSD-3-Clause
+  license_file: LICENSE
+  summary: Extensible Combinatorial Optimization Learning Environments
+  doc_url: https://doc.ecole.ai/
+
+extra:
+  recipe-maintainers:
+    - AntoinePrv
+    - gasse

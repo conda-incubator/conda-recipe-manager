@@ -1,0 +1,68 @@
+{% set name = "dftd3-python" %}
+{% set version = "1.0.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/dftd3/simple-dftd3/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: fac3d9f785562b178dcf8e89f8d27782b8bda45fcd9dbaccc359b5def4fb1cf6
+
+build:
+  number: 1
+  skip: true  # [win]
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - cffi                                   # [build_platform != target_platform]
+    - {{ compiler('c') }}  # [unix]
+    - {{ compiler('m2w64_c') }}  # [win]
+    - cffi                                # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}  # [build_platform != target_platform]
+    - meson                               # [build_platform != target_platform]
+    - pkg-config                          # [build_platform != target_platform]
+    - python                              # [build_platform != target_platform]
+  host:
+    - cffi
+    - libblas  # [unix]
+    - meson
+    - pkg-config
+    - pip
+    - python
+    - simple-dftd3 >={{ version }}
+  run:
+    - cffi
+    - numpy
+    - python
+
+
+test:
+  imports:
+    - dftd3
+    - dftd3.library
+    - dftd3.interface
+    - dftd3.parameters
+    - dftd3.ase
+    - dftd3.qcschema
+  requires:
+    - pytest
+    - setuptools
+    - qcelemental
+    - ase
+    - tomli
+
+about:
+  home: https://github.com/awvwgk/simple-dftd3/tree/main/python
+  license: LGPL-3.0-or-later
+  license_family: LGPL
+  license_file:
+    - COPYING
+    - COPYING.LESSER
+  summary: Python API for the DFT-D3 project
+
+extra:
+  recipe-maintainers:
+    - awvwgk

@@ -1,0 +1,47 @@
+{% set name = "pdm-backend" %}
+{% set version = "2.1.8" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/pdm_backend-{{ version }}.tar.gz
+  sha256: 2487dfbd13f69d80fb4e6a08006a3ee68272833970813047dc5fcfacdfdc0151
+
+build:
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+  host:
+    - pip
+    - python
+    - importlib-metadata >=3.6  # [py<310]
+  run:
+    - python
+    - importlib-metadata >=3.6  # [py<310]
+
+test:
+  imports:
+    - pdm.backend
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://pypi.org/project/pdm-backend/
+  summary: The build backend used by PDM that supports latest packaging standards.
+  license: MIT
+  license_file: LICENSE
+  dev_url: https://github.com/pdm-project/pdm-backend
+
+extra:
+  recipe-maintainers:
+    - theAeon
+    - xhochy

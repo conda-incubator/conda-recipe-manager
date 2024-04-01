@@ -1,0 +1,64 @@
+{% set name = "PySolid" %}
+{% set version = "0.3.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/insarlab/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: 77eb3da2a42b44d6abcc69d3320aaba6ec11d79b2e83ac9a3f4d698db67931d6
+
+build:
+  number: 0
+  skip: true  # [py<36]
+  script:
+    - export SETUPTOOLS_SCM_PRETEND_VERSION={{ version }}  # [unix]
+    - set SETUPTOOLS_SCM_PRETEND_VERSION={{ version }}  # [win]
+    - {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - numpy                                  # [build_platform != target_platform]
+    - {{ compiler('fortran') }}
+
+  host:
+    - m2w64-toolchain  # [win]
+    - libpython  # [win]
+    - python
+    - pip
+    - numpy
+    - setuptools_scm
+  run:
+    - python
+    - numpy
+    - scipy
+
+test:
+  imports:
+    - pysolid
+
+about:
+  home: https://github.com/insarlab/PySolid
+  license: GPL-3.0-or-later
+  license_family: GPL
+  license_file: LICENSE
+  summary: A Python wrapper for solid to compute solid Earth tides
+  description: |
+    The Python based solid Earth tides (PySolid) is a thin Python wrapper of the
+    `solid.for` program (by Dennis Milbert based on `dehanttideinelMJD.f` from
+    V. Dehant, S. Mathews, J. Gipson and C. Bruyninx) to calculate solid Earth
+    tides in east/north/up direction (section 7.1.1 in the 2010 IERS Conventions).
+    Solid Earth tides introduces large offsets in SAR observations and long spatial
+    wavelength ramps in InSAR observations, as shown in the Sentinel-1 data with
+    regular acquisitions and large swaths (Yunjun et al., 2022).
+  dev_url: https://github.com/insarlab/PySolid
+
+extra:
+  recipe-maintainers:
+    - jhkennedy
+    - jlrine2
+    - scottstanie
+    - yunjunz

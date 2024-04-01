@@ -1,0 +1,49 @@
+{% set name = "xarrayutils" %}
+{% set version = "2.0.0" %}
+{% set sha = "463c53af98d6a0c18e78e7841d5c6f29d58eb44a483786666271dcc80506c6bb" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: {{ sha }}
+
+build:
+  noarch: python
+
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.8
+    - pip
+    - pytest-runner
+  run:
+    - python >=3.8
+    - xarray
+    - numpy
+    - matplotlib-base
+    - scipy
+    - astropy
+    - dask
+
+test:
+  imports:
+    - xarrayutils
+
+about:
+  home: https://github.com/jbusecke/xarrayutils
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: A collection of various tools for data analysis built on top of xarray and xgcm
+
+  description: This package contains a variety of utility functions I have used in the past few years for data analysis.
+  dev_url: https://github.com/jbusecke/xarrayutils
+
+extra:
+  recipe-maintainers:
+    - jbusecke

@@ -1,0 +1,50 @@
+{% set name = "oslo.concurrency" %}
+{% set version = "6.0.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: b52f02b4e46f5f274b91fb8e1bfc5cbf9a418dfcd4a83be080345495e3d26e8a
+
+build:
+  number: 0
+  script: '{{ PYTHON }} -m pip install . --no-deps --ignore-installed -vv '
+  noarch: python
+
+requirements:
+  host:
+    - pbr !=2.1.0,>=2.0.0
+    - pip
+    - python >=3.8
+  run:
+    - pbr !=2.1.0,>=2.0.0
+    - oslo.config >=5.2.0
+    - oslo.i18n >=3.15.3
+    - oslo.utils >=3.33.0
+    - fasteners >=0.7.0
+    - python >=3.8
+
+test:
+  imports:
+    - oslo_concurrency
+    - oslo_concurrency.lockutils
+    - oslo_concurrency.opts
+    - oslo_concurrency.processutils
+    - oslo_concurrency.version
+    - oslo_concurrency.watchdog
+
+about:
+  home: https://docs.openstack.org/oslo.concurrency/latest/
+  license: Apache-2.0
+  license_family: APACHE
+  license_file: LICENSE
+  summary: The oslo.concurrency library has utilities for safely running multi-thread, multi-process applications using locking mechanisms and for running external processes
+
+extra:
+  recipe-maintainers:
+    - pg-hbk
+    - sy-hbk
+    - tschoonj

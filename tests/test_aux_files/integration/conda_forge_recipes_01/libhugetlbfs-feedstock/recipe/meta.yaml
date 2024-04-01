@@ -1,0 +1,46 @@
+{% set version = "2.24" %}
+
+package:
+  name: libhugetlbfs
+  version: {{ version }}
+
+source:
+  url: https://github.com/libhugetlbfs/libhugetlbfs/releases/download/{{ version }}/libhugetlbfs-{{ version }}.tar.gz
+  sha256: d501dfa91c8ead1106967a3d3829f2ba738c3fac0a65cb358ed2ab3870ddc5ef
+
+build:
+  number: 0
+  skip: true  # [not linux]
+  run_exports:
+    # 2021/12/29 hmaarrfk
+    # This package seems to be quite stable. I think this pinning is correct
+    # Though it does not have any information on the webiste:
+    # https://abi-laboratory.pro/
+    - {{ pin_subpackage('libhugetlbfs', max_pin='x') }}
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - make
+    - autoconf
+    - automake
+    - libtool
+
+test:
+  commands:
+    - test   -f $PREFIX/lib/libhugetlbfs${SHLIB_EXT}
+    - test ! -f $PREFIX/lib/libhugetlbfs.a
+    - hugectl --help
+    - hugeadm --help
+    - hugeedit --help
+
+about:
+  home: https://github.com/libhugetlbfs/libhugetlbfs
+  license: LGPL-2.1-only
+  license_family: LGPL
+  license_file: LGPL-2.1
+  summary: 'The libhugetlbfs library interface works with hugetlbfs to provide more convenient specific application-level services.'
+
+extra:
+  recipe-maintainers:
+    - hmaarrfk

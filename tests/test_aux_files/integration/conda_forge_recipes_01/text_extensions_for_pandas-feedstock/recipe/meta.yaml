@@ -1,0 +1,48 @@
+{% set name = "text_extensions_for_pandas" %}
+{% set version = "0.2.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/CODAIT/text-extensions-for-pandas/archive/v{{ version }}.tar.gz
+  sha256: 9c146d0ebeb45a3ad86484794c7bc2617559b8539400832c491dc99e8d2c1a36
+
+build:
+  number: 2
+  skip: true  # [win or py<36]
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  build:
+    - python
+  host:
+    - python
+    - pip
+  run:
+    - python
+    - numpy >=1.17
+    - pandas >=1.0.3
+    - pyarrow >=1.0.0
+    - regex
+    - importlib_resources
+    - memoized-property
+    - requests
+
+test:
+  imports:
+    - text_extensions_for_pandas
+
+about:
+  home: https://github.com/CODAIT/text-extensions-for-pandas
+  license: Apache-2.0
+  license_file: LICENSE.txt
+  summary: Natural language processing support for Pandas DataFrames.
+  doc_url: https://text-extensions-for-pandas.readthedocs.io/en/latest/
+  dev_url: https://github.com/CODAIT/text-extensions-for-pandas
+
+extra:
+  recipe-maintainers:
+    - frreiss
+    - BryanCutler

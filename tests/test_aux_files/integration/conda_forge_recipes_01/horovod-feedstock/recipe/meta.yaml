@@ -1,0 +1,118 @@
+{% set name = "horovod" %}
+{% set version = "0.28.1" %}
+{% set proc_type = "cuda" if cuda_compiler_version != "None" else "cpu" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/horovod/horovod/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: 88fbcd2815083607a5d27962f323eae5752e3eb96511aaac98258f280cac0f8e
+  patches:
+    - 0001-pass-cmake-args.patch
+    - 0002-skip-python-for-crosscompiling.patch
+    - 3998.patch
+
+build:
+  number: 3
+  skip: true  # [win]
+  skip: true  # [py<39]
+  string: {{ proc_type }}_mpi_{{ mpi }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}
+  ignore_run_exports_from:
+    - flatbuffers
+    - tensorflow
+    - pytorch
+  # Horovod supports multiple frameworks, and the package is built against TensorFlow and PyTorch.
+  # However, usually, the user only uses one of them simultaneously. (by importing either horovod.tensorflow or horovod.torch)
+  # Thus, TensorFlow and PyTorch are not listed in the `run` section, but in the `run_constrained` section.
+  # Users can manually install Horovod and only one of them.
+  # Both TensorFlow and PyTorch libraries are listed in `missing_dso_whitelist`, and a test is added to ensure Horovod libraries can be 
+  # correctly loaded when TensorFlow and PyTorch are installed.
+  # (horovod.tensorflow loads Horovod TensorFlow library and horovod.torch loads Horovod PyTorch library)
+  missing_dso_whitelist:
+    - "*/libtensorflow_framework.so.*"  # [linux]
+    - "*/libtensorflow_cc.so.*"  # [linux]
+    - "*/torch/lib/*.so"  # [linux]
+    - "*/libtensorflow_framework.*.dylib"  # [osx]
+    - "*/libtensorflow_cc.*.dylib"  # [osx]
+    - "*/_pywrap_tensorflow_internal.so"
+    - "*/torch/lib/*.dylib"  # [osx]
+    - "*/libc10*.so"  # [linux]
+    - "*/libtorch*.so"  # [linux]
+
+requirements:
+  build:
+    - {{ compiler('cxx') }}
+    - {{ compiler('cuda') }}  # [cuda_compiler_version != 'None']
+    - cmake >=3.13
+    - make  # [unix]
+    - python  # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}  # [build_platform != target_platform]
+    - flatbuffers
+    - {{ mpi }}  # [build_platform != target_platform and mpi == "openmpi"]
+  host:
+    - python
+    - pip
+    - wheel
+    - setuptools
+    - pyyaml
+    - cloudpickle
+    - packaging
+    - psutil
+    - nccl  # [cuda_compiler_version != 'None']
+    - {{ mpi }}
+    - mpi4py
+    - tensorflow  # [not (cuda_compiler_version or "").startswith("11")]
+    - tensorflow * {{ proc_type }}*
+    - pytorch  # [not (cuda_compiler_version or "").startswith("11")]
+    - pytorch * {{ proc_type }}*
+    # https://github.com/conda-forge/tensorflow-feedstock/pull/367#issuecomment-1890751416
+    - tensorflow 2.14.*  # [(cuda_compiler_version or "").startswith("11")]
+    - pytorch 2.0.*  # [(cuda_compiler_version or "").startswith("11")]
+    # for flatc
+    - flatbuffers
+    - libboost-headers
+    - lbfgspp
+    - cuda-cudart-dev  # [(cuda_compiler_version or "").startswith("12")]
+    - cuda-nvtx-dev    # [(cuda_compiler_version or "").startswith("12")]
+
+  run:
+    - python
+    - pyyaml
+    - cloudpickle
+    - packaging 
+    - psutil
+    - nccl  # [cuda_compiler_version != 'None']
+    - {{ mpi }}
+    - mpi4py
+
+  run_constrained:
+    - {{ pin_compatible('tensorflow', max_pin='x.x') }} {{ proc_type }}*
+    - {{ pin_compatible('pytorch', max_pin='x.x') }} {{ proc_type }}*
+
+test:
+  requires:
+    - pip
+    - tensorflow
+    - pytorch 
+  imports:
+    - horovod
+    - horovod.tensorflow
+    - horovod.torch
+  commands:
+    - pip check
+    - horovodrun -h
+
+about:
+  home: https://horovod.ai/
+  license: Apache-2.0
+  license_family: Apache
+  license_file: LICENSE
+  summary: 'Distributed training framework for TensorFlow, Keras, PyTorch, and Apache MXNet.'
+  doc_url: https://horovod.readthedocs.io/
+  dev_url: https://github.com/horovod/horovod
+
+extra:
+  recipe-maintainers:
+    - njzjz

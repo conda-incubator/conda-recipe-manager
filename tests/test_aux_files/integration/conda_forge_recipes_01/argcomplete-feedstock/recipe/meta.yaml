@@ -1,0 +1,48 @@
+{% set name = "argcomplete" %}
+{% set version = "3.2.3" %}
+
+package:
+  name: argcomplete
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/argcomplete-{{ version }}.tar.gz
+  sha256: bf7900329262e481be5a15f56f19736b376df6f82ed27576fa893652c5de6c23
+
+build:
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  noarch: python
+
+requirements:
+  host:
+    - python >=3.8
+    - setuptools >=67.7.2
+    - setuptools-scm >=6.2
+    - pip
+  run:
+    - python >=3.8
+
+test:
+  requires:
+    - pip
+  commands:
+    - pip check
+  imports:
+    - argcomplete
+
+about:
+  home: https://github.com/kislyuk/argcomplete
+  license: Apache-2.0
+  summary: Bash tab completion for argparse
+  license_family: Apache
+  license_file:
+    - LICENSE.rst
+    - NOTICE
+  doc_url: https://argcomplete.readthedocs.io
+  dev_url: https://github.com/kislyuk/argcomplete
+
+extra:
+  recipe-maintainers:
+    - asmeurer
+    - xylar

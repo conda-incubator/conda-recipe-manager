@@ -1,0 +1,56 @@
+{% set name = "ubermag" %}
+{% set version = "2023.11" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 888feb4dff64b4b1bc157f2bc920b95bb9b4f3b31571f207fee05d8ff20c5a52
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.8
+    - pip
+  run:
+    - python >=3.8
+    - jupyterlab >=3.0
+    - discretisedfield ==0.90.1
+    - mag2exp ==0.62.2
+    - micromagneticdata ==0.65.2
+    - micromagneticmodel ==0.63.2
+    - micromagnetictests ==0.63.1
+    - mumax3c ==0.2.0
+    - oommfc ==0.64.1
+    - ubermagtable ==0.61.3
+    - ubermagutil ==0.63.2
+
+test:
+  imports:
+    - ubermag
+
+  commands:
+    - python -c "import sys; import ubermag; sys.exit(ubermag.test())"
+
+about:
+  home: http://ubermag.github.io/
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: Meta package for the Ubermag project.
+  doc_url: https://ubermag.github.io/documentation/ubermag.html
+  dev_url: https://github.com/ubermag/ubermag
+
+extra:
+  recipe-maintainers:
+    - marijanbeg
+    - fangohr
+    - lang-m
+    - samjrholt
+    - swapneelap

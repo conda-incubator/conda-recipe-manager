@@ -1,0 +1,537 @@
+{% set name = "ibis-framework" %}
+{% set version = "8.0.0" %}
+
+package:
+  name: {{ name }}-ext
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name.replace("-", "_") }}-{{ version }}.tar.gz
+  sha256: 20e74a0cdbd5fc03c96955fdb80ad4cc6d16518c28339e24a2b0f930bc40eeb6
+
+build:
+  number: 1
+
+requirements:
+  host:
+    - python >=3.9
+
+outputs:
+  - name: {{ name }}-core
+    version: {{ version }}
+
+    build:
+      noarch: python
+      script:
+        - python -m pip install . -vv --no-deps
+      script_env:
+        - POETRY_DYNAMIC_VERSIONING_BYPASS={{ version }}
+
+    requirements:
+      host:
+        - pip
+        - poetry-core >=1.0.0
+        - poetry-dynamic-versioning >=0.18.0
+        - python >=3.9
+
+      run:
+        - atpublic >=2.3
+        - bidict >=0.22.1
+        - filelock >=3.7.0,<4
+        - multipledispatch >=0.6,<2
+        - numpy >=1.15,<2
+        - pandas >=1.2.5
+        - parsy >=2
+        - pins >=0.8.2
+        - pyarrow >=2
+        - pyarrow-hotfix >=0.4
+        - python >=3.9
+        - python-graphviz >=0.16
+        - regex >=2021.7.6
+        - rich >=12.4.4
+        - pytz >=2022.7
+        - python-dateutil >=2.8.2
+        - sqlglot >=18.7.0,<=20.11
+        - toolz >=0.11
+
+    test:
+      imports:
+        - ibis
+        - ibis.backends.pandas
+
+  - name: {{ name }}
+    version: {{ version }}
+
+    build:
+      noarch: python
+
+    requirements:
+      run:
+        - duckdb-engine <1,>=0.1.8
+        - python-duckdb <1,>=0.8.1
+        - sqlalchemy <3,>=1.4
+        - sqlalchemy-views <1,>=0.3.1
+        - {{ pin_subpackage(name + '-core') }}
+        # - typing_extensions <5,>=4.3.0
+        # - trino-python-client <1,>=0.321
+        # - toolz <1,>=0.11
+        # - sqlglot <21,>=18.12.0
+        # - sqlalchemy_exasol >=4.6.0
+        # - snowflake-sqlalchemy <2,>=1.4.1
+        # - snowflake-connector-python !=3.3.0b1,<4,>=3.0.2
+        # - shapely <3,>=2
+        # - rich <14,>=12.4.4
+        # - requests <3,>=2
+        # - regex >=2021.7.6
+        # - pytz >=2022.7
+        # - python-graphviz <1,>=0.16
+        # - python-dateutil <3,>=2.8.2
+        # - pyspark <3.4,>=3
+        # - pymysql <2,>=1
+        # - pymssql <3,>=2.2.5
+        # - pydruid <1,>=0.6.5
+        # - pydata-google-auth <2,>=1.4.0
+        # - pyarrow-hotfix <1,>=0.4
+        # - pyarrow <15,>=2
+        # - psycopg2 <3,>=2.8.4
+        # - polars <1,>=0.19.3
+        # - pins <1,>=0.8.3
+        # - parsy <3,>=2
+        # - pandas <3,>=1.2.5
+        # - packaging <24,>=21.3
+        # - oracledb <2,>=1.3.1
+        # - numpy <2,>=1
+        # - multipledispatch <2,>=0.6
+        # - impyla <1,>=0.17
+        # - google-cloud-bigquery-storage <3,>=2
+        # - google-cloud-bigquery <4,>=3
+        # - geopandas <1,>=0.6
+        # - geoalchemy2 <1,>=0.6.3
+        # - fsspec >=2022.1.0
+        # - filelock <4,>=3.7.0
+        # - deltalake <1,>=0.9.0
+        # - db-dtypes <2,>=0.3
+        # - datafusion <34,>=0.6
+        # - dask-core >=2022.9.1
+        # - clickhouse-connect <1,>=0.5.23
+        # - black <24,>=22.1.0
+        # - bidict <1,>=0.22.1
+        # - atpublic <5,>=2.3
+        # - typing_extensions <5,>=4.3.0
+        # - trino-python-client <1,>=0.321
+        # - toolz <1,>=0.11
+        # - sqlglot <=20.11,>=18.12.0
+        # - sqlalchemy_exasol >=4.6.0
+        # - sqlalchemy-risingwave <2,>=1.0.0
+        # - snowflake-sqlalchemy <2,>=1.4.1
+        # - snowflake-connector-python !=3.3.0b1,<4,>=3.0.2
+        # - shapely <3,>=2
+        # - rich <14,>=12.4.4
+        # - regex >=2021.7.6
+        # - pytz >=2022.7
+        # - python-graphviz <1,>=0.16
+        # - python-dateutil <3,>=2.8.2
+        # - pyspark <3.4,>=3
+        # - pyodbc <6,>=4.0.39
+        # - pymysql <2,>=1
+        # - pydruid <1,>=0.6.5
+        # - pydata-google-auth <2,>=1.4.0
+        # - pyarrow-hotfix <1,>=0.4
+        # - pyarrow <16,>=2
+        # - psycopg2 <3,>=2.8.4
+        # - polars <1,>=0.19.3
+        # - pins <1,>=0.8.3
+        # - parsy <3,>=2
+        # - pandas <3,>=1.2.5
+        # - packaging <24,>=21.3
+        # - oracledb <3,>=1.3.1
+        # - numpy <2,>=1
+        # - multipledispatch <2,>=0.6
+        # - impyla <1,>=0.17
+        # - google-cloud-bigquery-storage <3,>=2
+        # - google-cloud-bigquery <4,>=3
+        # - geopandas <1,>=0.6
+        # - geoalchemy2 <1,>=0.6.3
+        # - deltalake <1,>=0.9.0
+        # - db-dtypes <2,>=0.3
+        # - datafusion <36,>=0.6
+        # - dask-core >=2022.9.1
+        # - clickhouse-connect <1,>=0.5.23
+        # - black <25,>=22.1.0
+        # - bidict <1,>=0.22.1
+        # - atpublic <5,>=2.3
+    test:
+      imports:
+        - ibis
+        - ibis.backends.duckdb
+
+
+  - name: ibis-clickhouse
+    version: {{ version }}
+
+    build:
+      noarch: python
+
+    requirements:
+      run:
+        - clickhouse-connect >=0.5.23
+        - sqlalchemy >=1.4
+        - {{ pin_subpackage(name + '-core') }}
+
+    test:
+      imports:
+        - ibis
+        - ibis.backends.clickhouse
+
+  - name: ibis-dask
+    version: {{ version }}
+
+    build:
+      noarch: python
+
+    requirements:
+      run:
+        - dask >=2022.9.1
+        - {{ pin_subpackage(name + '-core') }}
+
+    test:
+      imports:
+        - ibis
+        - ibis.backends.dask
+
+  - name: ibis-impala
+    version: {{ version }}
+
+    build:
+      noarch: python
+
+    requirements:
+      run:
+        - fsspec >=2022.1.0
+        - impyla >=0.17
+        - requests >=2
+        - sqlalchemy >=1.4
+        - {{ pin_subpackage(name + '-core') }}
+
+    test:
+      imports:
+        - ibis
+        - ibis.backends.impala
+
+  - name: ibis-mysql
+    version: {{ version }}
+
+    build:
+      noarch: python
+
+    requirements:
+      run:
+        - pymysql >=1
+        - sqlalchemy >=1.4
+        - {{ pin_subpackage(name + '-core') }}
+
+    test:
+      imports:
+        - ibis
+        - ibis.backends.mysql
+
+  - name: ibis-postgres
+    version: {{ version }}
+
+    build:
+      noarch: python
+
+    requirements:
+      run:
+        - psycopg2 >=2.8.4
+        - sqlalchemy >=1.4
+        - {{ pin_subpackage(name + '-core') }}
+
+    test:
+      imports:
+        - ibis
+        - ibis.backends.postgres
+
+  - name: ibis-pyspark
+    version: {{ version }}
+
+    build:
+      noarch: python
+
+    requirements:
+      run:
+        - pyspark >=3
+        - sqlalchemy >=1.4
+        - packaging >=21.3
+        - {{ pin_subpackage(name + '-core') }}
+
+    test:
+      imports:
+        - ibis
+        - ibis.backends.pyspark
+
+  - name: ibis-sqlite
+    version: {{ version }}
+
+    build:
+      noarch: python
+
+    requirements:
+      run:
+        - sqlalchemy >=1.4
+        - {{ pin_subpackage(name + '-core') }}
+
+    test:
+      imports:
+        - ibis
+        - ibis.backends.sqlite
+
+  - name: ibis-datafusion
+    version: {{ version }}
+
+    build:
+      noarch: python
+
+    requirements:
+      run:
+        - datafusion >=0.6
+        - {{ pin_subpackage(name + '-core') }}
+
+    test:
+      imports:
+        - ibis
+        - ibis.backends.datafusion
+
+  - name: ibis-duckdb
+    version: {{ version }}
+
+    build:
+      noarch: python
+
+    requirements:
+      run:
+        - duckdb-engine >=0.1.8
+        - python-duckdb >=0.8.1
+        - sqlalchemy-views >=0.3.1
+        - sqlalchemy >=1.4
+        - {{ pin_subpackage(name + '-core') }}
+
+    test:
+      imports:
+        - ibis
+        - ibis.backends.duckdb
+
+  - name: ibis-pandas
+    version: {{ version }}
+
+    build:
+      noarch: python
+
+    requirements:
+      run:
+        - duckdb-engine >=0.1.8
+        - python-duckdb >=0.8.1
+        - sqlalchemy-views >=0.3.1
+        - sqlalchemy >=1.4
+        - {{ pin_subpackage(name + '-core') }}
+
+    test:
+      imports:
+        - ibis
+        - ibis.backends.pandas
+
+  - name: ibis-mssql
+    version: {{ version }}
+
+    build:
+      noarch: python
+
+    requirements:
+      run:
+        - pymssql >=2.2.5
+        - sqlalchemy >=1.4
+        - {{ pin_subpackage(name + '-core') }}
+
+    test:
+      imports:
+        - ibis
+        - ibis.backends.mssql
+
+
+  - name: ibis-bigquery
+    version: {{ version }}
+
+    build:
+      noarch: python
+
+    requirements:
+      run:
+        - db-dtypes >=0.3.0,<2
+        - google-cloud-bigquery >=3,<4
+        - google-cloud-bigquery-storage >=2,<3
+        - pydata-google-auth
+        - sqlalchemy >=1.4
+        - {{ pin_subpackage(name + '-core') }}
+
+    test:
+      imports:
+        - ibis
+        - ibis.backends.bigquery
+
+  - name: ibis-trino
+    version: {{ version }}
+
+    build:
+      noarch: python
+
+    requirements:
+      run:
+        - trino-python-client >=0.321
+        - sqlalchemy >=1.4
+        - {{ pin_subpackage(name + '-core') }}
+
+    test:
+      imports:
+        - ibis
+        - ibis.backends.trino
+
+  - name: ibis-snowflake
+    version: {{ version }}
+
+    build:
+      noarch: python
+
+    requirements:
+      run:
+        - snowflake-connector-python >=3.0.2
+        - snowflake-sqlalchemy >=1.4.1
+        - sqlalchemy >=1.4,<2
+        - {{ pin_subpackage(name + '-core') }}
+
+    test:
+      imports:
+        - ibis
+        - ibis.backends.snowflake
+
+  - name: ibis-polars
+    version: {{ version }}
+
+    build:
+      noarch: python
+
+    requirements:
+      run:
+        - {{ pin_subpackage(name + '-core') }}
+        - packaging >=21.3
+        - polars >=0.19
+
+    test:
+      imports:
+        - ibis
+        - ibis.backends.polars
+
+  - name: ibis-druid
+    version: {{ version }}
+
+    build:
+      noarch: python
+
+    requirements:
+      run:
+        - {{ pin_subpackage(name + '-core') }}
+        - pydruid >=0.6.5
+        - sqlalchemy >=1.4
+        - sqlalchemy-views <1,>=0.3.1
+
+    test:
+      imports:
+        - ibis
+        - ibis.backends.druid
+
+  - name: ibis-oracle
+    version: {{ version }}
+
+    build:
+      noarch: python
+
+    requirements:
+      run:
+        - {{ pin_subpackage(name + '-core') }}
+        - oracledb >=1.3.1
+        - packaging >=21.3
+        - sqlalchemy >=1.4
+        - sqlalchemy-views <1,>=0.3.1
+
+    test:
+      imports:
+        - ibis
+        - ibis.backends.oracle
+
+  - name: ibis-exasol
+    version: {{ version }}
+
+    build:
+      noarch: python
+
+    requirements:
+      run:
+        - {{ pin_subpackage(name + '-core') }}
+        - sqlalchemy_exasol >=4.6.0
+        - sqlalchemy >=1.4,<3
+        - sqlalchemy-views <1,>=0.3.1
+
+    test:
+      imports:
+        - ibis
+        - ibis.backends.exasol
+
+  - name: ibis-flink
+    version: {{ version }}
+
+    build:
+      noarch: python
+
+    requirements:
+      run:
+        - {{ pin_subpackage(name + '-core') }}
+        - apache-flink
+
+    test:
+      imports:
+        - ibis
+        - ibis.backends.flink
+
+  - name: ibis-risingwave
+    version: {{ version }}
+
+    build:
+      noarch: python
+
+    requirements:
+      run:
+        - {{ pin_subpackage(name + '-core') }}
+        - psycopg2 >=2.8.4
+        - sqlalchemy-risingwave >=1.0.0
+        - sqlalchemy >=1.4,<3
+        - sqlalchemy-views <1,>=0.3.1
+
+    test:
+      imports:
+        - ibis
+        - ibis.backends.exasol
+
+
+about:
+  license: Apache-2.0
+  license_family: Apache
+  license_file: LICENSE.txt
+  home: http://www.ibis-project.org
+  summary: Productivity-centric Python Big Data Framework
+
+extra:
+  recipe-maintainers:
+    - jreback
+    - xmnlab
+    - datapythonista
+    - cpcloud
+    - gforsyth

@@ -1,0 +1,46 @@
+{% set version = "0.5-0" %}
+
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-npsurv
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/npsurv_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/npsurv/npsurv_{{ version }}.tar.gz
+  sha256: bc87db76e7017e178c2832a684fcd49c42e20054644b21b586413d26c8821dc6
+
+build:
+  noarch: generic
+  number: 2
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  host:
+    - r-base
+    - r-lsei
+  run:
+    - r-base
+    - r-lsei
+
+test:
+  commands:
+    - $R -e "library('npsurv')"           # [not win]
+    - "\"%R%\" -e \"library('npsurv')\""  # [win]
+
+about:
+  home: https://www.stat.auckland.ac.nz/~yongwang
+  license: GPL-2.0-or-later
+  summary: 'Contains functions for non-parametric survival analysis of exact and interval-censored observations. '
+  license_family: GPL3
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-3
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r

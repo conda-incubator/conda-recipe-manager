@@ -1,0 +1,113 @@
+{% set name = "gwcelery" %}
+{% set version = "2.0.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: f1bba81b988fb9a8a24222690a217a60c58c82609b2e1ae3d26150ac9eca7321
+  patches:
+    - 0001-pyproject.toml-update-requirements-for-conda.patch
+
+build:
+  entry_points:
+    - gwcelery = gwcelery:main
+    - gwcelery-condor-submit-helper = gwcelery.tools.condor_submit_helper:main
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.8,<3.11
+    - poetry-core >=1.0.0
+    - poetry-dynamic-versioning
+  run:
+    - adc-streaming >=2.2.0
+    - astropy >=4.3.1
+    - bilby_pipe >=1.0.6
+    - celery >=5.1
+    - click >=7
+    - comet
+    - dnspython
+    - flask >=2.2
+    - flask-caching
+    - gracedb-sdk >=0.1.5
+    - gwdatafind >=1.1.1
+    - gwpy >=2.0.1
+    - healpy
+    - hop-client >=0.7.0
+    - igwn-alert >=0.2.2
+    - imapclient
+    - jinja2 >=2.11.2
+    - ligo-followup-advocate >=1.1.6
+    - ligo-gracedb >=2.7.5
+    - ligo-raven >=2.0
+    - ligo-segments
+    - ligo.em-bright >=1.0.4
+    - ligo.skymap >=0.4.0
+    - lscsoft-glue
+    - lxml
+    - numpy
+    - p_astro >=1.0.1
+    - pesummary
+    - pygcn >=1.0.1
+    - python >=3.8,<3.11
+    - python-confluent-kafka >=1.9.2,<2.0.0
+    - python-lal >=7.1.2
+    - python-ligo-lw >=1.8.3,<2.0.0
+    - safe-netrc
+    - sentry-sdk
+    - service_identity
+    - voeventlib >=1.2
+    - werkzeug >=0.15.0
+    - zstandard
+    # extras for celery[redis]
+    - redis-py
+    # extras for sentry-sdk[flask]
+    - blinker >=1.1
+    # extras for sentry-sdk[tornado]
+    - tornado >=5
+
+test:
+  requires:
+    # for scikit-learn
+    - openblas
+    # for mpi
+    - openssh
+    # for pip check
+    - pip
+    # for gwcelery's test suite
+    - fastavro >=1.6.1,<2.0.0
+    - pytest >=3.0
+    - pytest-celery
+    - pytest-flask
+    - pytest-socket
+    - redis-server
+  commands:
+    # check metadata
+    - python -m pip check gwcelery
+    - python -m pip show gwcelery
+    # run test suite
+    - python -m pytest -ra --pyargs gwcelery.tests
+    # check entry points
+    - gwcelery report
+
+about:
+  home: https://git.ligo.org/emfollow/gwcelery
+  dev_url: https://git.ligo.org/emfollow/gwcelery
+  doc_url: https://gwcelery.readthedocs.io/
+  license: GPL-2.0-or-later
+  license_family: GPL
+  license_file: LICENSE.rst
+  summary: Hipster pipeline for annotating LIGO events
+  description: |
+    GWCelery is a simple and reliable package for annotating and orchestrating
+    LIGO/Virgo alerts, built from widely used open source components.
+
+extra:
+  recipe-maintainers:
+    - duncanmmacleod

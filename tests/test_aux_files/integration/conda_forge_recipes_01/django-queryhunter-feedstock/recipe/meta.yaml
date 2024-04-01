@@ -1,0 +1,42 @@
+{% set name = "django-queryhunter" %}
+{% set version = "0.1.6" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/django_queryhunter-{{ version }}.tar.gz
+  sha256: a2b9066afc4134a316d15fb286f4fcc86b7dcd89f9b4b0333c2aedc0d9f2e6ee
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  number: 0
+
+requirements:
+  host:
+    - python >=3.8,<4.0
+    - poetry >=1.1.13
+    - pip
+  run:
+    - python >=3.8,<4.0
+    - django >=3.2
+
+test:
+  imports:
+    - queryhunter
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/PaulGilmartin/django-queryhunter
+  summary: Map your Django application code to the SQL queries it produces.
+  license: BSD-3-Clause
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - thewchan

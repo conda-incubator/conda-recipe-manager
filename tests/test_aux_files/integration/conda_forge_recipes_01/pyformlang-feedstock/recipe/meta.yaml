@@ -1,0 +1,44 @@
+{% set name = "pyformlang" %}
+{% set version = "1.0.7" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/pyformlang-{{ version }}.tar.gz
+  sha256: 8b889bd7c2adc9cf6946ee0ffad4081e867f21b00e93c0e7d0c5c9a31c3c8000
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  number: 0
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+  run:
+    - python >=3.6
+    - networkx
+    - numpy
+    - pydot
+
+test:
+  imports:
+    - pyformlang
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/Aunsiels/pyformlang
+  summary: A python framework for formal grammars
+  license: MIT
+  license_file: LICENSE
+  dev_url: https://github.com/Aunsiels/pyformlang
+
+extra:
+  recipe-maintainers:
+    - johnhany97

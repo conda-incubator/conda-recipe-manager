@@ -1,0 +1,49 @@
+{% set name = "npx" %}
+{% set version = "0.1.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: cce26aad91af079a721750a5bdcb5ca7435bf2feef4642afcf580d58cb151bd4
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3
+    - pip
+    - flit
+    - numpy >=1.20.0
+  run:
+    - python >=3
+    - numpy >=1.20.0
+
+test:
+  imports:
+    - npx
+  requires:
+    - pytest-codeblocks
+    - pytest
+  source_files:
+    - README.md
+    - tests
+  commands:
+    - python -m pytest --codeblocks
+
+about:
+  home: https://github.com/nschloe/npx
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: Useful extensions for NumPy
+  dev_url: https://github.com/nschloe/npx
+
+extra:
+  recipe-maintainers:
+    - nschloe

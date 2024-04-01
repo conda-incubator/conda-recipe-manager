@@ -1,0 +1,44 @@
+{% set name = "rlp" %}
+{% set version = "4.0.0" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 61a5541f86e4684ab145cb849a5929d2ced8222930a570b3941cf4af16b72a78
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+    - setuptools-markdown
+  run:
+    - eth-utils >=2.0.0
+    - python >=3.6
+
+test:
+  imports:
+    - rlp
+    - rlp.sedes
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/ethereum/pyrlp
+  summary: A package for Recursive Length Prefix encoding and decoding
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - step21

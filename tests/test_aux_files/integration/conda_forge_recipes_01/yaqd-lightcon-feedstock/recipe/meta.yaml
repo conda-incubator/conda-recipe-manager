@@ -1,0 +1,53 @@
+{% set name = "yaqd-lightcon" %}
+{% set version = "2022.11.0" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 98f0eda16c8807e3c54845faaa68b302cad1150ce11db68bf27522427444128c
+
+build:
+  number: 0
+  noarch: python
+  entry_points:
+    - yaqd-lightcon-topas4-motor = yaqd_lightcon._lightcon_topas4_motor:LightconTopas4Motor.main
+    - yaqd-lightcon-topas4-shutter = yaqd_lightcon._lightcon_topas4_shutter:LightconTopas4Shutter.main
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.7
+    - pip
+    - flit
+    - aiohttp
+    - yaqd-core >=2020.10.1
+  run:
+    - python >=3.7
+    - aiohttp
+    - yaqd-core >=2020.10.1
+
+test:
+  imports:
+    - yaqd_lightcon
+  commands:
+    - pip check
+    - yaqd-lightcon-topas4-motor --help
+    - yaqd-lightcon-topas4-shutter --help
+  requires:
+    - pip
+
+about:
+  home: https://yaq.fyi
+  summary: yaq daemons for hardware from Light Conversion
+  dev_url: https://gitlab.com/yaq/yaqd-lightcon
+  license: LGPL-3.0-only
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - untzag
+    - ksunden

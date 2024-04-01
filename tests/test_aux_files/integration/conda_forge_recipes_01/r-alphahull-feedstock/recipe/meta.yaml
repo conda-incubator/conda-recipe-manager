@@ -1,0 +1,63 @@
+{% set version = "2.5" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-alphahull
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/alphahull_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/alphahull/alphahull_{{ version }}.tar.gz
+  sha256: 82104b049b945b62b5b62f1520ff789a77638ab7e91650e50d6eb191373a8012
+
+build:
+  merge_build_host: True  # [win]
+  number: 2
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+    - cross-r-base {{ r_base }}    # [build_platform != target_platform]
+  host:
+    - r-base
+    - r-r.utils
+    - r-ggplot2
+    - r-interp
+    - r-sgeostat
+    - r-spatstat.geom
+    - r-spatstat.random
+    - r-splancs
+  run:
+    - r-base
+    - r-r.utils
+    - r-ggplot2
+    - r-interp
+    - r-sgeostat
+    - r-spatstat.geom
+    - r-spatstat.random
+    - r-splancs
+
+test:
+  commands:
+    - $R -e "library('alphahull')"           # [not win]
+    - "\"%R%\" -e \"library('alphahull')\""  # [win]
+
+about:
+  home: https://CRAN.R-project.org/package=alphahull
+  license: GPL-2.0-or-later
+  summary: Computation of the alpha-shape and alpha-convex hull of a given sample of points in the plane. The concepts of alpha-shape and alpha-convex hull generalize the definition of the convex hull of a finite set of points. The programming is based on the duality between the Voronoi diagram and Delaunay triangulation. The package also includes a function that returns the Delaunay mesh of a given sample of points and its dual Voronoi diagram in one single object.
+  license_family: GPL
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-2
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-3
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+    - colineroyaux

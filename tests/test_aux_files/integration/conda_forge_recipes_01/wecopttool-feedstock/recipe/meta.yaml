@@ -1,0 +1,56 @@
+{% set name = "wecopttool" %}
+{% set version = "2.7.0" %}
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 64613ce9e67271fef629a50a422bc43a502c92c788314c50ceba4e2fe0b76d15
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.8,<3.12
+    - pip
+  run:
+    - python >=3.8,<3.12
+    - pip
+    - numpy >=1.20
+    - scipy
+    - xarray
+    - autograd
+    - capytaine
+    - joblib
+    - wavespectra >=3.13,<3.15
+    - netcdf4
+
+test:
+  imports:
+    - wecopttool
+  requires:
+    - pip
+  commands:
+    - pip check
+
+about:
+  home: https://github.com/sandialabs/WecOptTool
+  summary: WEC Design Optimization Toolbox
+  description: |
+    The Wave Energy Converter Design Optimization Toolbox (WecOptTool)
+    allows users to perform wave energy converter (WEC) device design
+    optimization studies with constrained optimal control.
+  license: GPL-3.0-only
+  license_family: GPL3
+  license_file: LICENSE
+  doc_url: https://sandialabs.github.io/WecOptTool
+
+extra:
+  recipe-maintainers:
+    - ryancoe
+    - cmichelenstrofer
+    - michaelcdevin

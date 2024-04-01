@@ -1,0 +1,60 @@
+{% set version = "2.7-2" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-sna
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/sna_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/sna/sna_{{ version }}.tar.gz
+  sha256: 7b214626967feb9389e743e50b919dd4b00e7436b2355fd068c873c45ac7a7cd
+
+build:
+  merge_build_host: true  # [win]
+  number: 0
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - cross-r-base {{ r_base }}  # [build_platform != target_platform]
+    - r-network                  # [build_platform != target_platform]
+    - r-statnet.common           # [build_platform != target_platform]
+    - {{ compiler('c') }}              # [not win]
+    - {{ compiler('m2w64_c') }}        # [win]
+    - {{ posix }}filesystem        # [win]
+    - {{ posix }}make
+    - {{ posix }}sed               # [win]
+    - {{ posix }}coreutils         # [win]
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+    - r-network
+    - r-statnet.common
+  run:
+    - r-base
+    - {{ native }}gcc-libs         # [win]
+    - r-network
+    - r-statnet.common
+
+test:
+  commands:
+    - $R -e "library('sna')"           # [not win]
+    - "\"%R%\" -e \"library('sna')\""  # [win]
+
+about:
+  home: http://www.statnet.org
+  license: GPL-2.0-or-later
+  summary: A range of tools for social network analysis, including node and graph-level indices, structural distance and covariance methods, structural equivalence detection, network regression, random graph generation, and 2D/3D network visualization.
+  license_family: GPL3
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-3
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+    - stevierene82

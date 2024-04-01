@@ -1,0 +1,47 @@
+{% set name = "buildbot-console-view" %}
+{% set version = "3.11.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 22b5c3c0ed184a98997f0e81fe5a2b11075b008679a828daef92ff3c5466266b
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >3.5
+    - buildbot-pkg
+  run:
+    - python >3.5
+    - buildbot-pkg
+    - buildbot-www
+
+test:
+  imports:
+    - buildbot_console_view
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://buildbot.net/
+  license: GPL-2.0-or-later
+  license_family: GPL
+  license_file: LICENSE
+  summary: Buildbot Console View plugin
+  doc_url: https://docs.buildbot.net
+
+extra:
+  recipe-maintainers:
+    - kszucs
+    - xhochy
+    - marcelotrevisani

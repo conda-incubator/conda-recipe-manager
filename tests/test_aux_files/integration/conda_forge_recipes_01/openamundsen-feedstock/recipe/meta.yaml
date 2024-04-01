@@ -1,0 +1,69 @@
+{% set name = "openamundsen" %}
+{% set version = "0.8.3" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/openamundsen-{{ version }}.tar.gz
+  sha256: c9d30782671c59baf2f3928b1ca711eec92a8aaad7e8456028d10ead7981856d
+
+build:
+  number: 0
+  noarch: python
+  entry_points:
+    - openamundsen = openamundsen.cli:main
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.8
+    - setuptools >=45
+    - setuptools-scm >=6.0
+    - wheel
+  run:
+    - cerberus
+    - importlib-metadata
+    - loguru
+    - munch
+    - netcdf4
+    - numba >=0.50.1
+    - numpy
+    - pandas >=1.1.0
+    - pyproj
+    - python >=3.8
+    - rasterio >=1.1.0
+    - ruamel.yaml >=0.15.0
+    - scipy
+    - setuptools-scm
+    - xarray >=0.14.0
+
+test:
+  requires:
+    - dask
+    - pip
+    - pooch
+    - pytest
+    - pytest-lazy-fixture
+    - pvlib-python
+  source_files:
+    - ./tests
+  imports:
+    - openamundsen
+  commands:
+    - pip check
+    - openamundsen --help
+    - pytest
+
+about:
+  home: https://github.com/openamundsen/openamundsen
+  summary: Modular snow and hydroclimatological modeling framework
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - fhanzer

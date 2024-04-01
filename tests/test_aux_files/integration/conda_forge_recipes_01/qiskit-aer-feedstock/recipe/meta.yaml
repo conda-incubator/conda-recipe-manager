@@ -1,0 +1,127 @@
+{% set name = "qiskit-aer" %}
+{% set version = "0.13.3" %}
+{% set build = 0 %}
+
+{% if cuda_compiler_version in (None, "None", True, False) %}
+{% set cuda_major = 0 %}
+{% set build = build + 200 %}
+{% else %}
+{% set cuda_major = environ.get("cuda_compiler_version", "11.2").split(".")[0] | int %}
+{% endif %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/Qiskit/{{ name }}/archive/refs/tags/{{ version }}.tar.gz
+  sha256: 93ae93ceb688a38e8ac761b1395d7b506311ee0a54aaeb63c538524a3385230d
+  patches:
+    # qiskit-aer builds against a bundled blas on Windows. This patch adds a
+    # USE_BUNDLED_BLAS_WIN cmake option to search for an installed blas library
+    # instead
+    # This patch was accepted in https://github.com/Qiskit/qiskit-aer/pull/1940
+    # and can be removed from the receipe with the 0.14 release.
+    - 0001-windows-find-blas.patch
+
+build:
+  script:
+    # cuQuantum only supports Volta+
+    - export AER_CUDA_ARCH="7.0;7.5;8.0;8.6;9.0+PTX"  # [cuda_compiler != "None"]
+    - CMAKE_GENERATOR="Ninja" {{ PYTHON }} -m pip install . -vv  # [not win]
+  skip: true  # [(win64 and cuda_compiler != "None") or cuda_compiler_version not in ("None", "11.8", "12.0")]
+  number: {{ build }}
+  string: cuda{{ cuda_compiler_version | replace('.', '') }}_py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version != "None"]
+  string: cpu_py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version == "None"]
+  script_env:
+    - DISABLE_DEPENDENCY_INSTALL=ON
+    - DISABLE_CONAN=ON
+    - CMAKE_GENERATOR=Ninja
+    - CMAKE_PREFIX_PATH=%PREFIX%  # [win]
+    - CMAKE_BUILD_PARALLEL_LEVEL=1  # [cuda_compiler != "None"]
+    - CUQUANTUM_ROOT=$PREFIX  # [cuda_compiler != "None"]
+    - CUTENSOR_ROOT=$PREFIX  # [cuda_compiler != "None"]
+    - AER_THRUST_BACKEND=CUDA  # [cuda_compiler != "None"]
+    - AER_ENABLE_CUQUANTUM=ON  # [cuda_compiler != "None"]
+  ignore_run_exports_from:
+    - {{ compiler('cuda') }}  # [(cuda_compiler_version or "").startswith("11")]
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - numpy                                  # [build_platform != target_platform]
+    - pybind11                               # [build_platform != target_platform]
+    - {{ compiler('cxx') }}
+    - {{ compiler('cuda') }}  # [cuda_compiler != "None"]
+    - cmake !=3.17,>=3.8
+    - libgomp  # [linux]
+    - llvm-openmp  # [osx]
+    - ninja
+  host:
+    - libblas
+    - liblapack
+    - muparserx =4.0.8
+    # Stick the specific version used in upstream except for macOS arm64 for
+    # which there is no build, it's pinned to <=3.10.2 instead because of Qiskit/qiskit-aer#1742
+    - nlohmann_json =3.1.2  # [not (osx and arm64)]
+    - nlohmann_json <=3.10.2  # [osx and arm64]
+    - numpy
+    - pip
+    - python
+    - pybind11
+    - scikit-build >=0.11.0
+    - setuptools >=40.1.0
+    - spdlog
+    - cuda-version {{ cuda_compiler_version }}  # [cuda_compiler != "None"]
+    # Qiskit Aer now uses both
+    - custatevec                                # [cuda_compiler != "None"]
+    - cutensornet                               # [cuda_compiler != "None"]
+  run:
+    - {{ pin_compatible('numpy') }}
+    - {{ pin_compatible('muparserx', max_pin='x.x.x') }}
+    - python
+    - qiskit >=0.44.0
+    - scipy >=1.0
+    - cuda-version >={{ cuda_major }}.2,<{{ cuda_major+1 }}  # [(cuda_compiler_version or "").startswith("11")]
+    - cuda-version >={{ cuda_major }}.0,<{{ cuda_major+1 }}  # [(cuda_compiler_version or "").startswith("12")]
+
+test:
+  source_files:
+    - .stestr.conf
+    - test/*
+  commands:
+    - pip check
+    # perform the import test via CLI because we need to load the stub for CUDA 12
+    - export CUDA_STUB="$PREFIX/lib/stubs/libcuda.so"  # [linux and (cuda_compiler_version or "").startswith("12")]
+    - LD_PRELOAD="$CUDA_STUB" python -c "import qiskit_aer"  # [linux]
+    - python -c "import qiskit_aer"                          # [not linux and build_platform == target_platform]
+    # Ignore tests that require qiskit_qasm3_import which is not packaged in
+    # conda-forge by using `-E test_save_statevector_for_qasm3_circuit`
+    #
+    # Ignore TestNoiseTransformer as a workaround until
+    # https://github.com/testing-cabal/testtools/pull/371 is released
+    #
+    # Ignore _GPU tests for CUDA builds because the environment does not have a GPU
+    - stestr run -E "test_save_statevector_for_qasm3_circuit|TestNoiseTransformer"  # [build_platform == target_platform and cuda_compiler_version == "None"]
+    - LD_PRELOAD="$CUDA_STUB" stestr run -E 'test_save_statevector_for_qasm3_circuit|TestNoiseTransformer|_GPU'  # [linux and cuda_compiler_version != "None"]
+  requires:
+    - ddt
+    - ipython
+    - matplotlib-base
+    - pip
+    - seaborn
+    - stestr
+    - cuda-driver-dev  # [linux and (cuda_compiler_version or "").startswith("12")]
+
+about:
+  home: https://github.com/Qiskit/qiskit-aer
+  summary: Qiskit Aer - High performance simulators for Qiskit
+  license: Apache-2.0
+  license_file: LICENSE.txt
+
+extra:
+  recipe-maintainers:
+    - leofang
+    - wshanks
+    - basnijholt

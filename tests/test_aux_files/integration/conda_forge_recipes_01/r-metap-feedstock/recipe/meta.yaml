@@ -1,0 +1,53 @@
+{% set version = "1.1" %}
+
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-metap
+  version: {{ version|replace("-", "_") }}
+
+source:
+  fn: metap_{{ version }}.tar.gz
+  url:
+    - {{ cran_mirror }}/src/contrib/metap_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/metap/metap_{{ version }}.tar.gz
+  sha256: 20120428672d39dc15829c7e66850fc4350a34df290d48cef0b1cc78d13f7b82
+
+build:
+  noarch: generic
+  merge_build_host: true  # [win]
+  number: 4
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+    - r-rdpack
+    - r-lattice
+  run:
+    - r-base
+    - r-rdpack
+    - r-lattice
+
+test:
+  commands:
+    - $R -e "library('metap')"           # [not win]
+    - "\"%R%\" -e \"library('metap')\""  # [win]
+
+about:
+  home: http://www.dewey.myzen.co.uk/meta/meta.html
+  license: GPL-2.0-only
+  summary: The canonical way to perform meta-analysis involves using effect sizes. When they are not available this package provides a number of methods for meta-analysis of significance values including the methods of Edgington, Fisher, Lancaster, Stouffer, Tippett, and Wilkinson; a number of data-sets to replicate published
+    results; and a routine for graphical display.
+  license_family: GPL2
+
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-2
+extra:
+  recipe-maintainers:
+    - conda-forge/r

@@ -1,0 +1,93 @@
+{% set version = "4.4.1" %}
+
+package:
+  name: pcraster
+  version: {{ version }}
+
+
+source:
+  url: http://pcraster.geo.uu.nl/pcraster/packages/src/pcraster-{{ version }}.tar.bz2
+  sha256: 99edb3ada4e960fbb0d39b6cb4dee08b37983aa1412ab23ef74f0c4172fb80a7
+
+
+build:
+  number: 4
+
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - numpy                                  # [build_platform != target_platform]
+    - {{ compiler('c') }}
+    - {{ stdlib("c") }}
+    - {{ compiler('cxx') }}
+    - {{ cdt('mesa-libgl-devel') }}         # [linux]
+    - {{ cdt('mesa-dri-drivers') }}         # [linux]
+    - {{ cdt('libselinux') }}               # [linux]
+    - {{ cdt('libxdamage') }}               # [linux]
+    - {{ cdt('libxxf86vm') }}               # [linux]
+    - cmake >=3.15
+    - ninja
+    - make                                  # [win]
+
+  host:
+    - xorg-libxfixes                        # [linux]
+    - libboost-devel
+    - xerces-c
+    - qt-main
+    - ncurses                               # [not win]
+    - libgdal
+    - python
+    - numpy
+    - vs2015_runtime                        # [win]
+    - libglu                                # [linux]
+
+  run:
+    - python
+    - {{ pin_compatible('numpy') }}
+    - libgdal
+    - ncurses                               # [not win]
+    - vs2015_runtime                        # [win]
+    - libglu                                # [linux]
+
+
+test:
+  imports:
+    - pcraster
+  commands:
+    - asc2map
+    - col2map
+    - legend
+    - map2asc
+    - map2col
+    - mapattr
+    - oldcalc
+    - pcrcalc
+    - resample
+    - table
+
+
+about:
+  home: http://www.pcraster.eu
+  license: GPL-3.0-only
+  license_file: LICENSE
+  summary: Environmental modelling software.
+  description: |
+    PCRaster is a collection of tools and software libraries tailored to the
+    construction of spatio-temporal environmental models. Application domains
+    are amongst others hydrology (rainfall-runoff, global water balance,
+    groundwater (with Modflow)), ecology, or land use change.
+    PCRaster includes a rich set of spatial operations for manipulating and
+    analysing raster maps. A Python framework supports Monte Carlo simulations
+    and data assimilation (Ensemble Kalman Filter and Particle Filter). The
+    Aguila tool allows for the interactive visualisation of stochastic spatio-
+    temporal data.
+  doc_url: https://pcraster.geo.uu.nl/pcraster/latest/documentation/index.html
+  dev_url: https://github.com/pcraster/pcraster
+
+
+extra:
+  recipe-maintainers:
+    - OliverSchmitz
+    - kordejong

@@ -1,0 +1,68 @@
+{% set version = "0.9.5" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-ggrepel
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/ggrepel_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/ggrepel/ggrepel_{{ version }}.tar.gz
+  sha256: d1e600e56c2ad345961ed23f30f04b81c631ff94bd6762a260c62e0206cf8caa
+
+build:
+  merge_build_host: true  # [win]
+  number: 0
+  skip: true  # [win32]
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - cross-r-base {{ r_base }}  # [build_platform != target_platform]
+    - r-scales                   # [build_platform != target_platform]
+    - r-rcpp                     # [build_platform != target_platform]
+    - r-ggplot2                  # [build_platform != target_platform]
+    - r-rlang                    # [build_platform != target_platform]
+    - {{ compiler('c') }}              # [not win]
+    - {{ compiler('m2w64_c') }}        # [win]
+    - {{ compiler('cxx') }}            # [not win]
+    - {{ compiler('m2w64_cxx') }}      # [win]
+    - {{ posix }}filesystem        # [win]
+    - {{ posix }}make
+    - {{ posix }}sed               # [win]
+    - {{ posix }}coreutils         # [win]
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+    - r-rcpp
+    - r-ggplot2 >=2.2.0
+    - r-rlang >=0.3.0
+    - r-scales >=0.5.0
+  run:
+    - r-base
+    - {{ native }}gcc-libs         # [win]
+    - r-rcpp
+    - r-ggplot2 >=2.2.0
+    - r-rlang >=0.3.0
+    - r-scales >=0.5.0
+
+test:
+  commands:
+    - $R -e "library('ggrepel')"           # [not win]
+    - "\"%R%\" -e \"library('ggrepel')\""  # [win]
+
+about:
+  home: http://github.com/slowkow/ggrepel
+  license: GPL-3.0-only
+  summary: Provides text and label geoms for 'ggplot2' that help to avoid overlapping text labels. Labels repel away from each other and away from the data points.
+  license_family: GPL3
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-3
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r

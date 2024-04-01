@@ -1,0 +1,41 @@
+{% set name = "vector-quantize-pytorch" %}
+{% set version = "0.2.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/lucidrains/{{ name }}/archive/{{ version }}.tar.gz
+  sha256: 4d85e8172ecc12642acb6ba38dd5b905852c9692373c3c9f0d5f6498cf088fca
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - python >=3.6
+    - pytorch
+
+test:
+  imports:
+    - vector_quantize_pytorch
+
+about:
+  home: https://github.com/lucidrains/vector-quantizer-pytorch
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: Simple Vector Quantization, in Pytorch
+  dev_url: https://github.com/lucidrains/vector-quantizer-pytorch
+
+extra:
+  recipe-maintainers:
+    - psortos
+    - oblute
+    - mxr-conda

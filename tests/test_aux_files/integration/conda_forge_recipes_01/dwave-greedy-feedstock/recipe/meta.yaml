@@ -1,0 +1,44 @@
+{% set name = "dwave-greedy" %}
+{% set version = "0.3.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/dwave-greedy-{{ version }}.tar.gz
+  sha256: 806c02d6c3f260ef5bf063d4932f43dfb52a0ea00f9db0b0d34d9b15691a011a
+
+build:
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - {{ compiler('cxx') }}
+  host:
+    - pip
+    - python
+  run:
+    - dwave-samplers >=1.0.0
+    - python
+
+test:
+  imports:
+    - greedy
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/dwavesystems/dwave-greedy
+  summary: Ocean-compatible collection of greedy/brute-force solvers/samplers
+  license: Apache-2.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - BastianZim

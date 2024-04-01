@@ -1,0 +1,44 @@
+{% set name = "simpful" %}
+{% set version = "2.12.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/simpful-{{ version }}.tar.gz
+  sha256: 9c1290f0ad1b6674cb1567df055a809535924c714a6830f0a4aa0a8a3d60dddb
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 1
+
+requirements:
+  host:
+    - python >=3.8
+    - pip
+  run:
+    - python >=3.8
+    - numpy >=1.12.0
+    - scipy >=1.0.0
+
+test:
+  imports:
+    - simpful
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/aresio/simpful
+  summary: A user-friendly Python library for fuzzy logic
+  license: AFL-3.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - hechth
+    - aresio
+    - sspola

@@ -1,0 +1,43 @@
+{% set name = "plugcli" %}
+{% set version = "0.2.0" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/plugcli-{{ version }}.tar.gz
+  sha256: 26f1e978eb9db6ec5f95c2b5561862127ecee5837ec5a5870d85d19b587ff686
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.8
+  run:
+    - click
+    - python >=3.8
+
+test:
+  imports:
+    - plugcli
+    - plugcli.tests
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/dwhswenson/plugcli
+  summary: Plugin based CLI framework built on click
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - dwhswenson

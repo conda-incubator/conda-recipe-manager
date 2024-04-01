@@ -1,0 +1,43 @@
+{% set name = "pyntcloud" %}
+{% set version = "0.3.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 628b45967e1c97a947df0637267197a6b38a36cb04173f9837f05bc3180348b8
+
+build:
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+  noarch: python
+
+requirements:
+  host:
+    - python >=3.6.0
+    - setuptools
+    - pip
+  run:
+    - python >=3.6.0
+    - numpy
+    - scipy
+    - pandas
+
+test:
+  imports:
+    - pyntcloud
+
+about:
+  home: http://github.com/daavoo/pyntcloud
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE.md
+  summary: pyntcloud is a Python 3 library for working with 3D point clouds leveraging the power of the Python scientific stack
+  doc_url: http://pyntcloud.readthedocs.io/
+  dev_url: https://github.com/daavoo/pyntcloud
+
+extra:
+  recipe-maintainers:
+    - daavoo

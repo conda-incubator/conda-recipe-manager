@@ -1,0 +1,79 @@
+{% set name = "opentelemetry-instrumentation-requests" %}
+{% set version = "0.45b0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/opentelemetry_instrumentation_requests-{{ version }}.tar.gz
+  sha256: 6bf1359284105ab50fa7465ea6c60b4a62c699408cb0260af3ac8895e8a7451a
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.7
+    - pip
+    - hatchling
+  run:
+    - python >=3.7
+    - opentelemetry-api ~=1.12
+    - opentelemetry-instrumentation ==0.45b0
+    - opentelemetry-semantic-conventions ==0.45b0
+    - opentelemetry-util-http ==0.45b0
+    # - requests ~=2.0
+    # - opentelemetry-test-utils ==0.37b0
+    # - opentelemetry-instrumentation-requests 
+    # - httpretty ~=1.0
+    # - requests ~=2.0
+    # - opentelemetry-test-utils ==0.38b0
+    # - opentelemetry-instrumentation-requests 
+    # - httpretty ~=1.0
+    # - requests ~=2.0
+    # - opentelemetry-test-utils ==0.39b0
+    # - opentelemetry-instrumentation-requests 
+    # - httpretty ~=1.0
+    # - requests ~=2.0
+    # - opentelemetry-test-utils ==0.40b0
+    # - opentelemetry-instrumentation-requests 
+    # - httpretty ~=1.0
+    # - requests ~=2.0
+    # - opentelemetry-test-utils ==0.41b0
+    # - opentelemetry-instrumentation-requests 
+    # - httpretty ~=1.0
+    # - requests ~=2.0
+    # - opentelemetry-test-utils ==0.42b0
+    # - opentelemetry-instrumentation-requests 
+    # - httpretty ~=1.0
+    # - requests ~=2.0
+    # - opentelemetry-test-utils ==0.43b0
+    # - opentelemetry-instrumentation-requests 
+    # - httpretty ~=1.0
+    # - requests ~=2.0
+    # - opentelemetry-test-utils ==0.44b0
+    # - opentelemetry-instrumentation-requests 
+    # - httpretty ~=1.0
+    # - requests ~=2.0
+
+test:
+  imports:
+    - opentelemetry
+    - opentelemetry.instrumentation
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation/opentelemetry-instrumentation-requests
+  summary: OpenTelemetry requests instrumentation
+  license: Apache-2.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - mariusvniekerk

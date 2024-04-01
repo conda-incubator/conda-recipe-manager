@@ -1,0 +1,57 @@
+{% set version = "29.0.0" %}
+
+package:
+  name: python-kubernetes
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/k/kubernetes/kubernetes-{{ version }}.tar.gz
+  sha256: c4812e227ae74d07d53c88293e564e54b850452715a59a927e7e1bc6b9a60459
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+  run:
+    - python >=3.6
+    - certifi >=14.05.14
+    - six >=1.9.0
+    - python-dateutil >=2.5.3
+    - pyyaml >=5.4.1
+    - google-auth >=1.0.1
+    - websocket-client >=0.32.0,!=0.40.0,!=0.41.*,!=0.42.*
+    - requests
+    - requests-oauthlib
+    - oauthlib >=3.2.2
+    - urllib3 >=1.24.2,<2.0
+
+test:
+  requires:
+    - pip
+  commands:
+    - pip check
+  imports:
+    - kubernetes
+    - kubernetes.client
+    - kubernetes.client.apis
+    - kubernetes.client.models
+    - kubernetes.config
+    - kubernetes.watch
+
+about:
+  home: https://github.com/kubernetes-incubator/client-python
+  license: Apache-2.0
+  summary: The official Kubernetes python client.
+  license_family: APACHE
+  license_file: LICENSE
+  dev_url: https://github.com/kubernetes-incubator/client-python
+
+extra:
+  recipe-maintainers:
+    - johanneskoester
+    - ocefpaf

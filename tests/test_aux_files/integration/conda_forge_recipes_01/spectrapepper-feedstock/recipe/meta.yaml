@@ -1,0 +1,40 @@
+{% set name = "spectrapepper" %}
+{% set version = "0.1.9" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: "https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz"
+  sha256: 7763bcf5f1e3865bbe7197c5e123e7cbfc899cda3429bc4f4aa48758e5382b0b
+build:
+  number: 1
+  script: {{ PYTHON }} -m pip install . -vv
+requirements:
+  host:
+    - pip
+    - python
+  run:
+    - matplotlib-base
+    - numpy >=1.21
+    - pandas
+    - python
+    - scipy >=1.7.0
+
+test:
+  imports:
+    - spectrapepper
+
+about:
+  home: https://github.com/spectrapepper/spectrapepper
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: A Python package to simplify and accelerate analysis of spectroscopy data
+  doc_url: https://spectrapepper.github.io/spectrapepper/
+  dev_url: https://github.com/spectrapepper/spectrapepper
+
+extra:
+  recipe-maintainers:
+    - enricgrau

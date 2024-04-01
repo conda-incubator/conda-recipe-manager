@@ -1,0 +1,64 @@
+{% set version = "1.0-5" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-inum
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/inum_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/inum/inum_{{ version }}.tar.gz
+  sha256: e696b7e0b31b3bbf405112e60691b6a72fedcaa02e08ee517c59f6bf9cd36bbd
+
+build:
+  merge_build_host: true  # [win]
+  number: 1
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+    - r-libcoin >=1.0_0
+  run:
+    - r-base
+    - r-libcoin >=1.0_0
+
+test:
+  commands:
+    - $R -e "library('inum')"           # [not win]
+    - "\"%R%\" -e \"library('inum')\""  # [win]
+
+about:
+  home: https://CRAN.R-project.org/package=inum
+  license: GPL-2.0-only
+  summary: Enum-type representation of vectors and representation of intervals, including a method of coercing variables in data frames.
+  license_family: GPL2
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-2
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+
+# Package: inum
+# Title: Interval and Enum-Type Representation of Vectors
+# Date: 2019-04-24
+# Version: 1.0-1
+# Authors@R: person("Torsten", "Hothorn", role = c("aut", "cre"), email = "Torsten.Hothorn@R-project.org")
+# Description: Enum-type representation of vectors and representation of intervals, including a method of coercing variables in data frames.
+# Depends: R (>= 3.3.0)
+# Imports: stats, libcoin (>= 1.0-0)
+# License: GPL-2
+# NeedsCompilation: no
+# Packaged: 2019-04-24 15:34:27 UTC; hothorn
+# Author: Torsten Hothorn [aut, cre]
+# Maintainer: Torsten Hothorn <Torsten.Hothorn@R-project.org>
+# Repository: CRAN
+# Date/Publication: 2019-04-25 05:20:10 UTC

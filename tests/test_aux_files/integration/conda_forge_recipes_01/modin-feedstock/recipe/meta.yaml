@@ -1,0 +1,195 @@
+{% set version = "0.28.0" %}
+
+package:
+  name: modin-packages
+  version: {{ version }}
+
+source:
+  url: https://github.com/modin-project/modin/archive/refs/tags/{{ version }}.tar.gz
+  sha256: 6f3ee8c7b8e35725fc0be516056f1075f7e1bde3d47ab57d4f251743b1a952a2
+  patches:
+    # Remove all requirements from setup.py - they should be handled here.
+    # The point is to create a "patch failed" conflict when dependencies change
+    # in upstream so this doesn't go unnoticed.
+    - patches/0001-Remove-dependencies-from-env_hdk.patch
+    - patches/0002-Remove-dependencies-from-setup.py.patch
+
+build:
+  number: 0
+  # noarch disabled because the recipe now has selector for Ray, see below
+  # noarch: python
+  skip: true  # [py<39]
+
+# the outputs map the modin options on PyPI (see upstream definition
+# https://github.com/modin-project/modin/blob/0.10.1/setup.py#L40-L45)
+# from "modin[<option>]" to "modin-<option>" as a conda-forge package
+outputs:
+  - name: modin-all
+    requirements:
+      host:
+        - python
+      run:
+        - python
+        - {{ pin_subpackage('modin-core', exact=True) }}
+        - {{ pin_subpackage('modin-dask', exact=True) }}
+        - {{ pin_subpackage('modin-unidist', exact=True) }}
+        # ray does not have OSX builds yet
+        - {{ pin_subpackage('modin-ray', exact=True) }}           # [not osx]
+        # Note: modin-hdk is conda-only, its dependencies were never published on PyPI
+        - {{ pin_subpackage('modin-hdk', exact=True) }}           # [linux or win]
+        #- {{ pin_subpackage('modin-spreadsheet', exact=True) }}  # turned off for now, see below
+    test:
+      imports:
+        # dummy test; actual tests are in subpackages
+        - modin
+
+  # compatibility with packagename before split into options
+  - name: modin
+    requirements:
+      host:
+        - python
+      run:
+        - python
+        # modin needs at least one engine; use dask as it is more light-weight than ray
+        - {{ pin_subpackage('modin-dask', exact=True) }}
+    test:
+      imports:
+        - modin
+        - modin.pandas
+
+  - name: modin-core
+    build:
+      script: python -m pip install . --no-deps --ignore-installed -vv
+    requirements:
+      build:
+        - python                                 # [build_platform != target_platform]
+        - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+      host:
+        - pip
+        - python
+      run:
+        - python
+        - packaging >=21.0
+        - pandas >=2.2,<2.3
+        - numpy >=1.22.4
+        - fsspec >=2022.11.0
+        - psutil >=5.8.0
+    test:
+      imports:
+        - modin
+        - modin.pandas
+
+  - name: modin-dask
+    build:
+      skip: false  # workaround section to bring back pipelines
+    requirements:
+      host:
+        - python
+      run:
+        - python
+        - {{ pin_subpackage('modin-core', exact=True) }}
+        - dask >=2.22.0
+        - distributed >=2.22.0
+    test:
+      imports:
+        - modin
+        - modin.pandas
+      commands:
+        - python -c "import modin.pandas as pd, modin.config as cfg; cfg.Engine.put('Dask'); df = pd.DataFrame([])"
+
+  - name: modin-ray
+    build:
+      # There is no Ray in conda-forge for MacOS yet, see conda-forge/ray-packages-feedstock#2
+      skip: true  # [osx]
+    requirements:
+      host:
+        - python
+      run:
+        - python
+        - {{ pin_subpackage('modin-core', exact=True) }}
+        # ray==2.5.0 broken: https://github.com/conda-forge/ray-packages-feedstock/issues/100
+        - ray-default >=1.13.0,!=2.5.0
+        # https://github.com/modin-project/modin/pull/5270#issuecomment-1331172629
+        # workaround for https://github.com/conda/conda/issues/11744
+        - grpcio!=1.45.*
+        - grpcio!=1.46.*
+        - pyarrow >=7.0.0
+    test:
+      imports:
+        - modin
+        - modin.pandas
+      commands:
+        - python -c "import modin.pandas as pd, modin.config as cfg; cfg.Engine.put('Ray'); df = pd.DataFrame([])"
+
+  - name: modin-hdk
+    build:
+      # there is no Hdk on anything but Linux for now
+      skip: true  # [not (linux or win)]
+    requirements:
+      host:
+        - python
+      run:
+        - python
+        - {{ pin_subpackage('modin-core', exact=True) }}
+        - pyhdk ==0.9
+        - s3fs >=2022.11.0
+    test:
+      imports:
+        - modin
+        - modin.pandas
+      commands:
+        - python -c "import modin.experimental.pandas as pd, modin.config as cfg; cfg.StorageFormat.put('Hdk'); df = pd.DataFrame([])"
+
+  - name: modin-unidist
+    requirements:
+      host:
+        - python
+      run:
+        - python
+        - {{ pin_subpackage('modin-core', exact=True) }}
+        - unidist-mpi>=0.2.1
+    test:
+      # TODO: add tests when https://github.com/conda-forge/unidist-packages-feedstock/issues/4 gets fixed
+      imports:
+        - modin
+        - modin.pandas
+
+  # TODO: bring https://pypi.org/project/modin-spreadsheet/ to conda-forge
+  # as modin-spreadsheet-core, leave modin-spreadsheet to be a subpackage here;
+  # see discussion with upstream developers here:
+  # https://github.com/conda-forge/modin-feedstock/pull/14/files#r595534632
+  - name: modin-spreadsheet
+    build:
+      # dependency modin-spreadsheet-core is not in conda-forge yet
+      skip: true
+    requirements:
+      host:
+        - python
+      run:
+        - python
+        - {{ pin_subpackage('modin-core', exact=True) }}
+        - modin-spreadsheet >=0.1.0
+    test:
+      imports:
+        # are there more specific imports?!
+        - modin
+
+about:
+  home: https://github.com/modin-project/modin
+  license: Apache-2.0
+  license_family: Apache
+  license_file: LICENSE
+  summary: Speed up your Pandas workflows by changing a single line of code
+  doc_url: https://modin.readthedocs.io/
+  dev_url: https://github.com/modin-project/modin
+
+extra:
+  recipe-maintainers:
+    - anmyachev
+    - devin-petersohn
+    - h-vetinari
+    - vnlitvinov
+    - maksimbo1
+    - YarShev
+    - mvashishtha
+  feedstock-name: modin

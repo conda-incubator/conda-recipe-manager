@@ -1,0 +1,44 @@
+{% set name = "flask-sspi" %}
+{% set version = "0.2" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/Flask-SSPI-{{ version }}.tar.gz
+  sha256: 511bbead9c7d757872737f9b05ebf2f38a84e076ca5701767e48e8a185d8532b
+
+build:
+  skip: true  # [not win or py<36]
+  number: 3
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python
+  run:
+    - flask
+    - mock
+    - python
+    - pywin32
+
+test:
+  imports:
+    - flask_sspi
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: http://github.com/ceprio/flask-sspi
+  summary: SSPI authentication support for Flask
+  license: BSD-2-Clause
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - fuglede

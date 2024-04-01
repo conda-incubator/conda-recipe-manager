@@ -1,0 +1,44 @@
+{% set name = "suitcase-csv" %}
+{% set version = "0.3.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: cc229b978105476d680651223135a0c5ddc21c6f8fe4189f16e2ccfe91ed6157
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+  run:
+    - python >=3.6
+    - event-model >=1.8.0
+    - pandas
+    - suitcase-utils
+
+test:
+  imports:
+    - suitcase.csv
+
+about:
+  home: https://blueskyproject.io/suitcase
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: Export bluesky documents to CSV
+  doc_url: https://blueskyproject.io/suitcase
+  dev_url: https://github.com/bluesky/suitcase-csv
+
+extra:
+  recipe-maintainers:
+    - mrakitin
+    - kbeeperez
+    - conda-forge/event-model

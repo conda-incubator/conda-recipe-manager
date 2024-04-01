@@ -1,0 +1,41 @@
+{% set name = "net-http-persistent" %}
+{% set version = "4.0.2" %}
+
+package:
+  name: rb-{{ name|lower }}
+  version: {{ version }}
+
+source:
+  - url: https://rubygems.org/downloads/{{ name }}-{{ version }}.gem
+    sha256: 03f827a33857b1d56b4e796957ad19bf5b58367d853fd0a224eb70fba8d02a44
+
+build:
+  noarch: generic
+  number: 0
+  script:
+    - gem install -N -l -V --norc --ignore-dependencies {{ name }}-{{ version }}.gem
+
+requirements:
+  host:
+    - ruby >=2.7,<3
+  run:
+    - ruby >=2.7,<3
+    - rb-connection_pool >=2.2,<3
+
+test:
+  commands:
+    - ruby -r 'net/http/persistent' -e 'exit 0'
+
+about:
+  home: https://rubygems.org/gems/{{ name }}
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE.txt
+  summary: Thread-safe persistent connections with Net::HTTP
+  doc_url: https://www.rubydoc.info/gems/{{ name }}
+  dev_url: https://github.com/drbrain/{{ name }}
+
+extra:
+  recipe-maintainers:
+    - svengiegerich
+    - janjagusch

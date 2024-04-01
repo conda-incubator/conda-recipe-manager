@@ -1,0 +1,81 @@
+{% set name = "sasview" %}
+{% set version = "5.0.6" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/SasView/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
+
+  sha256: 3ee5a95c30d9858c1d32766e99a5e3504d219614fb6c5b2cc7c2561d6b924291
+
+build:
+  number: 1
+  skip: true  # [py<36]
+  entry_points:
+    - sasview = sas.qtgui.MainWindow.MainWindow:run_sasview
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - numpy                                  # [build_platform != target_platform]
+    - {{ compiler('cxx') }}
+  host:
+    - python
+    - pip
+    - numpy <1.24
+    # Maintainer note: remove this numpy pin when sasview 5.0.6 is released, 5.0.6 and newer patch this issue.
+    - pyqt >=5.12
+    - setuptools
+  run:
+    - python
+    - bumps >=0.9.1
+    - dataclasses
+    - h5py >=2.5,<3.8
+    # See
+    # https://github.com/sqlalchemy/mako/blob/86025c02f25954d7be32b368c6b015f6c9f51b71/setup.cfg#L37
+    # for the importlib-metadata conditional dependency.
+    - importlib-metadata  # [py<38]
+    - lxml
+    - matplotlib-base <3.5
+    - packaging
+    - periodictable >=1.5.0
+    - pillow
+    - pyparsing >=2.0.0
+    - pyqt >=5.12,<6.0
+    - qt5reactor
+    - qtconsole
+    - sasmodels >=1.0.7
+    - scipy
+    - twisted
+    - uncertainties
+    - xhtml2pdf
+    - {{ pin_compatible('numpy',max_pin='x.x') }}
+test:
+  requires:
+    - pip
+  imports:
+    - sas.sasview
+    - sas.qtgui
+    - sas.qtgui.MainWindow
+  commands:
+    - pip check
+    - which sasview  # [not win]
+
+about:
+  home: https://github.com/SasView/sasview
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE.TXT
+  summary: SasView is a Small Angle Scattering (SAS) analysis package
+
+extra:
+  recipe-maintainers:
+    - mdoucet
+    - mrakitin
+    - rozyczko
+    - stuartcampbell
+    - pbeaucage
+    - wpotrzebowski

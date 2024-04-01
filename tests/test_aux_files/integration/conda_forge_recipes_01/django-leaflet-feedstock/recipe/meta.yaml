@@ -1,0 +1,49 @@
+{% set version = "0.29.1" %}
+
+package:
+  name: django-leaflet
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/d/django-leaflet/django-leaflet-{{ version }}.tar.gz
+  sha256: 102b6870f247611d43b052de54c55db6589ae1434e27234cb14d42ad7d5a56c4
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+  run:
+    - python >=3.6
+    - django
+
+test:
+  commands:
+    - python -c "import django; from django.conf import settings; settings.configure(INSTALLED_APPS=['leaflet']); django.setup(); import leaflet;"
+
+about:
+  home: https://github.com/makinacorpus/django-leaflet
+  license: LGPL-3.0-only
+  license_family: LGPL
+  license_file: LICENSE
+  summary: django-leaflet allows you to use Leaflet in your Django projects.
+  description: |
+    Main purposes of having a python package for the Leaflet Javascript library::
+    - Install and enjoy ;
+    - Do not embed Leaflet assets in every Django project ;
+    - Enjoy geometry edition with Leaflet form widget ;
+    - Control apparence and settings of maps from Django settings (e.g. at deployment) ;
+    - Reuse Leaflet map initialization code (e.g. local projections) ;
+    note:: django-leaflet is compatible with django-geojson fields, which allow handling 
+    geographic data without spatial database.
+  doc_url: https://django-leaflet.readthedocs.io/en/latest/
+  dev_url: https://github.com/makinacorpus/django-leaflet
+
+extra:
+  recipe-maintainers:
+    - xmnlab
+    - luabida

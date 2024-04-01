@@ -1,0 +1,43 @@
+{% set name = "pympler" %}
+{% set version = "1.0.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/Pympler-{{ version }}.tar.gz
+  sha256: 993f1a3599ca3f4fcd7160c7545ad06310c9e12f70174ae7ae8d4e25f6c5d3fa
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - python >=3.6
+
+test:
+  imports:
+    - pympler
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/pympler/pympler
+  doc_url: http://pythonhosted.org/Pympler/
+  license: Apache-2.0
+  license_file: LICENSE
+  summary: Development tool to measure, monitor and analyze the memory behavior of Python objects in a running Python application.
+
+
+extra:
+  recipe-maintainers:
+    - CJ-Wright
+    - thewchan

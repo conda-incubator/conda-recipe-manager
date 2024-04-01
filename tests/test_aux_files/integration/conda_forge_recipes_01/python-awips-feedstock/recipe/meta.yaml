@@ -1,0 +1,47 @@
+{% set name = "python-awips" %}
+{% set version = "20.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/Unidata/{{ name }}/archive/v{{ version }}.tar.gz
+  sha256: d301298e0e97dfc9e620f7a54011846be6a1b6e2a5a1a8f462bccb4c9f32d4c4
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv
+
+requirements:
+  host:
+    - python >=3
+    - pip
+  run:
+    - python >=3
+    - numpy
+    - six
+    - shapely
+
+test:
+  imports:
+    - awips
+
+about:
+  home: http://github.com/Unidata/python-awips
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: Python AWIPS Data Access Framework
+  description: |
+    python-awips provides a data access framework for requesting grid and 
+    geometry datasets from an AWIPS EDEX data server.
+  doc_url: http://unidata.github.io/python-awips/
+  dev_url: https://github.com/Unidata/python-awips
+
+extra:
+  recipe-maintainers:
+    - dopplershift
+    - dcamron
+    - srcarter3

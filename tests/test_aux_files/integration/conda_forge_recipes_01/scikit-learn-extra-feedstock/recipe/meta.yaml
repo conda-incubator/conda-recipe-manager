@@ -1,0 +1,61 @@
+{% set name = "scikit-learn-extra" %}
+{% set version = "0.2.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 3b1bb5fedde47920eb4b3fa0a0c18f80cc7359d9d0496720178788c6153b8019
+
+build:
+  number: 2
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler("cxx") }}
+  host:
+    - python
+    - pip
+    - cython >=0.28.5
+    - numpy
+  run:
+    - python
+    - {{ pin_compatible('numpy') }}
+    - scipy
+    - joblib
+    - scikit-learn >=0.23.0
+
+test:
+  requires:
+    - pytest >=3.3.0
+  imports:
+    - sklearn_extra
+  commands:
+    - set OPENBLAS_NUM_THREADS=1          # [win]
+    - set OMP_NUM_THREADS=1               # [win]
+    - export OPENBLAS_NUM_THREADS=1       # [not win]
+    - export OMP_NUM_THREADS=1            # [not win]
+    - pytest --verbose --pyargs sklearn_extra -k "not test_all_estimators"
+
+about:
+  home: https://github.com/scikit-learn-contrib/scikit-learn-extra
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: scikit-learn contrib estimators
+
+  description: |
+    scikit-learn-extra is a Python module for machine learning that extends
+    scikit-learn. It includes algorithms that are useful but do not satisfy
+    the scikit-learn inclusion criteria, for instance due to their novelty or
+    lower citation number.
+  doc_url: https://scikit-learn-extra.readthedocs.io/
+  dev_url: https://github.com/scikit-learn-contrib/scikit-learn-extra
+
+extra:
+  recipe-maintainers:
+    - rth

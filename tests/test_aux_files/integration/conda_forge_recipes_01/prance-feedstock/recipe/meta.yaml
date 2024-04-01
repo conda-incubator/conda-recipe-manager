@@ -1,0 +1,52 @@
+{% set name = "prance" %}
+{% set version = "23.6.21.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/prance-{{ version }}.tar.gz
+  sha256: d8c15f8ac34019751cc4945f866d8d964d7888016d10de3592e339567177cabe
+
+build:
+  entry_points:
+    - prance=prance.cli:cli
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - pytest-runner
+    - python >=3.6
+  run:
+    - packaging >=21.3
+    - chardet >=3.0
+    - python >=3.6
+    - ruamel.yaml >=0.17.10
+    - requests >=2.25
+    - semver >=2.13,<3.dev0
+    - six >=1.15,<2.dev0
+
+test:
+  imports:
+    - prance
+  commands:
+    - pip check
+    - prance --help
+  requires:
+    - pip
+    # optional dependency needed only for `prance --help`
+    - flex-swagger
+
+about:
+  home: https://github.com/jfinkhaeuser/prance
+  summary: Resolving Swagger/OpenAPI 2.0 and 3.0.0 Parser
+  license: MIT
+  license_file: LICENSE.txt
+
+extra:
+  recipe-maintainers:
+    - xhochy

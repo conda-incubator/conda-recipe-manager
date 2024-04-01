@@ -1,0 +1,63 @@
+{% set name = "marslab" %}
+{% set version = "0.9.13" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/marslab-{{ version }}.tar.gz
+  sha256: 4951a4117bb294e6f995e881fa45a271b87e87cc125e4fc883b9bbaea1d9c143
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.9
+    - pip
+  run:
+    - python >=3.9
+    - numpy
+    - scipy
+    - dustgoggles
+    - fs
+    - pandas
+    - more-itertools
+    - pathos
+    - cytoolz
+    - matplotlib-base
+    - python-Levenshtein
+    - python-dateutil
+    - pdr
+    - astropy
+    - sympy
+    - fast-histogram
+    - scikit-image
+    - opencv
+
+test:
+  imports:
+    - marslab
+  commands:
+     # removed pip check due to discrepancies with clize metadata in PyPI vs conda-forge
+  requires:
+    - pip
+
+about:
+  home: https://github.com/millionconcepts/marslab
+  summary: Utilities for working with observational data of Mars.
+  description: |
+    marslab is the core support library for the marslab ecosystem (https://github.com/MillionConcepts/marslab-reference).
+    It defines common formats, shared references, and support objects, many of which are also useful on their own.
+    Highlights include Look, a lightweight construction kit for multispectral visualizations;
+    and BandSet, an object that streamlines operations on multispectral observations, treating entire clusters of related images as coherent wholes.
+  license: BSD-3-Clause
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - Sierra-MC
+    - m-stclair

@@ -1,0 +1,58 @@
+{% set version = "12.42" %}
+# https://metacpan.org/dist/Image-ExifTool/changes
+# Use ^^^^^^^^^^^^^^^^ to check Check if the release is a production release.
+
+package:
+  name: exiftool
+  version: {{ version }}
+
+source:
+  url: https://cpan.metacpan.org/authors/id/E/EX/EXIFTOOL/Image-ExifTool-{{ version }}.tar.gz
+  sha256: 31d805ed59f2114f19c569f8a2aaffb89fa211453733d2c650d843a3e46236df
+  patches:
+    # I know this patch removes the -w flag.
+    # YOu need env with the -S flag for linux, not all versions of env have it
+    # finally, the -w flag is discouraged within perl
+    # https://perldoc.perl.org/warnings.html
+    - usr_bin_env_perl.diff
+
+build:
+  number: 0
+  script:
+    - perl Makefile.PL --prefix={{ PREFIX }}                      # [not win]
+    - perl Makefile.PL PREFIX={{ PREFIX }} LIB={{ LIBRARY_LIB }}  # [win]
+    - make
+    - make install
+
+requirements:
+  build:
+    - make
+  host:
+    - perl
+  run:
+    - perl
+
+test:
+  commands:
+    - exiftool --help
+
+about:
+  home: https://exiftool.org/
+  license: GPL-1.0-or-later
+  license_family: GPL
+  license_file: LICENSE.txt
+  summary: Read, Write and Edit Meta Information!
+  description: |
+    ExifTool is a platform-independent Perl library plus a command-line
+    application for reading, writing and editing meta information in a wide
+    variety of files. ExifTool supports many different metadata formats
+    including EXIF, GPS, IPTC, XMP, JFIF, GeoTIFF, ICC Profile, Photoshop IRB,
+    FlashPix, AFCP and ID3, as well as the maker notes of many digital cameras
+    by Canon, Casio, DJI, FLIR, FujiFilm, GE, GoPro, HP, JVC/Victor, Kodak,
+    Leaf, Minolta/Konica-Minolta, Motorola, Nikon, Nintendo, Olympus/Epson,
+    Panasonic/Leica, Pentax/Asahi, Phase One, Reconyx, Ricoh, Samsung, Sanyo,
+    Sigma/Foveon and Sony.
+
+extra:
+  recipe-maintainers:
+    - hmaarrfk

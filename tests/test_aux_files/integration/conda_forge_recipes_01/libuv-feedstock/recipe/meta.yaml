@@ -1,0 +1,60 @@
+{% set version = "1.48.0" %}
+
+package:
+  name: libuv
+  version: {{ version }}
+
+source:
+  url: https://github.com/libuv/libuv/archive/v{{ version }}.tar.gz
+  sha256: 8c253adb0f800926a6cbd1c6576abae0bc8eb86a4f891049b72f9e5b7dc58f33
+  patches:
+    # linux.c:1638:21: error: 'CLOCK_BOOTTIME' undeclared
+    - boottime.patch
+
+build:
+  number: 0
+  run_exports:
+    - {{ pin_subpackage('libuv', max_pin='x') }}
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - automake             # [unix]
+    - autoconf             # [unix]
+    - libtool              # [unix]
+    - make                 # [unix]
+    - sed                  # [osx]
+    - cmake-no-system      # [win]
+    - ninja                # [win]
+
+test:
+  commands:
+    - test -f "$PREFIX/include/uv.h"    # [unix]
+    - test -f "$PREFIX/lib/libuv.a"     # [unix]
+    - test -f "$PREFIX/lib/libuv.so.1"  # [linux]
+    - test -f "$PREFIX/lib/libuv.1.dylib"  # [osx]
+    - test -f "$PREFIX/lib/libuv${SHLIB_EXT}"  # [not win]
+    - test -f "$PREFIX/lib/pkgconfig/libuv.pc"  # [not win]
+    - if not exist %LIBRARY_INC%\uv.h (exit 1)      # [win]
+    - if not exist %LIBRARY_LIB%\uv.lib (exit 1)    # [win]
+    - if not exist %LIBRARY_BIN%\uv.dll (exit 1)    # [win]
+    - if not exist %LIBRARY_LIB%\pkgconfig/libuv.pc (exit 1)         # [win]
+
+about:
+  home: http://libuv.org/
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: Cross-platform asynchronous I/O
+  description: |
+    libuv is a multi-platform support library with a focus on asynchronous I/O.
+    It was primarily developed for use by Node.js, but it's also used by Luvit,
+    Julia, pyuv, and others.
+  doc_url: http://docs.libuv.org/
+  dev_url: https://github.com/libuv/libuv
+
+extra:
+  recipe-maintainers:
+    - jjerphan
+    - frol
+    - mariusvniekerk

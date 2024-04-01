@@ -1,0 +1,55 @@
+{% set name = "python-arango" %}
+{% set version = "7.9.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/python-arango-{{ version }}.tar.gz
+  sha256: 18f7d365fb6cf45778fa73b559e3865d0a1c00081de65ef00ba238db52e374ab
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.8
+    - setuptools >=42
+    - setuptools-scm
+    - pip
+  run:
+    - python >=3.8
+    - urllib3 >=1.26.0
+    - requests
+    - requests-toolbelt
+    - pyjwt
+    - setuptools >=42
+    - importlib-metadata >=4.7.1
+    - packaging >=23.1
+
+test:
+  imports:
+    - arango
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/ArangoDB-Community/python-arango
+  summary: Python Driver for ArangoDB
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  doc_url: https://python-driver-for-arangodb.readthedocs.io/
+  dev_url: https://github.com/ArangoDB-Community/python-arango
+
+extra:
+  recipe-maintainers:
+    - xylar
+    - carlodri
+    - aMahanna
+    - xylar

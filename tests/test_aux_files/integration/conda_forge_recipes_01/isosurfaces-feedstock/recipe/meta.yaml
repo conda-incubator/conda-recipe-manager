@@ -1,0 +1,42 @@
+{% set name = "isosurfaces" %}
+{% set version = "0.1.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/isosurfaces-{{ version }}.tar.gz
+  sha256: fa51ebe864ea9355b26830e27fdd6a41d5a58b419fa8d4b47e3b8b80718d6e21
+
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.8
+  run:
+    - numpy
+    - python >=3.8
+
+test:
+  imports:
+    - isosurfaces
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/jared-hughes/isosurfaces
+  summary: Construct isolines/isosurfaces over a 2D/3D scalar field defined by a function (not a uniform grid)
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - gauranshkumar

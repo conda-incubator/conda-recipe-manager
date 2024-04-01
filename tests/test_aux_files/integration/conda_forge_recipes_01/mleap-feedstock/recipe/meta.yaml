@@ -1,0 +1,54 @@
+{% set name = "mleap" %}
+{% set version = "0.23.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 0e75fd7659d52b05b234997e6edbe91f445990b0392ccb871695af9d44938beb
+
+build:
+  number: 0
+  noarch: python
+  script: '{{ PYTHON }} -m pip install . --no-deps --ignore-installed -vv '
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - numpy >=1.8.2
+    - pandas >=0.18.1
+    - python >=3.6
+    - scikit-learn ~=1.0.0
+    - scipy >=0.13.0b1
+    - six >=1.10.0
+
+test:
+  requires:
+    - pip
+  commands:
+    - pip check
+  imports:
+    - mleap
+    - mleap.bundle
+    - mleap.sklearn
+    - mleap.sklearn.decomposition
+    - mleap.sklearn.ensemble
+    - mleap.sklearn.extensions
+    - mleap.sklearn.feature_extraction
+    - mleap.sklearn.preprocessing
+    - mleap.sklearn.tree
+
+about:
+  home: https://github.com/combust/mleap/
+  license: Apache-2.0
+  license_family: APACHE
+  license_file: LICENSE
+  summary: MLeap Python API
+
+extra:
+  recipe-maintainers:
+    - xhochy

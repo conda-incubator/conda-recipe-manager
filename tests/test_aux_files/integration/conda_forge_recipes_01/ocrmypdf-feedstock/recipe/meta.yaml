@@ -1,0 +1,67 @@
+{% set name = "ocrmypdf" %}
+{% set version = "14.2.0" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/ocrmypdf-{{ version }}.tar.gz
+  sha256: eb78822c725c2c6143d4fd642f73e6d3c7a032651ac5fa1a9a741f019f21a714
+
+build:
+  number: 0
+  noarch: python
+  entry_points:
+    - ocrmypdf = ocrmypdf.__main__:run
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.7
+    - setuptools_scm
+    - setuptools_scm_git_archive
+  run:
+    - deprecation >=2.1.0
+    - coloredlogs >=15
+    - img2pdf >=0.4
+    - packaging >=20
+    - pdfminer.six >=20201018
+    - pikepdf >=5.1
+    - pillow >=8.3.2
+    - pluggy >=0.13.0
+    - python >=3.7
+    - reportlab >=3.5
+    - importlib_resources
+    - importlib_metadata
+    - tqdm >=4
+    - ghostscript >=9.5
+    - img2pdf
+    - pngquant
+    - qpdf
+    - tesseract >=4.1.1
+    - unpaper
+    - packaging
+
+test:
+  imports:
+    - ocrmypdf
+    - ocrmypdf._exec
+  commands:
+    - pip check
+    - ocrmypdf --help
+  requires:
+    - pip
+
+about:
+  home: https://github.com/jbarlow83/OCRmyPDF
+  summary: OCRmyPDF adds an OCR text layer to scanned PDF files, allowing them to be searched
+  dev_url: https://github.com/jbarlow83/ocrmypdf
+  license: MPL-2.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - izahn

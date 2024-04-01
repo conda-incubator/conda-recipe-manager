@@ -1,0 +1,72 @@
+{% set name = "dtale" %}
+{% set version = "3.11.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: c82dfdbe01fb5768dd88dea6bf856a6262a33c66303a622c0fa0fd470dc85254
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+  entry_points:
+    - dtale = dtale.cli.script:main
+
+requirements:
+  host:
+    - python ==2.7.*|>=3.6
+    - pip
+    - six
+  run:
+    - python ==2.7.*|>=3.6
+    - lz4
+    - beautifulsoup4
+    - dash
+    - dash-bootstrap-components
+    - dash-core-components
+    - dash-html-components
+    - dash_colorscales
+    - dash-daq
+    - Flask-Compress
+    - Flask
+    - future
+    - itsdangerous
+    - missingno !=0.4.3
+    - networkx
+    - openpyxl
+    - pandas
+    - plotly >=4.14.3
+    - requests
+    - seaborn
+    - scikit-learn
+    - scipy
+    - six
+    - squarify
+    - statsmodels
+    - strsimpy
+    - xarray
+    - xlrd
+
+test:
+  commands:
+    - dtale --help
+  imports:
+    - dtale
+    - dtale.cli
+
+about:
+  home: https://github.com/man-group/dtale/
+  license: LGPL-2.1-only
+  license_file: LICENSE
+  summary: D-Tale is the combination of a Flask back-end and a React front-end to bring you an easy way to view & analyze Pandas data structures
+
+  doc_url: https://dtale.readthedocs.io
+  dev_url: https://github.com/man-group/dtale/
+
+extra:
+  recipe-maintainers:
+    - aschonfeld

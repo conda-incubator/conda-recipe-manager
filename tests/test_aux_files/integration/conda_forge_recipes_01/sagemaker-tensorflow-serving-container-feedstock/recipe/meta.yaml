@@ -1,0 +1,42 @@
+{% set name = "sagemaker-tensorflow-serving-container" %}
+{% set version = "1.8.4" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/aws/{{ name }}/archive/v{{ version }}.tar.gz
+  sha256: 6820eca1bc49010e259b4738d222cd768ef892a804f474c27c5ece09f0603144
+
+build:
+  number: 4
+  script:
+    - cp -r $SRC_DIR $SP_DIR/sagemaker_tensorflow_serving_container
+  skip: true  # [win or py2k]
+
+requirements:
+  host:
+    - python
+  run:
+    - python
+
+test:
+  imports:
+    - sagemaker_tensorflow_serving_container
+
+about:
+  home: https://github.com/aws/sagemaker-tensorflow-serving-container
+  license: Apache-2.0
+  license_family: Apache
+  license_file: LICENSE
+  summary: SageMaker TensorFlow Serving Container is an a open source project that builds docker images for running TensorFlow Serving on Amazon SageMaker.
+  doc_url: https://sagemaker.readthedocs.io/en/stable/using_tf.html
+  dev_url: https://github.com/aws/sagemaker-tensorflow-serving-container
+
+extra:
+  recipe-maintainers:
+    - mxr-conda
+    - benhuff
+    - oblute
+    - rluria14

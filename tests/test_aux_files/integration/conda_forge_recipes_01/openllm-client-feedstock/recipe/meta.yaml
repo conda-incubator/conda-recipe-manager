@@ -1,0 +1,48 @@
+{% set name = "openllm-client" %}
+{% set version = "0.4.44" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/openllm_client-{{ version }}.tar.gz
+  sha256: 9353423c1d59ddd02cb94a462885e00292a7b58f24c12f6836006b79443eb57c
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  number: 0
+
+requirements:
+  host:
+    - python >=3.8
+    - hatchling ==1.18.0
+    - hatch-vcs ==0.3.0
+    - hatch-fancy-pypi-readme ==23.1.0
+    - pip
+  run:
+    - python >=3.8
+    - openllm-core
+    - httpx
+    - distro
+    - anyio
+
+test:
+  imports:
+    - openllm_client
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  summary: 'OpenLLM Client: Interacting with OpenLLM HTTP/gRPC server, or any BentoML server.'
+  home: https://github.com/bentoml/OpenLLM
+  license: Apache-2.0
+  license_file: LICENSE.md
+
+extra:
+  recipe-maintainers:
+    - rxm7706
+    - conda-forge/openllm-core

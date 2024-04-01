@@ -1,0 +1,62 @@
+{% set name = "hummingbird-ml" %}
+{% set version = "0.4.11" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/hummingbird-ml-{{ version }}.tar.gz
+  sha256: 2406afba71f744e637efa37221ac5f1ffedc96efd19c1baf3033ba36b50c703e
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - protobuf >=3.20.2
+    - dill
+    - numpy >=1.15
+    - onnxconverter-common >=1.6.0
+    - psutil
+    - python >=3.6
+    - scikit-learn
+    - scipy
+    - pytorch >1.7.0
+    # - xgboost >=0.90
+    # - skl2onnx >=1.7.0
+    # - pytest 
+    # - pyspark <3.1.2,>=2.4.4
+    # - pyarrow >1.0
+    # - prophet ==1.0.1
+    # - pre-commit 
+    # - onnxruntime >=1.0.0
+    # - onnxmltools >=1.6.0
+    # - memory-profiler 
+    # - lightgbm >=2.2
+    # - flake8 
+    # - coverage 
+
+test:
+  imports:
+    - hummingbird.ml
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/microsoft/hummingbird
+  summary: Convert trained traditional machine learning models into tensor computations
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - xhochy

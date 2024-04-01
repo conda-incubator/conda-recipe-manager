@@ -1,0 +1,49 @@
+{% set name = "d2l" %}
+{% set version = "1.0.3" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/d2l-{{ version }}.tar.gz
+  sha256: b69964354f8150d1ae02166d1eccd622c61f330bf61a23bae614be4fb59ce3be
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.8
+    - pip
+  run:
+    - python >=3.8
+    # cf. https://github.com/d2l-ai/d2l-en/blob/v1.0.3/setup.py
+    - jupyter ==1.0.0
+    - numpy ==1.23.5
+    - matplotlib-base ==3.7.2
+    - matplotlib-inline ==0.1.6
+    - requests ==2.31.0
+    - pandas ==2.0.3
+    - scipy ==1.10.1
+
+test:
+  imports:
+    - d2l
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://d2l.ai
+  dev_url: https://github.com/d2l-ai/d2l-en
+  summary: Dive into Deep Learning
+  license: MIT-0
+  license_file: LICENSE-SAMPLECODE
+
+extra:
+  recipe-maintainers:
+    - pavelzw

@@ -1,0 +1,47 @@
+{% set name = "sqltrie" %}
+{% set version = "0.11.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/sqltrie-{{ version }}.tar.gz
+  sha256: e613a74843e2b55ce1d20d333100d6a41127a1d6c12f835915f58fbd13944a82
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.8
+    - setuptools_scm >=6.3.1
+
+  run:
+    - python >=3.8
+    - attrs
+    - orjson
+    - pygtrie
+
+test:
+  imports:
+    - sqltrie
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/iterative/sqltrie
+  summary: SQL-based prefix tree inspired by pygtrie and python-diskcache
+  license: Apache-2.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - pmrowla
+    - efiop
+    - shcheklein

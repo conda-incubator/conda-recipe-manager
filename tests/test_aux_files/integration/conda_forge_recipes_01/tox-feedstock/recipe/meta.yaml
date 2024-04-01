@@ -1,0 +1,142 @@
+{% set name = "tox" %}
+{% set version = "4.14.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/tox-{{ version }}.tar.gz
+  sha256: 0defb44f6dafd911b61788325741cc6b2e12ea71f987ac025ad4d649f1f1a104
+
+build:
+  noarch: python
+  entry_points:
+    - tox = tox.run:run
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  number: 0
+
+requirements:
+  host:
+    - python >=3.8
+    - hatch-vcs >=0.4
+    - hatchling >=1.21
+    - pip
+  run:
+    - python >=3.8
+    - cachetools >=5.3.2
+    - chardet >=5.2
+    - colorama >=0.4.6
+    - filelock >=3.13.1
+    - importlib_metadata >=7.0.1
+    - packaging >=23.2
+    - platformdirs >=4.1
+    - pluggy >=1.3
+    - pyproject-api >=1.6.1
+    - tomli >=2.0.1
+    - typing-extensions >=4.9
+    - virtualenv >=20.25
+
+
+{% set skip_tests = [
+  "allowed_implicit_cli_envs",
+  "build_wheel_in_non_base_pkg_env",
+  "deps_remove_recreate",
+  "env_log",
+  "find_alias_on_path",
+  "get_info_uses_hook_path",
+  "install_command_no_packages",
+  "install_pkg_via",
+  "keyboard_interrupt",
+  "legacy_cli_flags",
+  "local_subprocess",
+  "override_incorrect",
+  "package_only",
+  "parallel_inception",
+  "parallel_interrupt",
+  "pip_install_constraint_file_create_change",
+  "pip_install_constraint_file_new",
+  "pip_install_path",
+  "pip_install_req_file_req_like",
+  "pip_install_requirements_file_deps",
+  "pip_pre",
+  "pip_req_path",
+  "pkg_dep_remove_recreate",
+  "pkg_env_dep_remove_recreate",
+  "plugin_hooks_and_order",
+  "provision_interrupt_child",
+  "provision_non_canonical_dep",
+  "pyproject_deps_from_static",
+  "pyproject_deps_static_with_dynamic",
+  "pyproject_no_build_editable_fallback",
+  "python_disable_hash_seed",
+  "python_generate_hash_seed",
+  "python_keep_hash_seed",
+  "python_set_hash_seed",
+  "requirements_txt",
+  "skip_develop_mode",
+  "some_files_exist",
+  "test_constrain_package_deps",
+  "test_package_pyproject",
+  "test_python_hash_seed_from_env_and_disable",
+  "test_python_hash_seed_from_env_and_override",
+  "tox_install_pkg_sdist",
+  "tox_install_pkg_wheel",
+  "verbosity_guess_miss_match",
+] | join(" or ") %}
+
+test:
+  source_files:
+    - tests
+  requires:
+    - python-build >=0.10
+    - detect-test-pollution >=1.1.1
+    - covdefaults >=2.3
+    - devpi-process >=0.3.1
+    - diff-cover >=7.7
+    - distlib >=0.3.7
+    - flaky >=3.7
+    - hatch-vcs >=0.3
+    - hatchling >=1.18
+    - pip
+    - psutil >=5.9.5
+    - pytest >=7.4
+    - pytest-cov >=4.1
+    - pytest-mock >=3.11.1
+    - pytest-xdist >=3.3.1
+    - python-build >=0.10
+    - re-assert >=1.1
+    - time-machine >=2.12
+    - wheel >=0.41.1
+
+  imports:
+    - tox
+  commands:
+    - pip check
+    - tox --version
+    - tox --help
+    - pytest -vv --cov=tox --no-cov-on-fail --cov-report=term-missing:skip-covered -k "not ({{ skip_tests }})" --cov-fail-under=90
+
+about:
+  home: https://tox.wiki
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: virtualenv-based automation of test activities
+  description: |
+    Tox is a generic virtualenv management and test command line tool you can use for
+    - checking your package installs correctly with different Python versions and interpreters
+    - running your tests in each of the environments, configuring your test tool of choice
+    - acting as a frontend to Continuous Integration servers, greatly reducing boilerplate
+      and merging CI and shell-based testing.
+  doc_url: https://tox.readthedocs.org
+  dev_url: https://github.com/tox-dev/tox
+  doc_source_url: https://github.com/tox-dev/tox/tree/{{ version }}/docs
+
+extra:
+  recipe-maintainers:
+    - rxm7706
+    - cshaley
+    - kalefranz
+    - sannykr
+    - bollwyvl

@@ -1,0 +1,90 @@
+{% set version = "5.0.1" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-seuratobject
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/SeuratObject_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/SeuratObject/SeuratObject_{{ version }}.tar.gz
+  sha256: 5ace1720fef373d44da36d28cab8947cd3c342e76f889c2f204a62d668f5f941
+
+build:
+  merge_build_host: true  # [win]
+  number: 0
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - cross-r-base {{ r_base }}  # [build_platform != target_platform]
+    - r-matrix                   # [build_platform != target_platform]
+    - r-rcpp                     # [build_platform != target_platform]
+    - r-rcppeigen                # [build_platform != target_platform]
+    - r-future                   # [build_platform != target_platform]
+    - r-future.apply             # [build_platform != target_platform]
+    - r-generics                 # [build_platform != target_platform]
+    - r-lifecycle                # [build_platform != target_platform]
+    - r-progressr                # [build_platform != target_platform]
+    - r-rlang                    # [build_platform != target_platform]
+    - r-sp                       # [build_platform != target_platform]
+    - r-spam                     # [build_platform != target_platform]
+    - {{ compiler('c') }}          # [not win]
+    - {{ compiler('m2w64_c') }}    # [win]
+    - {{ compiler('cxx') }}        # [not win]
+    - {{ compiler('m2w64_cxx') }}  # [win]
+    - {{ posix }}filesystem        # [win]
+    - {{ posix }}make
+    - {{ posix }}sed               # [win]
+    - {{ posix }}coreutils         # [win]
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+    - r-matrix >=1.6.3
+    - r-rcpp >=1.0.5
+    - r-rcppeigen
+    - r-future
+    - r-future.apply
+    - r-generics
+    - r-lifecycle
+    - r-progressr
+    - r-rlang >=0.4.7
+    - r-sp >=1.5.0
+    - r-spam
+  run:
+    - r-base
+    - {{ native }}gcc-libs         # [win]
+    - r-matrix >=1.6.3
+    - r-rcpp >=1.0.5
+    - r-rcppeigen
+    - r-future
+    - r-future.apply
+    - r-generics
+    - r-lifecycle
+    - r-progressr
+    - r-rlang >=0.4.7
+    - r-sp >=1.5.0
+    - r-spam
+
+test:
+  commands:
+    - $R -e "library('SeuratObject')"           # [not win]
+    - "\"%R%\" -e \"library('SeuratObject')\""  # [win]
+
+about:
+  home: https://satijalab.org/seurat, https://github.com/mojaveazure/seurat-object
+  license: MIT
+  summary: Defines S4 classes for single-cell genomic data and associated information, such as dimensionality reduction embeddings, nearest-neighbor graphs, and spatially-resolved coordinates. Provides data access methods and R-native hooks to ensure the Seurat object is familiar to other R users. See Satija R, Farrell J,
+    Gennert D, et al (2015) <doi:10.1038/nbt.3192>, Macosko E, Basu A, Satija R, et al (2015) <doi:10.1016/j.cell.2015.05.002>, and Stuart T, Butler A, et al (2019) <doi:10.1016/j.cell.2019.05.031> for more details.
+  license_family: MIT
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/MIT
+    - LICENSE
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r

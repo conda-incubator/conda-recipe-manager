@@ -1,0 +1,40 @@
+{% set name = "atuin" %}
+{% set version = "18.0.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/atuinsh/atuin/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: 02b26d15de30da5fa8ee16bc6b9f03e2e644f5d39ef85dd251998915dc6e5fc5
+
+build:
+  number: 0
+  skip: true  # [win]
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('rust') }}
+    - cargo-bundle-licenses
+    - sysroot_{{ target_platform }} =2.17  # [linux]
+  run:
+    - __osx >={{ MACOSX_DEPLOYMENT_TARGET|default("10.9") }}  # [osx and x86_64]
+
+test:
+  commands:
+    - {{ name }} --help
+
+about:
+  home: https://github.com/atuinsh/{{ name }}
+  license: MIT
+  license_file:
+    - LICENSE
+    - THIRDPARTY.yml
+  summary: Improved shell history for zsh and bash
+  dev_url: https://github.com/atuinsh/{{ name }}
+
+extra:
+  recipe-maintainers:
+    - danielnachun

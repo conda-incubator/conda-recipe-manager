@@ -1,0 +1,54 @@
+{% set name = "ldas-tools-filters" %}
+{% set version = "2.6.6" %}
+
+# dependencies
+{% set ldas_tools_cmake_version = "1.2.3" %}
+{% set ldas_tools_al_version = "2.6.7" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  url: http://software.ligo.org/lscsoft/source/{{ name }}-{{ version }}.tar.gz
+  sha256: 66ec578a06c2fde43cafdae0f50a2919f7f1d4c52ef3d8de1155b23435ab4314
+
+build:
+  number: 0
+  skip: true  # [win]
+  run_exports:
+    - {{ pin_subpackage("ldas-tools-filters", max_pin="x.x") }}
+
+requirements:
+  build:
+    - {{ compiler('cxx') }}
+    - cmake >=3.6
+    - pkg-config  # [not win]
+    - make  # [not win]
+  host:
+    - ldas-tools-cmake >={{ ldas_tools_cmake_version }}
+    - ldas-tools-al >={{ ldas_tools_al_version }}
+  run:
+    - ldas-tools-al >={{ ldas_tools_al_version }}
+
+test:
+  requires:
+    - pkg-config  # [unix]
+  commands:
+    - test -d ${PREFIX}/include/filters  # [unix]
+    - pkg-config --print-errors --exact-version {{ version }} ldas-tools-filters  # [unix]
+
+about:
+  home: https://wiki.ligo.org/Computing/LDASTools
+  dev_url: https://git.ligo.org/ldastools/LDAS_Tools
+  license: GPL-2.0-or-later
+  license_family: GPL
+  license_file: COPYING
+  summary: Filters library used by ldas-tools
+  description: |
+    This provides the runtime libraries for the filters library.
+
+extra:
+  recipe-maintainers:
+    - duncanmmacleod
+    - emaros

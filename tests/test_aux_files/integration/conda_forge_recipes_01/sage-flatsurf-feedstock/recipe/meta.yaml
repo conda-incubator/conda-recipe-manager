@@ -1,0 +1,48 @@
+{% set name = "sage-flatsurf" %}
+{% set version = "0.5.2" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name | replace('-', '_') }}/{{ name | replace('-', '_') }}-{{ version }}.tar.gz
+  sha256: dbc618bb4a49660302b5c7082a2210ce2a5fecd45078f99d54fc63f1d9f0312e
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+  run:
+    - python >=3.6
+    - sagelib
+    - surface-dynamics
+
+test:
+  imports:
+    - flatsurf
+
+about:
+  home: http://github.com/flatsurf/sage-flatsurf
+  license: GPL-2.0-or-later
+  license_file: COPYING
+  summary: Flat Surfaces in SageMath
+  description: |
+    This module supports the investigation of geometric, algebraic and
+    dynamical questions related to flat surfaces. By flat surface we mean a
+    surface modeled on the plane with monodromy given by similarities of the
+    plane, though current efforts are focused on translation surfaces and
+    half-translation surfaces.
+  doc_url: https://flatsurf.github.io/sage-flatsurf/
+  dev_url: https://github.com/flatsurf/sage-flatsurf
+
+extra:
+  recipe-maintainers:
+    - saraedum
+    - videlec
+    - slel

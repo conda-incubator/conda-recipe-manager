@@ -1,0 +1,55 @@
+{% set name = "linear_operator" %}
+{% set version = "0.5.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 5cd9099bca5b9f1e57017a4153526df7410561a46aedd47096c8da642159b90d
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.8
+    - pip
+    - setuptools
+    - setuptools_scm
+  run:
+    - python >=3.8
+    - jaxtyping >=0.2.9
+    - pytorch >=1.11
+    - scipy
+    - typeguard ~=2.13.3
+
+test:
+  imports:
+    - linear_operator
+    - linear_operator.functions
+    - linear_operator.operators
+    - linear_operator.test
+    - linear_operator.utils
+  requires:
+    - pip
+  commands:
+    - pip check
+    - python -c "import linear_operator; print(linear_operator.__version__)"
+
+about:
+  home: https://github.com/cornellius-gp/linear_operator
+  summary: A LinearOperator implementation to wrap the numerical nuts and bolts of GPyTorch
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  dev_url: https://github.com/cornellius-gp/linear_operator
+
+extra:
+  recipe-maintainers:
+    - AdrianSosic
+    - ngam
+    - thewchan

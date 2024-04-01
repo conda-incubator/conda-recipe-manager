@@ -1,0 +1,64 @@
+{% set version = "2.71" %}
+
+package:
+  name: autoconf
+  version: {{ version }}
+
+source:
+  url: http://ftp.gnu.org/gnu/autoconf/autoconf-{{ version }}.tar.gz
+  sha256: 431075ad0bf529ef13cb41e9042c542381103e80015686222b8a9d4abef42a1c
+  patches:
+    - 0001-Patch-shebang.patch
+    - 0002-Add-use-lib-.-to-auto-scan-header-.in.patch
+
+build:
+  number: 1
+  skip: true  # [win]
+  ignore_run_exports_from:
+    - perl 5.*
+    - {{ compiler('cxx') }}
+
+requirements:
+  build:
+    - gnuconfig
+    #  make check requirement:
+    - libtool
+    - make
+    - curl
+    - help2man
+  host:
+    - m4
+    - perl 5.*
+    #  make check requirement:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+  run:
+    - m4
+    - perl 5.*
+
+test:
+  commands:
+    - autoconf --help
+    - autoreconf --help
+
+about:
+  home: http://www.gnu.org/software/autoconf/
+  license: GPL-3.0-or-later
+  license_file:
+    - COPYING
+    - COPYINGv3
+    - COPYING.EXCEPTION
+  summary: Extensible M4 macros that produce shell scripts to configure software source code packages.
+  description: |
+    Autoconf is a tool for producing shell scripts that automatically configure
+    software source code packages to adapt to many kinds of Posix-like systems.
+    The configuration scripts produced by Autoconf are independent of Autoconf
+    when they are run, so their users do not need to have Autoconf.
+  doc_url: https://www.gnu.org/software/autoconf/manual/autoconf.html
+  dev_url: http://git.sv.gnu.org/r/autoconf.git
+
+extra:
+  recipe-maintainers:
+    - jakirkham
+    - ocefpaf
+    - mingwandroid

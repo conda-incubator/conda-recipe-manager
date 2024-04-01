@@ -1,0 +1,66 @@
+{% set name = "tables-io" %}
+{% set version = "0.9.5" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 9bd5c8c29861645b8427604dabfd2f6b9c13ccdeb29d9fe51f01f236062406ee
+
+build:
+  number: 0
+
+outputs:
+  - name: {{ name }}
+    script: build_base.sh
+    build:
+      noarch: python
+    requirements:
+      host:
+        - python >=3.6
+        - pip
+        - setuptools_scm
+
+      run:
+        - python >=3.6
+        - numpy
+    test:
+      imports:
+        - tables_io
+
+  - name: {{ name }}-full
+    build:
+      noarch: python
+    requirements:
+      run:
+        - {{ pin_subpackage('tables-io', max_pin='x.x.x') }}
+        - astropy
+        - h5py
+        - pandas
+        - pyarrow
+        - pytables
+    test:
+      imports:
+        - tables_io
+        - astropy
+        - h5py
+        - pandas
+        - pyarrow
+
+about:
+  home: http://github.com/LSSTDESC/tables_io
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: Input/output and conversion interfaces for tabular data formats.
+  description: |
+    Input/output and conversion interfaces for tabular data formats.
+  dev_url: https://github.com/LSSTDESC/tables_io
+
+extra:
+  recipe-maintainers:
+    - eacharles
+    - brianv0

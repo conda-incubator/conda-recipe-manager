@@ -1,0 +1,43 @@
+{% set name = "ratarmountcore" %}
+{% set version = "0.6.4" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/ratarmountcore-{{ version }}.tar.gz
+  sha256: f70e32aa5ed14639c3fa9991799a9940f46ce9c71945ffbe365b6f42cac0a8c1
+
+build:
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+  noarch: python
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+  run:
+    - python >=3.6
+    - dataclasses
+    - importlib-metadata
+
+test:
+  imports:
+    - ratarmountcore
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/mxmlnkn/ratarmount/tree/master/core
+  summary: Random Access Read-Only Tar Mount Library
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - ap--
+    - mxmlnkn

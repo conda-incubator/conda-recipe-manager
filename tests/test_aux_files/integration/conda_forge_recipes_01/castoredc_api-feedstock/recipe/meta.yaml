@@ -1,0 +1,48 @@
+{% set name = "castoredc_api" %}
+{% set version = "0.1.9.1" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/castoredc_api-{{ version }}.tar.gz
+  sha256: a26c5f6998a8912841c2a972d8f4d25727136558337f2a7b883985d2b9039e27
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.8
+  run:
+    - httpx >=0.19.0
+    - numpy >=1.21.1
+    - openpyxl >=3.0.7
+    - pandas >=1.3.1
+    - python >=3.8
+    - tqdm >=4.62.0
+    - ratelimiter >=1.2.0
+
+test:
+  imports:
+    - castoredc_api
+    - castoredc_api.auth
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/reiniervlinschoten/castoredc_api
+  summary: Python wrapper for the Castor EDC API
+  license: MIT
+  license_file: LICENSE.md
+
+extra:
+  recipe-maintainers:
+    - reiniervlinschoten

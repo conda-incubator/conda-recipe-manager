@@ -1,0 +1,39 @@
+{% set name = "types-cachetools" %}
+{% set version = "5.3.0.7" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/types-cachetools-{{ version }}.tar.gz
+  sha256: 27c982cdb9cf3fead8b0089ee6b895715ecc99dac90ec29e2cab56eb1aaf4199
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - python >=3.6
+
+test:
+  commands:
+    - test -f $SP_DIR/cachetools-stubs/__init__.pyi
+
+
+about:
+  home: https://github.com/python/typeshed
+  summary: Typing stubs for cachetools
+  license: Apache-2.0 AND MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - fhoehle
+    - conda-forge/mypy

@@ -1,0 +1,47 @@
+{% set name = "coq-jupyter" %}
+{% set version = "1.6.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/coq_jupyter-{{ version }}.tar.gz
+  sha256: ee3c43b8852a65b4a774f39304f5e5ac8bb49ff4b9541035e20de49bae647f2c
+
+build:
+  number: 2
+  skip: true  # [win]
+  script:
+    - {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - python
+    - pip
+  run:
+    - coq >=8.6
+    - python
+    - jupyter_client
+    - ipython
+    - ipykernel
+    - future
+    - pexpect >=4.0
+
+test:
+  imports:
+    - coq_jupyter
+
+about:
+  home: https://github.com/EugeneLoy/coq_jupyter
+  license: Apache-2.0
+  license_family: Apache
+  license_file: LICENSE
+  summary: Jupyter kernel for Coq
+  dev_url: https://github.com/EugeneLoy/coq_jupyter
+
+extra:
+  recipe-maintainers:
+    - EugeneLoy
+    - isuruf
+    - slel

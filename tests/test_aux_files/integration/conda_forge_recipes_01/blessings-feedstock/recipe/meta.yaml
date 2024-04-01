@@ -1,0 +1,45 @@
+{% set name = "blessings" %}
+{% set version = "1.7" %}
+{% set sha256 = "98e5854d805f50a5b58ac2333411b0482516a8210f23f43308baeb58d77c157d" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  number: 1008
+  skip: True  # [win]
+  script: "{{ PYTHON }} -m pip install . -vv"
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+  host:
+    - python
+    - setuptools
+    - pip
+  run:
+    - python
+    - six
+
+test:
+  imports:
+    - blessings
+
+about:
+  home: https://github.com/erikrose/blessings
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: 'A thin, practical wrapper around terminal capabilities in Python '
+  dev_url: https://github.com/erikrose/blessings
+
+extra:
+  recipe-maintainers:
+    - synapticarbors

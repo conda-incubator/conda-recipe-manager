@@ -1,0 +1,48 @@
+{% set version = "1.7" %}
+
+package:
+  name: configargparse
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/C/ConfigArgParse/ConfigArgParse-{{ version }}.tar.gz
+  sha256: e7067471884de5478c58a511e529f0f9bd1c66bfef1dea90935438d6c23306d1
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install  -vv --no-deps --no-build-isolation .
+
+requirements:
+  host:
+    - python >=3.5
+    - pip
+  run:
+    - python >=3.5
+
+test:
+  source_files:
+    - tests
+  requires:
+    - pip
+    - pytest-cov
+    - pyyaml
+  imports:
+    - configargparse
+  commands:
+    - pip check
+    - pytest -vv --cov=configargparse --cov-branch --cov-report=term-missing:skip-covered --no-cov-on-fail --cov-fail-under=74
+
+about:
+  home: https://github.com/bw2/ConfigArgParse
+  license: MIT
+  summary: A drop-in replacement for argparse that allows options to also be set via config files and/or environment variables.
+  license_family: MIT
+  license_file: LICENSE
+  dev_url: https://github.com/bw2/ConfigArgParse
+  doc_url: https://github.com/bw2/ConfigArgParse
+
+extra:
+  recipe-maintainers:
+    - msarahan
+    - bollwyvl

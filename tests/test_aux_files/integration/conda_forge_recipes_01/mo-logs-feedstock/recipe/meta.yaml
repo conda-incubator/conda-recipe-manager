@@ -1,0 +1,45 @@
+{% set name = "mo-logs" %}
+{% set version = "8.538.24037" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/mo-logs-{{ version }}.tar.gz
+  sha256: 9fd7b4c8d8d91950bb42fa18de1ba48a4fcd442544263e239183671e773c2182
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=2.7
+  run:
+    - python >=2.7
+    - mo-dots ==9.531.24035
+    - mo-future ==7.531.24035
+    - mo-imports ==7.531.24035
+    - mo-kwargs ==7.531.24035
+
+test:
+  imports:
+    - mo_logs
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/klahnakoski/mo-logs
+  summary: More Logs! Structured Logging and Exception Handling
+  license: MPL-2.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - xhochy

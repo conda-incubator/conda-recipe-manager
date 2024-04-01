@@ -1,0 +1,55 @@
+{% set name = "openfermion" %}
+{% set version = "1.6.0" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/openfermion-{{ version }}.tar.gz
+  sha256: b41280b3f07cd4c23db486639d27a3e89e6f801c2044e7459c74f5b6aaedfaae
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - cirq-core >=1.0,<2.dev0
+    - cirq-google >=0.15.0
+    - deprecation
+    - h5py >=2.8
+    - networkx
+    - numpy >=1.11.0
+    - pubchempy
+    - python >=3.6
+    - requests >=2.18
+    - scipy >=1.1.0,<1.10.0
+    - sympy
+
+test:
+  imports:
+    - openfermion
+    - openfermion.chem
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://quantumai.google/openfermion
+  summary: The electronic structure package for quantum computers.
+  license: Apache-2.0 AND BSD-3-Clause
+  license_file:
+    - LICENSE
+    - NOTICE
+  dev_url: https://github.com/quantumlib/OpenFermion
+
+extra:
+  recipe-maintainers:
+    - BastianZim

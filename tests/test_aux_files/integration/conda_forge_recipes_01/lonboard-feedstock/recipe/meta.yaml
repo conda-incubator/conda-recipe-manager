@@ -1,0 +1,53 @@
+{% set name = "lonboard" %}
+{% set version = "0.7.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/lonboard-{{ version }}.tar.gz
+  sha256: d9cd2f42ee34a3bc4c8bf828c0a0b4d15811bf1102a63c0316bd8c7063d1fe75
+
+build:
+  noarch: python
+  script:
+    - {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+
+  number: 0
+
+requirements:
+  build:
+    - nodejs
+  host:
+    - python >=3.8,<4.0
+    - poetry-core
+    - pip
+  run:
+    - python >=3.8.0,<4.0.0
+    - anywidget >=0.9.0
+    - pyarrow >=14.0.1
+    - geopandas >=0.13
+    - pandas >=2.0.0
+    - palettable >=3.3.3,<4.0.0
+    - matplotlib-base >=3.7.0,<4.0.0
+    - shapely >=2.0.0,<3.0.0
+
+test:
+  imports:
+    - lonboard
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/developmentseed/lonboard
+  summary: Python library for fast, interactive geospatial vector data visualization in Jupyter.
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - giswqs
+    - kylebarron

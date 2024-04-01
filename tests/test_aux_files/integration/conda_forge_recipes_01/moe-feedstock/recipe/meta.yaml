@@ -1,0 +1,55 @@
+{% set name = "moe" %}
+{% set version = "2.1.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/moe-{{ version }}.tar.gz
+  sha256: 46ee56f97a10a972e8c87fbd0ee58304a9e5709ca5382819f06e5402df3bf9c3
+
+build:
+  entry_points:
+    - moe = moe.cli:main
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.9,<3.12
+    - poetry-core >=1.0
+    - pip
+  run:
+    - python >=3.9,<3.12
+    - alembic >=1.4.2,<2.0.0
+    - dynaconf >=3.1.4,<4.0.0
+    - mediafile >=0.11.0,<0.12.0
+    - musicbrainzngs >=0.7.1,<0.8.0
+    - pluggy >=1.0.0,<2.0.0
+    - rich >=13.0.0,<14.0.0
+    - sqlalchemy >=2.0.0,<3.0.0
+    - unidecode >=1.2.0,<2.0.0
+    - questionary >=1.9.0,<2.0.0
+
+test:
+  imports:
+    - moe
+  commands:
+    - pip check
+    - moe --help
+  requires:
+    - pip
+
+about:
+  home: https://github.com/MoeMusic/Moe
+  summary: The ultimate tool for managing your music library.
+  license: MIT
+  license_file: LICENSE
+  dev_url: https://github.com/MoeMusic/Moe
+  doc_url: https://mrmoe.readthedocs.io/
+
+extra:
+  recipe-maintainers:
+    - HeavyTony2

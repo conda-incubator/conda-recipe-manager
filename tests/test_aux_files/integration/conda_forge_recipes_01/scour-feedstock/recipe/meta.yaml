@@ -1,0 +1,44 @@
+{% set name = "scour" %}
+{% set version = "0.38.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 6881ec26660c130c5ecd996ac6f6b03939dd574198f50773f2508b81a68e0daf
+
+build:
+  noarch: python
+  number: 0
+  entry_points:
+    - scour = scour.scour:run
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - python >=3.4
+    - pip
+  run:
+    - python >=3.4
+    - six >=1.9.0
+
+test:
+  imports:
+    - scour.scour
+  commands:
+    - scour -h
+
+about:
+  home: https://github.com/scour-project/scour
+  license: Apache-2.0
+  license_family: Apache
+  license_file: LICENSE
+  summary: Scour SVG Optimizer
+  doc_url: https://github.com/scour-project/scour
+  dev_url: https://github.com/scour-project/scour
+
+extra:
+  recipe-maintainers:
+    - njzjz

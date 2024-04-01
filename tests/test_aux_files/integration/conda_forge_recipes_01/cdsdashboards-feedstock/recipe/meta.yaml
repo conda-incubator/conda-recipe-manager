@@ -1,0 +1,81 @@
+{% set name = "cdsdashboards" %}
+{% set version = "0.6.3" %}
+{% set build_number = 0 %}
+
+package:
+  name: {{ name|lower }}-meta
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: afea7ec9acb3a69ba586052e8311de1615ca57ac3364aa42e8f8d3d29ed23309
+
+build:
+  noarch: python
+  number: {{ build_number }}
+
+outputs:
+  - name: {{ name|lower }}
+    build:
+      number: {{ build_number }}
+      noarch: python
+    script: build_base.sh
+    requirements:
+      host:
+        - python >=3.6.0,<4.0.0
+        - pip
+      run:
+        - python >=3.6.0,<4.0.0
+        - tornado >=6.0.4
+        - traitlets
+        - jupyterhub >=1.0.0
+        - alembic
+        - pluggy
+    test:
+      imports:
+        - cdsdashboards
+      requires:
+        - pip
+      commands:
+        - pip check
+
+  - name: {{ name|lower }}-singleuser
+    build:
+      number: {{ build_number }}
+      noarch: generic
+    requirements:
+      run:
+        - {{ pin_subpackage(name, exact=True) }}
+        - jhsingle-native-proxy >=0.6.1
+        - bokeh-root-cmd >=0.0.5
+        - plotlydash-tornado-cmd >=0.0.4
+        - rshiny-server-cmd >=0.0.2
+    test:
+      requires:
+        - bokeh
+      imports:
+        - cdsdashboards
+        - jhsingle_native_proxy
+        - bokeh_root_cmd
+        - plotlydash_tornado_cmd
+        - rshiny_server_cmd
+      commands:
+        - jhsingle-native-proxy --help
+        - bokeh-root-cmd --help
+        - plotlydash-tornado-cmd --help
+        - rshiny-server-cmd --help
+
+about:
+  home: https://github.com/ideonate/cdsdashboards
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: A Dashboard publishing solution for Data Science teams to share results with decision makers.
+  doc_url: https://cdsdashboards.readthedocs.io/
+  dev_url: https://github.com/ideonate/cdsdashboards
+
+extra:
+  feedstock-name: {{ name|lower }}
+  recipe-maintainers:
+    - danlester
+    - fcollonval

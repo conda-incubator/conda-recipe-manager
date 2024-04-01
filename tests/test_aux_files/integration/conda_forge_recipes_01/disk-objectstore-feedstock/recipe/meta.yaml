@@ -1,0 +1,49 @@
+{% set name = "disk-objectstore" %}
+{% set version = "1.1.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name|replace('-','_') }}-{{ version }}.tar.gz
+  sha256: 9216e973586f635b05e121a2ab90d72989b8eb64ed08f5aaae5092cabbe26e9b
+
+build:
+  number: 0
+  entry_points:
+    - dostore = disk_objectstore.cli:main
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.8
+    - flit-core
+  run:
+    - python >=3.8
+    - click
+    - sqlalchemy >=1.4.22
+
+test:
+  requires:
+    - pip
+  imports:
+    - disk_objectstore
+    - disk_objectstore.examples
+  commands:
+    - pip check
+    - dostore --help
+
+about:
+  home: http://github.com/aiidateam/disk-objectstore
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE.txt
+  summary: An implementation of an efficient object store writing directly into a disk folder
+
+extra:
+  recipe-maintainers:
+    - chrisjsewell
+    - sphuber

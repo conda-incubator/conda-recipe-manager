@@ -1,0 +1,53 @@
+{% set name = "Orange3-Timeseries" %}
+{% set version = "0.6.3" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 504135f946633419d17cadd12f91d1f1a6fb6e080acef349e4da33b8425b2c3c
+
+build:
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+  noarch: python
+
+requirements:
+  host:
+    - python >=3.9
+    - setuptools
+    - pip
+  run:
+    - python >=3.9
+    - Orange3 >=3.33.0
+    - statsmodels >=0.13.0
+    - python-dateutil
+    - pandas
+    - pandas-datareader
+    - numpy
+    - scipy >=1.9.2
+    - more-itertools
+    - python-dateutil
+    - yfinance
+    - pyqtgraph >=0.13.1
+
+test:
+  imports:
+    - orangecontrib.timeseries
+
+about:
+  home: https://github.com/biolab/orange3-timeseries
+  license: CC-BY-NC-3.0
+  summary: Orange3 add-on for exploring time series and sequential data.
+  license_family: Other
+  doc_url: http://orange3-timeseries.readthedocs.io
+  dev_url: https://github.com/biolab/orange3-timeseries
+
+extra:
+  recipe-maintainers:
+    - astaric
+    - ajdapretnar
+    - primozgodec
+    - markotoplak

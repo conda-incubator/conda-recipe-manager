@@ -1,0 +1,47 @@
+{% set name = "voms-clients" %}
+{% set version = "3.3.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/italiangrid/{{ name }}/archive/v{{ version }}.tar.gz
+  sha256: 5e878371262c28c941a2b07781f9e829d4c6e75179552773548c6285f360f10d
+
+build:
+  number: 1
+  skip: true  # [win]
+
+requirements:
+  build:
+    - maven
+  host:
+    - openjdk
+    - openssl
+    - 7za  # [win]
+  run:
+    - openjdk
+    - openssl
+  run_constrained:
+    # Mark voms-clients as conflicting with voms
+    - voms ==9999999
+
+test:
+  commands:
+    - voms-proxy-init --help
+    - voms-proxy-info --help
+    - voms-proxy-destroy --help
+
+about:
+  home: http://italiangrid.github.io/voms/
+  license: Apache 2.0
+  license_family: Apache
+  license_file: LICENSE
+  summary: Command-line clients for Virtual Organization Membership Service (VOMS)
+  doc_url: https://italiangrid.github.io/voms/documentation.html
+  dev_url: https://github.com/italiangrid/voms-clients
+
+extra:
+  recipe-maintainers:
+    - chrisburr

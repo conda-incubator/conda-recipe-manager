@@ -1,0 +1,44 @@
+{% set name = "azure-keyvault-secrets" %}
+{% set version = "4.8.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 5636c0a1d8a20e3c5799cb3ccffd4ebf3f0d1acb7cae9526861833af8b0fe814
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.7
+    - pip
+  run:
+    - python >=3.7
+    - azure-common ~=1.1
+    - azure-core <2.0.0,>=1.29.5
+    - isodate >=0.6.1
+    - typing-extensions >=4.0.1
+
+test:
+  imports:
+    - azure.keyvault.secrets
+    - azure.keyvault.secrets.aio
+
+about:
+  home: https://docs.microsoft.com/en-au/azure/key-vault/
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE.txt
+  summary: Azure Key Vault Secret client library for Python
+  doc_url: https://azuresdkdocs.blob.core.windows.net/$web/python/azure-keyvault-secrets/latest/index.html
+  dev_url: https://github.com/Azure/azure-sdk-for-python/tree/master/sdk/keyvault/azure-keyvault-secrets
+
+extra:
+  recipe-maintainers:
+    - dhirschfeld

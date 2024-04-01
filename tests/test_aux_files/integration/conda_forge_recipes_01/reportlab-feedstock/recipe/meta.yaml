@@ -1,0 +1,64 @@
+{% set name = "reportlab" %}
+{% set version = "4.1.0" %}
+{% set sha256 = "3a99faf412691159c068b3ff01c15307ce2fd2cf6b860199434874e002040a84" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  number: 0
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - {{ compiler('c') }}
+  host:
+    - chardet
+    - pip
+    - python
+    - setuptools
+    - pillow >=9
+    - rlpycairo >=0.2.0
+    - freetype-py >=2.3,<2.4
+  run:
+    - chardet
+    - python
+    - pillow >=9
+    - rlpycairo >=0.2.0
+    - freetype-py >=2.3,<2.4
+
+test:
+  imports:
+    - reportlab
+    - reportlab.graphics.charts
+    - reportlab.graphics.samples
+    - reportlab.graphics.widgets
+    - reportlab.graphics.barcode
+    - reportlab.graphics
+    - reportlab.lib
+    - reportlab.pdfbase
+    - reportlab.pdfgen
+    - reportlab.platypus
+
+about:
+  home: https://www.reportlab.com/opensource/
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: Open-source engine for creating complex, data-driven PDF documents and custom vector graphics
+  description: |
+    This is the ReportLab PDF Toolkit. It allows rapid creation
+    of rich PDF documents, and also creation of charts in a variety
+    of bitmap and vector formats.
+  doc_url: https://docs.reportlab.com
+
+extra:
+  recipe-maintainers:
+    - bkpoon

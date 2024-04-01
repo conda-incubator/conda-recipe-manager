@@ -1,0 +1,50 @@
+{% set name = "fair-research-login" %}
+{% set version = "0.3.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: eeccc8c77e509fa18e3940fa12c09822aaa68bae6dae9f481426ed3d4f469cc0
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+  run:
+    - python >=3.6
+    - globus-sdk
+
+test:
+  imports:
+    - fair_research_login
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/fair-research/native-login
+  license: Apache-2.0
+  license_family: Apache
+  license_file: LICENSE
+  summary: Provides Native App login and token storage for multiple providers
+
+  description: |
+    This package makes writing Globus scripts and clients a 
+    breeze! Easily setup token management and local server 
+    login with a few lines of code. Easily extend components 
+    as your app grows and requires its own config.
+  doc_url: https://github.com/fair-research/native-login
+  dev_url: https://github.com/fair-research/native-login
+
+extra:
+  recipe-maintainers:
+    - jan-janssen

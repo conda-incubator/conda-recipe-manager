@@ -1,0 +1,64 @@
+{% set name = "explainerdashboard" %}
+{% set version = "0.4.7" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/explainerdashboard-{{ version }}.tar.gz
+  sha256: 5fad61e4a78a398e76f30d8eac60e9364db93c3bd3d11f80d7c4c741416d15c6
+
+build:
+  number: 0
+  noarch: python
+  entry_points:
+    - explainerdashboard = explainerdashboard.cli:explainerdashboard_cli
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.8
+  run:
+    - python >=3.8
+    - click
+    - dash >=2.10.1
+    - dash-auth
+    - dash-bootstrap-components >=1
+    - dash-html-components ==2.0.0
+    - dash-core-components ==2.0.0
+    - dash-table ==5.0.0
+    - dtreeviz >=2.1
+    - graphviz >=0.18.2
+    - flask_simplelogin
+    - joblib
+    - jupyter-dash
+    - numpy <=1.25
+    - oyaml
+    - pandas >=1.1
+    - scikit-learn >=1.1
+    - shap >=0.42
+    - waitress
+
+test:
+  imports:
+    - explainerdashboard
+    - explainerdashboard.dashboard_components
+  commands:
+    - pip check
+    - explainerdashboard --help
+  requires:
+    - pip
+
+about:
+  home: https://github.com/oegedijk/explainerdashboard
+  summary: explainerdashboard allows you quickly build an interactive dashboard to explain the inner workings of your machine learning model.
+  license: MIT
+  license_file: LICENSE.txt
+
+extra:
+  recipe-maintainers:
+    - raybellwaves
+    - oegedijk

@@ -1,0 +1,57 @@
+{% set name = "napari-live-recording" %}
+{% set version = "0.3.8" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 5bc06130032780cec852882d464f301a58d27abb3cc50539e90aa5a1b4a263aa
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.9,<3.12
+    - setuptools-scm
+  run:
+    - pims
+    - microscope
+    - napari
+    - numpy
+    - opencv
+    - pyqtgraph
+    - pymmcore-plus >=0.6.7
+    - pymmcore-widgets
+    - python >=3.9,<3.12
+    - qtpy
+    - superqt
+    - tifffile
+
+test:
+  imports:
+    - napari_live_recording
+  commands:
+    - pip list
+    - pip check
+  requires:
+    - pip
+    - pyqt
+
+about:
+  home: https://pypi.org/project/napari-live-recording
+  summary: A napari plugin for live video recording with a generic camera device.
+  license: MIT
+  license_file: LICENSE
+  dev_url: https://github.com/jacopoabramo/napari-live-recording
+
+extra:
+  recipe-maintainers:
+    - goanpeca
+    - jaimergp
+    - jacopoabramo

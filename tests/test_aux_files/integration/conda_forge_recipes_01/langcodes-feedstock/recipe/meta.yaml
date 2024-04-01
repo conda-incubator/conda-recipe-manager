@@ -1,0 +1,48 @@
+{% set name = "langcodes" %}
+{% set version = "3.3.0" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/langcodes-{{ version }}.tar.gz
+  sha256: 794d07d5a28781231ac335a1561b8442f8648ca07cd518310aeb45d6f0807ef6
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - poetry
+    - python >=3.6
+  run:
+    - python >=3.6
+
+test:
+  imports:
+    - langcodes
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: http://github.com/rspeer/langcodes
+  summary: Labels and compares human languages in a standardized way
+  license: MIT
+  license_file: LICENSE.txt
+  description: |
+    Langcodes is a toolkit for working with and comparing the
+     standardized codes for languages, such as 'en' for English, 'es'
+     for Spanish, and 'zh-Hant' for Traditional Chinese. These are
+     BCP 47 language codes, formerly known as ISO language codes.
+
+
+extra:
+  recipe-maintainers:
+    - thewchan

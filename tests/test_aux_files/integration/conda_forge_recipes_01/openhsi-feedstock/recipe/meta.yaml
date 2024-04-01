@@ -1,0 +1,65 @@
+{% set name = "openhsi" %}
+{% set version = "0.3.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/openhsi-{{ version }}.tar.gz
+  sha256: 33f9761eb035e7d634fa4f4b830cd058a84b452135b0b9cc961b8488f6f70cb9
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.7
+  run:
+    - bokeh
+    - datashader
+    - fastcore
+    - fastprogress
+    - h5py
+    - holoviews
+    - hvplot
+    - matplotlib-base
+    - netcdf4
+    - numpy >=1.23.1
+    - packaging
+    - pandas <2.0.0
+    - panel
+    - param
+    - pillow
+    - pip
+    - psutil
+    - py6s
+    - pyserial
+    - python >=3.7
+    - pyviz_comms
+    - requests <=2.24.0
+    - scipy
+    - streamz
+    - tqdm
+    - xarray ==2022.3.0
+
+test:
+  imports:
+    - openhsi
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/openhsi/openhsi/tree/master/
+  summary: Library to calibrate, trigger and capture data cubes for the open source hyperspectral camera.
+  license: Apache-2.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - christhechris

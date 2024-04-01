@@ -1,0 +1,39 @@
+{% set name = "custom-inherit" %}
+{% set version = "2.4.1" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/c/{{ name }}/custom_inherit-{{ version }}.tar.gz
+  sha256: 7052eb337bcce83551815264391cc4efc2bf70b295a3c52aba64f1ab57c3a8a2
+
+build:
+  number: 0
+  noarch: python
+  script: '{{ PYTHON }} -m pip install . --no-deps --ignore-installed -vv '
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - python >=3.6
+
+test:
+  imports:
+    - custom_inherit
+
+about:
+  home: https://github.com/rsokl/custom_inherit
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE.md
+  summary: A Python package that provides customized docstring inheritance schemes between derived classes and their parents.
+  doc_url: https://github.com/rsokl/custom_inherit/blob/master/README.md
+
+extra:
+  recipe-maintainers:
+    - rsokl

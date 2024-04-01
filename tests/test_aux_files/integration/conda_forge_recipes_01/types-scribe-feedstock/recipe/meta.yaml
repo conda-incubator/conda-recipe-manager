@@ -1,0 +1,40 @@
+{% set name = "types-scribe" %}
+{% set version = "2.0.0" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/types-scribe-{{ version }}.tar.gz
+  sha256: c302f6ae55a1d9a5f4c83754deccf85674cf6807683b2df5e66be41a1f2a2655
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - python >=3.6
+    - types-fb303
+
+test:
+  commands:
+    - test -f $SP_DIR/scribe-python2-stubs/__init__.pyi
+
+
+about:
+  home: https://github.com/python/typeshed
+  summary: Typing stubs for scribe
+  license: Apache-2.0 AND MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - fhoehle
+    - conda-forge/mypy

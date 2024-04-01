@@ -1,0 +1,107 @@
+{% set name = "readuct" %}
+{% set pkg_name = "scine-" + name %}
+{% set version = "4.1.0" %}
+
+package:
+  name: {{ pkg_name }}-pkg
+  version: {{ version }}
+
+source:
+  - url: https://github.com/qcscine/readuct/archive/refs/tags/{{ version }}.tar.gz
+    sha256: 9cec0192a444403d6a8fd096509798c49fbd1eec298ec7194aba915e31f50782
+    patches:
+      - patches/skip_library_build.patch
+  - url: https://github.com/qcscine/development-utils/archive/refs/tags/5.0.1.tar.gz
+    sha256: 089ca500fc191e04a968ea166d2fe80178b227bc2e6d3926523fa2eee5f6492d
+    folder: dev
+    patches:
+      - patches/pybind11_pin.patch
+
+build:
+  number: 5
+  skip: true  # [win]
+
+outputs:
+  - name: {{ pkg_name }}
+    script: build_lib.sh
+
+    build:
+      run_exports:
+        - {{ pin_subpackage(pkg_name, max_pin='x') }}
+
+    requirements:
+      build:
+        - {{ compiler('c') }}
+        - {{ compiler('cxx') }}
+        - cmake
+        - ninja
+        - pkg-config
+      host:
+        - boost-cpp
+        - eigen
+        - gtest
+        - gmock
+        - libblas  # [linux]
+        - scine-core
+        - scine-utilsos
+        - yaml-cpp
+      run:
+        - boost-cpp
+        - yaml-cpp
+
+    test:
+      commands:
+        - test -f $PREFIX/bin/{{ name }}
+        - test -f $PREFIX/lib/lib{{ name }}${SHLIB_EXT}
+
+  - name: {{ pkg_name }}-python
+    script: build_python.sh
+
+    requirements:
+      build:
+        - {{ compiler('c') }}
+        - {{ compiler('cxx') }}
+        - cmake
+        - ninja
+        - pkg-config
+        - python                              # [build_platform != target_platform]
+        - cross-python_{{ target_platform }}  # [build_platform != target_platform]
+        - pybind11                            # [build_platform != target_platform]
+      host:
+        - boost-cpp
+        - eigen
+        - libblas
+        - pip
+        - python
+        - pybind11
+        - pybind11-abi
+        - yaml-cpp
+        - {{ pkg_name }} =={{ version }}
+      run:
+        - boost-cpp
+        - python
+        - yaml-cpp
+        - scine-utilities-python
+        - {{ pkg_name }} =={{ version }}
+
+    test:
+      imports:
+        - scine_readuct
+      requires:
+        - pip
+      commands:
+        - pip check
+
+about:
+  license: BSD-3-Clause
+  license_file: LICENSE.txt
+  summary: |
+    ReaDuct allows you to carry out structure optimizations, transition state searches
+    and intrinsic reaction coordinate (IRC) calculations among other things
+  home: https://scine.ethz.ch/
+  dev_url: https://github.com/qcscine/readuct
+
+extra:
+  recipe-maintainers:
+    - awvwgk
+  feedstock-name: {{ pkg_name }}

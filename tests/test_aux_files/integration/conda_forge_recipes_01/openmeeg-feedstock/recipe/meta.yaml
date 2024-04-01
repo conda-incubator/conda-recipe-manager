@@ -1,0 +1,76 @@
+{% set name = "openmeeg" %}
+{% set version = "2.5.7" %}
+{% set build_number = 0 %}
+{% set sha256 = "19e982821affb67fedb76fbeac6fbdc0b6653f3c8d4a6f807ef729566a42b0dc" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/{{ name }}/{{ name }}/archive/{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+# https://conda-forge.org/docs/maintainer/knowledge_base.html
+build:
+  number: {{ build_number }}
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - numpy                                  # [build_platform != target_platform]
+    - cmake >=3.19
+    - make
+    - ninja  # [not win]
+    - {{ compiler('cxx') }}
+    - {{ compiler('fortran') }}  # just for OpenBLAS to link properly
+    - llvm-openmp  # [osx]
+    - libgomp      # [linux]
+    - pthread-stubs  # [win]
+    - swig
+
+  host:
+    - python
+    - numpy
+    - hdf5
+    - openblas
+    - zlib
+    - libmatio
+
+  run:
+    - python
+    - {{ pin_compatible('numpy') }}
+    - libgfortran  # [not win]
+    - libgfortran5  # [not win]
+    - ucrt  # [win]
+    - libopenblas
+    - zlib
+    - libmatio
+
+test:
+  imports:
+    - openmeeg
+  requires:
+    - pytest
+    - packaging
+    - pip
+  source_files:
+    - data
+  commands:
+    - om_minverser --help
+    - python -c "from packaging.version import parse; import openmeeg; print(openmeeg.__version__); assert parse(openmeeg.__version__) == parse('{{ version }}')"
+    - pip check
+    - pip show openmeeg
+
+about:
+  home: https://openmeeg.github.io/
+  license: CECILL-B
+  license_file: LICENSE.txt
+  summary: >
+    A C++ package for solving the forward problems of electroencephalography (EEG) and magnetoencephalography (MEG).
+
+extra:
+  recipe-maintainers:
+    - agramfort
+    - larsoner

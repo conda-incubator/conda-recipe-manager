@@ -1,0 +1,51 @@
+{% set name = "pytest-pyvista" %}
+{% set version = "0.1.9" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/p/pytest_pyvista/pytest_pyvista-{{ version }}.tar.gz
+  sha256: 6ef567f075d9be54f7adfa3de3f5ba98d475db47d8e878b9f1d249d19c27a7b6
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.8
+    - flit >=3.2,<4
+  run:
+    - python >=3.8
+    - pytest >=3.5.0
+    - pyvista
+
+test:
+  imports:
+    - pytest_pyvista  # [not win]
+  commands:
+    - pip check  # [not win]
+  requires:
+    - pip
+
+about:
+  home: https://github.com/pyvista/pytest-pyvista
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: Plugin to test PyVista plot outputs.
+
+  description: |
+    This plugin facilitates the comparison of the images produced by PyVista. It generates a cache of images from the tests, using the PyVista plotting function in its first execution. Then, further executions will compare its results against this cache, so if there are any changes in the code that break the image generation, the comparison against the cache will notice it. Note that there is an error tolerance in the comparison, so minor differences won't fail.
+  doc_url: https://pytest.pyvista.org/
+  dev_url: https://github.com/pyvista/pytest-pyvista
+
+extra:
+  recipe-maintainers:
+    - MatthewFlamm
+    - bjlittle
+    - tkoyama010

@@ -1,0 +1,85 @@
+{% set version = "2.7.0" %}
+
+package:
+  name: landlab
+  version: {{ version }}
+
+source:
+  url: https://github.com/landlab/landlab/archive/v{{ version }}.tar.gz
+  sha256: 2b4eb0fdbde08fcb749bf3c24a43267ce4d057b2b5e29e94e5225969e9a6f1d6
+
+build:
+  number: 0
+  script:
+    - {{ PYTHON }} -m pip install . --no-deps -vv
+    - {{ PYTHON }} -c "import pathlib, site, shutil; shutil.rmtree(pathlib.Path(site.getsitepackages()[0]) / 'tests', ignore_errors=True)"
+  skip: true  # [py<310]
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - cython <3                               # [build_platform != target_platform]
+    - numpy                                  # [build_platform != target_platform]
+    - {{ compiler("c") }}
+    - {{ compiler("cxx") }}
+  host:
+    - python
+    - pip
+    - cython <3
+    - numpy
+  run:
+    - python
+    - {{ pin_compatible('numpy') }}
+    - bmipy
+    - matplotlib-base
+    - netcdf4
+    - pandas
+    - pyshp
+    - pyyaml
+    - rich-click
+    - richdem >=2.3
+    - setuptools
+    - scipy
+    - statsmodels
+    - xarray >=0.16
+
+test:
+  requires:
+    - pip
+  #   - pytest
+  #   - pytest-datadir
+  imports:
+    - landlab
+  commands:
+    - pip check
+    - export MPLBACKEND=Agg  # [not win]
+    # skipping the tests b/c they have some flaky repr comparisons
+    # - pytest --pyargs landlab --doctest-modules -o doctest_optionflags="NORMALIZE_WHITESPACE IGNORE_EXCEPTION_DETAIL ALLOW_UNICODE"
+
+about:
+  home: http://landlab.github.io
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE.rst
+  summary: A python toolkit for modeling earth surface processes
+  description: |
+    Landlab creates an environment in which scientists can build
+    a numerical landscape model without having to code all of the
+    individual components. Landscape models compute flows of mass,
+    such as water, sediment, glacial ice, volcanic material, or
+    landslide debris, across a gridded terrain surface. Landscape
+    models have a number of commonalities, such as operating on a
+    grid of points and routing material across the grid. Scientists
+    who want to use a landscape model often build their own unique
+    model from the ground up, re-coding the basic building blocks
+    of their landscape model rather than taking advantage of codes
+    that have already been written.
+  doc_url: https://landlab.readthedocs.io
+  dev_url: https://github.com/landlab/landlab
+
+extra:
+  recipe-maintainers:
+    - mcflugen
+    - lsetiawan
+    - ocefpaf

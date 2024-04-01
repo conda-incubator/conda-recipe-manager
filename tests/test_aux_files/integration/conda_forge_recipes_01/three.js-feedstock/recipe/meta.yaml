@@ -1,0 +1,51 @@
+{% set name = "three.js" %}
+{% set version = "122" %}
+
+package:
+  name: three.js-split
+  version: {{ version }}
+
+source:
+  url: https://github.com/mrdoob/three.js/archive/r{{ version }}.tar.gz
+  sha256: eeed366444ff521cfa0f3f97a33dea6adefb8a3111617dc1599df83722bcd56a
+
+build:
+  number: 2
+
+outputs:
+  - name: three.js
+    build:
+      noarch: generic
+    script: build-threejs.sh
+    requirements:
+      build:
+        - nodejs *
+    test:
+      commands:
+        - test -f $PREFIX/share/threejs/build/three.min.js  # [unix]
+
+  - name: threejs-sage
+    build:
+      noarch: generic
+    script: build-threejs-sage.sh
+    requirements:
+      host:
+        - three.js {{ version }}
+      run:
+        - three.js {{ version }}
+    test:
+      commands:
+        - test -f $PREFIX/share/threejs-sage/r{{ version }}/three.min.js  # [unix]
+
+about:
+  home: https://threejs.org
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: JavaScript 3D library.
+  dev_url: https://github.com/mrdoob/three.js
+
+extra:
+  recipe-maintainers:
+    - isuruf
+  feedstock-name: three.js

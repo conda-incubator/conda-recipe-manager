@@ -1,0 +1,93 @@
+{% set name = "atom-ml" %}
+{% set version = "5.2.0" %}
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: a1302cc80a6d15d9ee1c827945176e1dc5961d5979b9fbeb5fc32ea445c4903d
+
+
+build:
+  number: 0
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - python
+    - pip >=23.0.1
+    - pdm >=2.4.9
+    - pdm-pep517 >=1.1.2
+  run:
+    - python
+    - category_encoders >=2.5.1
+    - dill >=0.3.6
+    - gplearn >=0.4.2
+    - imbalanced-learn >=0.10.1
+    - featuretools >=1.23.0
+    - joblib >=1.1.0
+    - matplotlib-base >=3.6.3
+    - mlflow >=2.2.0
+    - modin-ray >=0.18.1
+    - nltk >=3.8.1
+    - numpy >=1.23.0
+    - optuna >=3.2.0
+    - pandas >=1.5.3
+    - plotly >=5.13.1
+    - ray-serve >=2.3.0
+    - shap >=0.41.0
+    - scikit-learn >=1.2.2
+    - scikit-learn-intelex >=2023.0.1  # [x86]
+    - scipy >=1.9.3
+    - zoofs >=0.1.25
+
+test:
+  requires:
+    - pytest >= 7.2.1
+    - botorch >= 0.8.5
+    - catboost >= 1.1.1
+    - evalml >= 0.65.0
+    - explainerdashboard >= 0.4.2
+    - gradio >= 3.19.1
+    - lightgbm >=3.3.5
+    - schemdraw >=0.16
+    - wordcloud >=1.8.2
+    - py-xgboost >=1.7.1  # [not win]
+  source_files:
+    - tests
+  commands:
+    - pip install -U dagshub ydata-profiling  # Not available in conda-forge
+    - pip install -U explainerdashboard  # Fails for some reason with conda
+    - export GIT_PYTHON_REFRESH=quiet  # Needed to make dagshub import work
+    - pytest
+about:
+  home: http://github.com/tvdboom/ATOM
+  license: MIT
+  license_file: LICENSE
+  summary: A Python package for fast exploration of machine learning pipelines
+  description: |
+    During the exploration phase of a machine learning project, a data
+    scientist tries to find the optimal pipeline for his specific use case.
+    This usually involves applying standard data cleaning steps, creating
+    or selecting useful features, trying out different models, etc. Testing
+    multiple pipelines requires many lines of code, and writing it all in
+    the same notebook often makes it long and cluttered. On the other hand,
+    using multiple notebooks makes it harder to compare the results and to
+    keep an overview. On top of that, refactoring the code for every test
+    can be time-consuming. How many times have you conducted the same action
+    to pre-process a raw dataset? How many times have you copy-and-pasted
+    code from an old repository to re-use it in a new use case?
+    ATOM is here to help solve these common issues. The package acts as
+    a wrapper of the whole machine learning pipeline, helping the data
+    scientist to rapidly find a good model for his problem. Avoid
+    endless imports and documentation lookups. Avoid rewriting the same
+    code over and over again. With just a few lines of code, it's now
+    possible to perform basic data cleaning steps, select relevant
+    features and compare the performance of multiple models on a given
+    dataset, providing quick insights on which pipeline performs best
+    for the task at hand.
+  doc_url: https://tvdboom.github.io/ATOM/
+  dev_url: http://github.com/tvdboom/ATOM/tree/development
+extra:
+  recipe-maintainers:
+    - tvdboom

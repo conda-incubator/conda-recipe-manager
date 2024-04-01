@@ -1,0 +1,50 @@
+{% set name = "dcm2bids" %}
+{% set version = "3.1.1" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/dcm2bids-{{ version }}.tar.gz
+  sha256: c9ee032d8b488e632820d050fd5fbad8c9d062a7722b1d43fdef74d535b02d05
+
+build:
+  number: 0
+  noarch: python
+  entry_points:
+    - dcm2bids = dcm2bids.cli.dcm2bids:main
+    - dcm2bids_helper = dcm2bids.cli.dcm2bids_helper:main
+    - dcm2bids_scaffold = dcm2bids.cli.dcm2bids_scaffold:main
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.8
+    - packaging
+  run:
+    - python >=3.8
+
+test:
+  imports:
+    - dcm2bids
+  commands:
+    - pip check
+    - dcm2bids --help
+    - dcm2bids_helper --help
+    - dcm2bids_scaffold --help
+  requires:
+    - pip
+    - packaging
+
+about:
+  home: https://pypi.org/project/dcm2bids/
+  summary: Reorganising NIfTI files from dcm2niix into the Brain Imaging Data Structure
+  license: GPL-3.0-only
+  license_file: LICENSE.txt
+
+extra:
+  recipe-maintainers:
+    - SamGuay

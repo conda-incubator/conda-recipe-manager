@@ -1,0 +1,53 @@
+{% set name = "stlearn" %}
+{% set version = "0.4.12" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/stlearn-{{ version }}.tar.gz
+  sha256: 2aafc461e5692d038729d6573425a4f4739d445b1fd89b2cc4a96ec4d01017cd
+
+
+build:
+  entry_points:
+    - stlearn=stlearn.app.cli:main
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.7
+  run:
+    - bokeh >=2.4.2
+    - click >=8.0.4
+    - leidenalg
+    - louvain
+    - numpy >=1.18,<1.22
+    - pillow >=9.0.1
+    - python >=3.7
+    - scanpy >=1.8.2
+    - scikit-image >=0.19.2
+    - tensorflow
+
+test:
+  imports:
+    - stlearn
+  commands:
+    - pip check
+    - stlearn --help
+  requires:
+    - pip
+
+about:
+  home: https://github.com/BiomedicalMachineLearning/stLearn
+  summary: A downstream analysis toolkit for Spatial Transcriptomic data
+  license: BSD-3-Clause
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - duypham2108

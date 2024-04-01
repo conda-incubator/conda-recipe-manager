@@ -1,0 +1,45 @@
+{% set name = "doccano" %}
+{% set version = "1.8.4" %}
+
+package:
+  name: doccano
+  version: {{ version }}
+
+source:
+  url: https://github.com/{{ name }}/{{ name }}/archive/v{{ version }}.tar.gz
+  sha256: 02eea419ff19046486dc1eec1e62d4309bcea261dc7acdfbcbe325dc51723f12
+
+build:
+  number: 0
+  skip: true  # [win]
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - nodejs  # [unix]
+    - make
+  host:
+    - nodejs
+    - pnpm
+    - pnpm-licenses
+  run:
+    - nodejs
+
+test:
+  commands:
+    - npm list -g {{ name }}
+
+about:
+  home: https://github.com/doccano/doccano
+  license: MIT
+  license_file: LICENSE
+  summary: Open source text annotation tool for machine learning practitioner.
+  doc_url: https://github.com/doccano/doccano
+  dev_url: https://github.com/doccano/doccano
+
+extra:
+  recipe-maintainers:
+    - JennaLipscomb
+    - mxr-conda
+    - xhochy

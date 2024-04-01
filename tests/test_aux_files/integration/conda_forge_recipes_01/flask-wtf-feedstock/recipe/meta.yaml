@@ -1,0 +1,49 @@
+{% set name = "Flask-WTF" %}
+{% set version = "1.2.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/flask_wtf-{{ version }}.tar.gz
+  sha256: 8bb269eb9bb46b87e7c8233d7e7debdf1f8b74bf90cc1789988c29b37a97b695
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  number: 0
+
+requirements:
+  host:
+    - python >=3.8
+    - hatchling
+    - pip
+  run:
+    - python >=3.8
+    - flask
+    - wtforms
+    - itsdangerous
+
+test:
+  requires:
+    - pip
+  imports:
+    - flask_wtf
+    - flask_wtf.recaptcha
+  commands:
+    - pip check
+
+about:
+  home: https://github.com/wtforms/flask-wtf
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE.rst
+  summary: Simple integration of Flask and WTForms
+  dev_url: https://github.com/wtforms/flask-wtf
+  doc_url: https://pythonhosted.org/Flask-WTF/
+
+extra:
+  recipe-maintainers:
+    - pmlandwehr
+    - xylar

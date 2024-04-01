@@ -1,0 +1,53 @@
+{% set version = "0.41.7" %}
+
+package:
+  name: barvinok
+  version: {{ version }}
+
+source:
+  url: https://barvinok.sourceforge.io/barvinok-{{ version }}.tar.gz
+  sha256: 1d305e42487d3db8084a233035a1578be827a8d8d4a5a7506f6a6315b18273d1
+
+build:
+  number: 1
+  skip: true  # [win]
+  run_exports:
+    - {{ pin_subpackage("barvinok", max_pin="x.x.x") }}
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - make
+    - gnuconfig  # [unix]
+    - pkg-config  # [unix]
+  host:
+    - ntl
+    - gmp
+    - isl {{ isl|default("0") }}.* gmp_*
+
+test:
+  commands:
+    - test -f $PREFIX/lib/libbarvinok$SHLIB_EXT
+    - iscc --version  # [build_platform == target_platform]
+
+about:
+  home: https://barvinok.sourceforge.io/
+  license: GPL-2.0-only
+  license_family: GPL
+  license_file: LICENSE
+  summary: barvinok is a library for counting the number of integer points in parametric and non-parametric polytopes.
+  description: |
+    barvinok is a library for counting the number of integer points in
+    parametric and non-parametric polytopes. For parametric polytopes an
+    explicit function in the shape of a piece-wise step-polynomial is
+    constructed. This is a generalization of both Ehrhart quasi-polynomials and
+    vector partition functions. Alternatively, a generalized Ehrhart series can
+    be constructed as well.
+  dev_url: https://repo.or.cz/w/barvinok.git
+  doc_url: https://barvinok.sourceforge.io/barvinok.pdf
+
+extra:
+  recipe-maintainers:
+    - matthiasdiener
+    - isuruf

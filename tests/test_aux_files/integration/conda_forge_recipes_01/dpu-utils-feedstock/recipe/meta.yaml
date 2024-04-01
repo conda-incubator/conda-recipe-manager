@@ -1,0 +1,61 @@
+{% set name = "dpu-utils" %}
+{% set version = "0.6.1" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/dpu_utils-{{ version }}.tar.gz
+  sha256: 31b1a4e82f3f0b5c6df00f2968667e8846f1bac74d0947cfd3afdb5bcd0ab73c
+
+build:
+  number: 1
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - azure-identity
+    - azure-storage-blob
+    - chardet
+    - idna
+    - isodate
+    - msal
+    - msrest
+    - oauthlib
+    - portalocker ~=1.0
+    - pycparser
+    - cryptography
+    - cffi
+    - docopt
+    - numpy
+    - python >=3.6
+    - regex
+    - sentencepiece
+    - setsimilaritysearch
+    - tqdm
+    - requests
+    - urllib3
+
+test:
+  imports:
+    - dpu_utils
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/microsoft/dpu-utils
+  summary: Python utilities used by Deep Procedural Intelligence
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - sarthakpati

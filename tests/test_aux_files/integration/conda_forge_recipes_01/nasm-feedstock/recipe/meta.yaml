@@ -1,0 +1,39 @@
+{% set version = "2.15.05" %}
+
+package:
+  name: nasm
+  version: {{ version }}
+
+source:
+  fn: nasm-{{ version }}.tar.gz
+  url: https://www.nasm.us/pub/nasm/releasebuilds/{{ version }}/nasm-{{ version }}.tar.gz
+  sha256: e2b1c1cb0250fbf2a91c6fdbf42b3b9d568cbe0d7b90af64e02f128c67ae4f83
+
+build:
+  number: 0
+  skip: true  # [win]
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - gnuconfig  # [unix]
+    - make  # [unix]
+    - perl  # [win]
+  host:
+
+test:
+  commands:
+    - nasm -h
+    - nasm -version
+    - ndisasm -h
+
+about:
+  home: http://www.nasm.us
+  license: BSD-2-Clause
+  license_file: LICENSE
+  summary: "Netwide Assembler: an assembler targetting the Intel x86 series of processors."
+
+extra:
+  recipe-maintainers:
+    - jakirkham
+    - rhpvorderman

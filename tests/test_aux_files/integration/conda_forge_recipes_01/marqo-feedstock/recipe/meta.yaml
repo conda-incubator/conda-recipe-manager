@@ -1,0 +1,47 @@
+{% set name = "marqo" %}
+{% set version = "3.2.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/marqo-{{ version }}.tar.gz
+  sha256: 117623196aa490ef695d0f5abb9062d8e5d6d7c401cbdd4358ecf7525a52f3d6
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.7
+    - setuptools >=42
+  run:
+    - python >=3.7
+    - requests
+    - urllib3 <2.0.0,>=1.26.0
+    - pydantic <2.0.0
+    - typing-extensions >=4.5.0
+    - packaging
+
+test:
+  imports:
+    - marqo
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/marqo-ai/marqo
+  doc_url: https://marqo.pages.dev/
+  summary: Tensor search for humans
+  license: Apache-2.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - thewchan

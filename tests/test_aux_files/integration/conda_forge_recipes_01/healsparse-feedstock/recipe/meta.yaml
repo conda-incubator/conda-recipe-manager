@@ -1,0 +1,60 @@
+{% set name = "healsparse" %}
+{% set version = "1.9.1" %}
+{% set sha256 = "ffb7c003c51ab5362be33f68b174babe4c530a38516734438cf406e4bedd3051" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/healsparse-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.7
+    - setuptools_scm
+    - setuptools_scm_git_archive
+  run:
+    - astropy
+    - hpgeom >=1.2.0
+    - numpy
+    - python >=3.7
+
+test:
+  imports:
+    - healsparse
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/lsstdesc/healsparse
+  summary: Sparse healpix maps and geometry library
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+
+  description: |
+    HealSparse is a sparse implementation of HEALPix in Python.
+    HealSparse is a pure Python library that sits on top of
+    numpy and healpy and is designed to avoid storing full
+    sky maps in case of partial coverage, including easy
+    reading of sub-maps. This reduces the overall memory
+    footprint allowing maps to be rendered at arcsecond
+    resolution while keeping the familiarity and power of
+    healpy.
+  doc_url: https://healsparse.readthedocs.io
+  dev_url: https://github.com/lsstdesc/healsparse
+
+extra:
+  recipe-maintainers:
+    - erykoff

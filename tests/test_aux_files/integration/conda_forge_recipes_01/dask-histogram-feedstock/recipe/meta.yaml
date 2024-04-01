@@ -1,0 +1,50 @@
+{% set name = "dask-histogram" %}
+{% set version = "2024.3.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/d/dask_histogram/dask_histogram-{{ version }}.tar.gz
+  sha256: 834d4d25f5e2c417f5e792fafaa55484c20c9f3812d175125de7ac34f994ef7b
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.8
+    - pip
+    - hatchling >=1.8.0
+    - hatch-vcs
+    - toml
+  run:
+    - python >=3.8
+    - dask
+    - boost-histogram
+
+test:
+  imports:
+    - dask_histogram
+
+about:
+  home: https://dask-histogram.readthedocs.io/
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: Scale up histogramming with Dask.
+  description: |
+    Dask histogram extends the boost-histogram library to provide
+    compatibility with Dask collections.
+  doc_url: https://dask-histogram.readthedocs.io/
+  dev_url: https://github.com/dask-contrib/dask-histogram/
+
+extra:
+  recipe-maintainers:
+    - martindurant
+    - jpivarski
+    - lgray
+    - douglasdavis

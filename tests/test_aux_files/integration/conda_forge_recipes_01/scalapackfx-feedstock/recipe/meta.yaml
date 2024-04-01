@@ -1,0 +1,62 @@
+{% set name = "scalapackfx" %}
+{% set version = "1.2" %}
+{% set build = 0 %}
+{% set mpi = mpi or "nompi" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/dftbplus/{{ name }}/archive/{{ version }}.tar.gz
+  sha256: 277fd170cfe6b6c67242a2c179494ec48d0daae94eac26f8361ca30aafe71b98
+
+build:
+  number: {{ build }}
+  skip: true  # [win]
+
+  {% set mpi_prefix = "mpi_" + mpi %}
+  string: {{ mpi_prefix }}_h{{ PKG_HASH }}_{{ build }}
+
+  run_exports:
+    - {{ pin_subpackage(name, max_pin='x.x') }} {{ mpi_prefix }}_*
+
+requirements:
+  build:
+    - {{ compiler('c') }}  # [osx]
+    - {{ compiler('fortran') }}
+    - cmake
+    - ninja
+    - fypp
+    - llvm-openmp  # [osx]
+    - libgomp  # [linux]
+    - {{ mpi }}  # [mpi == "openmpi" and build_platform != target_platform]
+  host:
+    - {{ mpi }}
+    - scalapack
+    - libblas
+    - liblapack
+  run:
+    - {{ mpi }}
+    - scalapack
+
+
+test:
+  requires:
+    - pkg-config
+  commands:
+    - pkg-config {{ name }} --modversion
+    - test -f $PREFIX/lib/lib{{ name }}${SHLIB_EXT}
+
+about:
+  home: https://github.com/dftbplus/{{ name }}
+  license: BSD-2-Clause
+  license_file:
+    - LICENSE
+  summary: Modern Fortran wrappers around ScaLAPACK routines
+
+extra:
+  recipe-maintainers:
+    - aradi
+    - awvwgk
+    - bhourahine

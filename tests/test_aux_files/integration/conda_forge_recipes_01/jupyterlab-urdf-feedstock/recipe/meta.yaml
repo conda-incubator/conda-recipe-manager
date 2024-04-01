@@ -1,0 +1,44 @@
+{% set name = "jupyterlab-urdf" %}
+{% set version = "0.3.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/jupyterlab_urdf-{{ version }}.tar.gz
+  sha256: ea3fa7f469ff9931bb2c391fd3a728a2534e645af588b66a952ca17436158152
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.9
+    - hatchling
+    - nodejs
+    - hatch-nodejs-version
+    - hatch-jupyter-builder
+  run:
+    - python >=3.9
+
+test:
+  imports:
+    - jupyterlab_urdf
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/jupyter-robotics/jupyterlab-urdf
+  summary: A URDF viewer and editor extension for JupyterLab.
+  license: BSD-3-Clause
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - ihuicatl

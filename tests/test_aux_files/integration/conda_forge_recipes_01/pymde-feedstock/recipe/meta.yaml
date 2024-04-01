@@ -1,0 +1,66 @@
+{% set name = "pymde" %}
+{% set version = "0.1.18" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/pymde-{{ version }}.tar.gz
+  sha256: 67f83fd269046a338dca1ebea71003a65b53c72467b6559bfc5eda30a86d3d33
+
+build:
+  number: 2
+  script: {{ PYTHON }} -m pip install . -vv
+  skip: true  # [win]
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - cython                                 # [build_platform != target_platform]
+    - numpy                                  # [build_platform != target_platform]
+    - {{ compiler('c') }}
+  host:
+    - cython
+    - pip
+    - python
+    - setuptools >=18.0
+    - numpy
+  run:
+    - matplotlib-base
+    - {{ pin_compatible('numpy') }}
+    - pynndescent
+    - python
+    - scipy
+    - pytorch >=1.7.1
+    - torchvision >=0.8.2
+    - requests
+
+test:
+  imports:
+    - pymde
+    - pymde.functions
+  requires:
+    - pip
+    - pytest
+  commands:
+    - pip check
+    - pytest --pyargs pymde
+
+about:
+  home: https://github.com/cvxgrp/pymde
+  summary: Minimum-Distortion Embedding
+  description: |
+    PyMDE is a Python library for computing vector embeddings for finite sets of
+    items, such as images, biological cells, nodes in a network, or any other
+    abstract object.
+  license: Apache-2.0
+  license_family: Apache
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - mfansler
+    - akshayka

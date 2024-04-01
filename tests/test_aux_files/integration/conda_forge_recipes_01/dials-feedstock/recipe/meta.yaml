@@ -1,0 +1,183 @@
+{% set name = "dials" %}
+{% set version = "3.18.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/dials/dials/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: 7562bc9975b4068f4aac5c9ede6a89c8877b41595fc20f0bcca9094742dfa98e
+  folder: dials
+  patches:
+    - skip_model_background_test.diff
+    - skip_test_rs_mapper.diff
+    - patch_test_rs_mapper.diff
+
+build:
+  number: 0
+  skip: true  # [py<39]
+  osx_is_app: true
+  entry_points:
+    - cluster.dials.exec = dials.command_line.cluster_exec:run
+    - dev.dials.napari_rlv = dials.command_line.napari_rlv:run
+    - dev.dials.show_extensions = dials.command_line.show_extensions:run
+    - dev.dials.simple_integrate = dials.command_line.simple_integrate:run
+    - dials.align_crystal = dials.command_line.align_crystal:run
+    - dials.anvil_correction = dials.command_line.anvil_correction:run
+    - dials.apply_mask = dials.command_line.apply_mask:run
+    - dials.assign_experiment_identifiers = dials.command_line.assign_experiment_identifiers:run
+    - dials.augment_spots = dials.command_line.augment_spots:run
+    - dials.background = dials.command_line.background:run
+    - dials.check_indexing_symmetry = dials.command_line.check_indexing_symmetry:run
+    - dials.cluster_unit_cell = dials.command_line.cluster_unit_cell:run
+    - dials.combine_experiments = dials.command_line.combine_experiments:run
+    - dials.compare_orientation_matrices = dials.command_line.compare_orientation_matrices:run
+    - dials.complete_full_sphere = dials.command_line.complete_full_sphere:run
+    - dials.compute_delta_cchalf = dials.command_line.compute_delta_cchalf:run
+    - dials.convert_to_cbf = dials.command_line.convert_to_cbf:run
+    - dials.cosym = dials.command_line.cosym:run
+    - dials.create_profile_model = dials.command_line.create_profile_model:run
+    - dials.damage_analysis = dials.command_line.damage_analysis:run
+    - dials.detect_blanks = dials.command_line.detect_blanks:run
+    - dials.estimate_gain = dials.command_line.estimate_gain:run
+    - dials.estimate_resolution = dials.command_line.estimate_resolution:run
+    - dials.export = dials.command_line.export:run
+    - dials.export_best = dials.command_line.export_best:run
+    - dials.export_bitmaps = dials.command_line.export_bitmaps:run
+    - dials.filter_reflections = dials.command_line.filter_reflections:run
+    - dials.find_bad_pixels = dials.command_line.find_bad_pixels:run
+    - dials.find_hot_pixels = dials.command_line.find_hot_pixels:run
+    - dials.find_rotation_axis = dials.command_line.find_rotation_axis:run
+    - dials.find_spots = dials.command_line.find_spots:run
+    - dials.find_spots_client = dials.command_line.find_spots_client:run
+    - dials.find_spots_server = dials.command_line.find_spots_server:run
+    - dials.frame_orientations = dials.command_line.frame_orientations:run
+    - dials.generate_distortion_maps = dials.command_line.generate_distortion_maps:run
+    - dials.generate_mask = dials.command_line.generate_mask:run
+    - dials.geometry_viewer = dials.command_line.geometry_viewer:run
+    - dials.goniometer_calibration = dials.command_line.goniometer_calibration:run
+    - dials.image_viewer = dials.command_line.image_viewer:run
+    - dials.import = dials.command_line.dials_import:run
+    - dials.import_xds = dials.command_line.import_xds:run
+    - dials.index = dials.command_line.index:run
+    - dials.indexed_as_integrated = dials.command_line.indexed_as_integrated:run
+    - dials.integrate = dials.command_line.integrate:run
+    - dials.merge = dials.command_line.merge:run
+    - dials.merge_cbf = dials.command_line.merge_cbf:run
+    - dials.merge_reflection_lists = dials.command_line.merge_reflection_lists:run
+    - dials.missing_reflections = dials.command_line.missing_reflections:run
+    - dials.model_background = dials.command_line.model_background:run
+    - dials.modify_geometry = dials.command_line.modify_geometry:run
+    - dials.plot_Fo_vs_Fc = dials.command_line.plot_Fo_vs_Fc:run
+    - dials.plot_reflections = dials.command_line.plot_reflections:run
+    - dials.plot_scan_varying_model = dials.command_line.plot_scan_varying_model:run
+    - dials.plugins = dials.command_line.plugins:run
+    - dials.powder_calibrate = dials.command_line.powder_calibrate:run
+    - dials.predict = dials.command_line.predict:run
+    - dials.rbs = dials.command_line.refine_bravais_settings:run
+    - dials.reciprocal_lattice_viewer = dials.command_line.reciprocal_lattice_viewer:run
+    - dials.reference_profile_viewer = dials.command_line.reference_profile_viewer:run
+    - dials.refine = dials.command_line.refine:run
+    - dials.refine_bravais_settings = dials.command_line.refine_bravais_settings:run
+    - dials.refine_error_model = dials.command_line.refine_error_model:run
+    - dials.reflection_viewer = dials.command_line.reflection_viewer:run
+    - dials.reindex = dials.command_line.reindex:run
+    - dials.report = dials.command_line.report:run
+    - dials.rl_png = dials.command_line.rl_png:run
+    - dials.rlv = dials.command_line.reciprocal_lattice_viewer:run
+    - dials.rs_mapper = dials.command_line.rs_mapper:run
+    - dials.scale = dials.command_line.scale:run
+    - dials.search_beam_position = dials.command_line.search_beam_position:run
+    - dials.sequence_to_stills = dials.command_line.sequence_to_stills:run
+    - dials.shadow_plot = dials.command_line.shadow_plot:run
+    - dials.show = dials.command_line.show:run
+    - dials.slice_sequence = dials.command_line.slice_sequence:run
+    - dials.sort_reflections = dials.command_line.sort_reflections:run
+    - dials.split_experiments = dials.command_line.split_experiments:run
+    - dials.spot_counts_per_image = dials.command_line.spot_counts_per_image:run
+    - dials.spot_resolution_shells = dials.command_line.spot_resolution_shells:run
+    - dials.ssx_index = dials.command_line.ssx_index:run
+    - dials.ssx_integrate = dials.command_line.ssx_integrate:run
+    - dials.stereographic_projection = dials.command_line.stereographic_projection:run
+    - dials.stills_process = dials.command_line.stills_process:run
+    - dials.symmetry = dials.command_line.symmetry:run
+    - dials.two_theta_offset = dials.command_line.two_theta_offset:run
+    - dials.two_theta_refine = dials.command_line.two_theta_refine:run
+    - dials.unit_cell_histogram = dials.command_line.unit_cell_histogram:run
+    - dials.version = dials.command_line.version:run
+
+{% set version_parts = version.split('.') %}
+{% set version_xy = version_parts[0] ~ '.' ~ version_parts[1] %}
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - {{ compiler('cxx') }}
+    - cmake
+    - ninja
+  host:
+    - cctbx-base
+    - dxtbx ={{ version_xy }}
+    - libboost-devel
+    - libboost-python-devel
+    - msgpack-cxx
+    - pip
+    - python
+  run:
+    - {{ pin_compatible('cctbx-base') }}
+    - {{ pin_compatible('dxtbx', max_pin='x.x', lower_bound=version_xy) }}
+    - gemmi
+    - h5py
+    - jinja2
+    - matplotlib-base
+    - numpy
+    - orderedset
+    - pandas
+    - procrunner
+    - pycbf
+    - python
+    - scikit-learn
+    - scipy
+    - tabulate
+    - tqdm
+    - wxpython
+
+test:
+  source_files:
+    - dials/tests
+    - dials/conftest.py
+  requires:
+    - dials-data
+    - pip
+    - pytest
+    - pytest-forked
+    - pytest-mock
+    - pytest-xdist
+  imports:
+    - dials
+  commands:
+    - dials.data get image_examples --verify
+    - pytest $SRC_DIR/dials/tests --regression -n auto  # [not win]
+    - pytest %SRC_DIR%/dials/tests --regression -n auto  # [win]
+    - pip check
+
+about:
+  home: https://github.com/dials/dials
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: dials/LICENSE
+  summary: Diffraction Integration for Advanced Light Sources
+  description: |
+    The DIALS project is a collaborative endeavour to develop new diffraction
+    integration software to meet the data analysis requirements presented by recent
+    advances in high performance pixel array detectors, new beamlines capable of
+    delivering micron and sub-micron focus and new light sources such as XFELs.
+  doc_url: https://dials.github.io/documentation/index.html
+  dev_url: https://github.com/dials/dials
+
+extra:
+  recipe-maintainers:
+    - jbeilstenedmands
+    - ndevenish

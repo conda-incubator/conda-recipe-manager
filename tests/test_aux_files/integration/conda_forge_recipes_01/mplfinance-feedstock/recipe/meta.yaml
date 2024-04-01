@@ -1,0 +1,43 @@
+{% set name = "mplfinance" %}
+{% set version = "0.12.9b7" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 8c0ef47dfb465ea95b7c3577e261b57b5d6ad2bce6d287a17b8b4dd2fbacc92e
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - matplotlib-base
+    - pandas
+    - python >=3.6
+
+test:
+  imports:
+    - mplfinance
+    - mplfinance._styledata
+
+about:
+  home: http://github.com/matplotlib/mplfinance
+  license: LicenseRef-PSF-based
+  license_url: https://github.com/matplotlib/mplfinance/blob/master/LICENSE
+  license_family: PSF
+  license_file: LICENSE
+  summary: Utilities for the visualization, and visual analysis, of financial data
+  doc_url: https://github.com/matplotlib/mplfinance#contents-and-tutorials
+  dev_url: http://github.com/matplotlib/mplfinance
+
+extra:
+  recipe-maintainers:
+    - DanielGoldfarb

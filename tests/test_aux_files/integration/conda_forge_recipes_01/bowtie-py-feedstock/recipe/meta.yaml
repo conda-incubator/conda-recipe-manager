@@ -1,0 +1,50 @@
+{% set version = "0.11.0" %}
+
+package:
+  name: bowtie-py
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/b/bowtie/bowtie-{{ version }}.tar.gz
+  sha256: 947baaf3ff5ee31f5e850b18b72a185ba40870cf12f0d97929528c09f580edb0
+
+build:
+  number: 3
+  skip: True  # [py<36]
+  script: "{{ PYTHON }} -m pip install . --no-deps -vv"
+
+requirements:
+  host:
+    - python
+    - pip
+    - flit
+  run:
+    - python
+    - click
+    - eventlet
+    - flask
+    - flask-socketio
+    - jinja2
+    - markdown
+    - msgpack-python
+    - yarn
+
+test:
+  imports:
+    - bowtie
+
+about:
+  home: https://github.com/jwkvam/bowtie
+  license: MIT
+  license_file: LICENSE
+  summary: 'Interactive Dashboard Toolkit'
+  description: |
+    Bowtie is a library for writing dashboards in Python. No need to know
+    web frameworks or JavaScript, focus on building functionality in Python.
+    Interactively explore your data in new ways! Deploy and share with others!
+  doc_url: https://bowtie-py.readthedocs.io/
+  dev_url: https://github.com/jwkvam/bowtie
+
+extra:
+  recipe-maintainers:
+    - jwkvam

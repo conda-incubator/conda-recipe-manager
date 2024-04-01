@@ -1,0 +1,53 @@
+{% set name = "iscd-nstokes" %}
+{% set version = "1.0.0" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/ISCDtoolbox/NavierStokes/archive/refs/tags/v1.0.0.zip
+  sha256: baca0831e0be704ff66381b7659afee2475c20c5b8df208cb9388e86779823d8
+  patches:
+    - CMakeLists.patch
+
+build:
+  number: 0
+  skip: true  # [py<3 or win] # Cannot open include file: 'pthread.h': No such file or directory
+  run_exports:
+    - {{ pin_subpackage('iscd-nstokes', max_pin='x.x.x') }}
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+  host:
+    - cmake
+    - make  # [not win]
+    - jom  # [win]
+    - iscd-commons
+  run:
+    - iscd-commons
+
+test:
+  commands:
+    - nstokes --version || true  # [unix]
+    - test -f $PREFIX/lib/libNavierStokes.so  # [linux]
+    - test -f $PREFIX/lib/libNavierStokes.dylib  # [osx]
+    - test -f $PREFIX/include/nstokes.h
+    - test -f $PREFIX/include/ns_calls.h
+
+about:
+  home: https://iscd.sorbonne-universite.fr/
+  license: GPL-3.0-only
+  license_family: GPL
+  license_file: LICENSE
+  summary: 'ISCD - Nstokes'
+  description: |
+    Nstokes is a finite element solver for Stokes and Navier-Stokes incompressible flow problems in two and three dimensions.
+  doc_url: https://github.com/ISCDtoolbox/NavierStokes/wiki
+  dev_url: https://github.com/ISCDtoolbox/NavierStokes
+
+extra:
+  recipe-maintainers:
+    - ldallolio
+    - fbordeu

@@ -1,0 +1,66 @@
+{% set name = "smac" %}
+{% set version = "2.0.2" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: b49cd5c5dc5d4fc9f0436610136dc368eed971701834a5f745d59abb314c1c9b
+
+build:
+  number: 0
+  noarch: python
+  entry_points:
+    - smac = smac.smac_cli:cmd_line_call
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.8
+  run:
+    - configspace >=0.6.1
+    - dask-core
+    - dask-jobqueue
+    - regex
+    - numpy >=1.23.3
+    - scipy >=1.9.2
+    - psutil
+    - pynisher >=1.0.0
+    - ConfigSpace >=0.6.1
+    - joblib
+    - scikit-learn >=1.1.2
+    - pyrfr >=0.9.0
+    - dask
+    - emcee >=3.0.0
+    - python >=3.8
+    - pyyaml
+    - __linux
+
+test:
+  imports:
+    - smac
+
+
+about:
+  home: https://www.automl.org/automated-algorithm-design/algorithm-configuration/smac/
+  summary: Sequential Model-based Algorithm Configuration
+  description: |
+    SMAC is a tool for algorithm configuration to optimize the parameters of arbitrary
+    algorithms across a set of instances. This also includes hyperparameter optimization
+    of ML algorithms. The main core consists of Bayesian Optimization in combination
+    with an aggressive racing mechanism to efficiently decide which of two configurations
+    performs better.
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE.txt
+  doc_url: https://automl.github.io/SMAC3/
+  dev_url: https://github.com/automl/SMAC3
+
+extra:
+  recipe-maintainers:
+    - BastianZim
+    - mfeurer

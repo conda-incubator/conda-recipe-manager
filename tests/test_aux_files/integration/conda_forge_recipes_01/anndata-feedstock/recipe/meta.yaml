@@ -1,0 +1,60 @@
+{% set name = "anndata" %}
+{% set version = "0.10.6" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 16ada7ed7d38552ce56d8e8b2348e18a5fc81294ce8a7ea282acf30dc42cd6c2
+
+build:
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+  noarch: python
+
+requirements:
+  host:
+    - python >=3.9
+    - pip
+    - hatchling
+    - hatch-vcs
+  run:
+    - python >=3.9
+    - pandas >=1.4, !=2.1.2
+    - scipy >=1.8
+    - h5py >=3.1
+    - numpy >=1.23
+    - natsort
+    - packaging >=20
+    - array-api-compat >1.4, !=1.5
+    - exceptiongroup  # py<3.11
+
+test:
+  imports:
+    - anndata
+  commands:
+    - pip check
+    - python -c "import anndata; print(anndata.__version__)"
+  requires:
+    - pip
+
+about:
+  home: https://github.com/theislab/anndata
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: An annotated data matrix.
+  description: |
+    AnnData provides a scalable way of keeping track of data and learned annotations. 
+    It was initially built for Scanpy (Genome Biology, 2018).
+  doc_url: http://anndata.rtfd.io
+  dev_url: https://github.com/theislab/anndata
+
+extra:
+  recipe-maintainers:
+    - jakakokosar
+    - pavlin-policar
+    - flying-sheep
+    - ivirshup

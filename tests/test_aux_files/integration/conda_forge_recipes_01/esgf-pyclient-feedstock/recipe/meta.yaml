@@ -1,0 +1,50 @@
+{% set name = "esgf-pyclient" %}
+{% set version = "0.3.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: d79fafc6ec2a1eff9645e098554103f1e9f3c270947b1ac4f4a8a07fece59f3b
+
+build:
+  number: 3
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps
+
+requirements:
+  host:
+    - python
+    - pip
+  run:
+    - python >=3.6
+    - jinja2
+    - requests
+    - requests-cache >=0.6
+    - webob
+    - defusedxml
+    - myproxyclient >=2.1.1
+
+test:
+  imports:
+    - pyesgf
+    - pyesgf.search
+    - pyesgf.security
+    - pyesgf.logon
+
+about:
+  home: http://esgf-pyclient.readthedocs.org
+  license: BSD-3-Clause
+  license_file: LICENSE
+  summary: A library interacting with ESGF services within Python
+
+extra:
+  recipe-maintainers:
+    - valeriupredoi
+    - agoodm
+    - jarifibrahim
+    - agstephens
+    - cehbrecht
+    - bouweandela

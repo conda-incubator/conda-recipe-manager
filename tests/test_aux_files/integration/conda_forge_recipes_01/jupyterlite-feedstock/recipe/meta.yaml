@@ -1,0 +1,47 @@
+{% set version = "0.3.0" %}
+{% set core_version = ">=" ~ version ~ ",<0.4.0" %}
+
+package:
+  name: jupyterlite
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/j/jupyterlite/jupyterlite-{{ version }}.tar.gz
+  sha256: 824c9a6dad850766ececf4863052b944543b0650fe1be8c7a99d9df0150a5c60
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+
+requirements:
+  host:
+    - hatchling >=1.6.3,<2
+    - pip
+    - python >=3.8
+  run:
+    - jupyterlite-core {{ core_version }}
+    - python >=3.8
+
+test:
+  imports:
+    - jupyterlite
+  commands:
+    - pip check
+    - jupyter lite --version
+    - jupyter lite --help
+  requires:
+    - pip
+
+about:
+  home: https://github.com/jupyterlite/jupyterlite
+  summary: JupyterLite metapackage
+  license: BSD-3-Clause
+  license_file: LICENSE
+  doc_url: https://jupyterlite.readthedocs.io
+
+extra:
+  recipe-maintainers:
+    - bollwyvl
+    - jtpio
+    - martinRenou

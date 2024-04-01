@@ -1,0 +1,48 @@
+{% set name = "dvc-gs" %}
+{% set version = "3.0.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: e5430a297fb8182366f7c4bc910b1ab104d8e5cc22f611a19bce05165dffecd4
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.8
+    - pip
+    - setuptools_scm >=6.3.1
+  run:
+    - python >=3.8
+    - dvc
+    - gcsfs >=2022.11.0
+
+test:
+  imports:
+    - dvc_gs
+  requires:
+    - git
+    - pip
+  commands:
+    - pip check
+    - dvc version
+    - dvc version | grep gs
+
+about:
+  home: https://github.com/iterative/dvc-gs
+  summary: Google Storage plugin for DVC
+  license: Apache-2.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - pmrowla
+    - efiop
+    - shcheklein

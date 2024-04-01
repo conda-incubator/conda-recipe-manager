@@ -1,0 +1,47 @@
+{% set name = "opentelemetry-exporter-google-cloud" %}
+{% set version = "0.17b0" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: b5573d858f23d0235dd98e66cfa18021a87462aeee98f3820a79e9200f0bf76b
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.5
+  run:
+    - google-cloud-monitoring <2.0.0
+    - google-cloud-trace >=0.24.0,<1.0.0
+    - opentelemetry-api =={{ version }}
+    - opentelemetry-sdk =={{ version }}
+    - python >=3.5
+
+test:
+  imports:
+    - opentelemetry.exporter.cloud_trace
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/GoogleCloudPlatform/opentelemetry-operations-python/tree/master/opentelemetry-exporter-google-cloud
+  summary: OpenTelemetry Google Cloud Integration
+  license: Apache-2.0
+  license_file: LICENSE
+  description: Provides OpenTelemetry Python exporters for Google Cloud Platform.
+  doc_url: https://google-cloud-opentelemetry.readthedocs.io/en/latest/
+
+extra:
+  recipe-maintainers:
+    - twoodwark

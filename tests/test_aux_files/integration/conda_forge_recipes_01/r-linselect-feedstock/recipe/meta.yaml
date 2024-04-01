@@ -1,0 +1,77 @@
+{% set version = "1.1.5" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-linselect
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/LINselect_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/LINselect/LINselect_{{ version }}.tar.gz
+  sha256: 5021f2a6b6e55d048e31b7abd8f85f2ad8a7ab7f55f4dbe1e9a1b88a3958a269
+
+build:
+  merge_build_host: true  # [win]
+  number: 0
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+    - r-mass
+    - r-elasticnet
+    - r-gtools
+    - r-mvtnorm
+    - r-pls
+    - r-randomforest
+  run:
+    - r-base
+    - r-mass
+    - r-elasticnet
+    - r-gtools
+    - r-mvtnorm
+    - r-pls
+    - r-randomforest
+
+test:
+  commands:
+    - $R -e "library('LINselect')"           # [not win]
+    - "\"%R%\" -e \"library('LINselect')\""  # [win]
+
+about:
+  home: https://CRAN.R-project.org/package=LINselect
+  license: GPL-3.0-or-later
+  summary: Estimate the mean of a Gaussian vector, by choosing among a large collection of estimators. In particular it solves the problem of variable selection by choosing the best predictor among  predictors emanating from different methods as lasso, elastic-net, adaptive lasso, pls, randomForest. Moreover, it can be applied
+    for choosing the tuning parameter in a Gauss-lasso procedure.
+  license_family: GPL3
+  license_file:
+    - '{{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-3'
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+
+# Package: LINselect
+# Title: Selection of Linear Estimators
+# Version: 1.1.1
+# Date: 2017-04-20
+# Author: Yannick Baraud, Christophe Giraud, Sylvie Huet
+# Maintainer: ORPHANED
+# Description: Estimate the mean of a Gaussian vector, by choosing among a large collection of estimators. In particular it solves the problem of variable selection by choosing the best predictor among  predictors emanating from different methods as lasso, elastic-net, adaptive lasso, pls, randomForest. Moreover, it can be applied for choosing the tuning parameter in a Gauss-lasso procedure.
+# Imports: mvtnorm, elasticnet, MASS, randomForest, pls, gtools, stats
+# Depends: R (>= 3.6.0)
+# License: GPL (>= 3)
+# Encoding: latin1
+# NeedsCompilation: no
+# Packaged: 2019-03-07 09:55:59 UTC; ripley
+# Repository: CRAN
+# Date/Publication: 2019-04-26 13:20:38 UTC
+# X-CRAN-Original-Maintainer: Annie Bouvier <Annie.Bouvier@inra.fr>
+# X-CRAN-Comment: Orphaned on 2018-06-09 as maintainer has retired and her email address now bounces.

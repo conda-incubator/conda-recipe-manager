@@ -1,0 +1,73 @@
+{% set version = "1.10" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-dicedesign
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/DiceDesign_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/DiceDesign/DiceDesign_{{ version }}.tar.gz
+  sha256: 06543b207b8c1732bda575b9f60ca4ec004f896676e04200af8b222f8933c73d
+
+build:
+  merge_build_host: true  # [win]
+  number: 0
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - cross-r-base {{ r_base }}  # [build_platform != target_platform]
+    - {{ compiler('c') }}              # [not win]
+    - {{ compiler('m2w64_c') }}        # [win]
+    - {{ posix }}filesystem        # [win]
+    - {{ posix }}make
+    - {{ posix }}sed               # [win]
+    - {{ posix }}coreutils         # [win]
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+  run:
+    - r-base
+    - {{ native }}gcc-libs         # [win]
+
+test:
+  commands:
+    - $R -e "library('DiceDesign')"           # [not win]
+    - "\"%R%\" -e \"library('DiceDesign')\""  # [win]
+
+about:
+  home: http://dice.emse.fr/
+  license: GPL-3.0-only
+  summary: Space-Filling Designs and Uniformity Criteria.
+  license_family: GPL3
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-3
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+    - philip-khor
+
+# Package: DiceDesign
+# Type: Package
+# Title: Designs of Computer Experiments
+# Version: 1.8-1
+# Date: 2019-07-31
+# Author: Jessica Franco, Delphine Dupuy, Olivier Roustant,  Patrice Kiener, Guillaume Damblin and Bertrand Iooss.
+# Maintainer: Celine Helbert <Celine.Helbert@ec-lyon.fr>
+# Description: Space-Filling Designs and Uniformity Criteria.
+# License: GPL-3
+# Depends: R (>= 2.10)
+# Suggests: rgl, randtoolbox, lattice
+# Encoding: latin1
+# URL: http://dice.emse.fr/
+# NeedsCompilation: yes
+# LazyData: true
+# Packaged: 2019-07-31 13:04:12 UTC; bertrand
+# Repository: CRAN
+# Date/Publication: 2019-07-31 19:20:12 UTC

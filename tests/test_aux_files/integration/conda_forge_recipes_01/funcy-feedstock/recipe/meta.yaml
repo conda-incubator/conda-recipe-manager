@@ -1,0 +1,41 @@
+{% set name = "funcy" %}
+{% set version = "2.0" %}
+{% set sha256 = "3963315d59d41c6f30c04bc910e10ab50a3ac4a225868bfa96feed133df075cb" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv
+
+requirements:
+  host:
+    - python >=3.4
+    - pip
+  run:
+    - python >=3.4
+
+test:
+  imports:
+    - funcy
+
+about:
+  home: https://github.com/Suor/funcy
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: A collection of fancy functional tools focused on practicality.
+
+  doc_url: http://funcy.readthedocs.io/
+  dev_url: https://github.com/Suor/funcy
+
+extra:
+  recipe-maintainers:
+    - synapticarbors

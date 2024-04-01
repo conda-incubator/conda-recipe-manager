@@ -1,0 +1,48 @@
+{% set name = "pdfme" %}
+{% set version = "0.4.11" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/pdfme-{{ version }}.tar.gz
+  sha256: cd02c73245b59962f28218ed2c22f587f3d281383758891c9f1b696fc6752f95
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+    - setuptools >=42
+    - wheel
+  run:
+    - python >=3.6
+
+test:
+  source_files:
+    - tests
+  imports:
+    - pdfme
+  commands:
+    - pip check
+    - pytest -vvv --capture=tee-sys -k "not content and not table" tests
+  requires:
+    - pip
+    - pytest
+
+about:
+  home: https://github.com/aFelipeSP/pdfme
+  summary: Create PDFs easily
+  license: MIT
+  license_file: LICENSE
+  doc_url: https://pdfme.readthedocs.io/en/latest/
+
+extra:
+  recipe-maintainers:
+    - thewchan

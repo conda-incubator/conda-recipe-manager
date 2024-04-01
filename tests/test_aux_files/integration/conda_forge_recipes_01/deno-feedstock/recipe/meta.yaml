@@ -1,0 +1,72 @@
+{% set version = "1.41.3" %}
+
+package:
+  name: deno
+  version: {{ version }}
+
+source:
+  - url: https://github.com/denoland/deno/releases/download/v{{ version }}/deno_src.tar.gz  # [not osx or not arm64]
+    sha256: ee5025d6834ad6f52c759cda7e4f6a77ed0d48b44d7f35b508f8761e0d48d2b9  # [not osx or not arm64]
+    patches:   # [not osx or not arm64]
+      - 01-fix-libffi-msvc.patch     # [not osx or not arm64]
+  - url: https://github.com/rust-lang/cargo/archive/refs/tags/0.75.0.tar.gz  # [linux and aarch64]
+    sha256: d6b9512bca4b4d692a242188bfe83e1b696c44903007b7b48a56b287d01c063b  # [linux and aarch64]
+    folder: cargo-cross  # [linux and aarch64]
+    patches:   # [linux and aarch64]
+      - cargo-cross-build.patch                                               # [linux and aarch64]
+  - url: https://github.com/denoland/deno/releases/download/v{{ version }}/deno-aarch64-apple-darwin.zip  # [osx and arm64]
+    sha256: b89785702b7b5dadd57e77ca4b4ec49a8513c92edc3b6131505a4b08b7944745  # [osx and arm64]
+
+build:
+  number: 0
+
+requirements:   # [not osx or not arm64]
+  build:   # [not osx or not arm64]
+    - {{ compiler("rust") }}   # [not osx or not arm64]
+    # needs c compiler for run_exports
+    - {{ compiler("c") }}      # [not osx or not arm64]
+    # for some reason, test_ffi pkg needs lld on osx-arm64
+    # - lld    # [osx and arm64]
+    - cargo-bundle-licenses   # [not osx or not arm64]
+    - make   # [unix and not arm64]
+    - cmake  # [unix and not arm64]
+    # libprotobuf is on build, not host, since we only need protoc
+    - libprotobuf  # [not osx or not arm64]
+    # on linux cross-builds, we need additional build deps for patched cargo
+    - zlib         # [linux and aarch64]
+  # cross-builds also need host libgcc to run the cross-built files
+  host:   # [linux and aarch64]
+    - libgcc-ng    # [linux and aarch64]
+  run:   # [osx and x86_64]
+    - __osx >={{ MACOSX_DEPLOYMENT_TARGET }}  # [osx and x86_64]
+
+test:
+  files:
+    - test-build-arch.js
+  commands:
+    - deno --help
+    - deno run https://examples.deno.land/hello-world.ts
+    - if [ "$DENO_INSTALL_ROOT" != "$PREFIX" ]; then echo "DENO_INTALL_ROOT var not set correctly" && exit 1; fi    # [unix]
+    - IF "%DENO_INSTALL_ROOT:/=\%" NEQ "%PREFIX:/=\%\Library" exit 1    # [win]
+    - deno run test-build-arch.js
+
+about:
+  home: https://deno.land
+  license: MIT
+  license_family: MIT
+  license_file:
+    - LICENSE.md    # [not osx or not arm64]
+    - DENO_THIRDPARTY_LICENSES.yml    # [not osx or not arm64]
+    # the binary doesn't ship with a license. This is one taken from the github repo.
+    - LICENSE    # [osx and arm64]
+  summary: A simple, modern and secure runtime for JavaScript and TypeScript that uses V8 and is built in Rust
+  doc_url: https://deno.land/manual
+  dev_url: https://github.com/denoland/deno
+
+extra:
+  recipe-maintainers:
+    - mdekstrand
+    - cderv
+    - cscheid
+    - dragonstyle
+    - msarahan

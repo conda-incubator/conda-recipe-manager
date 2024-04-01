@@ -1,0 +1,58 @@
+{% set version = "v2.0.2" %}
+
+package:
+  name: lastools
+  version: {{ version }}
+
+source:
+  fn: {{ version }}.tar.gz
+  url: https://github.com/LAStools/LAStools/archive/refs/tags/{{ version }}.tar.gz
+  sha256: 41200e2b6ad92fe057fc5008132978090890463d5b602bce89ecf8aa84c78a82
+  patches:
+    - lasindex.patch
+
+build:
+  number: 0
+
+requirements:
+  build:
+    - cmake
+    - ninja
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+  host:
+
+  run:
+
+test:
+  commands:
+    - if not exist %LIBRARY_BIN%\\LASlib.dll exit 1             # [win]
+    - if not exist %LIBRARY_LIB%\\LASlib.lib exit 1             # [win]
+    - if not exist %LIBRARY_INC%\\LASlib\\lasreader.hpp exit 1  # [win]
+    - if not exist %LIBRARY_INC%\\LASlib\\laswriter.hpp exit 1  # [win]
+    - test -f $PREFIX/lib/libLASlib.so                          # [linux]
+    - test -f $PREFIX/lib/libLASlib.dylib                       # [osx]
+    - test -f $PREFIX/include/LASlib/lasreader.hpp              # [unix]
+    - test -f $PREFIX/include/LASlib/laswriter.hpp              # [unix]
+    - lasdiff64 -h
+    - las2txt64 -h
+    - lasindex64 -h
+    - lasmerge64 -h
+    - txt2las64 -h
+    - lasprecision64 -h
+    - las2las64 -h
+    - laszip64 -h
+    - lasinfo64 -h
+
+about:
+  home: http://www.cs.unc.edu/~isenburg/lastools/
+  license: LGPL-2.1-only
+  license_file: LICENSE.txt
+  summary: LASlib and LASzip libraries plus open source utilities from LAStools for manipulating LiDAR data in LAS format
+
+extra:
+  recipe-maintainers:
+    - gillins
+    - danclewley
+    - armstonj
+    - hobu

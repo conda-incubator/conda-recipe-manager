@@ -1,0 +1,51 @@
+{% set version = "1.11.0" %}
+
+package:
+  name: robotframework-lsp
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/r/robotframework-lsp/robotframework-lsp-{{ version }}.tar.gz
+  sha256: fc63766cdd92d92015f45b1f376f10932fddacc6acd01d0c5df559908561c153
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  entry_points:
+    - robotframework_ls = robotframework_ls.__main__:main
+
+requirements:
+  host:
+    - pip
+    - python >=3.7
+  run:
+    - python >=3.7
+    - robotframework >=3.2
+  run_constrained:
+    - robotframework-seleniumlibary >=4.4
+
+test:
+  requires:
+    - pip
+  imports:
+    - robotframework_debug_adapter
+    - robotframework_ls.vendored.robocorp_ls_core
+
+  commands:
+    - python -m pip check
+    - robotframework_ls --version
+    - robotframework_ls --help
+
+about:
+  home: https://github.com/robocorp/robotframework-lsp
+  summary: Language Server Protocol implementation for Robot Framework
+  license: Apache-2.0
+  license_file:
+    - COPYRIGHT
+    - LICENSE
+    - ThirdPartyNotices.txt
+
+extra:
+  recipe-maintainers:
+    - bollwyvl

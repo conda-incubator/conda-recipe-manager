@@ -1,0 +1,49 @@
+{% set name = "XDMFWrite_h5py" %}
+{% set org = "tdegeus" %}
+{% set version = "0.2.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/{{ org }}/{{ name }}/archive/v{{ version }}.tar.gz
+  sha256: 8cac20d953aca4c14719ab818bd38a03b3263c7241072b9aebc1f234f879b7a7
+
+build:
+  number: 0
+  noarch: python
+  script_env: SETUPTOOLS_SCM_PRETEND_VERSION={{ version }}
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3
+    - pip
+    - setuptools_scm
+  run:
+    - python >=3
+    - numpy
+    - h5py
+
+test:
+  requires:
+    - pip
+  imports:
+    - {{ name }}
+  commands:
+    - pip check
+    - python -c "import {{ name }}; print({{ name }}.version)"
+
+about:
+  home: https://github.com/{{ org }}/{{ name }}
+  license: MIT
+  license_file: LICENSE
+  summary: Write XDMF files to interpret HDF5 files.
+  description: Write XDMF files to interpret HDF5 files.
+  doc_url: https://github.com/{{ org }}/{{ name }}
+  dev_url: https://github.com/{{ org }}/{{ name }}
+
+extra:
+  recipe-maintainers:
+    - tdegeus

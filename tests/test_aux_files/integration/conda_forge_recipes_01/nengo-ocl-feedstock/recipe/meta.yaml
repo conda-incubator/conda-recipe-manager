@@ -1,0 +1,46 @@
+{% set name = "nengo-ocl" %}
+{% set version = "3.0.0" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/nengo-ocl-{{ version }}.tar.gz
+  sha256: 813874f7ae5b54dd168f9370ac448d8b4407bf186e5c9d1a4c3d19569eb86ed0
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - mako
+    - nengo >=3.1.0
+    - pyopencl
+    - python >=3.6
+    - platformdirs
+
+test:
+  imports:
+    - nengo_ocl
+    - nengo_ocl.tests
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://labs.nengo.ai/nengo-ocl/
+  summary: OpenCL-based simulator for Nengo neural models
+  license: LicenseRef-NENGO
+  license_file: LICENSE.rst
+
+extra:
+  recipe-maintainers:
+    - Tobias-Fischer

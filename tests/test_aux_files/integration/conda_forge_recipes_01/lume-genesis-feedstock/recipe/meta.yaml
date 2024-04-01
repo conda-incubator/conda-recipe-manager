@@ -1,0 +1,49 @@
+{% set name = "lume-genesis" %}
+{% set version = "0.6.3" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/slaclab/{{ name }}/archive/v{{ version }}.tar.gz
+  sha256: 799d17d3d2d4b974c7ff416a5de6f416fda1ec58d106e62574c9d8e52e9f3a16
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+  run:
+    - python >=3.6
+    - scipy
+    - genesis2
+    - lume-base
+
+test:
+  imports:
+    - genesis
+  requires:
+    - pytest
+  source_files:
+    - tests
+  commands:
+    - pytest tests
+
+about:
+  home: https://github.com/slaclab/{{ name }}
+  license: APACHE-2.0
+  license_family: APACHE
+  license_file: LICENSE
+  summary: Genesis tools for use in LUME
+  description: |
+    Genesis tools for use in LUME.
+
+extra:
+  recipe-maintainers:
+    - balticfish
+    - ChristopherMayes

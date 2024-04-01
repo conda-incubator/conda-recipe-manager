@@ -1,0 +1,81 @@
+{% set version = "4.9.0" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-statnet.common
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/statnet.common_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/statnet.common/statnet.common_{{ version }}.tar.gz
+  sha256: a485dc6e363a993d87336fbd1027adb1cd7b9103447fd63904cae4dc3bfc2dd7
+
+build:
+  merge_build_host: true  # [win]
+  number: 1
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - cross-r-base {{ r_base }}  # [build_platform != target_platform]
+    - r-rle                      # [build_platform != target_platform]
+    - r-coda                     # [build_platform != target_platform]
+    - {{ compiler('c') }}        # [not win]
+    - {{ compiler('m2w64_c') }}        # [win]
+    - {{ posix }}filesystem        # [win]
+    - {{ posix }}make
+    - {{ posix }}sed               # [win]
+    - {{ posix }}coreutils         # [win]
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+    - r-coda
+    - r-rle
+  run:
+    - r-base
+    - {{ native }}gcc-libs         # [win]
+    - r-coda
+    - r-rle
+
+test:
+  commands:
+    - $R -e "library('statnet.common')"           # [not win]
+    - "\"%R%\" -e \"library('statnet.common')\""  # [win]
+
+about:
+  home: http://www.statnet.org
+  license: GPL-3.0-only
+  summary: Non-statistical utilities used by the software developed by the Statnet Project. They may also be of use to others.
+  license_family: GPL3
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-3
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+    - stevierene82
+
+# Package: statnet.common
+# Version: 4.2.0
+# Date: 2019-01-08
+# Title: Common R Scripts and Utilities Used by the Statnet Project Software
+# Authors@R: c( person("Pavel N.", "Krivitsky", role=c("aut","cre"), email="pavel@uow.edu.au"), person("Skye", "Bender-deMoll", role=c("ctb"), email="skyebend@uw.edu"))
+# Description: Non-statistical utilities used by the software developed by the Statnet Project. They may also be of use to others.
+# Depends: R (>= 3.5)
+# Imports: utils, methods, coda, parallel, tools
+# BugReports: https://github.com/statnet/statnet.common/issues
+# License: GPL-3 + file LICENSE
+# URL: http://www.statnet.org
+# RoxygenNote: 6.1.1
+# Encoding: UTF-8
+# Suggests: covr
+# NeedsCompilation: yes
+# Packaged: 2019-01-08 09:57:19 UTC; pavel
+# Author: Pavel N. Krivitsky [aut, cre], Skye Bender-deMoll [ctb]
+# Maintainer: Pavel N. Krivitsky <pavel@uow.edu.au>
+# Repository: CRAN
+# Date/Publication: 2019-01-08 18:10:08 UTC

@@ -1,0 +1,42 @@
+{% set name = "qibojit" %}
+{% set version = "0.1.3" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/qiboteam/qibojit/archive/v{{ version }}.tar.gz
+  sha256: 0b638bcc9a27f581aa0aa3540e43a1bb16595e62a43ec801c4340964138300f9
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.9,<3.12
+    - poetry
+  run:
+    - numba >=0.51.0
+    - scipy
+    - psutil
+    - python >=3.9,<3.12
+    - qibo >=0.2.5
+
+test:
+  imports:
+    - qibojit
+
+about:
+  home: https://github.com/qiboteam/qibojit
+  summary: Simulation tools based on numba and cupy for Qibo.
+  license: Apache-2.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - scarrazza

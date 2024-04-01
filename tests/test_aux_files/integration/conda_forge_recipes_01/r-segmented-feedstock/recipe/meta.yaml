@@ -1,0 +1,67 @@
+{% set version = "2.0-3" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-segmented
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/segmented_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/segmented/segmented_{{ version }}.tar.gz
+  sha256: e7a88ae270ecb853067fbe26e21477dd369b47cefc443c3af486f2bebed909b9
+
+build:
+  merge_build_host: true  # [win]
+  number: 0
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+    - cross-r-base {{ r_base }}    # [build_platform != target_platform]
+  host:
+    - r-base
+    - r-mass
+    - r-nlme
+  run:
+    - r-base
+    - r-mass
+    - r-nlme
+
+test:
+  commands:
+    - $R -e "library('segmented')"           # [not win]
+    - "\"%R%\" -e \"library('segmented')\""  # [win]
+
+about:
+  home: https://CRAN.R-project.org/package=segmented
+  license: GPL-2.0-or-later
+  summary: "Given a regression model, segmented `updates' it by adding one or more segmented (i.e., piece-wise linear) relationships. Several variables with multiple breakpoints are allowed. The estimation method is discussed in Muggeo (2003, <doi:10.1002/sim.1545>) and illustrated in Muggeo (2008, <https://www.r-project.org/doc/Rnews/Rnews_2008-1.pdf>).
+    An approach for hypothesis testing is presented in Muggeo (2016, <doi:10.1080/00949655.2016.1149855>), and interval estimation for the breakpoint is discussed in Muggeo (2017, <doi:10.1111/anzs.12200>).  "
+  license_family: GPL
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-3
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+
+# Package: segmented
+# Type: Package
+# Title: Regression Models with Break-Points / Change-Points Estimation
+# Version: 1.0-0
+# Date: 2019-06-10
+# Authors@R: c(person(given = c("Vito","M.","R."), family = "Muggeo", role = c("aut", "cre"), email = "vito.muggeo@unipa.it"))
+# Author: Vito M. R. Muggeo [aut, cre]
+# Maintainer: Vito M. R. Muggeo <vito.muggeo@unipa.it>
+# Description: Given a regression model, segmented `updates' it by adding one or more segmented (i.e., piece-wise linear) relationships. Several variables with multiple breakpoints are allowed. The estimation method is discussed in Muggeo (2003, <doi:10.1002/sim.1545>) and illustrated in Muggeo (2008, <https://www.r-project.org/doc/Rnews/Rnews_2008-1.pdf>). An approach for hypothesis testing is presented in Muggeo (2016, <doi:10.1080/00949655.2016.1149855>), and interval estimation for the breakpoint is discussed in Muggeo (2017, <doi:10.1111/anzs.12200>).
+# License: GPL
+# NeedsCompilation: no
+# Packaged: 2019-06-17 15:27:38 UTC; vito
+# Repository: CRAN
+# Date/Publication: 2019-06-17 18:30:03 UTC

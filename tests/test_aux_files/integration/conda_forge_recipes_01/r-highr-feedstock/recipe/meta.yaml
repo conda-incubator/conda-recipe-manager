@@ -1,0 +1,48 @@
+{% set version = "0.10" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-highr
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/highr_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/highr/highr_{{ version }}.tar.gz
+  sha256: ec55bc1ff66390ed66806dc2a7b6c17dbfd089b3d73fe2e369017f8cb4bc347b
+
+build:
+  merge_build_host: true  # [win]
+  number: 1
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+    - r-xfun >=0.18
+  run:
+    - r-base
+    - r-xfun >=0.18
+
+test:
+  commands:
+    - $R -e "library('highr')"           # [not win]
+    - "\"%R%\" -e \"library('highr')\""  # [win]
+
+about:
+  home: https://github.com/yihui/highr
+  license: GPL-2.0-or-later
+  summary: Provides syntax highlighting for R source code. Currently it supports LaTeX and HTML output. Source code of other languages is supported via Andre Simon's highlight package (<http://www.andre-simon.de>).
+  license_family: GPL
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-3
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r

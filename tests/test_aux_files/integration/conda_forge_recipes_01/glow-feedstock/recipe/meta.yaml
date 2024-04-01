@@ -1,0 +1,58 @@
+{% set name = "glow" %}
+{% set pypi_name = "glow.py" %}
+{% set version = "2.0.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/projectglow/glow/releases/download/v{{ version }}/{{ pypi_name }}-{{ version }}.tar.gz
+  sha256: 728c33ec92fc68a6fdf34c99315bbf3d2e7f5a68801bef37676eacb8c536b896
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python
+    - pip
+  run:
+    - python >=3.10
+    - pyspark >=3.4.0
+    - nptyping >=2.5.0
+    - numpy >=1.23.5
+    - opt_einsum >=3.2.0
+    - pandas >=1.5.3
+    - statsmodels >=0.13.5
+    - typeguard >=2.13.3
+
+test:
+  imports:
+    - glow
+    - glow.gwas
+    - glow.wgr
+
+about:
+  home: https://projectglow.io
+  license: Apache-2.0
+  license_family: Apache
+  license_file: LICENSE.txt
+  summary: An open-source toolkit for large-scale genomic analysis
+  description: |
+    Glow is an open-source toolkit for working with genomic data at 
+    biobank-scale and beyond. The toolkit is natively built on Apache Spark, 
+    the leading unified engine for big data processing and machine learning, 
+    enabling the scale of the cloud for genomics workflows.
+  doc_url: https://glow.readthedocs.io/
+  dev_url: https://github.com/projectglow/glow
+
+extra:
+  recipe-maintainers:
+    - a0x8o
+    - henrydavidge
+    - karenfeng
+    - kianfar77
+    - kermany

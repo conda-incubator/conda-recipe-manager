@@ -1,0 +1,178 @@
+# Update with the following command
+#   conda skeleton pypi pyomo
+{% set version = "6.7.1" %}
+
+package:
+  name: pyomo
+  version: {{ version }}
+
+source: # pypi md5
+  fn: Pyomo-{{ version }}.tar.gz
+  url: https://pypi.io/packages/source/P/Pyomo/Pyomo-{{ version }}.tar.gz
+  sha256: 735b66c45937f1caa43f073d8218a4918b6de658914a699397d38d5b8c219a40
+
+build:
+  number: 0
+  script: "{{ PYTHON }} -m pip install . --no-deps -vv"
+  script_env:
+    - PYOMO_SETUP_ARGS=--with-distributable-extensions
+  entry_points:
+    - pyomo=pyomo.scripting.pyomo_main:main_console_script
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - cython                                 # [build_platform != target_platform]
+    - pybind11                               # [build_platform != target_platform]
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+
+  host:
+    - python
+    - pip
+    - cython
+    - pybind11
+
+  run:
+    - python
+    - setuptools
+    - ply
+
+test:
+  imports: # Note that there may be new imports
+    - pyomo
+    - pyomo.common
+    - pyomo.common.collections
+    - pyomo.contrib
+    - pyomo.contrib.ampl_function_demo
+    - pyomo.contrib.appsi
+    - pyomo.contrib.appsi.cmodel
+    - pyomo.contrib.appsi.examples
+    - pyomo.contrib.appsi.solvers
+    - pyomo.contrib.appsi.utils
+    - pyomo.contrib.appsi.writers
+    - pyomo.contrib.benders
+    - pyomo.contrib.community_detection
+    - pyomo.contrib.cp
+    - pyomo.contrib.cp.repn
+    - pyomo.contrib.cp.scheduling_expr
+    - pyomo.contrib.cp.transform
+    - pyomo.contrib.doe
+    - pyomo.contrib.example
+    - pyomo.contrib.example.plugins
+    - pyomo.contrib.fbbt
+    - pyomo.contrib.fme
+    - pyomo.contrib.gdp_bounds
+    - pyomo.contrib.gdpopt
+    - pyomo.contrib.gjh
+    - pyomo.contrib.iis
+    - pyomo.contrib.incidence_analysis
+    - pyomo.contrib.incidence_analysis.common
+    - pyomo.contrib.interior_point
+    - pyomo.contrib.interior_point.linalg
+    - pyomo.contrib.latex_printer
+    - pyomo.contrib.mcpp
+    - pyomo.contrib.mindtpy
+    - pyomo.contrib.mpc
+    - pyomo.contrib.mpc.data
+    - pyomo.contrib.mpc.examples
+    - pyomo.contrib.mpc.examples.cstr
+    - pyomo.contrib.mpc.interfaces
+    - pyomo.contrib.mpc.modeling
+    - pyomo.contrib.multistart
+    - pyomo.contrib.parmest
+    - pyomo.contrib.parmest.examples
+    - pyomo.contrib.parmest.examples.reaction_kinetics
+    - pyomo.contrib.parmest.examples.reactor_design
+    - pyomo.contrib.parmest.examples.rooney_biegler
+    - pyomo.contrib.parmest.examples.semibatch
+    - pyomo.contrib.parmest.utils
+    - pyomo.contrib.piecewise
+    - pyomo.contrib.piecewise.transform
+    - pyomo.contrib.preprocessing
+    - pyomo.contrib.preprocessing.plugins
+    - pyomo.contrib.pynumero
+    - pyomo.contrib.pynumero.algorithms
+    - pyomo.contrib.pynumero.algorithms.solvers
+    - pyomo.contrib.pynumero.examples
+    - pyomo.contrib.pynumero.examples.callback
+    - pyomo.contrib.pynumero.examples.external_grey_box
+    - pyomo.contrib.pynumero.examples.external_grey_box.param_est
+    - pyomo.contrib.pynumero.examples.external_grey_box.react_example
+    - pyomo.contrib.pynumero.interfaces
+    - pyomo.contrib.pynumero.linalg
+    - pyomo.contrib.pynumero.sparse
+    - pyomo.contrib.pyros
+    - pyomo.contrib.satsolver
+    - pyomo.contrib.sensitivity_toolbox
+    - pyomo.contrib.sensitivity_toolbox.examples
+    - pyomo.contrib.solver
+    - pyomo.contrib.trustregion
+    - pyomo.contrib.trustregion.examples
+    - pyomo.contrib.viewer
+    - pyomo.core
+    - pyomo.core.base
+    - pyomo.core.beta
+    - pyomo.core.expr
+    - pyomo.core.expr.calculus
+    - pyomo.core.kernel
+    - pyomo.core.kernel.piecewise_library
+    - pyomo.core.plugins
+    - pyomo.core.plugins.transform
+    - pyomo.dae
+    - pyomo.dae.plugins
+    - pyomo.dataportal
+    - pyomo.dataportal.plugins
+    - pyomo.duality
+    - pyomo.environ
+    - pyomo.gdp
+    - pyomo.gdp.plugins
+    - pyomo.kernel
+    - pyomo.mpec
+    - pyomo.mpec.plugins
+    - pyomo.neos
+    - pyomo.neos.plugins
+    - pyomo.network
+    - pyomo.network.plugins
+    - pyomo.opt
+    - pyomo.opt.base
+    - pyomo.opt.parallel
+    - pyomo.opt.plugins
+    - pyomo.opt.problem
+    - pyomo.opt.results
+    - pyomo.opt.solver
+    - pyomo.repn
+    - pyomo.repn.beta
+    - pyomo.repn.plugins
+    - pyomo.repn.plugins.ampl
+    - pyomo.scripting
+    - pyomo.scripting.plugins
+    - pyomo.solvers
+    - pyomo.solvers.plugins
+    - pyomo.solvers.plugins.converter
+    - pyomo.solvers.plugins.solvers
+    - pyomo.util
+    - pyomo.version
+
+  commands:
+    - pyomo --help
+
+about:
+  home: http://pyomo.org
+  license: "BSD-3-Clause"
+  license_file: '{{ environ["RECIPE_DIR"] }}/Pyomo-LICENSE.txt'
+  license_family: BSD
+  summary: 'Pyomo: Python Optimization Modeling Objects'
+  description: |
+    An object-oriented algebraic modeling language in Python for
+    structured optimization problems.
+  dev_url: https://github.com/Pyomo/pyomo
+  doc_url: https://pyomo.readthedocs.io
+
+extra:
+  recipe-maintainers:
+    - blnicho
+    - jsiirola
+    - mrmundt
+    - whart222

@@ -1,0 +1,65 @@
+{% set version = "1.30.22" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-biocmanager
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/BiocManager_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/BiocManager/BiocManager_{{ version }}.tar.gz
+  sha256: 5389c9c0d6562b0757659fb8262ab51b48225c4ba7e9acd4f5e7c0049735e835
+
+build:
+  merge_build_host: true  # [win]
+  number: 0
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ posix }}zip               # [win]
+  host:
+    - r-base
+  run:
+    - r-base
+
+test:
+  commands:
+    - $R -e "library('BiocManager')"           # [not win]
+    - "\"%R%\" -e \"library('BiocManager')\""  # [win]
+
+about:
+  home: https://CRAN.R-project.org/package=BiocManager
+  license: Artistic-2.0
+  summary: A convenient tool to install and update Bioconductor packages.
+  license_family: OTHER
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/Artistic-2.0
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+
+# Package: BiocManager
+# Title: Access the Bioconductor Project Package Repository
+# Description: A convenient tool to install and update Bioconductor packages.
+# Version: 1.30.7
+# Authors@R: c( person("Martin", "Morgan", email = "martin.morgan@roswellpark.org", role = "aut", comment = c(ORCID = "0000-0002-5874-8148")), person("Marcel", "Ramos", email = "marcel.ramos@roswellpark.org", role = c("ctb", "cre"), comment = c(ORCID = "0000-0002-3242-0582")))
+# Imports: utils
+# Suggests: BiocStyle, BiocVersion, remotes, testthat, knitr, withr
+# BugReports: https://github.com/Bioconductor/BiocManager/issues
+# VignetteBuilder: knitr
+# License: Artistic-2.0
+# Encoding: UTF-8
+# RoxygenNote: 6.1.1
+# NeedsCompilation: no
+# Packaged: 2019-10-07 15:25:34 UTC; mr148
+# Author: Martin Morgan [aut] (<https://orcid.org/0000-0002-5874-8148>), Marcel Ramos [ctb, cre] (<https://orcid.org/0000-0002-3242-0582>)
+# Maintainer: Marcel Ramos <marcel.ramos@roswellpark.org>
+# Repository: CRAN
+# Date/Publication: 2019-10-07 17:20:08 UTC

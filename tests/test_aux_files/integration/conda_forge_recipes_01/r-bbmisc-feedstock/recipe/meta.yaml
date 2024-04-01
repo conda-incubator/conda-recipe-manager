@@ -1,0 +1,61 @@
+{% set version = "1.13" %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-bbmisc
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/BBmisc_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/BBmisc/BBmisc_{{ version }}.tar.gz
+  sha256: 1145dcf9fed15e7beeaa4a5c7075d8a8badd17c8246838cd63e40cd9551e4405
+
+build:
+  merge_build_host: true  # [win]
+  number: 2
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - cross-r-base {{ r_base }}  # [build_platform != target_platform]
+    - r-data.table               # [build_platform != target_platform]
+    - r-checkmate                # [build_platform != target_platform]
+    - {{ compiler('c') }}              # [not win]
+    - {{ compiler('m2w64_c') }}        # [win]
+    - {{ posix }}filesystem        # [win]
+    - {{ posix }}make
+    - {{ posix }}sed               # [win]
+    - {{ posix }}coreutils         # [win]
+    - {{ posix }}zip               # [win]
+    - cross-r-base {{ r_base }}    # [build_platform != target_platform]
+  host:
+    - r-base
+    - r-checkmate >=1.8.0
+    - r-data.table
+  run:
+    - r-base
+    - {{ native }}gcc-libs         # [win]
+    - r-checkmate >=1.8.0
+    - r-data.table
+
+test:
+  commands:
+    - $R -e "library('BBmisc')"           # [not win]
+    - "\"%R%\" -e \"library('BBmisc')\""  # [win]
+
+about:
+  home: https://github.com/berndbischl/BBmisc
+  license: BSD-2-Clause
+  summary: Miscellaneous helper functions for and from B. Bischl and some other guys, mainly for package development.
+  license_family: BSD
+  license_file:
+    - {{ environ["PREFIX"] }}/lib/R/share/licenses/BSD_2_clause
+    - LICENSE
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r

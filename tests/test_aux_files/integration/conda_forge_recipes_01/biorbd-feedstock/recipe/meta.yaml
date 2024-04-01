@@ -1,0 +1,72 @@
+{% set name = "biorbd" %}
+{% set version = "1.11.0" %}
+{% set build_num = 0 %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/pyomeca/{{ name }}/archive/Release_{{ version }}.tar.gz
+  sha256: 6053ebf73767656cac6e293ff3bd8eae4bc509ccb1265d42b1ca168655ba0e73
+
+build:
+  number: {{ build_num }}
+  rpaths:
+    - lib/
+    - lib/{{ name }}/
+  run_exports:
+    - {{ pin_subpackage('biorbd', max_pin='x.x') }}
+  skip: true  # [py<310]
+
+requirements:
+  build:
+    - cmake
+    - swig
+    - pkgconfig
+    - rbdl
+    - tinyxml
+    - ipopt
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - numpy                                  # [build_platform != target_platform]
+    - ninja
+    - {{ compiler('cxx') }}
+  host:
+    - python
+    - numpy
+    - rbdl
+    - tinyxml
+    - ipopt
+  run:
+    - rbdl
+    - tinyxml
+    - ipopt
+    - python
+    - scipy
+    - {{ pin_compatible('numpy') }}
+
+test:
+  commands:
+    - test -f $PREFIX/lib/biorbd_casadi/libbiorbd_casadi$SHLIB_EXT  # [unix]
+    - test -f $PREFIX/lib/biorbd_eigen/libbiorbd_eigen$SHLIB_EXT  # [unix]
+    - if not exist %PREFIX%\\Lib\\biorbd_casadi*.lib exit 1  # [win]
+    - if not exist %PREFIX%\\Lib\\biorbd_eigen*.lib exit 1  # [win]
+  imports:
+    - biorbd  # [not arm64]
+    - biorbd_casadi  # [not arm64]
+
+about:
+  home: http://github.com/pyomeca/biorbd
+  license: MIT
+  license_file: LICENSE
+  summary: 'Biomechanical add-ons to the RigidBody Dynamics Library '
+
+  description: |
+    Biomechanical add-ons to the RigidBody Dynamics Library .
+  doc_url: https://github.com/pyomeca/biorbd/
+  dev_url: https://github.com/pyomeca/biorbd/
+
+extra:
+  recipe-maintainers:
+    - pariterre

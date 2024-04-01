@@ -1,0 +1,53 @@
+{% set name = "blackdoc" %}
+{% set version = "0.3.9" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: b1da5ca93550081fc3f1b34bfdc731431ee74c378ea63abb31771a222ef5d053
+
+build:
+  number: 0
+  noarch: python
+  entry_points:
+    - blackdoc=blackdoc.__main__:main
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.8
+    - setuptools >=42
+    - setuptools_scm >=3.4
+    - tomli
+  run:
+    - black
+    - more-itertools
+    - python >=3.8
+    - tomli
+    - rich
+
+test:
+  imports:
+    - blackdoc
+    - blackdoc.formats
+  commands:
+    - pip check
+    - blackdoc --help
+    - python -c 'from blackdoc import __version__; assert __version__ == "{{ version }}"'
+  requires:
+    - pip
+
+about:
+  home: https://github.com/keewis/blackdoc
+  summary: run black on documentation code snippets
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - keewis

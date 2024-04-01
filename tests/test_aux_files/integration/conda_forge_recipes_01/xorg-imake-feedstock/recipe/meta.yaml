@@ -1,0 +1,54 @@
+{% set xorg_name = "imake" %}
+{% set xorg_category = "util" %}
+{% set name = "xorg-" ~ xorg_name %}
+{% set version = "1.0.8" %}
+{% set sha256 = "b8d2e416b3f29cd6482bcffaaf19286d32917a164d07102a0e531ccd41a2a702" %}
+{% set am_version = "1.15" %} # keep synchronized with build.sh
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ xorg_name }}-{{ version }}.tar.bz2
+  url: https://www.x.org/releases/individual/{{ xorg_category }}/{{ xorg_name }}-{{ version }}.tar.bz2
+  sha256: {{ sha256 }}
+  patches:
+    - windows.patch  # [win]
+
+build:
+  number: 0
+  detect_binary_files_with_prefix: true
+
+requirements:
+  build:
+    - m2-autoconf  # [win]
+    - m2-automake{{ am_version }}  # [win]
+    - m2-libtool  # [win]
+    - m2w64-pkg-config  # [win]
+    - pkg-config  # [not win]
+    - posix  # [win]
+    - {{ compiler('c') }}        # [unix]
+    - {{ compiler('m2w64_c') }}  # [win]
+    - {{ compiler('cxx') }}        # [unix]
+    - {{ compiler('m2w64_cxx') }}  # [win]
+  host:
+    - xorg-util-macros
+    - xorg-xproto
+  run:
+
+test:
+  commands:
+    - conda inspect linkages -p $PREFIX $PKG_NAME  # [not win]
+    - conda inspect objects -p $PREFIX $PKG_NAME  # [osx]
+
+about:
+  home: https://www.x.org/
+  license: MIT
+  license_family: MIT
+  license_file: COPYING
+  summary: 'The X.org incarnation of the X11 IMake utility.'
+
+extra:
+  recipe-maintainers:
+    - pkgw

@@ -1,0 +1,192 @@
+{% set name = "cadabra2" %}
+{% set version = "2.3.0" %}
+
+package:
+  name: cadabra2-split
+  version: {{ version }}
+
+source:
+  url: https://github.com/kpeeters/cadabra2/releases/download/{{ version }}/cadabra2-{{ version }}.tar.gz
+  sha256: 144b4123e0e1f89592dc5e51e30c0e3ecf819a3288f5e1c88bddc7474e9f8a56
+
+build:
+  number: 8
+  skip: True  # [win]
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - cmake
+    - make
+    - pkg-config
+    - {{ cdt('libice-devel') }}  # [linux]
+    - {{ cdt('libsm-devel') }}  # [linux]
+    - {{ cdt('libx11-devel') }}  # [linux]
+    - {{ cdt('libxcomposite-devel') }}  # [linux]
+    - {{ cdt('libxcursor-devel') }}  # [linux]
+    - {{ cdt('libxdamage-devel') }}  # [linux]
+    - {{ cdt('libxext-devel') }}  # [linux]
+    - {{ cdt('libxi-devel') }}  # [linux]
+    - {{ cdt('libxinerama-devel') }}  # [linux]
+    - {{ cdt('libxfixes-devel') }}  # [linux]
+    - {{ cdt('libxrandr-devel') }}  # [linux]
+    - {{ cdt('libxrender-devel') }}  # [linux]
+    - {{ cdt('libxtst-devel') }}  # [linux]
+    - {{ cdt('mesa-libEGL-devel') }}  # [linux]
+    - {{ cdt('mesa-libGL-devel') }}  # [linux]
+    - {{ cdt('xorg-x11-proto-devel') }}  # [linux]
+
+  host:
+    - python
+    - gmp
+    - jsoncpp
+    - pybind11
+
+    - boost-cpp
+    - sqlite
+    - pcre
+    - gtkmm-3.0
+    - glibmm
+    - cairomm-1.0
+    - glib
+    - sigcpp-2.0
+    - pangomm-1.4
+    - cairo
+    - atkmm-1.6
+    - gtkmm
+    
+    - xeus
+    - zeromq
+    - cppzmq
+    - nlohmann_json
+    - xtl
+    - libuuid
+    # Needed for ctest
+    - sympy
+
+outputs:
+  - name: cadabra2
+    requirements:
+      build:
+        - {{ compiler('c') }}
+        - {{ compiler('cxx') }}
+      host:
+        - python
+        - gmp
+        - pybind11
+        - jsoncpp
+      run:
+        - python
+        - sympy
+        - matplotlib-base
+    files:
+      - lib/python*/site-packages/cdb/**/*
+      - lib/python*/site-packages/cadabra2.so
+      - lib/python*/site-packages/cdb_appdirs.py
+      - lib/python*/site-packages/cadabra2_defaults.py
+      - share/man/man1/cadabra2.1
+      - share/cadabra2/**/*
+      - bin/cadabra2
+    test:
+      imports:
+        - cadabra2
+      commands:
+        - test -f $PREFIX/share/cadabra2/python/cadabra2.so
+        - test -f $PREFIX/share/cadabra2/latex/preamble.tex
+
+  - name: cadabra2-gtk
+    requirements:
+      build:
+        - {{ compiler('c') }}
+        - {{ compiler('cxx') }}
+      host:
+        - gtkmm-3.0
+        - glibmm
+        - cairomm-1.0
+        - glib
+        - sigcpp-2.0
+        - pangomm-1.4
+        - cairo
+        - atkmm-1.6
+        - jsoncpp
+        - boost-cpp
+        - sqlite
+        - python
+      run:
+        # Remove these when they get run_exports
+        - {{ pin_compatible("cairo") }}
+        - {{ pin_compatible("glibmm") }}
+        - {{ pin_compatible("glib") }}
+        - boost-cpp
+        - python
+        - {{ pin_subpackage("cadabra2", exact=True) }}
+      run_constrained:
+        - cadabra2-jupyter-kernel {{ version }}
+    files:
+      - bin/cadabra2-gtk
+      - bin/cadabra2latex
+      - bin/cadabra-server
+      - bin/cadabra2cadabra
+      - bin/cadabra2html
+      - bin/cadabra2python
+      - bin/cadabra2-cli
+      - share/icons/**/cadabra2*
+      - share/man/man1/cadabra2-gtk.1
+      - share/man/man1/cadabra-server.1
+      - share/man/man1/cadabra2cadabra.1
+      - share/man/man1/cadabra2html.1
+      - share/man/man1/cadabra2python.1
+      - share/applications/cadabra2*
+    test:
+      commands:
+        - test -f $PREFIX/bin/cadabra2-gtk
+
+  - name: cadabra2-jupyter-kernel
+    build:
+      skip: True  # [win]
+    requirements:
+      build:
+        - {{ compiler('c') }}
+        - {{ compiler('cxx') }}
+      host:
+        - xeus
+        - libuuid
+        - nlohmann_json
+        - python
+        - boost-cpp
+        - jsoncpp
+        - glibmm
+      run:
+        - python
+        - boost-cpp
+        # Remove these when they get run_exports
+        - {{ pin_compatible("glibmm") }}
+        - {{ pin_subpackage("cadabra2", exact=True) }}
+      run_constrained:
+        - cadabra2-gtk {{ version }}
+
+    files:
+      - bin/cadabra-jupyter-kernel
+      - share/jupyter/kernels/cadabra/*
+    test:
+      commands:
+        - test -f $PREFIX/bin/cadabra-jupyter-kernel
+
+
+about:
+  home: https://github.com/kpeeters/cadabra2
+  license: GPL-3.0-only
+  license_family: GPL
+  license_file:
+    - LICENSE
+    - libs/websocketpp/COPYING
+    - libs/pybind11/LICENSE
+    - libs/linenoise/LICENSE
+    - libs/tiny-process-library/LICENSE
+    - libs/whereami/LICENSE.WTFPLv2
+  summary: 'a field-theory motivated approach to computer algebra'
+
+extra:
+  recipe-maintainers:
+    - isuruf

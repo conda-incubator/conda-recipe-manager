@@ -1,0 +1,37 @@
+{% set version = "3.6.1" %}
+
+package:
+  name: singledispatch
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/s/singledispatch/singledispatch-{{ version }}.tar.gz
+  sha256: 58b46ce1cc4d43af0aac3ac9a047bdb0f44e05f0b2fa2eec755863331700c865
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python
+    - pip
+    - setuptools
+  run:
+    - python
+    - six
+
+test:
+  imports:
+    - singledispatch
+
+about:
+  home: http://docs.python.org/3/library/functools.html#functools.singledispatch
+  license: MIT
+  license_file: LICENSE
+  summary: This library brings functools.singledispatch from Python 3.4 to Python 2.6-3.3.
+
+extra:
+  recipe-maintainers:
+    - jakirkham

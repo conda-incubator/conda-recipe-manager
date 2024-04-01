@@ -1,0 +1,50 @@
+{% set name = "misic-napari" %}
+{% set version = "0.2.3" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/misic-napari-{{ version }}.tar.gz
+  sha256: 1863713041dfe21f9a1b43a94af1cfc685ac4fab7ac88356f57376e0e4a8e158
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+    - setuptools-scm
+  run:
+    - magicgui
+    - napari
+    - napari-plugin-engine
+    - numpy
+    - python >=3.6
+    - tensorflow >=2
+    - scikit-image
+    - scipy
+
+test:
+  imports:
+    - misic_ui
+  commands:
+    - pip list
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/pswapnesh/MiSiC
+  summary: Segmentation of bacteria agnostic to imaging modality
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - goanpeca
+    - jaimergp

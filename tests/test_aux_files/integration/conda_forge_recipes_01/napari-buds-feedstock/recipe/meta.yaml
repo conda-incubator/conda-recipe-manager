@@ -1,0 +1,58 @@
+{% set name = "napari-buds" %}
+{% set version = "0.1.6" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/napari-buds-{{ version }}.tar.gz
+  sha256: 8e2f2028447c4544540ad81d90b9f4db840eae7ca2ef124f4ec29f4d06f2a2c6
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+  script_env:
+    - QT_QPA_PLATFORM=offscreen
+
+requirements:
+  host:
+    - pip
+    - python >=3.8
+  run:
+    - magicgui
+    - napari
+    - numpy
+    - python >=3.8
+    - qtpy
+    - pandas
+    - magic-class
+    - scipy
+    - scikit-learn
+    - scikit-image
+    - matplotlib-base
+    - joblib
+    - imageio-ffmpeg
+    - stackview
+    - jupyterlab
+
+test:
+  imports:
+    - napari_buds
+  commands:
+    - pip list
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/SanderSMFISH/napari-buds
+  summary: Random-forest automated bud annotation
+  license: BSD-3-Clause
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - goanpeca
+    - jaimergp

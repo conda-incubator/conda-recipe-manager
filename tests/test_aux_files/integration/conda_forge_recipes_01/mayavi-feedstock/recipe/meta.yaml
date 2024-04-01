@@ -1,0 +1,75 @@
+{% set version = "4.8.1" %}
+
+package:
+  name: mayavi
+  version: {{ version }}
+
+source:
+  fn: mayavi-{{ version }}.tar.gz
+  url: https://github.com/enthought/mayavi/archive/{{ version }}.tar.gz
+  sha256: 903dc4fe340ddfbb5245b3da92d244912b36f2043aaeea938788689fb965cb1c
+  patches:
+    # Waiting for a release so we can drop this patch, generated in the mayavi source dir with:
+    # git diff 4.8.1 origin/include -- . ':(exclude)*.yml' > ../mayavi-feedstock/recipe/since_release.patch
+    # while on the "larsoner/include" branch
+    - since_release.patch
+
+build:
+  number: 8
+  entry_points:
+    - mayavi2 = mayavi.scripts.mayavi2:main
+    - tvtk_doc = tvtk.tools.tvtk_doc:main
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - python                                 # [build_platform != target_platform]
+    - numpy                                  # [build_platform != target_platform]
+    - cython                                 # [build_platform != target_platform]
+    - vtk                                    # [build_platform != target_platform]
+    - qt-main                                # [build_platform != target_platform]
+  host:
+    - python
+    - pip
+    - cython
+    - numpy
+    - vtk
+    - qt-main
+    - traitsui
+    - apptools
+  run:
+    - python
+    - {{ pin_compatible('numpy') }}
+    - vtk
+    - traitsui
+    - pyface
+    - apptools
+    - envisage
+    - pyqt >=4,<6
+    - setuptools
+
+test:
+  commands:
+    - mayavi2 --help
+  imports:
+    - tvtk
+    - tvtk.array_ext
+    - mayavi
+
+about:
+  home: https://github.com/enthought/mayavi
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE.txt
+  summary: The Mayavi scientific data 3-dimensional visualizers
+  doc_url: http://docs.enthought.com/mayavi/mayavi
+  dev_url: https://github.com/enthought/mayavi
+
+extra:
+  recipe-maintainers:
+    - msarahan
+    - grlee77
+    - dfroger
+    - cadair
+    - larsoner

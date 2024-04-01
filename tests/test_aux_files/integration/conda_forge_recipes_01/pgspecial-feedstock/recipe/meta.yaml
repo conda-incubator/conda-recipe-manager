@@ -1,0 +1,46 @@
+{% set name = "pgspecial" %}
+{% set version = "2.1.1" %}
+{% set sha256 = "a38239cd961fac33ce6da35c466d758acb6f942901598d7df74e5b82fe6f5636" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - python >=3.6
+    - pip
+    - setuptools
+  run:
+    - python >=3.6
+    - click >=4.1
+    - psycopg >=3.0.10
+    - sqlparse >=0.1.19
+
+test:
+  imports:
+    - pgspecial
+    - pgspecial.help
+
+about:
+  home: http://pgcli.com
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: License.txt
+  summary: Meta-commands handler for Postgres Database.
+  dev_url: https://github.com/dbcli/pgspecial
+
+extra:
+  recipe-maintainers:
+    - mariusvniekerk
+    - dhirschfeld

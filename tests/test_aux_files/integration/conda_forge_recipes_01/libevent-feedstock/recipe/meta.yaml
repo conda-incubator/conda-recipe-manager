@@ -1,0 +1,95 @@
+{% set version = "2.1.12" %}
+
+package:
+  name: libevent
+  version: {{ version }}
+
+source:
+  url: https://github.com/libevent/libevent/archive/refs/tags/release-{{ version }}-stable.tar.gz
+  sha256: 7180a979aaa7000e1264da484f712d403fcf7679b1e9212c4e3d09f5c93efc24
+  patches:
+    - patches/0001-Fix-destination-for-DLLs-lib-bin.patch
+    - patches/0002-link-correct-libs.patch                 # [osx and arm64]
+    # libevent brings its own "Find myself" CMake setup; it only
+    # looks in $PREFIX/lib, but on windows the DLLs are in /bin...
+    - patches/0003-search-for-libs-PREFIX-bin.patch        # [win]
+
+build:
+  number: 1
+  run_exports:
+    # https://abi-laboratory.pro/tracker/timeline/libevent/
+    - {{ pin_subpackage('libevent', max_pin='x.x.x') }}
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - cmake
+    - ninja
+  host:
+    - openssl
+
+test:
+  requires:
+    - python *
+    # cmake needs compiler to be able to run package detection, see
+    # https://discourse.cmake.org/t/questions-about-find-package-cli-msvc/6194
+    - {{ compiler('cxx') }}
+    - cmake
+    - ninja
+    - pkg-config
+  source_files:
+    - event_rpcgen.py
+    - test/
+  files:
+    - cmake_test/
+  commands:
+    # Check for headers.
+    - test -d "${PREFIX}/include/event2"        # [unix]
+    - if not exist %LIBRARY_INC%\event2 exit 1  # [win]
+
+    # Check for libraries.
+    {% set libs = [
+        "event", "event_core", "event_extra", "event_openssl"
+    ] + (not win) * ["event_pthreads"] %}
+
+    {% for each_lib in libs %}
+    # presence of shared libs
+    - test -f "${PREFIX}/lib/lib{{ each_lib }}.dylib"         # [osx]
+    - test -f "${PREFIX}/lib/lib{{ each_lib }}.so"            # [linux]
+    - if not exist "%LIBRARY_LIB%/{{ each_lib }}.lib" exit 1  # [win]
+    - if not exist "%LIBRARY_BIN%/{{ each_lib }}.dll" exit 1  # [win]
+
+    # absence of static libs
+    - test ! -f "${PREFIX}/lib/lib{{ each_lib }}.a"           # [unix]
+
+    # pkg-config metadata
+    - pkg-config --print-errors --exact-version "{{ version }}" lib{{ each_lib }}
+    {% endfor %}
+
+    # Run included Python script.
+    - python event_rpcgen.py test/regress.rpc test/regress.gen.h test/regress.gen.c
+
+    # CMake integration
+    - cd cmake_test
+    - cmake -GNinja $CMAKE_ARGS .   # [unix]
+    - cmake -GNinja %CMAKE_ARGS% .  # [win]
+
+about:
+  home: http://libevent.org/
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  description: |
+    The libevent API provides a mechanism to execute a callback function when
+    a specific event occurs on a file descriptor or after a timeout has been
+    reached. Furthermore, libevent also supports callbacks due to signals or
+    regular timeouts.
+  summary: An event notification library.
+  doc_url: http://www.wangafu.net/~nickm/libevent-1.4/doxygen/html/
+  dev_url: https://github.com/libevent/libevent
+
+extra:
+  recipe-maintainers:
+    - jakirkham
+    - h-vetinari
+    - xhochy

@@ -1,0 +1,53 @@
+{% set name = "us" %}
+{% set version = "3.1.1" %}
+{% set bundle = "tar.gz" %}
+{% set hash = "e347963e8d24a1ca7437af443fa68591776847b50c8650d8ef0eb53482e705c2" %}
+{% set build = 1 %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.{{ bundle }}
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.{{ bundle }}
+  sha256: {{ hash }}
+
+build:
+  noarch: python
+  entry_points:
+    - states = us.cli.states:main
+  number: {{ build }}
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+    - setuptools
+  run:
+    - python >=3.6
+    - jellyfish ==0.11.2
+    - setuptools
+
+test:
+  imports:
+    - us
+    - us.cli
+
+  commands:
+    - states --help
+
+about:
+  home: https://github.com/unitedstates/python-us
+  license: BSD-3-Clause
+  license_file: LICENSE
+  license_family: BSD
+  summary: US state meta information and other fun stuff
+  dev_url: https://github.com/unitedstates/python-us
+
+extra:
+  recipe-maintainers:
+    - raybellwaves
+    - pmlandwehr
+    - dorisjlee

@@ -1,0 +1,50 @@
+{% set name = "pynldas2" %}
+{% set version = "0.16.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/pynldas2-{{ version }}.tar.gz
+  sha256: ed7d49c927b57988dedad7618c3144688c5f8b5f0a104dd24ec01d309d306dd0
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.8
+    - setuptools >=42
+    - setuptools-scm >=7
+    - pip
+  run:
+    - python >=3.8
+    - async-retriever <0.17,>=0.16
+    - h5netcdf
+    - numpy >=1.21
+    - pandas >=1.0
+    - pygeoutils <0.17,>=0.16
+    - pyproj >=2.2
+    - rioxarray >=0.11
+    - xarray >=2022.03.0
+
+test:
+  imports:
+    - pynldas2
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/hyriver/pynldas2
+  summary: Get NLDAS2 forcing data.
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - cheginit

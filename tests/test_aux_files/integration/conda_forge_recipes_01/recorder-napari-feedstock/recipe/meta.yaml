@@ -1,0 +1,92 @@
+{% set name = "recorder-napari" %}
+{% set version = "0.2.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/recOrder-napari-{{ version }}.tar.gz
+  sha256: 9390bbb1f94a775308c1a4067f660942db1c9026ff841ae732a26f36b17b62f3
+  patches:
+    - modules.patch
+    - qtpy.patch
+
+build:
+  entry_points:
+    - recorder = recOrder.scripts.cli:help
+    - recorder.reconstruct = recOrder.scripts.cli:reconstruct
+    - recorder.convert = recOrder.scripts.cli:convert
+    - recOrder = recOrder.scripts.cli:help
+    - recOrder.reconstruct = recOrder.scripts.cli:reconstruct
+    - recOrder.convert = recOrder.scripts.cli:convert
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - pip
+    - python >=3.8
+    - setuptools-scm
+  run:
+    - click >=8.0.1
+    - colorspacious >=1.1.2
+    - imageio !=2.11.0,!=2.22.1
+    - importlib-metadata
+    - matplotlib-base >=3.4.3  # Imported but not in requirements
+    - napari
+    - napari-ome-zarr >=0.3.2
+    - natsort >=7.1.1
+    - numpy ==1.23.5  # Original package ==1.23.5
+    - numpydoc
+    - opencv >=4.5.3.56
+    - psutil  # Imported but not in requirements
+    - packaging  # Imported but not in requirements
+    - pycromanager ==0.19.2  # Original package ==0.19.2
+    - pyqtgraph >=0.12.3
+    - python >=3.8
+    - pyyaml >=5.4.1
+    - qtpy
+    - scipy >=1.3.0  # Imported but not in requirements
+    - superqt >=0.2.4
+    - tifffile  # Imported but not in requirements
+    - tqdm >=4.61.1
+    - waveorder ==1.0.0rc0  # Original package ==1.0.0rc0
+    - zarr >=2.6.1  # Imported but not in requirements
+
+test:
+  imports:
+    - recOrder
+    - recOrder.acq
+    - recOrder.calib
+    - recOrder.compute
+    - recOrder.pipelines
+    - recOrder.plugin
+    - recOrder.scripts
+    - recOrder.scripts.md5_check_sum
+  commands:
+    - pip list
+    # - pip check
+    - recOrder --help
+    - recOrder.reconstruct --help
+    - recOrder.convert --help
+    - recorder --help
+    - recorder.reconstruct --help
+    - recorder.convert --help
+  requires:
+    - pip
+
+about:
+  home: https://pypi.org/project/recorder
+  summary: Computational microscopy toolkit for label-free imaging
+  license: BSD-2-Clause
+  license_file: LICENSE
+  dev_url: https://github.com/mehta-lab/recOrder
+
+extra:
+  recipe-maintainers:
+    - goanpeca
+    - jaimergp
+    - mattersoflight
+    - talonchandler

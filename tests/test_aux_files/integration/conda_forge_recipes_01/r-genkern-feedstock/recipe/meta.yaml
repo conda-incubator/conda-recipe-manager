@@ -1,0 +1,72 @@
+{% set version = '1.2-60' %}
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-genkern
+  version: {{ version|replace("-", "_") }}
+
+source:
+  url:
+    - {{ cran_mirror }}/src/contrib/GenKern_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/GenKern/GenKern_{{ version }}.tar.gz
+  sha256: cc74225fe6a092b4b98bebcc42b5ce5632dd492cc2368b4e8087fed87c6a158b
+
+build:
+  merge_build_host: True  # [win]
+  number: 1007
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - {{ compiler('c') }}              # [not win]
+    - {{ compiler('m2w64_c') }}        # [win]
+    - {{ posix }}filesystem        # [win]
+    - {{ posix }}make
+    - {{ posix }}sed               # [win]
+    - {{ posix }}coreutils         # [win]
+    - {{ posix }}zip               # [win]
+    - cross-r-base {{ r_base }}    # [build_platform != target_platform]
+  host:
+    - r-base
+    - r-kernsmooth
+  run:
+    - r-base
+    - {{ native }}gcc-libs         # [win]
+    - r-kernsmooth
+
+test:
+  commands:
+    - $R -e "library('GenKern')"           # [not win]
+    - "\"%R%\" -e \"library('GenKern')\""  # [win]
+
+about:
+  home: https://CRAN.R-project.org/package=GenKern
+  license: GPL-2.0-only
+  summary: Computes generalised KDEs
+  license_family: GPL2
+  license_file:
+    - '{{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-2'
+
+extra:
+  recipe-maintainers:
+    - conda-forge/r
+    - FrodePedersen
+    - ArneKr
+    - MathiasHaudgaard
+
+# Package: GenKern
+# Version: 1.2-60
+# Date: 10/11/2013
+# Title: Functions for generating and manipulating binned kernel density estimates
+# Author: David Lucy <d.lucy@lancaster.ac.uk> and Robert Aykroyd <r.g.aykroyd@leeds.ac.uk>
+# Maintainer: David Lucy <d.lucy@lancaster.ac.uk>
+# Description: Computes generalised KDEs
+# Depends: KernSmooth, utils
+# License: GPL-2
+# Packaged: 2013-11-10 10:46:24 UTC; lucy
+# NeedsCompilation: yes
+# Repository: CRAN
+# Date/Publication: 2013-11-11 12:50:45

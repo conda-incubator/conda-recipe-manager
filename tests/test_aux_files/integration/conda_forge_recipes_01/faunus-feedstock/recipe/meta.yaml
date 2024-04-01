@@ -1,0 +1,78 @@
+{% set name = "faunus" %}
+{% set version = "2.12.0" %}
+{% set sha256 = "00e2683500f5028d729cb02fc587bba6d5ab7a396de693b6570284e108a494a9" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ version }}.tar.gz
+  url: https://github.com/mlund/{{ name }}/archive/v{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  number: 0
+  skip: true  # [win or py<38]
+  script:
+    - export CXXFLAGS="${CXXFLAGS} -D_LIBCPP_DISABLE_AVAILABILITY -DCATCH_CONFIG_NO_CPP17_UNCAUGHT_EXCEPTIONS -fno-aligned-allocation"  # [osx]
+    - unset _CONDA_PYTHON_SYSCONFIGDATA_NAME  # [linux]
+    - cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DPython_EXECUTABLE="$PYTHON" -DCMAKE_INSTALL_PREFIX:PATH=$PREFIX -DPYBIND11_FINDPYTHON=on -DENABLE_PYTHON=on -DVERSION_STRING=v{{ version }}  # [mpi == 'nompi']
+    - cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DPython_EXECUTABLE="$PYTHON" -DCMAKE_INSTALL_PREFIX:PATH=$PREFIX -DPYBIND11_FINDPYTHON=on -DENABLE_PYTHON=on -DVERSION_STRING=v{{ version }} -DENABLE_MPI=on  # [mpi != 'nompi']
+    - make faunus pyfaunus
+    - make
+    - make install
+
+requirements:
+  run_constrained:
+    - __osx >={{ MACOSX_DEPLOYMENT_TARGET|default("10.9") }}  # [osx]
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - cmake >=3.24
+    - make 4
+    - llvm-openmp  # [osx]
+    - libgomp      # [linux]
+    - zlib         # [linux]
+  host:
+    - {{ mpi }}  # [mpi != 'nompi']
+    - python
+    - pandoc 2    # [not arm64]
+    - pypandoc 1  # [not arm64]
+    - beautifulsoup4 4
+    - ruamel.yaml <0.19
+    - jinja2
+    - sdl2
+  run:
+    - {{ mpi }}  # [mpi != 'nompi']
+    - python
+    - ruamel.yaml <0.19
+    - pygments >=2.2
+    - jinja2
+    - jsonschema >=3
+
+test:
+  commands:
+    - test -x $PREFIX/bin/faunus
+    - $PREFIX/bin/faunus --version
+  imports:
+    - pyfaunus
+
+about:
+  home: https://github.com/mlund/faunus
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: A Framework for Molecular Monte Carlo Simulations
+  description: |
+    Faunus is a tool for molecular simulations using Metropolis-Hastings
+    Monte Carlo techniques. It is written in C++20 and has experimental
+    support for python bindings.
+  doc_url: https://faunus.readthedocs.io
+  dev_url: https://github.com/mlund/faunus
+
+extra:
+  recipe-maintainers:
+    - mlund

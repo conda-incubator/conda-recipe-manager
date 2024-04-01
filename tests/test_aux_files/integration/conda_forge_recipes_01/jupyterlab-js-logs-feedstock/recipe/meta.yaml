@@ -1,0 +1,43 @@
+{% set name = "jupyterlab-js-logs" %}
+{% set version = "0.2.6" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: b0e03217f579f95b640192ed4d8844103a8c88780d82e9ad11ce932a7163f03a
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+    - jupyter-packaging >=0.10,<2
+  run:
+    - python >=3.6
+
+test:
+  commands:
+    - pip check
+    - test -f "${PREFIX}/share/jupyter/labextensions/jupyterlab-js-logs/package.json"                                    # [unix]
+    - if exist %PREFIX%\\share\\jupyter\\labextensions\\jupyterlab-js-logs\\package.json (exit 0) else (exit 1)          # [win]
+  requires:
+    - pip
+
+about:
+  home: https://github.com/QuantStack/jupyterlab-js-logs
+  summary: JupyterLab extension to show the logs from the browser developer tools console
+  license: BSD-3-Clause
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - jtpio
+    - hbcarlos
