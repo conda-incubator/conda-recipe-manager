@@ -126,6 +126,7 @@ def test_loading_obj_in_list() -> None:
         "curl.yaml",  # Complex, multi-output recipe
         "gsm-amzn2-aarch64.yaml",  # Regression test: Contains `- '*'` string that failed to parse
         "pytest-pep8.yaml",
+        "google-cloud-cpp.yaml",
     ],
 )
 def test_round_trip(file: str) -> None:
@@ -363,6 +364,19 @@ def test_render_to_object_multi_output() -> None:
             "pytest-pep8.yaml",
             [],
             [
+                "Required field missing: /about/license_url",
+            ],
+        ),
+        # Regression test: TODO
+        (
+            "google-cloud-cpp.yaml",
+            [],
+            [
+                "A non-list item had a selector at: /outputs/0/script",
+                "A non-list item had a selector at: /outputs/1/script",
+                "A non-list item had a selector at: /outputs/0/script",
+                "A non-list item had a selector at: /outputs/1/script",
+                "Required field missing: /about/description",
                 "Required field missing: /about/license_url",
             ],
         ),
