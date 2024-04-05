@@ -882,7 +882,7 @@ class RecipeParser:
             test_files_path = RecipeParser.append_to_path(test_path, "/files")
             if new_recipe.contains_value(test_files_path):
                 test_files_value = new_recipe.get_value(test_files_path)
-                # TODO: Figure out, replace does not work here, produces `- null`
+                # TODO: Fix, replace does not work here, produces `- null`, Issue #20
                 # _patch_and_log({"op": "replace", "path": test_files_path, "value": None})
                 _patch_and_log({"op": "remove", "path": test_files_path})
                 _patch_and_log({"op": "add", "path": test_files_path, "value": None})
