@@ -7,7 +7,7 @@ from __future__ import annotations
 import pytest
 
 from conda_recipe_manager.parser.types import MessageCategory
-from tests.conftest import TEST_FILES_PATH, load_file, load_recipe_convert
+from tests.file_loading import TEST_FILES_PATH, load_file, load_recipe_convert
 
 
 @pytest.mark.parametrize(

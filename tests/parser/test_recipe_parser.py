@@ -12,7 +12,7 @@ from conda_recipe_manager.parser.enums import SelectorConflictMode
 from conda_recipe_manager.parser.exceptions import JsonPatchValidationException
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
 from conda_recipe_manager.types import JsonType
-from tests.conftest import TEST_FILES_PATH, load_file, load_recipe
+from tests.file_loading import TEST_FILES_PATH, load_file, load_recipe
 
 # Long multi-line description string found in the `simple-recipe.yaml` test file
 SIMPLE_DESCRIPTION: Final[
