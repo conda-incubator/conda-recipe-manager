@@ -877,9 +877,24 @@ class RecipeParser:
             if not new_recipe.contains_value(test_path):
                 continue
 
-            _patch_move_base_path(test_path, "/files", "/files/recipe")
+            # Moving `files` to `files/recipe` is not possible in a single `move` operation as a new path has to be
+            # created in the path being moved.
+            test_files_path = RecipeParser.append_to_path(test_path, "/files")
+            if new_recipe.contains_value(test_files_path):
+                test_files_value = new_recipe.get_value(test_files_path)
+                # TODO: Fix, replace does not work here, produces `- null`, Issue #20
+                # _patch_and_log({"op": "replace", "path": test_files_path, "value": None})
+                _patch_and_log({"op": "remove", "path": test_files_path})
+                _patch_and_log({"op": "add", "path": test_files_path, "value": None})
+                _patch_and_log(
+                    {
+                        "op": "add",
+                        "path": RecipeParser.append_to_path(test_files_path, "/recipe"),
+                        "value": test_files_value,
+                    }
+                )
             # Edge case: `/source_files` exists but `/files` does not
-            if new_recipe.contains_value(RecipeParser.append_to_path(test_path, "/source_files")):
+            elif new_recipe.contains_value(RecipeParser.append_to_path(test_path, "/source_files")):
                 _patch_add_missing_path(test_path, "/files")
             _patch_move_base_path(test_path, "/source_files", "/files/source")
 
