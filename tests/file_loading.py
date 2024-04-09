@@ -11,7 +11,7 @@ from conda_recipe_manager.parser.recipe_parser import RecipeParser
 from conda_recipe_manager.parser.recipe_parser_convert import RecipeParserConvert
 
 # Path to supplementary files used in test cases
-TEST_FILES_PATH: Final[str] = "tests/test_aux_files"
+TEST_FILES_PATH: Final[Path] = Path(__file__).parent / "test_aux_files"
 
 
 def load_file(file: Path | str) -> str:
