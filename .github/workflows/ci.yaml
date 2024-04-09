@@ -58,7 +58,7 @@ jobs:
             conda activate conda-recipe-manager
             conda install -y -c conda-forge rattler-build
             convert -o recipe/recipe.yaml recipe/meta.yaml
-            rattler-build build -r recipe/
+            rattler-build build -r recipe/ --output-dir $HOME/output
   ## Integration tests ##
   integration-rattler:
       runs-on: ubuntu-latest
