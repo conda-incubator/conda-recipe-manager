@@ -10,7 +10,7 @@ from conda_recipe_manager.commands.convert import convert
 
 def test_usage() -> None:
     """
-    Ensure failure to provide a sub-command results in rendering the help menu
+    Smoke test that ensures rendering of the help menu
     """
     runner = CliRunner()
     # No commands are provided

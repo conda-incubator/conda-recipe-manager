@@ -18,6 +18,8 @@ from typing import Final, cast
 
 import click
 
+from conda_recipe_manager.commands.utils.print import print_err
+
 # Required file name for the recipe, specified in CEP-13
 NEW_FORMAT_RECIPE_FILE_NAME: Final[str] = "recipe.yaml"
 # When performing a bulk operation, overall "success" is indicated by the % of recipe files that were built
@@ -45,13 +47,6 @@ class BuildResult:
 
     code: ExitCode
     errors: list[str]
-
-
-def print_err(*args, **kwargs) -> None:  # type: ignore
-    """
-    Convenience wrapper that prints to STDERR
-    """
-    print(*args, file=sys.stderr, **kwargs)  # type: ignore
 
 
 def build_recipe(file: Path, path: Path, args: list[str]) -> tuple[str, BuildResult]:
