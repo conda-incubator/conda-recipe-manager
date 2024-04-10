@@ -13,7 +13,7 @@ build:
   noarch: python
   script: pip install . --no-deps --no-build-isolation -vv
   entry_points:
-    - convert = conda_recipe_manager.commands.convert:convert
+    - conda-recipe-manager = conda_recipe_manager.commands.conda_recipe_manager:conda_recipe_manager
 
 requirements:
   host:

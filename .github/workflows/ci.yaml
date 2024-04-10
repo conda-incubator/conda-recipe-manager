@@ -57,7 +57,7 @@ jobs:
             source $CONDA/bin/activate
             conda activate conda-recipe-manager
             conda install -y -c conda-forge rattler-build
-            convert -o recipe/recipe.yaml recipe/meta.yaml
+            conda-recipe-manager convert -o recipe/recipe.yaml recipe/meta.yaml
             mkdir -p ../temp
             rattler-build build -r recipe/ --output-dir=../temp
   ## Integration tests ##
@@ -78,5 +78,5 @@ jobs:
             source $CONDA/bin/activate
             conda activate conda-recipe-manager
             conda install -y -c conda-forge rattler-build
-            convert -m 0.80 -o recipe.yaml tests/test_aux_files/integration/${{ matrix.test-directory }}
-            rattler-bulk-build -m 0.30 tests/test_aux_files/integration/${{ matrix.test-directory }} --render-only
+            conda-recipe-manager convert -m 0.80 -o recipe.yaml tests/test_aux_files/integration/${{ matrix.test-directory }}
+            conda-recipe-manager rattler-bulk-build -m 0.30 tests/test_aux_files/integration/${{ matrix.test-directory }} --render-only
