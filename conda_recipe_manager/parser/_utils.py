@@ -2,6 +2,7 @@
 File:           _utils.py
 Description:    Provides private utility functions only used by the parser.
 """
+
 from __future__ import annotations
 
 import json

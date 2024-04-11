@@ -2,6 +2,7 @@
 File:           convert.py
 Description:    CLI for converting an old recipe file to the "new" format.
 """
+
 from __future__ import annotations
 
 import json
@@ -16,7 +17,7 @@ from typing import Final, Optional
 
 import click
 
-from conda_recipe_manager.parser.recipe_parser import RecipeParser
+from conda_recipe_manager.parser.recipe_parser_convert import RecipeParserConvert
 from conda_recipe_manager.parser.types import MessageCategory, MessageTable
 
 # Pre-CEP-13 name of the recipe file
@@ -112,9 +113,9 @@ def convert_file(file_path: Path, output: Optional[Path], print_output: bool) ->
         conversion_result.msg_tbl.add_message(MessageCategory.EXCEPTION, e_msg)
         return conversion_result
 
-    parser: RecipeParser
+    parser: RecipeParserConvert
     try:
-        parser = RecipeParser(recipe_content)
+        parser = RecipeParserConvert(recipe_content)
     except Exception as e:  # pylint: disable=broad-exception-caught
         e_msg = "EXCEPTION: An exception occurred while parsing the recipe file"
         if print_output:

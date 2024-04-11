@@ -2,6 +2,7 @@
 File:           types.py
 Description:    Provides public types, type aliases, constants, and small classes used by the parser.
 """
+
 from __future__ import annotations
 
 from enum import StrEnum, auto
