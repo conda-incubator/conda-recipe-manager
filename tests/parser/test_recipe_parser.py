@@ -17,9 +17,9 @@ from tests.file_loading import TEST_FILES_PATH, load_file, load_recipe
 
 # Long multi-line description string found in the `simple-recipe.yaml` test file
 SIMPLE_DESCRIPTION: Final[str] = (
-    "This is a PEP '561 type stub package for the toml package."
-    "\nIt can be used by type-checking tools like mypy, pyright,"
-    "\npytype, PyCharm, etc. to check code that uses toml."
+    "This is a PEP '561 type stub package for the toml package.\n"
+    "It can be used by type-checking tools like mypy, pyright,\n"
+    "pytype, PyCharm, etc. to check code that uses toml."
 )
 
 # Multiline string used to validate interpretation of the various multiline variations YAML allows
