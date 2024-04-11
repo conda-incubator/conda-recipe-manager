@@ -2,6 +2,7 @@
 File:           _types.py
 Description:    Provides private types, type aliases, constants, and small classes used by the parser and related files.
 """
+
 from __future__ import annotations
 
 import re

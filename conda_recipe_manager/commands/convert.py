@@ -2,6 +2,7 @@
 File:           convert.py
 Description:    CLI for converting an old recipe file to the "new" format.
 """
+
 from __future__ import annotations
 
 import json

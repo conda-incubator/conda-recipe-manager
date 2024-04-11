@@ -2,6 +2,7 @@
 File:           enums.py
 Description:    Provides enumerated types used by the parser.
 """
+
 from __future__ import annotations
 
 from enum import Enum

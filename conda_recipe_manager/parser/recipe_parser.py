@@ -11,6 +11,7 @@ Description:    Provides a class that takes text from a Jinja-formatted recipe f
                 - https://jsonpatch.com/
                 - https://datatracker.ietf.org/doc/html/rfc6902/
 """
+
 # Allows older versions of python to use newer forms of type annotation. There are major features introduced in >=3.9
 from __future__ import annotations
 

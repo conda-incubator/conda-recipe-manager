@@ -2,6 +2,7 @@
 File:           test_recipe_parser.py
 Description:    Unit tests for the RecipeParser class
 """
+
 from __future__ import annotations
 
 from typing import Final

@@ -2,6 +2,7 @@
 File:           test_convert_cli.py
 Description:    Tests the `convert` CLI
 """
+
 from click.testing import CliRunner
 
 from conda_recipe_manager.commands.convert import convert
