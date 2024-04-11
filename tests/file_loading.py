@@ -30,7 +30,7 @@ def load_recipe(file_name: str) -> RecipeParser:
     :param file_name: File name of the test recipe to load
     :returns: RecipeParser instance, based on the file
     """
-    recipe = load_file(f"{TEST_FILES_PATH}/{file_name}")
+    recipe = load_file(TEST_FILES_PATH / file_name)
     return RecipeParser(recipe)
 
 
