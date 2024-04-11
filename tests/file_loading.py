@@ -20,8 +20,7 @@ def load_file(file: Path | str) -> str:
     :param file: Filename of the file to read
     :returns: Text from the file
     """
-    with open(Path(file), "r", encoding="utf-8") as f:
-        return f.read()
+    return Path(file).read_text(encoding="utf-8")
 
 
 def load_recipe(file_name: str) -> RecipeParser:
