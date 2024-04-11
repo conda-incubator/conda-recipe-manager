@@ -40,5 +40,5 @@ def load_recipe_convert(file_name: str) -> RecipeParserConvert:
     :param file_name: File name of the test recipe to load
     :returns: RecipeParserConvert instance, based on the file
     """
-    recipe = load_file(f"{TEST_FILES_PATH}/{file_name}")
+    recipe = load_file(TEST_FILES_PATH / file_name)
     return RecipeParserConvert(recipe)
