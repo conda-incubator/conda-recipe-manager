@@ -39,16 +39,16 @@ class RecipeParserConvert(RecipeParser):
         # `copy.deepcopy()` produced some bizarre artifacts, namely single-line comments were being incorrectly rendered
         # as list members. Although inefficient, we have tests that validate round-tripping the parser and there
         # is no development cost in utilizing tools we already must maintain.
-        self.new_recipe: RecipeParser = RecipeParser(self.render())
-        self.msg_tbl = MessageTable()
+        self._new_recipe: RecipeParser = RecipeParser(self.render())
+        self._msg_tbl = MessageTable()
 
     def _patch_and_log(self, patch: JsonPatchType) -> None:
         """
         Convenience function that logs failed patches to the message table.
         :param patch: Patch operation to perform
         """
-        if not self.new_recipe.patch(patch):
-            self.msg_tbl.add_message(MessageCategory.ERROR, f"Failed to patch: {patch}")
+        if not self._new_recipe.patch(patch):
+            self._msg_tbl.add_message(MessageCategory.ERROR, f"Failed to patch: {patch}")
 
     def _patch_add_missing_path(self, base_path: str, ext: str, value: JsonType = None) -> None:
         """
@@ -59,7 +59,7 @@ class RecipeParserConvert(RecipeParser):
         :param value: `value` field for the patch-add operation
         """
         temp_path: Final[str] = RecipeParser.append_to_path(base_path, ext)
-        if self.new_recipe.contains_value(temp_path):
+        if self._new_recipe.contains_value(temp_path):
             return
         self._patch_and_log({"op": "add", "path": temp_path, "value": value})
 
@@ -72,7 +72,7 @@ class RecipeParserConvert(RecipeParser):
         :param new_ext: New extension to the base path of where the data should go
         """
         old_path: Final[str] = RecipeParser.append_to_path(base_path, old_ext)
-        if not self.new_recipe.contains_value(old_path):
+        if not self._new_recipe.contains_value(old_path):
             return
         self._patch_and_log({"op": "move", "from": old_path, "path": RecipeParser.append_to_path(base_path, new_ext)})
 
@@ -87,9 +87,9 @@ class RecipeParserConvert(RecipeParser):
         def _comparison(n: Node) -> int:
             return RecipeParser._canonical_sort_keys_comparison(n, tbl)
 
-        node = traverse(self.new_recipe._root, str_to_stack_path(sort_path))  # pylint: disable=protected-access
+        node = traverse(self._new_recipe._root, str_to_stack_path(sort_path))  # pylint: disable=protected-access
         if node is None:
-            self.msg_tbl.add_message(MessageCategory.WARNING, f"Failed to sort members of {sort_path}")
+            self._msg_tbl.add_message(MessageCategory.WARNING, f"Failed to sort members of {sort_path}")
             return
         if rename:
             node.value = rename
@@ -111,7 +111,7 @@ class RecipeParserConvert(RecipeParser):
         # of a `RecipeParser` tree. This will make it easier to build an upgrade-path, if we so choose to pursue one.
 
         # Log the original comments
-        old_comments: Final[dict[str, str]] = self.new_recipe.get_comments_table()
+        old_comments: Final[dict[str, str]] = self._new_recipe.get_comments_table()
 
         ## JINJA -> `context` object ##
 
@@ -119,9 +119,9 @@ class RecipeParserConvert(RecipeParser):
         # future developers' convenience.
         self._patch_and_log({"op": "add", "path": "/context", "value": None})
         # Filter-out any value not covered in the new format
-        for name, value in self.new_recipe._vars_tbl.items():
+        for name, value in self._new_recipe._vars_tbl.items():
             if not isinstance(value, (str, int, float, bool)):
-                self.msg_tbl.add_message(MessageCategory.WARNING, f"The variable `{name}` is an unsupported type.")
+                self._msg_tbl.add_message(MessageCategory.WARNING, f"The variable `{name}` is an unsupported type.")
                 continue
             self._patch_and_log({"op": "add", "path": f"/context/{name}", "value": value})
 
@@ -129,12 +129,12 @@ class RecipeParserConvert(RecipeParser):
         self._patch_and_log({"op": "add", "path": "/schema_version", "value": CURRENT_RECIPE_SCHEMA_FORMAT})
 
         # Swap all JINJA to use the new `${{ }}` format.
-        jinja_sub_locations: Final[list[str]] = self.new_recipe.search(Regex.JINJA_SUB)
+        jinja_sub_locations: Final[list[str]] = self._new_recipe.search(Regex.JINJA_SUB)
         for path in jinja_sub_locations:
-            value = self.new_recipe.get_value(path)
+            value = self._new_recipe.get_value(path)
             # Values that match the regex should only be strings. This prevents crashes that should not occur.
             if not isinstance(value, str):
-                self.msg_tbl.add_message(
+                self._msg_tbl.add_message(
                     MessageCategory.WARNING, f"A non-string value was found as a JINJA substitution: {value}"
                 )
                 continue
@@ -142,7 +142,7 @@ class RecipeParserConvert(RecipeParser):
             self._patch_and_log({"op": "replace", "path": path, "value": value})
 
         ## Convert selectors into ternary statements or `if` blocks ##
-        for selector, instances in self.new_recipe._selector_tbl.items():
+        for selector, instances in self._new_recipe._selector_tbl.items():
             for info in instances:
                 # Selectors can be applied to the parent node if they appear on the same line. We'll ignore these when
                 # building replacements.
@@ -167,7 +167,7 @@ class RecipeParserConvert(RecipeParser):
                 if not isinstance(info.node.value, bool):
                     # CEP-13 states that ONLY list members may use the `if/then/else` blocks
                     if not info.node.list_member_flag:
-                        self.msg_tbl.add_message(
+                        self._msg_tbl.add_message(
                             MessageCategory.WARNING, f"A non-list item had a selector at: {selector_path}"
                         )
                         continue
@@ -182,11 +182,11 @@ class RecipeParserConvert(RecipeParser):
                     }
                 # Apply the patch
                 self._patch_and_log(patch)
-                self.new_recipe.remove_selector(selector_path)
+                self._new_recipe.remove_selector(selector_path)
 
         # Cached copy of all of the "outputs" in a recipe. This is useful for easily handling multi and single output
         # recipes in 1 loop construct.
-        base_package_paths: Final[list[str]] = self.new_recipe.get_package_paths()
+        base_package_paths: Final[list[str]] = self._new_recipe.get_package_paths()
 
         # TODO Fix: comments are not preserved with patch operations (add a flag to `patch()`?)
 
@@ -197,28 +197,28 @@ class RecipeParserConvert(RecipeParser):
 
             # `run_exports`
             old_re_path = RecipeParser.append_to_path(base_path, "/build/run_exports")
-            if self.new_recipe.contains_value(old_re_path):
+            if self._new_recipe.contains_value(old_re_path):
                 requirements_path = RecipeParser.append_to_path(base_path, "/requirements")
                 new_re_path = RecipeParser.append_to_path(base_path, "/requirements/run_exports")
-                if not self.new_recipe.contains_value(requirements_path):
+                if not self._new_recipe.contains_value(requirements_path):
                     self._patch_and_log({"op": "add", "path": requirements_path, "value": None})
                 self._patch_and_log({"op": "move", "from": old_re_path, "path": new_re_path})
             # `ignore_run_exports`
             old_ire_path = RecipeParser.append_to_path(base_path, "/build/ignore_run_exports")
-            if self.new_recipe.contains_value(old_re_path):
+            if self._new_recipe.contains_value(old_re_path):
                 requirements_path = RecipeParser.append_to_path(base_path, "/requirements")
                 new_ire_path = RecipeParser.append_to_path(base_path, "/requirements/ignore_run_exports")
-                if not self.new_recipe.contains_value(requirements_path):
+                if not self._new_recipe.contains_value(requirements_path):
                     self._patch_and_log({"op": "add", "path": requirements_path, "value": None})
                 self._patch_and_log({"op": "move", "from": old_ire_path, "path": new_ire_path})
 
             # Perform internal section changes per `build/` section
             build_path = RecipeParser.append_to_path(base_path, "/build")
-            if not self.new_recipe.contains_value(build_path):
+            if not self._new_recipe.contains_value(build_path):
                 continue
 
             # `build/entry_points` -> `build/python/entry_points`
-            if self.new_recipe.contains_value(RecipeParser.append_to_path(build_path, "/entry_points")):
+            if self._new_recipe.contains_value(RecipeParser.append_to_path(build_path, "/entry_points")):
                 self._patch_add_missing_path(build_path, "/python")
             self._patch_move_base_path(build_path, "/entry_points", "/python/entry_points")
 
@@ -237,8 +237,8 @@ class RecipeParserConvert(RecipeParser):
         ]
         for field in about_required:
             path = f"/about/{field}"
-            if not self.new_recipe.contains_value(path):
-                self.msg_tbl.add_message(MessageCategory.WARNING, f"Required field missing: {path}")
+            if not self._new_recipe.contains_value(path):
+                self._msg_tbl.add_message(MessageCategory.WARNING, f"Required field missing: {path}")
 
         # Transform renamed fields
         about_rename: Final[list[tuple[str, str]]] = [
@@ -262,7 +262,7 @@ class RecipeParserConvert(RecipeParser):
         ]
         for field in about_deprecated:
             path = f"/about/{field}"
-            if self.new_recipe.contains_value(path):
+            if self._new_recipe.contains_value(path):
                 self._patch_and_log({"op": "remove", "path": path})
 
         ## `test` section changes and upgrades ##
@@ -271,14 +271,14 @@ class RecipeParserConvert(RecipeParser):
         # have to use their best judgement to manually break-up the test into multiple tests as they see fit.
         for base_path in base_package_paths:
             test_path = RecipeParser.append_to_path(base_path, "/test")
-            if not self.new_recipe.contains_value(test_path):
+            if not self._new_recipe.contains_value(test_path):
                 continue
 
             # Moving `files` to `files/recipe` is not possible in a single `move` operation as a new path has to be
             # created in the path being moved.
             test_files_path = RecipeParser.append_to_path(test_path, "/files")
-            if self.new_recipe.contains_value(test_files_path):
-                test_files_value = self.new_recipe.get_value(test_files_path)
+            if self._new_recipe.contains_value(test_files_path):
+                test_files_value = self._new_recipe.get_value(test_files_path)
                 # TODO: Fix, replace does not work here, produces `- null`, Issue #20
                 # self._patch_and_log({"op": "replace", "path": test_files_path, "value": None})
                 self._patch_and_log({"op": "remove", "path": test_files_path})
@@ -291,18 +291,18 @@ class RecipeParserConvert(RecipeParser):
                     }
                 )
             # Edge case: `/source_files` exists but `/files` does not
-            elif self.new_recipe.contains_value(RecipeParser.append_to_path(test_path, "/source_files")):
+            elif self._new_recipe.contains_value(RecipeParser.append_to_path(test_path, "/source_files")):
                 self._patch_add_missing_path(test_path, "/files")
             self._patch_move_base_path(test_path, "/source_files", "/files/source")
 
-            if self.new_recipe.contains_value(RecipeParser.append_to_path(test_path, "/requires")):
+            if self._new_recipe.contains_value(RecipeParser.append_to_path(test_path, "/requires")):
                 self._patch_add_missing_path(test_path, "/requirements")
             self._patch_move_base_path(test_path, "/requires", "/requirements/run")
 
             # Replace `- pip check` in `commands` with the new flag. If not found, set the flag to `False` (as the
             # flag defaults to `True`).
             commands = cast(
-                list[str], self.new_recipe.get_value(RecipeParser.append_to_path(test_path, "/commands"), [])
+                list[str], self._new_recipe.get_value(RecipeParser.append_to_path(test_path, "/commands"), [])
             )
             pip_check = False
             for i, command in enumerate(commands):
@@ -324,7 +324,7 @@ class RecipeParserConvert(RecipeParser):
 
             # Move `test` to `tests` and encapsulate the pre-existing object into a list
             new_test_path = f"{test_path}s"
-            test_element = cast(dict[str, JsonType], self.new_recipe.get_value(test_path))
+            test_element = cast(dict[str, JsonType], self._new_recipe.get_value(test_path))
             test_array: list[JsonType] = []
             # There are 3 types of test elements. We break them out of the original object, if they exist.
             # `Python` Test Element
@@ -343,7 +343,7 @@ class RecipeParserConvert(RecipeParser):
 
         ## Upgrade the multi-output section(s) ##
         # TODO Complete
-        if self.new_recipe.contains_value("/outputs"):
+        if self._new_recipe.contains_value("/outputs"):
             # On the top-level, `package` -> `recipe`
             self._patch_move_base_path(ROOT_NODE_VALUE, "/package", "/recipe")
 
@@ -352,9 +352,9 @@ class RecipeParserConvert(RecipeParser):
                     continue
 
                 # Move `name` and `version` under `package`
-                if self.new_recipe.contains_value(
+                if self._new_recipe.contains_value(
                     RecipeParser.append_to_path(output_path, "/name")
-                ) or self.new_recipe.contains_value(RecipeParser.append_to_path(output_path, "/version")):
+                ) or self._new_recipe.contains_value(RecipeParser.append_to_path(output_path, "/version")):
                     self._patch_add_missing_path(output_path, "/package")
                 self._patch_move_base_path(output_path, "/name", "/package/name")
                 self._patch_move_base_path(output_path, "/version", "/package/version")
@@ -368,11 +368,11 @@ class RecipeParserConvert(RecipeParser):
         # TODO: Comment tracking may need improvement. The "correct way" of tracking comments with patch changes is a
         #       fairly big engineering effort and refactor.
         # Alert the user which comments have been dropped.
-        new_comments: Final[dict[str, str]] = self.new_recipe.get_comments_table()
+        new_comments: Final[dict[str, str]] = self._new_recipe.get_comments_table()
         diff_comments: Final[dict[str, str]] = {k: v for k, v in old_comments.items() if k not in new_comments}
         for path, comment in diff_comments.items():
-            if not self.new_recipe.contains_value(path):
-                self.msg_tbl.add_message(MessageCategory.WARNING, f"Could not relocate comment: {comment}")
+            if not self._new_recipe.contains_value(path):
+                self._msg_tbl.add_message(MessageCategory.WARNING, f"Could not relocate comment: {comment}")
 
         # TODO Complete: move operations may result in empty fields we can eliminate. This may require changes to
         #                `contains_value()`
@@ -380,10 +380,10 @@ class RecipeParserConvert(RecipeParser):
         #                risk of screwing up critical list indices and ordering.
 
         # Hack: Wipe the existing table so the JINJA `set` statements don't render the final form
-        self.new_recipe._vars_tbl = {}
+        self._new_recipe._vars_tbl = {}
 
         # Sort the top-level keys to a "canonical" ordering. This should make previous patch operations look more
         # "sensible" to a human reader.
         self._sort_subtree_keys("/", TOP_LEVEL_KEY_SORT_ORDER)
 
-        return self.new_recipe.render(), self.msg_tbl
+        return self._new_recipe.render(), self._msg_tbl
