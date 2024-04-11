@@ -44,8 +44,8 @@ dev = ["pytest"]
 conda_build = ["conda-build"]
 
 [project.scripts]
-convert = "conda_recipe_manager.commands.convert:convert"
-rattler-bulk-build = "conda_recipe_manager.commands.rattler_bulk_build:rattler_bulk_build"
+conda-recipe-manager = "conda_recipe_manager.commands.conda_recipe_manager:conda_recipe_manager"
+crm = "conda_recipe_manager.commands.conda_recipe_manager:conda_recipe_manager"
 
 [project.urls]
 "Homepage" = "https://github.com/anaconda/conda-recipe-manager"
