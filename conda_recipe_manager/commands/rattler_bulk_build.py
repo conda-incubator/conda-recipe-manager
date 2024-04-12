@@ -12,7 +12,6 @@ import subprocess
 import sys
 import time
 from dataclasses import dataclass
-from enum import IntEnum
 from pathlib import Path
 from typing import Final, cast
 
@@ -26,17 +25,16 @@ NEW_FORMAT_RECIPE_FILE_NAME: Final[str] = "recipe.yaml"
 # "successfully"
 DEFAULT_BULK_SUCCESS_PASS_THRESHOLD: Final[float] = 0.80
 RATTLER_ERROR_REGEX = re.compile(r"Error:\s+.*")
+# Timeout to halt operation
+DEFAULT_RATTLER_BUILD_TIMEOUT: Final[int] = 120
 
 
-class ExitCode(IntEnum):
-    """
-    Error codes to return upon script completion
-    """
-
-    SUCCESS = 0
-    NO_FILES_FOUND = 1
-    # In bulk operation mode, this indicates that the % success threshold was not met
-    MISSED_SUCCESS_THRESHOLD = 42
+## Error codes (NOTE: there may be overlap with rattler-build) ##
+SUCCESS: Final[int] = 0
+NO_FILES_FOUND: Final[int] = 1
+# In bulk operation mode, this indicates that the % success threshold was not met
+MISSED_SUCCESS_THRESHOLD: Final[int] = 42
+TIMEOUT: Final[int] = 43
 
 
 @dataclass
@@ -45,7 +43,7 @@ class BuildResult:
     Struct that contains the results, metadata, errors, etc of building a single recipe file.
     """
 
-    code: ExitCode
+    code: int
     errors: list[str]
 
 
@@ -60,16 +58,23 @@ def build_recipe(file: Path, path: Path, args: list[str]) -> tuple[str, BuildRes
     """
     cmd: list[str] = ["rattler-build", "build", "-r", str(file)]
     cmd.extend(args)
-    output: Final[subprocess.CompletedProcess[str]] = subprocess.run(
-        " ".join(cmd),
-        encoding="utf-8",
-        capture_output=True,
-        shell=True,
-        check=False,
-    )
+    try:
+        output: Final[subprocess.CompletedProcess[str]] = subprocess.run(
+            " ".join(cmd),
+            encoding="utf-8",
+            capture_output=True,
+            shell=True,
+            check=False,
+            timeout=DEFAULT_RATTLER_BUILD_TIMEOUT,
+        )
+    except subprocess.TimeoutExpired:
+        return str(file.relative_to(path)), BuildResult(
+            code=TIMEOUT,
+            errors=["Recipe build dry-run timed out."],
+        )
 
     return str(file.relative_to(path)), BuildResult(
-        code=ExitCode(output.returncode),
+        code=output.returncode,
         errors=cast(list[str], RATTLER_ERROR_REGEX.findall(output.stderr)),
     )
 
@@ -92,8 +97,14 @@ def build_recipe(file: Path, path: Path, args: list[str]) -> tuple[str, BuildRes
     default=DEFAULT_BULK_SUCCESS_PASS_THRESHOLD,
     help="Sets a minimum passing success rate for bulk operations.",
 )
+@click.option(
+    "--truncate",
+    "-t",
+    is_flag=True,
+    help="Truncates logging. On large tests in a GitHub CI environment, this can eliminate log buffering issues.",
+)
 @click.pass_context
-def rattler_bulk_build(ctx: click.Context, path: Path, min_success_rate: float) -> None:
+def rattler_bulk_build(ctx: click.Context, path: Path, min_success_rate: float, truncate: bool) -> None:
     """
     Given a directory of feedstock repositories, performs multiple recipe builds using rattler-build.
     All unknown options and arguments for this script are passed directly to `rattler-build build`.
@@ -108,7 +119,7 @@ def rattler_bulk_build(ctx: click.Context, path: Path, min_success_rate: float) 
 
     if not files:
         print_err(f"No `recipe.yaml` files found in: {path}")
-        sys.exit(ExitCode.NO_FILES_FOUND)
+        sys.exit(NO_FILES_FOUND)
 
     # Process recipes in parallel
     thread_pool_size: Final[int] = mp.cpu_count()
@@ -123,7 +134,7 @@ def rattler_bulk_build(ctx: click.Context, path: Path, min_success_rate: float) 
     recipes_with_errors: list[str] = []
     error_histogram: dict[str, int] = {}
     for file, build_result in results.items():
-        if build_result.code == ExitCode.SUCCESS:
+        if build_result.code == SUCCESS:
             total_success += 1
         else:
             total_errors += 1
@@ -149,10 +160,11 @@ def rattler_bulk_build(ctx: click.Context, path: Path, min_success_rate: float) 
         },
     }
     final_output = {
-        "recipes_with_build_error_code": recipes_with_errors,
         "error_histogram": error_histogram,
         "stats": stats,
     }
+    if not truncate:
+        final_output["recipes_with_build_error_code"] = recipes_with_errors
 
     print(json.dumps(final_output, indent=2))
-    sys.exit(ExitCode.SUCCESS if percent_success >= min_success_rate else ExitCode.MISSED_SUCCESS_THRESHOLD)
+    sys.exit(SUCCESS if percent_success >= min_success_rate else MISSED_SUCCESS_THRESHOLD)

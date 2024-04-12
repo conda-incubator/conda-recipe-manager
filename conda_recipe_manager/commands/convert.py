@@ -164,8 +164,14 @@ def process_recipe(file: Path, path: Path, output: Optional[Path]) -> tuple[str,
     default=DEFAULT_BULK_SUCCESS_PASS_THRESHOLD,
     help="Sets a minimum passing success rate for bulk operations.",
 )
+@click.option(
+    "--truncate",
+    "-t",
+    is_flag=True,
+    help="Truncates logging. On large tests in a GitHub CI environment, this can eliminate log buffering issues.",
+)
 def convert(
-    path: Path, output: Optional[Path], min_success_rate: float
+    path: Path, output: Optional[Path], min_success_rate: float, truncate: bool
 ) -> None:  # pylint: disable=redefined-outer-name
     """
     Recipe conversion CLI utility. By default, recipes print to STDOUT. Messages always print to STDERR. Takes 1 file or
@@ -281,14 +287,15 @@ def convert(
     }
 
     final_output = {
-        "recipes_with_exceptions": recipes_with_except,
-        "recipes_with_errors": recipes_with_errors,
-        "recipes_with_warnings": recipes_with_warnings,
         "exception_histogram": except_histogram,
         "error_histogram": errors_histogram,
         "warnings_histogram": warnings_histogram,
         "statistics": stats,
     }
+    if not truncate:
+        final_output["recipes_with_exceptions"] = recipes_with_except
+        final_output["recipes_with_errors"] = recipes_with_errors
+        final_output["recipes_with_warnings"] = recipes_with_warnings
 
     print_out(json.dumps(final_output, indent=2))
     sys.exit(ExitCode.SUCCESS if percent_recipe_success >= min_success_rate else ExitCode.MISSED_SUCCESS_THRESHOLD)
