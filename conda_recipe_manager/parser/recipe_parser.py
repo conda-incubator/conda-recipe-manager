@@ -270,6 +270,7 @@ class RecipeParser:
         traverse_all(self._root, _collect_selectors)
 
     def __init__(self, content: str):
+        # pylint: disable=too-complex
         """
         Constructs a RecipeParser instance.
         :param content: conda-build formatted recipe file, as a single text string.
@@ -455,6 +456,7 @@ class RecipeParser:
 
     @staticmethod
     def _render_tree(node: Node, depth: int, lines: list[str], parent: Optional[Node] = None) -> None:
+        # pylint: disable=too-complex
         """
         Recursive helper function that traverses the parse tree to generate a file.
         :param node: Current node in the tree
@@ -572,6 +574,7 @@ class RecipeParser:
 
     @no_type_check
     def _render_object_tree(self, node: Node, replace_variables: bool, data: JsonType) -> None:
+        # pylint: disable=too-complex
         """
         Recursive helper function that traverses the parse tree to generate a Pythonic data object.
         :param node: Current node in the tree
