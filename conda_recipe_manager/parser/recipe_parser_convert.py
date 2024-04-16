@@ -42,6 +42,8 @@ class RecipeParserConvert(RecipeParser):
         self._new_recipe: RecipeParser = RecipeParser(self.render())
         self._msg_tbl = MessageTable()
 
+    ## Patch utility functions ##
+
     def _patch_and_log(self, patch: JsonPatchType) -> None:
         """
         Convenience function that logs failed patches to the message table.
@@ -95,31 +97,18 @@ class RecipeParserConvert(RecipeParser):
             node.value = rename
         node.children.sort(key=_comparison)
 
-    def render_to_new_recipe_format(self) -> tuple[str, MessageTable]:
-        # pylint: disable=protected-access
+    ## Upgrade functions ##
+
+    def _upgrade_jinja_to_context_obj(self) -> None:
         """
-        Takes the current recipe representation and renders it to the new format WITHOUT modifying the current recipe
-        state.
-
-        The "new" format is defined in the following CEPs:
-          - https://github.com/conda-incubator/ceps/blob/main/cep-13.md
-          - https://github.com/conda-incubator/ceps/blob/main/cep-14.md
-
-        (As of writing there is no official name other than "the new recipe format")
+        Upgrades the old proprietary JINJA templating usage to the new YAML-parsable `context` object and `$`-escaped
+        JINJA substitutions.
         """
-        # Approach: In the event that we want to expand support later, this function should be implemented in terms
-        # of a `RecipeParser` tree. This will make it easier to build an upgrade-path, if we so choose to pursue one.
-
-        # Log the original comments
-        old_comments: Final[dict[str, str]] = self._new_recipe.get_comments_table()
-
-        ## JINJA -> `context` object ##
-
         # Convert the JINJA variable table to a `context` section. Empty tables still add the `context` section for
         # future developers' convenience.
         self._patch_and_log({"op": "add", "path": "/context", "value": None})
         # Filter-out any value not covered in the new format
-        for name, value in self._new_recipe._vars_tbl.items():
+        for name, value in self._new_recipe._vars_tbl.items():  # pylint: disable=protected-access
             if not isinstance(value, (str, int, float, bool)):
                 self._msg_tbl.add_message(MessageCategory.WARNING, f"The variable `{name}` is an unsupported type.")
                 continue
@@ -141,8 +130,11 @@ class RecipeParserConvert(RecipeParser):
             value = value.replace("{{", "${{")
             self._patch_and_log({"op": "replace", "path": path, "value": value})
 
-        ## Convert selectors into ternary statements or `if` blocks ##
-        for selector, instances in self._new_recipe._selector_tbl.items():
+    def _upgrade_selectors_to_conditionals(self) -> None:
+        """
+        Upgrades the proprietary comment-based selector syntax to equivalent conditional logic statements.
+        """
+        for selector, instances in self._new_recipe._selector_tbl.items():  # pylint: disable=protected-access
             for info in instances:
                 # Selectors can be applied to the parent node if they appear on the same line. We'll ignore these when
                 # building replacements.
@@ -184,14 +176,11 @@ class RecipeParserConvert(RecipeParser):
                 self._patch_and_log(patch)
                 self._new_recipe.remove_selector(selector_path)
 
-        # Cached copy of all of the "outputs" in a recipe. This is useful for easily handling multi and single output
-        # recipes in 1 loop construct.
-        base_package_paths: Final[list[str]] = self._new_recipe.get_package_paths()
-
-        # TODO Fix: comments are not preserved with patch operations (add a flag to `patch()`?)
-
-        ## `build` section changes and validation ##
-
+    def _upgrade_build_section(self, base_package_paths: list[str]) -> None:
+        """
+        Upgrades/converts the `about` section(s) of a recipe file.
+        :param base_package_paths: Set of base paths to process that could contain this section.
+        """
         for base_path in base_package_paths:
             # Move `run_exports` and `ignore_run_exports` from `build` to `requirements`
 
@@ -225,8 +214,10 @@ class RecipeParserConvert(RecipeParser):
             # Canonically sort this section
             self._sort_subtree_keys(build_path, V1_BUILD_SECTION_KEY_SORT_ORDER)
 
-        ## `about` section changes and validation ##
-
+    def _upgrade_about_section(self) -> None:
+        """
+        Upgrades/converts the `about` section of a recipe file.
+        """
         # Warn if "required" fields are missing
         about_required: Final[list[str]] = [
             "summary",
@@ -265,8 +256,13 @@ class RecipeParserConvert(RecipeParser):
             if self._new_recipe.contains_value(path):
                 self._patch_and_log({"op": "remove", "path": path})
 
-        ## `test` section changes and upgrades ##
-
+    def _upgrade_test_section(self, base_package_paths: list[str]) -> None:
+        # pylint: disable=too-complex
+        # TODO Refactor and simplify ^
+        """
+        Upgrades/converts the `test` section(s) of a recipe file.
+        :param base_package_paths: Set of base paths to process that could contain this section.
+        """
         # NOTE: For now, we assume that the existing test section comprises of a single test entity. Developers will
         # have to use their best judgement to manually break-up the test into multiple tests as they see fit.
         for base_path in base_package_paths:
@@ -341,27 +337,68 @@ class RecipeParserConvert(RecipeParser):
             self._patch_and_log({"op": "add", "path": new_test_path, "value": test_array})
             self._patch_and_log({"op": "remove", "path": test_path})
 
-        ## Upgrade the multi-output section(s) ##
+    def _upgrade_multi_output(self, base_package_paths: list[str]) -> None:
+        """
+        Upgrades/converts sections pertaining to multi-output recipes.
+        :param base_package_paths: Set of base paths to process that could contain this section.
+        """
+        if not self._new_recipe.contains_value("/outputs"):
+            return
+
         # TODO Complete
-        if self._new_recipe.contains_value("/outputs"):
-            # On the top-level, `package` -> `recipe`
-            self._patch_move_base_path(ROOT_NODE_VALUE, "/package", "/recipe")
+        # On the top-level, `package` -> `recipe`
+        self._patch_move_base_path(ROOT_NODE_VALUE, "/package", "/recipe")
 
-            for output_path in base_package_paths:
-                if output_path == ROOT_NODE_VALUE:
-                    continue
+        for output_path in base_package_paths:
+            if output_path == ROOT_NODE_VALUE:
+                continue
 
-                # Move `name` and `version` under `package`
-                if self._new_recipe.contains_value(
-                    RecipeParser.append_to_path(output_path, "/name")
-                ) or self._new_recipe.contains_value(RecipeParser.append_to_path(output_path, "/version")):
-                    self._patch_add_missing_path(output_path, "/package")
-                self._patch_move_base_path(output_path, "/name", "/package/name")
-                self._patch_move_base_path(output_path, "/version", "/package/version")
+            # Move `name` and `version` under `package`
+            if self._new_recipe.contains_value(
+                RecipeParser.append_to_path(output_path, "/name")
+            ) or self._new_recipe.contains_value(RecipeParser.append_to_path(output_path, "/version")):
+                self._patch_add_missing_path(output_path, "/package")
+            self._patch_move_base_path(output_path, "/name", "/package/name")
+            self._patch_move_base_path(output_path, "/version", "/package/version")
 
-                # Not all the top-level keys are found in each output section, but all the output section keys are
-                # found at the top-level. So for consistency, we sort on that ordering.
-                self._sort_subtree_keys(output_path, TOP_LEVEL_KEY_SORT_ORDER)
+            # Not all the top-level keys are found in each output section, but all the output section keys are
+            # found at the top-level. So for consistency, we sort on that ordering.
+            self._sort_subtree_keys(output_path, TOP_LEVEL_KEY_SORT_ORDER)
+
+    def render_to_new_recipe_format(self) -> tuple[str, MessageTable]:
+        """
+        Takes the current recipe representation and renders it to the new format WITHOUT modifying the current recipe
+        state.
+
+        The "new" format is defined in the following CEPs:
+          - https://github.com/conda-incubator/ceps/blob/main/cep-13.md
+          - https://github.com/conda-incubator/ceps/blob/main/cep-14.md
+
+        (As of writing there is no official name other than "the new recipe format")
+        """
+        # Approach: In the event that we want to expand support later, this function should be implemented in terms
+        # of a `RecipeParser` tree. This will make it easier to build an upgrade-path, if we so choose to pursue one.
+
+        # Log the original comments
+        old_comments: Final[dict[str, str]] = self._new_recipe.get_comments_table()
+
+        # JINJA templates -> `context` object
+        self._upgrade_jinja_to_context_obj()
+
+        ## Convert selectors into ternary statements or `if` blocks ##
+        self._upgrade_selectors_to_conditionals()
+
+        # Cached copy of all of the "outputs" in a recipe. This is useful for easily handling multi and single output
+        # recipes in 1 loop construct.
+        base_package_paths: Final[list[str]] = self._new_recipe.get_package_paths()
+
+        # TODO Fix: comments are not preserved with patch operations (add a flag to `patch()`?)
+
+        # Upgrade common sections found in a recipe
+        self._upgrade_build_section(base_package_paths)
+        self._upgrade_about_section()
+        self._upgrade_test_section(base_package_paths)
+        self._upgrade_multi_output(base_package_paths)
 
         ## Final clean-up ##
 
@@ -380,7 +417,7 @@ class RecipeParserConvert(RecipeParser):
         #                risk of screwing up critical list indices and ordering.
 
         # Hack: Wipe the existing table so the JINJA `set` statements don't render the final form
-        self._new_recipe._vars_tbl = {}
+        self._new_recipe._vars_tbl = {}  # pylint: disable=protected-access
 
         # Sort the top-level keys to a "canonical" ordering. This should make previous patch operations look more
         # "sensible" to a human reader.

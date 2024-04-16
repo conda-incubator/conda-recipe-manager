@@ -11,18 +11,22 @@ from typing import Final
 from conda_recipe_manager.parser.types import MessageCategory, MessageTable
 
 
-def print_out(*args, **kwargs) -> None:  # type: ignore
+def print_out(*args, print_enabled: bool = True, **kwargs) -> None:  # type: ignore
     """
     Convenience wrapper that prints to STDOUT
+    :param print_enabled: (Optional) Flag to enable printing. Enabled by default.
     """
-    print(*args, file=sys.stdout, **kwargs)  # type: ignore
+    if print_enabled:
+        print(*args, file=sys.stdout, **kwargs)  # type: ignore
 
 
-def print_err(*args, **kwargs) -> None:  # type: ignore
+def print_err(*args, print_enabled: bool = True, **kwargs) -> None:  # type: ignore
     """
     Convenience wrapper that prints to STDERR
+    :param print_enable: (Optional) Flag to enable printing. Enabled by default.
     """
-    print(*args, file=sys.stderr, **kwargs)  # type: ignore
+    if print_enabled:
+        print(*args, file=sys.stderr, **kwargs)  # type: ignore
 
 
 def print_messages(category: MessageCategory, msg_tbl: MessageTable) -> None:

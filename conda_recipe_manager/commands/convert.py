@@ -61,6 +61,18 @@ class ConversionResult:
     # Extracted out of the path for bulk operations
     project_name: str
 
+    def set_return_code(self) -> None:
+        """
+        Given the current state of the message table, set the appropriate return code. Does not overwrite the existing
+        state unless errors or warnings were found.
+        """
+        error_count: Final[int] = self.msg_tbl.get_message_count(MessageCategory.ERROR)
+        warn_count: Final[int] = self.msg_tbl.get_message_count(MessageCategory.WARNING)
+        if error_count > 0:
+            self.code = ExitCode.RENDER_ERRORS
+        elif warn_count > 0:
+            self.code = ExitCode.RENDER_WARNINGS
+
 
 def convert_file(file_path: Path, output: Optional[Path], print_output: bool) -> ConversionResult:
     """
@@ -85,7 +97,7 @@ def convert_file(file_path: Path, output: Optional[Path], print_output: bool) ->
     if recipe_content is None:
         conversion_result.code = ExitCode.READ_EXCEPTION
         e_msg = f"EXCEPTION: Failed to read: {file_path}"
-        print_err(e_msg)
+        print_err(e_msg, print_enabled=print_output)
         conversion_result.msg_tbl.add_message(MessageCategory.EXCEPTION, e_msg)
         return conversion_result
 
@@ -94,9 +106,8 @@ def convert_file(file_path: Path, output: Optional[Path], print_output: bool) ->
         parser = RecipeParserConvert(recipe_content)
     except Exception as e:  # pylint: disable=broad-exception-caught
         e_msg = "EXCEPTION: An exception occurred while parsing the recipe file"
-        if print_output:
-            print_err(e_msg)
-            print_err(e)
+        print_err(e_msg, print_enabled=print_output)
+        print_err(e, print_enabled=print_output)
         conversion_result.msg_tbl.add_message(MessageCategory.EXCEPTION, e_msg)
         conversion_result.code = ExitCode.PARSE_EXCEPTION
         return conversion_result
@@ -105,29 +116,24 @@ def convert_file(file_path: Path, output: Optional[Path], print_output: bool) ->
         conversion_result.content, conversion_result.msg_tbl = parser.render_to_new_recipe_format()
     except Exception as e:  # pylint: disable=broad-exception-caught
         e_msg = "EXCEPTION: An exception occurred while converting to the new recipe file"
-        if print_output:
-            print_err(e_msg)
-            print_err(e)
+        print_err(e_msg, print_enabled=print_output)
+        print_err(e, print_enabled=print_output)
         conversion_result.msg_tbl.add_message(MessageCategory.EXCEPTION, e_msg)
         conversion_result.code = ExitCode.RENDER_EXCEPTION
         return conversion_result
 
     # Print or dump the results to a file. Printing is disabled for bulk operations.
     if output is None:
-        if print_output:
-            print_out(conversion_result.content)
+        print_out(conversion_result.content, print_enabled=print_output)
     else:
-        if not os.path.basename(output) == "recipe.yaml":
-            print_err("WARNING: File is not called `recipe.yaml`.")
+        print_err(
+            "WARNING: File is not called `recipe.yaml`.",
+            print_enabled=print_output and os.path.basename(output) != "recipe.yaml",
+        )
         with open(output, "w", encoding="utf-8") as fptr:
             fptr.write(conversion_result.content)
 
-    error_count: Final[int] = conversion_result.msg_tbl.get_message_count(MessageCategory.ERROR)
-    warn_count: Final[int] = conversion_result.msg_tbl.get_message_count(MessageCategory.WARNING)
-    if error_count > 0:
-        conversion_result.code = ExitCode.RENDER_ERRORS
-    elif warn_count > 0:
-        conversion_result.code = ExitCode.RENDER_WARNINGS
+    conversion_result.set_return_code()
     return conversion_result
 
 
@@ -143,6 +149,46 @@ def process_recipe(file: Path, path: Path, output: Optional[Path]) -> tuple[str,
     conversion_result = convert_file(file, out_file, False)
     conversion_result.project_name = file.relative_to(path).parts[0]
     return str(file.relative_to(path)), conversion_result
+
+
+def _get_files_list(path: Path) -> list[Path]:
+    """
+    Takes the file path from the user and generates the list of target file(s). Exits the script when an unrecoverable
+    state has been reached.
+    :param path: Path provided from the user.
+    :returns: List of files to convert.
+    """
+    files: list[Path] = []
+    # Establish which mode of operation we are in, based on the path passed-in
+    if path.is_dir():
+        for file_path in path.rglob(OLD_FORMAT_RECIPE_FILE_NAME):
+            files.append(file_path)
+        if not files:
+            print_err("Could not find any recipe files in this directory.")
+            sys.exit(ExitCode.CLICK_USAGE)
+    elif path.is_file():
+        files.append(path)
+    else:
+        print_err("Could not identify path as file or directory.")
+        sys.exit(ExitCode.CLICK_USAGE)
+    return files
+
+
+def _collect_issue_stats(project_name: str, issues: list[str], hist: dict[str, int], recipes_lst: list[str]) -> int:
+    """
+    Given a list of issues (errors, warnings, etc), collect that data into some useful metrics.
+    :param project_name: Project/recipe identifier
+    :param issues: List of issues to read
+    :param hist: Histogram to dump occurrence data into
+    :param recipes_lst: List to append to containing recipes that had this type of issue
+    :returns: How many issues were found in this recipe file
+    """
+    for issue in issues:
+        hist.setdefault(issue, 0)
+        hist[issue] += 1
+    if issues:
+        recipes_lst.append(project_name)
+    return len(issues)
 
 
 @click.command(short_help="Converts a `meta.yaml` formatted-recipe file to the new `recipe.yaml` format.")
@@ -179,21 +225,8 @@ def convert(
     attempt a bulk operation conversion across all subdirectories.
     """
     start_time: Final[float] = time.time()
-    files: list[Path] = []
     results: dict[str, ConversionResult] = {}
-
-    # Establish which mode of operation we are in, based on the path passed-in
-    if path.is_dir():
-        for file_path in path.rglob(OLD_FORMAT_RECIPE_FILE_NAME):
-            files.append(file_path)
-        if not files:
-            print_err("Could not find any recipe files in this directory.")
-            sys.exit(ExitCode.CLICK_USAGE)
-    elif path.is_file():
-        files.append(path)
-    else:
-        print_err("Could not identify path as file or directory.")
-        sys.exit(ExitCode.CLICK_USAGE)
+    files: list[Path] = _get_files_list(path)
 
     ## Single-file case ##
     if len(files) == 1:
@@ -231,30 +264,17 @@ def convert(
             recipes_with_except.append(project_name)
             exceptions = result.msg_tbl.get_messages(MessageCategory.EXCEPTION)
             for exception in exceptions:
-                if exception not in except_histogram:
-                    except_histogram[exception] = 0
+                except_histogram.setdefault(exception, 0)
                 except_histogram[exception] += 1
 
         errors = result.msg_tbl.get_messages(MessageCategory.ERROR)
-        warnings = result.msg_tbl.get_messages(MessageCategory.WARNING)
-
-        ## Errors ##
-        for error in errors:
-            if error not in errors_histogram:
-                errors_histogram[error] = 0
-            errors_histogram[error] += 1
-        total_errors += len(errors)
-        if errors:
-            recipes_with_errors.append(project_name)
-
-        ## Warnings ##
-        for warning in warnings:
-            if warning not in warnings_histogram:
-                warnings_histogram[warning] = 0
-            warnings_histogram[warning] += 1
-        total_warnings += len(warnings)
-        if warnings:
-            recipes_with_warnings.append(project_name)
+        total_errors += _collect_issue_stats(project_name, errors, errors_histogram, recipes_with_errors)
+        total_warnings += _collect_issue_stats(
+            project_name,
+            result.msg_tbl.get_messages(MessageCategory.WARNING),
+            warnings_histogram,
+            recipes_with_warnings,
+        )
 
         ## Success ##
         if result.code in {ExitCode.SUCCESS, ExitCode.RENDER_WARNINGS} and not errors:
