@@ -258,6 +258,7 @@ class RecipeParserConvert(RecipeParser):
 
     def _upgrade_test_section(self, base_package_paths: list[str]) -> None:
         # pylint: disable=too-complex
+        # TODO Refactor and simplify ^
         """
         Upgrades/converts the `test` section(s) of a recipe file.
         :param base_package_paths: Set of base paths to process that could contain this section.
