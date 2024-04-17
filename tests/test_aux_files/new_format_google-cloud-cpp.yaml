@@ -78,8 +78,10 @@ outputs:
         - libgoogle-cloud-talent
     tests:
       - script:
-        - test -f $PREFIX/lib/libgoogle_cloud_cpp_kms.${{ version }}.dylib
-        - test -f $PREFIX/lib/libgoogle_cloud_cpp_kms.so.${{ version }}
+          - if: osx
+            then: test -f $PREFIX/lib/libgoogle_cloud_cpp_kms.${{ version }}.dylib
+          - if: linux
+            then: test -f $PREFIX/lib/libgoogle_cloud_cpp_kms.so.${{ version }}
           - if: win
             then: if exist %LIBRARY_LIB%\google_cloud_cpp_kms.lib exit 1
           - if: unix

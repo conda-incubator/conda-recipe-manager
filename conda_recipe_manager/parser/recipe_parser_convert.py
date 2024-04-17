@@ -395,11 +395,12 @@ class RecipeParserConvert(RecipeParser):
         # Log the original comments
         old_comments: Final[dict[str, str]] = self._new_recipe.get_comments_table()
 
+        # Convert selectors into ternary statements or `if` blocks. We process selectors first so that there is no
+        # chance of selector comments getting accidentally wiped by patch or other operations.
+        self._upgrade_selectors_to_conditionals()
+
         # JINJA templates -> `context` object
         self._upgrade_jinja_to_context_obj()
-
-        ## Convert selectors into ternary statements or `if` blocks ##
-        self._upgrade_selectors_to_conditionals()
 
         # Cached copy of all of the "outputs" in a recipe. This is useful for easily handling multi and single output
         # recipes in 1 loop construct.
