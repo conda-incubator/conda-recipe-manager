@@ -259,13 +259,12 @@ class RecipeParser:
             if not node.comment:
                 return
             match = Regex.SELECTOR.search(node.comment)
-            if match:
-                selector = match.group(0)
-                selector_info = SelectorInfo(node, list(path))
-                if selector not in self._selector_tbl:
-                    self._selector_tbl[selector] = [selector_info]
-                else:
-                    self._selector_tbl[selector].append(selector_info)
+            if not match:
+                return
+            selector = match.group(0)
+            selector_info = SelectorInfo(node, list(path))
+            self._selector_tbl.setdefault(selector, [])
+            self._selector_tbl[selector].append(selector_info)
 
         traverse_all(self._root, _collect_selectors)
 

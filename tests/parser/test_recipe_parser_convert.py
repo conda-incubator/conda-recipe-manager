@@ -18,6 +18,7 @@ from tests.file_loading import TEST_FILES_PATH, load_file, load_recipe_convert
             "simple-recipe.yaml",
             [],
             [
+                "A non-list item had a selector at: /package/name",
                 "A non-list item had a selector at: /requirements/empty_field2",
                 "Required field missing: /about/license_file",
                 "Required field missing: /about/license_url",
