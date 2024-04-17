@@ -95,8 +95,6 @@ outputs:
           then: if exist %LIBRARY_LIB%\libcurl_a.lib exit 1
         - if: win
           then: if not exist %LIBRARY_BIN%\libcurl.dll exit 1
-      python:
-        pip-check: false
   - package:
       name: libcurl-static
     requirements:
@@ -122,8 +120,6 @@ outputs:
           then: test -f $PREFIX/lib/libcurl.a
         - if: win
           then: if not exist %LIBRARY_LIB%\libcurl_a.lib exit 1
-      python:
-        pip-check: false
   - package:
       name: curl
     files:
@@ -151,8 +147,6 @@ outputs:
         - curl https://raw.githubusercontent.com/conda-forge/curl-feedstock/master/LICENSE.txt
         - if: win
           then: if not exist %LIBRARY_BIN%\curl.exe exit 1
-      python:
-        pip-check: false
 
 about:
   license: curl

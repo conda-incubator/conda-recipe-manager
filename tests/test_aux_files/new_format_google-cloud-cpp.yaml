@@ -77,8 +77,6 @@ outputs:
         - libgoogle-cloud-speech
         - libgoogle-cloud-talent
     tests:
-      - python:
-          pip_check: false
       - script:
         - test -f $PREFIX/lib/libgoogle_cloud_cpp_kms.${{ version }}.dylib
         - test -f $PREFIX/lib/libgoogle_cloud_cpp_kms.so.${{ version }}
@@ -143,8 +141,6 @@ outputs:
       run_exports:
         - ${{ pin_subpackage("libgoogle-cloud-all", max_pin="x.x") }}
     tests:
-      - python:
-          pip_check: false
       - files:
           recipe:
             - run_test_feature.sh
@@ -182,8 +178,6 @@ outputs:
       run_exports:
         - ${{ pin_subpackage("libgoogle-cloud-all", max_pin="x.x") }}
     tests:
-      - python:
-          pip_check: false
       - script:
           - echo no test needed
 
