@@ -24,6 +24,38 @@ BasicJsonType = dict[str, dict[str, int | str] | str]
 
 
 @no_type_check
+def aggregate_stats(stats: list[dict[str, int | float]]) -> dict[str, int | float]:
+    """
+    Takes a list of dictionaries full of common statistics. All values are added together, unless the value is a
+    percentage. Those are averaged together.
+    :param stats: List of statistics tables to process
+    :returns: One table of accumulated statistics
+    """
+    accumulated_stats: dict[str, int | float] = {}
+    total_tests: Final[int] = len(stats)
+
+    # Track which stats are %'s to average later.
+    percent_keys: set[str] = set()
+
+    for tbl in stats:
+        # Older versions of the test scripts were not consistent about how the "statistics" section was labeled.
+        stats_key = "stats" if "stats" in tbl else "statistics"
+        for key, value in tbl[stats_key].items():
+            # Ignore non-numeric fields (like the `timinings` data structure)
+            if not isinstance(value, (int, float)):
+                continue
+            if cast(str, key).startswith("percent_"):
+                percent_keys.add(key)
+            accumulated_stats.setdefault(key, 0)
+            accumulated_stats[key] += value
+
+    for key in percent_keys:
+        accumulated_stats[key] = round(accumulated_stats[key] / total_tests, 2)
+
+    return accumulated_stats
+
+
+@no_type_check
 def generate_summary(convert_results: list[BasicJsonType], dry_run_results: list[BasicJsonType]) -> BasicJsonType:
     """
     Given the list of parsed JSON blobs of interest from the log files, summarize the results.
@@ -38,44 +70,33 @@ def generate_summary(convert_results: list[BasicJsonType], dry_run_results: list
     """
     test_counts: dict[str, int] = {}
 
-    # Aggregate conversion stats
-    for result in convert_results:
-        test = Path(result["info"]["directory"]).name
-        test_counts.setdefault(test, 0)
-        test_counts[test] += 1
+    # Helper function for accumulating counts of tests that have been run per target directory of integration tests.
+    def _count_tests(results: list[BasicJsonType]) -> None:
+        for result in results:
+            test = Path(result["info"]["directory"]).name
+            test_counts.setdefault(test, 0)
+            test_counts[test] += 1
 
-    # Aggregate dry-run stats
-    for result in dry_run_results:
-        test = Path(result["info"]["directory"]).name
-        test_counts.setdefault(test, 0)
-        test_counts[test] += 1
+    _count_tests(convert_results)
+    _count_tests(dry_run_results)
 
     return {
         "test_counts": dict(sorted(test_counts.items())),
         "stages": {
-            "recipe_conversion": {},
-            "rattler_dry_run": {},
+            "recipe_conversion": aggregate_stats(convert_results),
+            "rattler_dry_run": aggregate_stats(dry_run_results),
         },
     }
 
 
-def main() -> None:
+def read_logs(log_dir: Path) -> tuple[list[BasicJsonType], list[BasicJsonType]]:
     """
-    Main execution point of the script
+    Parses-out all the recognized JSON blobs found in the log files.
+    :param log_dir: Path to the directory containing all the log files.
+    :returns: The lists of parsed JSON blobs from both integration testing phases.
     """
-    parser = argparse.ArgumentParser(
-        description="Extracts JSON results from CI operations from a directory of CI log files"
-    )
-    parser.add_argument("dir", type=Path, help="Directory that contains log files to parse.")  # type: ignore[misc]
-    args = parser.parse_args()
-
-    log_dir: Final[Path] = Path(cast(str, args.dir))
-
-    # Separate test results into their own lists
     convert_results: list[BasicJsonType] = []
     dry_run_results: list[BasicJsonType] = []
-
-    # Parse-out all the recognized JSON blobs found in the log files.
     for file in log_dir.iterdir():
         if file.is_dir() or file.name == ".DS_Store":
             continue
@@ -104,15 +125,34 @@ def main() -> None:
                     start_idx = 0
                     print(f"Could not parse lines from {log_range}", file=sys.stderr)
                     continue
+    return convert_results, dry_run_results
+
+
+def main() -> None:
+    """
+    Main execution point of the script
+    """
+    parser = argparse.ArgumentParser(
+        description="Extracts JSON results from CI operations from a directory of CI log files"
+    )
+    parser.add_argument("dir", type=Path, help="Directory that contains log files to parse.")  # type: ignore[misc]
+    parser.add_argument("-v", "--verbose", action="store_true", help="Enables verbose final report.")
+    args = parser.parse_args()
+
+    log_dir: Final[Path] = Path(cast(str, args.dir))
+    verbose: Final[bool] = cast(bool, args.verbose)
+
+    # Separate test results into their own lists
+    convert_results, dry_run_results = read_logs(log_dir)
 
     # Aggregate the final results, putting the summary information at the top, followed by the raw results from the
     # log files.
     final_results = {
         "summary": cast(BasicJsonType, generate_summary(convert_results, dry_run_results)),
-        # TODO re-enable
-        # "raw_conversion_results": convert_results,
-        # "raw_dry_run_results": dry_run_results,
     }
+    if verbose:
+        final_results["raw_conversion_results"] = convert_results  # type: ignore[assignment]
+        final_results["raw_dry_run_results"] = dry_run_results  # type: ignore[assignment]
 
     print(json.dumps(final_results, indent=2))
 
