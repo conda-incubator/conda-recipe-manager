@@ -160,8 +160,12 @@ def rattler_bulk_build(ctx: click.Context, path: Path, min_success_rate: float, 
         },
     }
     final_output = {
+        "info": {
+            "command_name": "rattler-bulk-build",
+            "directory": Path(path).name,
+        },
         "error_histogram": error_histogram,
-        "stats": stats,
+        "statistics": stats,
     }
     if not truncate:
         final_output["recipes_with_build_error_code"] = recipes_with_errors

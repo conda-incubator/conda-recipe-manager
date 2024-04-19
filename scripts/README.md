@@ -6,6 +6,19 @@ This directory contains 1-off development scripts related to this project.
 
 They should not be packaged to be run by a user/consumer of this project.
 
+# parse_ci_output.py
+
+Utility script that reads the directory of log files provided by GitHub's CI infrastructure. The script then
+parses-out the JSON output from the integration tests and aggregates the statistics into an accumulative
+JSON structure.
+
+## Usage:
+```sh
+usage: parse_ci_output.py [-h] [-v] dir
+```
+Where `-v` enables the `verbose` report, including the fully-parsed JSON found in all of the logs and
+`dir` is the directory containing the log files from GitHub.
+
 # randomly_select_recipes.py
 
 Given a list of feedstock repositories owned by a GitHub organization, randomly select `NUM_RECIPES` number of recipe
