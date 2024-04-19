@@ -307,6 +307,10 @@ def convert(
     }
 
     final_output = {
+        "info": {
+            "command_name": "convert",
+            "directory": Path(path).name,
+        },
         "exception_histogram": except_histogram,
         "error_histogram": errors_histogram,
         "warnings_histogram": warnings_histogram,
