@@ -1,0 +1,39 @@
+on:
+  workflow_run:
+    workflows: ["Integration Tests"]
+    types:
+      - completed
+
+name: Integration Tests Bot
+
+jobs:
+  ## Runs after the integration tests complete to submit a final report ##
+  integration-bot:
+      runs-on: ubuntu-latest
+      name: Integration Testing Final Report
+      if: github.event.workflow_run.conclusion == 'success'
+      timeout-minutes: 5
+      steps:
+        - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        - uses: ./.github/actions/setup-env
+          with:
+            python-version: "3.11"
+        # TODO download logs to `./logs/`
+        # context.payload.workflow_run.id
+        - name: Integration Testing Report
+          run: |
+            source $CONDA/bin/activate
+            conda activate conda-recipe-manager
+            scripts/parse_ci_output.py logs/
+
+        - name: PR Comment
+          uses: actions/github-script@v7.0.1
+          with:
+            github-token: ${{secrets.GITHUB_TOKEN}}
+            script: |
+              github.issues.createComment({
+                issue_number: ${{ github.event.number }},
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: 'TODO write message:\n```json\nTODO test data```'
+              })
