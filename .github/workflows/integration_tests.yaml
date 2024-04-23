@@ -56,8 +56,17 @@ jobs:
           source $CONDA/bin/activate
           conda activate conda-recipe-manager
           conda install -y -c conda-forge rattler-build
-          conda-recipe-manager convert -t -m ${{ matrix.convert-success }} -o recipe.yaml test_data/recipes_v0/${{ matrix.test-directory }}
-          conda-recipe-manager rattler-bulk-build -t -m ${{ matrix.rattler-success }} test_data/recipes_v0/${{ matrix.test-directory }} --render-only
+          mkdir -p logs
+          conda-recipe-manager \
+            convert -t -m ${{ matrix.convert-success }} -o recipe.yaml test_data/recipes_v0/${{ matrix.test-directory }} \
+            | tee logs/convert_${{ matrix.test-directory }}.log
+          conda-recipe-manager \
+            rattler-bulk-build -t -m ${{ matrix.rattler-success }} test_data/recipes_v0/${{ matrix.test-directory }} --render-only \
+            | tee logs/rbb_${{ matrix.test-directory }}.log
+      - uses: actions/upload-artifact@v4
+        with:
+          name: integration-logs
+          path: logs/
   integration-final-results:
     runs-on: ubuntu-latest
     name: Integration Testing Final Report
@@ -68,22 +77,24 @@ jobs:
       - uses: ./.github/actions/setup-env
         with:
           python-version: "3.11"
-      # TODO download logs to `./logs/`
-      # context.payload.workflow_run.id
+      - uses: actions/download-artifact@v4
+        with:
+          name: integration-logs
+          path: logs/
       - name: Integration Testing Report
         run: |
           source $CONDA/bin/activate
           conda activate conda-recipe-manager
-          scripts/parse_ci_output.py logs/
+          scripts/parse_ci_output.py logs/ >> ${GITHUB_STEP_SUMMARY}
 
-      - name: PR Comment
-        uses: actions/github-script@v7.0.1
-        with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          script: |
-            github.issues.createComment({
-              issue_number: ${{ github.event.number }},
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: 'TODO write message:\n```json\nTODO test data```'
-            })
+      #- name: PR Comment
+      #  uses: actions/github-script@v7.0.1
+      #  with:
+      #    github-token: ${{secrets.GITHUB_TOKEN}}
+      #    script: |
+      #      github.issues.createComment({
+      #        issue_number: ${{ github.event.number }},
+      #        owner: context.repo.owner,
+      #        repo: context.repo.repo,
+      #        body: 'TODO write message:\n```json\nTODO test data```'
+      #      })
