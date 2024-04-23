@@ -1,6 +1,12 @@
 name: Set up environment
 description: Set up a conda-recipe-manager environment
 
+inputs:
+  python-version:
+    description: "Version of python to use in the conda environment."
+    required: false
+    default: "3.11"
+
 runs:
   using: "composite"
   steps:
