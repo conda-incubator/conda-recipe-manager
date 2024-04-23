@@ -127,7 +127,8 @@ def stringify_yaml(
     #
     # In addition, there are a handful of special cases that need to be quoted in order to produce valid YAML.
     if multiline_variant == MultilineVariant.NONE and isinstance(val, str) and not Regex.JINJA_SUB.match(val):
-        if val in _TO_QUOTE_SPECIAL_CASES or ("${{" not in val and ("'" in val or '"' in val)):
+        # Glob patterns that start with a * also cause the yaml parser to fail (i.e. `**/lib`)
+        if val in _TO_QUOTE_SPECIAL_CASES or val.startswith("*") or ("${{" not in val and ("'" in val or '"' in val)):
             # The PyYaml equivalent function injects newlines, hence why we abuse the JSON library to write our YAML
             return json.dumps(val)
     return val
