@@ -87,4 +87,7 @@ jobs:
         run: |
           source $CONDA/bin/activate
           conda activate conda-recipe-manager
-          scripts/parse_ci_output.py logs/ >> ${GITHUB_STEP_SUMMARY}
+          scripts/parse_ci_output.py logs/ | tee report.json
+          printf "Integration Report:\n```json\n" >> ${GITHUB_STEP_SUMMARY}
+          cat report.json >> ${GITHUB_STEP_SUMMARY}
+          printf "\n```" >> ${GITHUB_STEP_SUMMARY}
