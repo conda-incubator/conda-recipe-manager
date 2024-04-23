@@ -81,7 +81,6 @@ jobs:
         run: mkdir -p logs
       - uses: actions/download-artifact@v4
         with:
-          pattern: "*.log"
           merge-multiple: true
           path: logs/
       - name: Integration Testing Report
