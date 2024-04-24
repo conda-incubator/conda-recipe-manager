@@ -17,8 +17,6 @@ jobs:
             python-version: "3.11"
         # Executes `pre-commit` with the `make` directive to ensure all dependencies are found
         - run: |
-            source $CONDA/bin/activate
-            conda activate conda-recipe-manager
             make pre-commit
   test:
       runs-on: ubuntu-latest
