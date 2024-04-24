@@ -71,13 +71,19 @@ from tests.file_loading import TEST_FILES_PATH, load_file, load_recipe_convert
                 "Required field missing: /about/license_url",
             ],
         ),
+        # Tests for transformations related to the new `build/dynamic_linking` section
+        (
+            "dynamic-linking.yaml",
+            [],
+            [],
+        ),
         # TODO complete: The `rust.yaml` test contains many edge cases and selectors that aren't directly supported in
         # the new recipe format
         # (
         #    "rust.yaml",
         #    [],
         #    [],
-        # )
+        # ),
         # TODO Complete: The `curl.yaml` test is far from perfect. It is very much a work in progress.
         # (
         #    "curl.yaml",
