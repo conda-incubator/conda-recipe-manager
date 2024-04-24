@@ -15,10 +15,13 @@ runs:
         python-version: ${{ inputs.python-version }}
         activate-environment: conda-recipe-manager
         environment-file: environment.yaml
-    #- name: Create Environment
-    #  shell: bash
+    - name: Create Environment
+      shell: bash
+      run: |
+        source $CONDA/bin/activate
+        conda activate conda-recipe-manager
+        conda pip install .
     #  # NOTE: We use `sed` to force a Python version in the `environment.yaml` file
-    #  run: |
     #    conda update -n base -c defaults conda
     #    source $CONDA/etc/profile.d/conda.sh
     #    conda init bash
