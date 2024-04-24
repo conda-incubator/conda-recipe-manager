@@ -18,5 +18,6 @@ runs:
     - name: Create Environment
       shell: bash
       run: |
+        source $CONDA/bin/activate
         conda activate conda-recipe-manager
         pip install .
