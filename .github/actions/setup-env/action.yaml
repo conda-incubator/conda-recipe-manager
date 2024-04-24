@@ -20,7 +20,7 @@ runs:
       run: |
         source $CONDA/bin/activate
         conda activate conda-recipe-manager
-        conda pip install .
+        pip install .
     #  # NOTE: We use `sed` to force a Python version in the `environment.yaml` file
     #    conda update -n base -c defaults conda
     #    source $CONDA/etc/profile.d/conda.sh
