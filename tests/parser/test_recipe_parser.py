@@ -106,6 +106,7 @@ def test_loading_obj_in_list() -> None:
         "gsm-amzn2-aarch64.yaml",  # Regression test: Contains `- '*'` string that failed to parse
         "pytest-pep8.yaml",
         "google-cloud-cpp.yaml",
+        "dynamic-linking.yaml",
     ],
 )
 def test_round_trip(file: str) -> None:
