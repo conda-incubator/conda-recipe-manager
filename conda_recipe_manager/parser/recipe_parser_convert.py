@@ -7,7 +7,7 @@ Description:    Provides a subclass of RecipeParser that performs the conversion
 
 from __future__ import annotations
 
-from typing import Final, cast, Optional
+from typing import Final, Optional, cast
 
 from conda_recipe_manager.parser._node import Node
 from conda_recipe_manager.parser._traverse import traverse
@@ -78,7 +78,7 @@ class RecipeParserConvert(RecipeParser):
             return
         self._patch_and_log({"op": "move", "from": old_path, "path": RecipeParser.append_to_path(base_path, new_ext)})
 
-    def _patch_move_new_path(self, base_path: str, old_ext: str, new_path: str, new_ext: Optional[str]=None) -> None:
+    def _patch_move_new_path(self, base_path: str, old_ext: str, new_path: str, new_ext: Optional[str] = None) -> None:
         """
         Convenience function that moves an old path to a new path that is now under a new path that must be
         conditionally added, if it is not present.
@@ -230,9 +230,10 @@ class RecipeParserConvert(RecipeParser):
             self._patch_move_new_path(build_path, "/entry_points", "/python")
 
             # New `dynamic_linking` section changes
-            self._patch_move_new_path(build_path, "/missing_dso_whitelist", "/dynamic_linking", "/missing_dso_allowlist")
+            self._patch_move_new_path(
+                build_path, "/missing_dso_whitelist", "/dynamic_linking", "/missing_dso_allowlist"
+            )
             self._patch_move_new_path(build_path, "/runpath_whitelist", "/dynamic_linking", "/rpath_allowlist")
-
 
             # Canonically sort this section
             self._sort_subtree_keys(build_path, V1_BUILD_SECTION_KEY_SORT_ORDER)

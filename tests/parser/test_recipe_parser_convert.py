@@ -75,7 +75,7 @@ from tests.file_loading import TEST_FILES_PATH, load_file, load_recipe_convert
         (
             "dynamic-linking.yaml",
             [],
-            [],
+            ["Required field missing: /about/license_url"],
         ),
         # TODO complete: The `rust.yaml` test contains many edge cases and selectors that aren't directly supported in
         # the new recipe format

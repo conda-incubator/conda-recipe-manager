@@ -45,6 +45,7 @@ from conda_recipe_manager.parser._utils import (
     dedupe_and_preserve_order,
     normalize_multiline_strings,
     num_tab_spaces,
+    quote_special_strings,
     stack_path_to_str,
     str_to_stack_path,
     stringify_yaml,
@@ -80,6 +81,25 @@ class RecipeParser:
     _sentinel = SentinelType()
 
     @staticmethod
+    def _parse_yaml_recursive_sub(data: JsonType, modifier: Callable[[str], JsonType]) -> JsonType:
+        """
+        Recursive helper function used when we need to perform variable substitutions.
+        :param data: Data to substitute values in
+        :param modifier: Modifier function that performs some kind of substitution.
+        :returns: Pythonic data corresponding to the line of YAML
+        """
+        # Add the substitutions back in
+        if isinstance(data, str):
+            data = modifier(quote_special_strings(data))
+        if isinstance(data, dict):
+            for key in data.keys():
+                data[key] = RecipeParser._parse_yaml_recursive_sub(cast(str, data[key]), modifier)
+        elif isinstance(data, list):
+            for i in range(len(data)):
+                data[i] = RecipeParser._parse_yaml_recursive_sub(cast(str, data[i]), modifier)
+        return data
+
+    @staticmethod
     def _parse_yaml(s: str, parser: Optional[RecipeParser] = None) -> JsonType:
         """
         Parse a line (or multiple) of YAML into a Pythonic data structure
@@ -90,22 +110,14 @@ class RecipeParser:
         :returns: Pythonic data corresponding to the line of YAML
         """
 
-        # Recursive helper function used when we need to perform variable substitutions
-        def _parse_yaml_recursive_sub(data: JsonType, modifier: Callable[[str], JsonType]) -> JsonType:
-            # Add the substitutions back in
-            if isinstance(data, str):
-                data = modifier(data)
-            if isinstance(data, dict):
-                for key in data.keys():
-                    data[key] = _parse_yaml_recursive_sub(cast(str, data[key]), modifier)
-            elif isinstance(data, list):
-                for i in range(len(data)):
-                    data[i] = _parse_yaml_recursive_sub(cast(str, data[i]), modifier)
-            return data
-
         output: JsonType = None
+        # Our first attempt handles special string cases that require quotes that the YAML parser drops. If that fails,
+        # then we fall back to performing JINJA substitutions.
         try:
-            output = cast(JsonType, yaml.safe_load(s))
+            try:
+                output = cast(JsonType, yaml.safe_load(s))
+            except yaml.scanner.ScannerError:
+                output = cast(JsonType, yaml.safe_load(quote_special_strings(s)))
         except Exception:  # pylint: disable=broad-exception-caught
             # If a construction exception is thrown, attempt to re-parse by replacing Jinja macros (substrings in
             # `{{}}`) with friendly string substitution markers, then re-inject the substitutions back in. We classify
@@ -113,13 +125,13 @@ class RecipeParser:
             # substitution.
             sub_list: list[str] = Regex.JINJA_SUB.findall(s)
             s = Regex.JINJA_SUB.sub(RECIPE_MANAGER_SUB_MARKER, s)
-            output = _parse_yaml_recursive_sub(
+            output = RecipeParser._parse_yaml_recursive_sub(
                 cast(JsonType, yaml.safe_load(s)), lambda d: substitute_markers(d, sub_list)
             )
             # Because we leverage PyYaml to parse the data structures, we need to perform a second pass to perform
             # variable substitutions.
             if parser is not None:
-                output = _parse_yaml_recursive_sub(
+                output = RecipeParser._parse_yaml_recursive_sub(
                     output, parser._render_jinja_vars  # pylint: disable=protected-access
                 )
         return output
@@ -683,6 +695,7 @@ class RecipeParser:
     def get_value(self, path: str, default: JsonType | SentinelType = _sentinel, sub_vars: bool = False) -> JsonType:
         """
         Retrieves a value at a given path. If the value is not found, return a specified default value or throw.
+        TODO Refactor: This function could leverage `render_to_object()` to simplify/de-dupe the logic.
         :param path: JSON patch (RFC 6902)-style path to a value.
         :param default: (Optional) If the value is not found, return this value instead.
         :param sub_vars: (Optional) If set to True and the value contains a Jinja template variable, the Jinja value
