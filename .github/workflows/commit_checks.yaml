@@ -1,0 +1,62 @@
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+name: Commit Checks
+
+jobs:
+  # NOTE: Tests also run via `pre-commit`
+  pre-commit:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        - uses: ./.github/actions/setup-env
+          with:
+            python-version: "3.11"
+        # Executes `pre-commit` with the `make` directive to ensure all dependencies are found
+        - run: |
+            source $CONDA/bin/activate
+            conda activate conda-recipe-manager
+            make pre-commit
+  test:
+      runs-on: ubuntu-latest
+      name: Test on ${{ matrix.python-version }}
+      strategy:
+        matrix:
+          python-version: ["3.11"] # TODO: Bump this to 3.12 when supported and drop 3.11 (covered in pre-commit)
+      steps:
+        - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        - uses: ./.github/actions/setup-env
+          with:
+            python-version: ${{ matrix.python-version }}
+        - run: |
+            source $CONDA/bin/activate
+            conda activate conda-recipe-manager
+            make test
+  build-recipe-conda:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        - name: Build package in conda build
+          run: |
+            source $CONDA/bin/activate
+            conda install -y conda-build
+            conda build recipe/meta.yaml
+  # Eat our own dog food and build this project with rattler-build by converting our existing recipe.
+  build-recipe-rattler:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        - uses: ./.github/actions/setup-env
+          with:
+            python-version: "3.11"
+        - name: Build package in rattler-build (experimental)
+          run: |
+            source $CONDA/bin/activate
+            conda activate conda-recipe-manager
+            conda install -y -c conda-forge rattler-build
+            conda-recipe-manager convert -o recipe/recipe.yaml recipe/meta.yaml
+            mkdir -p ../temp
+            rattler-build build -r recipe/ --output-dir=../temp

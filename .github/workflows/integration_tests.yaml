@@ -1,0 +1,93 @@
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+name: Integration Tests
+
+jobs:
+  ## Integration tests ##
+  integration-rattler:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    name: Test on ${{ matrix.test-directory }}
+    strategy:
+      fail-fast: false
+      matrix:
+        test-directory:
+          - anaconda_recipes_01
+          - bioconda_recipes_01
+          - bioconda_recipes_02
+          - bioconda_recipes_03
+          - bioconda_recipes_04
+        include:
+          - test-directory: anaconda_recipes_01
+            convert-success: 0.80
+            rattler-success: 0.50
+          - test-directory: bioconda_recipes_01
+            convert-success: 0.55
+            rattler-success: 0.05
+          - test-directory: bioconda_recipes_02
+            convert-success: 0.60
+            rattler-success: 0.15
+          - test-directory: bioconda_recipes_03
+            convert-success: 0.85
+            rattler-success: 0.30
+          - test-directory: bioconda_recipes_04
+            convert-success: 0.85
+            rattler-success: 0.30
+          # 2,000 randomly selected conda-forge recipes
+          - test-directory: conda_forge_recipes_01
+            convert-success: 0.75
+            rattler-success: 0.70
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          repository: conda-incubator/conda-recipe-manager-test-data
+          path: test_data
+          sparse-checkout: recipes_v0/${{ matrix.test-directory }}
+      - uses: ./.github/actions/setup-env
+        with:
+          python-version: "3.11"
+      - name: Convert recipes and dry-run rattler-build
+        run: |
+          source $CONDA/bin/activate
+          conda activate conda-recipe-manager
+          conda install -y -c conda-forge rattler-build
+          mkdir -p logs
+          conda-recipe-manager \
+            convert -t -m ${{ matrix.convert-success }} -o recipe.yaml test_data/recipes_v0/${{ matrix.test-directory }} \
+            | tee logs/convert_${{ matrix.test-directory }}.log
+          conda-recipe-manager \
+            rattler-bulk-build -t -m ${{ matrix.rattler-success }} test_data/recipes_v0/${{ matrix.test-directory }} --render-only \
+            | tee logs/rbb_${{ matrix.test-directory }}.log
+      - uses: actions/upload-artifact@v4
+        with:
+          name: integration-logs-${{ matrix.test-directory }}
+          path: logs/*.log
+  integration-final-results:
+    runs-on: ubuntu-latest
+    name: Integration Testing Final Report
+    needs: [integration-rattler]
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: ./.github/actions/setup-env
+        with:
+          python-version: "3.11"
+      - name: Make artifact directory
+        run: mkdir -p logs
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+          path: logs/
+      - name: Integration Testing Report
+        run: |
+          source $CONDA/bin/activate
+          conda activate conda-recipe-manager
+          scripts/parse_ci_output.py logs/ | tee report.json
+          echo -e "Integration Report:\n\`\`\`json\n" >> ${GITHUB_STEP_SUMMARY}
+          cat report.json >> ${GITHUB_STEP_SUMMARY}
+          echo -e "\n\`\`\`" >> ${GITHUB_STEP_SUMMARY}
