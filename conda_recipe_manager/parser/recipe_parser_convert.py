@@ -7,7 +7,7 @@ Description:    Provides a subclass of RecipeParser that performs the conversion
 
 from __future__ import annotations
 
-from typing import Final, cast
+from typing import Final, Optional, cast
 
 from conda_recipe_manager.parser._node import Node
 from conda_recipe_manager.parser._traverse import traverse
@@ -77,6 +77,26 @@ class RecipeParserConvert(RecipeParser):
         if not self._new_recipe.contains_value(old_path):
             return
         self._patch_and_log({"op": "move", "from": old_path, "path": RecipeParser.append_to_path(base_path, new_ext)})
+
+    def _patch_move_new_path(self, base_path: str, old_ext: str, new_path: str, new_ext: Optional[str] = None) -> None:
+        """
+        Convenience function that moves an old path to a new path that is now under a new path that must be
+        conditionally added, if it is not present.
+
+        Examples:
+            `/build/entry_points` -> `/build/python/entry_points`
+            `/build/missing_dso_whitelist` -> `build/dynamic_linking/missing_dso_allowlist`
+        :param base_path: Shared base path from old and new locations
+        :param old_ext: Old extension to the base path containing the data to move
+        :param new_path: New path to extend to the base path, if the path does not currently exist
+        :param new_ext: (Optional) New extension to the base path of where the data should go. Use this when the
+            target value has been renamed. Defaults to the value of `old_ext`.
+        """
+        if new_ext is None:
+            new_ext = old_ext
+        if self._new_recipe.contains_value(RecipeParser.append_to_path(base_path, old_ext)):
+            self._patch_add_missing_path(base_path, new_path)
+        self._patch_move_base_path(base_path, old_ext, RecipeParser.append_to_path(new_path, new_ext))
 
     def _sort_subtree_keys(self, sort_path: str, tbl: dict[str, int], rename: str = "") -> None:
         """
@@ -207,9 +227,13 @@ class RecipeParserConvert(RecipeParser):
                 continue
 
             # `build/entry_points` -> `build/python/entry_points`
-            if self._new_recipe.contains_value(RecipeParser.append_to_path(build_path, "/entry_points")):
-                self._patch_add_missing_path(build_path, "/python")
-            self._patch_move_base_path(build_path, "/entry_points", "/python/entry_points")
+            self._patch_move_new_path(build_path, "/entry_points", "/python")
+
+            # New `dynamic_linking` section changes
+            self._patch_move_new_path(
+                build_path, "/missing_dso_whitelist", "/dynamic_linking", "/missing_dso_allowlist"
+            )
+            self._patch_move_new_path(build_path, "/runpath_whitelist", "/dynamic_linking", "/rpath_allowlist")
 
             # Canonically sort this section
             self._sort_subtree_keys(build_path, V1_BUILD_SECTION_KEY_SORT_ORDER)
