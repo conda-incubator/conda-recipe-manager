@@ -405,10 +405,35 @@ class RecipeParserConvert(RecipeParser):
     @staticmethod
     def pre_process_recipe_text(content: str) -> str:
         """
-        TODO complete
+        Takes the content of a recipe file and performs manipulations prior to the parsing stage. This is should be
+        seldom used to solve conversion issues.
+
+        Ideally the pre-processor phase is only used when:
+          - There is no other feasible way to solve a conversion issue.
+          - There is a proof-of-concept fix that would be easier to develop as a pre-processor step that could be
+            refactored into the parser later.
+          - The number of recipes afflicted by an issue does not justify the engineering effort required to handle
+            the issue in the parsing phase.
         :param content: Recipe file contents to pre-process
         :returns: Pre-processed recipe file contents
         """
+        # Convert the old JINJA `environ[""]` variable usage to the new `get.env("")` syntax. NOTE:
+        #   - This is mostly used by Bioconda recipes and R-based-packages in the `license_file` field.
+        #   - From our search, it looks like we never deal with more than one set of outer quotes with in the brackets
+        replacements: list[tuple[str, str]] = []
+        for groups in cast(list[str], Regex.PRE_PROCESS_ENVIRON.findall(content)):
+            # Each match should return ["<quote char>", "<key>", "<quote_char>"]
+            quote_char = groups[0]
+            key = groups[1]
+            replacements.append(
+                (
+                    f"environ[{quote_char}{key}{quote_char}]",
+                    f"env.get({quote_char}{key}{quote_char})",
+                )
+            )
+        for old, new in replacements:
+            content = content.replace(old, new, 1)
+
         return content
 
     def render_to_new_recipe_format(self) -> tuple[str, MessageTable]:
