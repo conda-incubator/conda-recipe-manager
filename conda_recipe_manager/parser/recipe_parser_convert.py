@@ -402,6 +402,15 @@ class RecipeParserConvert(RecipeParser):
             # found at the top-level. So for consistency, we sort on that ordering.
             self._sort_subtree_keys(output_path, TOP_LEVEL_KEY_SORT_ORDER)
 
+    @staticmethod
+    def pre_process_recipe_text(content: str) -> str:
+        """
+        TODO complete
+        :param content: Recipe file contents to pre-process
+        :returns: Pre-processed recipe file contents
+        """
+        return content
+
     def render_to_new_recipe_format(self) -> tuple[str, MessageTable]:
         """
         Takes the current recipe representation and renders it to the new format WITHOUT modifying the current recipe
