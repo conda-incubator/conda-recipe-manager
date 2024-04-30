@@ -405,8 +405,8 @@ class RecipeParserConvert(RecipeParser):
     @staticmethod
     def pre_process_recipe_text(content: str) -> str:
         """
-        Takes the content of a recipe file and performs manipulations prior to the parsing stage. This is should be
-        seldom used to solve conversion issues.
+        Takes the content of a recipe file and performs manipulations prior to the parsing stage. This should be
+        used sparingly for solving conversion issues.
 
         Ideally the pre-processor phase is only used when:
           - There is no other feasible way to solve a conversion issue.
