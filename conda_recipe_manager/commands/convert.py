@@ -46,6 +46,7 @@ class ExitCode(IntEnum):
     PARSE_EXCEPTION = 102
     RENDER_EXCEPTION = 103
     READ_EXCEPTION = 104
+    PRE_PROCESS_EXCEPTION = 105
 
 
 @dataclass
@@ -74,13 +75,38 @@ class ConversionResult:
             self.code = ExitCode.RENDER_WARNINGS
 
 
+def _record_unrecoverable_failure(
+    conversion_result: ConversionResult,
+    exit_code: ExitCode,
+    e_msg: str,
+    print_output: bool,
+    e: Optional[Exception] = None,
+) -> ConversionResult:
+    """
+    Convenience function that streamlines the process of recording an unrecoverable conversion failure.
+    :param conversion_result: Conversion result instance to use. This is passed into aggregate any other messages that
+        could be logged prior to reaching this fatal error case.
+    :param exit_code: Exit code to return for this error case.
+    :param e_msg: Error message to display, if enabled.
+    :param print_output: Prints the recipe to STDERR if the output file is not specified and this flag is `True`.
+    :param e: (Optional) Exception instance to capture, if applicable
+    :returns: The final `conversion_result` instance that should be returned immediately.
+    """
+    print_err(e_msg, print_enabled=print_output)
+    if e is not None:
+        print_err(e, print_enabled=print_output)
+    conversion_result.msg_tbl.add_message(MessageCategory.EXCEPTION, e_msg)
+    conversion_result.code = exit_code
+    return conversion_result
+
+
 def convert_file(file_path: Path, output: Optional[Path], print_output: bool) -> ConversionResult:
     """
     Converts a single recipe file to the new format, tracking results.
     :param file_path: Path to the recipe file to convert
     :param output: If specified, the file contents are written to this file path. Otherwise, the file is dumped to
         STDOUT IF `print_output` is set to `True`.
-    :param print_output: Prints the recipe to STDOUT if the output file is not specified and this flag is `True`.
+    :param print_output: Prints the recipe to STDOUT/STDERR if the output file is not specified and this flag is `True`.
     :returns: A struct containing the results of the conversion process, including debugging metadata.
     """
     conversion_result = ConversionResult(
@@ -89,43 +115,52 @@ def convert_file(file_path: Path, output: Optional[Path], print_output: bool) ->
 
     recipe_content = None
     try:
-        with open(file_path, "r", encoding="utf-8") as file:
-            recipe_content = file.read()
-    except IOError:
-        pass
+        recipe_content = Path(file_path).read_text(encoding="utf-8")
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        return _record_unrecoverable_failure(
+            conversion_result, ExitCode.READ_EXCEPTION, f"EXCEPTION: Failed to read: {file_path}", print_output, e
+        )
 
-    if recipe_content is None:
-        conversion_result.code = ExitCode.READ_EXCEPTION
-        e_msg = f"EXCEPTION: Failed to read: {file_path}"
-        print_err(e_msg, print_enabled=print_output)
-        conversion_result.msg_tbl.add_message(MessageCategory.EXCEPTION, e_msg)
-        return conversion_result
+    # Pre-process the recipe
+    try:
+        recipe_content = RecipeParserConvert.pre_process_recipe_text(recipe_content)
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        return _record_unrecoverable_failure(
+            conversion_result,
+            ExitCode.PRE_PROCESS_EXCEPTION,
+            "EXCEPTION: An exception occurred while pre-processing the recipe file",
+            print_output,
+            e,
+        )
 
+    # Parse the recipe
     parser: RecipeParserConvert
     try:
         parser = RecipeParserConvert(recipe_content)
     except Exception as e:  # pylint: disable=broad-exception-caught
-        e_msg = "EXCEPTION: An exception occurred while parsing the recipe file"
-        print_err(e_msg, print_enabled=print_output)
-        print_err(e, print_enabled=print_output)
-        conversion_result.msg_tbl.add_message(MessageCategory.EXCEPTION, e_msg)
-        conversion_result.code = ExitCode.PARSE_EXCEPTION
-        return conversion_result
+        return _record_unrecoverable_failure(
+            conversion_result,
+            ExitCode.PARSE_EXCEPTION,
+            "EXCEPTION: An exception occurred while parsing the recipe file",
+            print_output,
+            e,
+        )
 
+    # Convert the recipe
     try:
         conversion_result.content, conversion_result.msg_tbl = parser.render_to_new_recipe_format()
     except Exception as e:  # pylint: disable=broad-exception-caught
-        e_msg = "EXCEPTION: An exception occurred while converting to the new recipe file"
-        print_err(e_msg, print_enabled=print_output)
-        print_err(e, print_enabled=print_output)
-        conversion_result.msg_tbl.add_message(MessageCategory.EXCEPTION, e_msg)
-        conversion_result.code = ExitCode.RENDER_EXCEPTION
-        return conversion_result
+        return _record_unrecoverable_failure(
+            conversion_result,
+            ExitCode.RENDER_EXCEPTION,
+            "EXCEPTION: An exception occurred while converting to the new recipe file",
+            print_output,
+            e,
+        )
 
     # Print or dump the results to a file. Printing is disabled for bulk operations.
-    if output is None:
-        print_out(conversion_result.content, print_enabled=print_output)
-    else:
+    print_out(conversion_result.content, print_enabled=print_output and (output is None))
+    if output is not None:
         print_err(
             "WARNING: File is not called `recipe.yaml`.",
             print_enabled=print_output and os.path.basename(output) != "recipe.yaml",

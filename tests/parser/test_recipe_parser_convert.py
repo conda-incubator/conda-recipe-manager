@@ -7,8 +7,28 @@ from __future__ import annotations
 
 import pytest
 
+from conda_recipe_manager.parser.recipe_parser_convert import RecipeParserConvert
 from conda_recipe_manager.parser.types import MessageCategory
 from tests.file_loading import TEST_FILES_PATH, load_file, load_recipe_convert
+
+
+@pytest.mark.parametrize(
+    "input_file,expected_file",
+    [
+        ("simple-recipe_environ.yaml", "pre-processed-simple-recipe_environ.yaml"),
+        ("simple-recipe.yaml", "simple-recipe.yaml"),  # Unchanged file
+    ],
+)
+def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
+    """
+    Validates the pre-processor phase of the conversion process. A recipe file should come in
+    as a string and return a modified string, if applicable.
+    :param input_file: Test input recipe file name
+    :param expected_file: Name of the file containing the expected output of a test instance
+    """
+    assert RecipeParserConvert.pre_process_recipe_text(load_file(f"{TEST_FILES_PATH}/{input_file}")) == load_file(
+        f"{TEST_FILES_PATH}/{expected_file}"
+    )
 
 
 @pytest.mark.parametrize(
