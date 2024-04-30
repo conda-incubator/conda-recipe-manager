@@ -417,9 +417,10 @@ class RecipeParserConvert(RecipeParser):
         :param content: Recipe file contents to pre-process
         :returns: Pre-processed recipe file contents
         """
-        # Convert the old JINJA `environ[""]` variable usage to the new `get.env("")` syntax. NOTE:
+        # Convert the old JINJA `environ[""]` variable usage to the new `get.env("")` syntax.
+        # NOTE:
         #   - This is mostly used by Bioconda recipes and R-based-packages in the `license_file` field.
-        #   - From our search, it looks like we never deal with more than one set of outer quotes with in the brackets
+        #   - From our search, it looks like we never deal with more than one set of outer quotes within the brackets
         replacements: list[tuple[str, str]] = []
         for groups in cast(list[str], Regex.PRE_PROCESS_ENVIRON.findall(content)):
             # Each match should return ["<quote char>", "<key>", "<quote_char>"]
