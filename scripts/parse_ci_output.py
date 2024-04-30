@@ -68,24 +68,40 @@ def generate_summary(convert_results: list[BasicJsonType], dry_run_results: list
     :param dry_run_results: List of parsed JSON for dry-run results
     :returns: Summary JSON object to display in the final results.
     """
-    test_counts: dict[str, int] = {}
+    fields_to_pull: Final[list[str]] = [
+        # Conversion phase
+        "percent_recipe_exceptions",
+        "percent_recipe_errors",
+        "percent_recipe_success",
+        # rattler dry-run phase
+        "percent_errors",
+        "percent_success",
+    ]
+    test_data: dict[str, dict[str, str | int]] = {}
 
     # Helper function for accumulating counts of tests that have been run per target directory of integration tests.
-    def _count_tests(results: list[BasicJsonType]) -> None:
+    def _summarize_tests(results: list[BasicJsonType], test_title: str) -> None:
         for result in results:
             test = Path(result["info"]["directory"]).name
-            test_counts.setdefault(test, 0)
-            test_counts[test] += 1
+            test_data.setdefault(test, {})
+            test_data[test].setdefault("test_count", 0)
+            test_data[test]["test_count"] += 1
 
-    _count_tests(convert_results)
-    _count_tests(dry_run_results)
+            stats_key = "stats" if "stats" in result else "statistics"
+            for field in fields_to_pull:
+                if field in result[stats_key]:
+                    test_data[test].setdefault(test_title, {})
+                    test_data[test][test_title][field] = result[stats_key][field]
+
+    _summarize_tests(convert_results, "recipe_conversion")
+    _summarize_tests(dry_run_results, "recipe_dry_run")
 
     return {
-        "test_counts": dict(sorted(test_counts.items())),
-        "stages": {
+        "all_stages": {
             "recipe_conversion": aggregate_stats(convert_results),
             "rattler_dry_run": aggregate_stats(dry_run_results),
         },
+        "test_summaries": dict(sorted(test_data.items())),
     }
 
 
