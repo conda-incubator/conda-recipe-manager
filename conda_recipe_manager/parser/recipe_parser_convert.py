@@ -449,7 +449,7 @@ class RecipeParserConvert(RecipeParser):
         (As of writing there is no official name other than "the new recipe format")
         :returns: Returns a tuple containing:
             - The converted recipe, as a string
-            - A MessageTbl instance that contains error logging
+            - A `MessageTbl` instance that contains error logging
             - The `RecipeParser` instance containing the converted recipe file. USE FOR DEBUGGING PURPOSES ONLY!
         """
         # Approach: In the event that we want to expand support later, this function should be implemented in terms
