@@ -120,7 +120,7 @@ def test_render_to_new_recipe_format(file_base: str, errors: list[str], warnings
     :param file_base: Base file name for both the input and the expected out
     """
     parser = load_recipe_convert(file_base)
-    result, tbl = parser.render_to_new_recipe_format()
+    result, tbl, _ = parser.render_to_new_recipe_format()
     assert result == load_file(f"{TEST_FILES_PATH}/new_format_{file_base}")
     assert tbl.get_messages(MessageCategory.ERROR) == errors
     assert tbl.get_messages(MessageCategory.WARNING) == warnings
