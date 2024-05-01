@@ -97,6 +97,15 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
             [],
             ["Required field missing: /about/license_url"],
         ),
+        # Regression: Tests for proper indentation of a list item inside a collection node element
+        (
+            "boto.yaml",
+            [],
+            [
+                "Required field missing: /about/license_file",
+                "Required field missing: /about/license_url",
+            ],
+        ),
         # TODO complete: The `rust.yaml` test contains many edge cases and selectors that aren't directly supported in
         # the new recipe format
         # (
