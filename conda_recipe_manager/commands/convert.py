@@ -100,13 +100,14 @@ def _record_unrecoverable_failure(
     return conversion_result
 
 
-def convert_file(file_path: Path, output: Optional[Path], print_output: bool) -> ConversionResult:
+def convert_file(file_path: Path, output: Optional[Path], print_output: bool, debug: bool) -> ConversionResult:
     """
     Converts a single recipe file to the new format, tracking results.
     :param file_path: Path to the recipe file to convert
     :param output: If specified, the file contents are written to this file path. Otherwise, the file is dumped to
         STDOUT IF `print_output` is set to `True`.
     :param print_output: Prints the recipe to STDOUT/STDERR if the output file is not specified and this flag is `True`.
+    :param debug: Enables debug mode output. Prints to STDERR.
     :returns: A struct containing the results of the conversion process, including debugging metadata.
     """
     conversion_result = ConversionResult(
@@ -146,6 +147,10 @@ def convert_file(file_path: Path, output: Optional[Path], print_output: bool) ->
             e,
         )
 
+    # Print the initial parsed recipe, if requested
+    print_err("########## PARSED RECIPE FILE ##########", debug)
+    print_err(parser, debug)
+
     # Convert the recipe
     try:
         conversion_result.content, conversion_result.msg_tbl = parser.render_to_new_recipe_format()
@@ -172,16 +177,17 @@ def convert_file(file_path: Path, output: Optional[Path], print_output: bool) ->
     return conversion_result
 
 
-def process_recipe(file: Path, path: Path, output: Optional[Path]) -> tuple[str, ConversionResult]:
+def process_recipe(file: Path, path: Path, output: Optional[Path], debug: bool) -> tuple[str, ConversionResult]:
     """
     Helper function that performs the conversion operation for parallelizable execution.
     :param file: Recipe file to convert
     :param path: Path argument provided by the user
     :param output: Output argument file provided by the user
+    :param debug: Enables debug mode output. Prints to STDERR.
     :returns: Tuple containing the key/value pairing that tracks the result of the conversion operation
     """
     out_file: Optional[Path] = None if output is None else file.parent / output
-    conversion_result = convert_file(file, out_file, False)
+    conversion_result = convert_file(file, out_file, False, debug)
     conversion_result.project_name = file.relative_to(path).parts[0]
     return str(file.relative_to(path)), conversion_result
 
@@ -251,8 +257,14 @@ def _collect_issue_stats(project_name: str, issues: list[str], hist: dict[str, i
     is_flag=True,
     help="Truncates logging. On large tests in a GitHub CI environment, this can eliminate log buffering issues.",
 )
+@click.option(
+    "--debug",
+    "-d",
+    is_flag=True,
+    help="Debug mode, prints debugging information to STDERR.",
+)
 def convert(
-    path: Path, output: Optional[Path], min_success_rate: float, truncate: bool
+    path: Path, output: Optional[Path], min_success_rate: float, truncate: bool, debug: bool
 ) -> None:  # pylint: disable=redefined-outer-name
     """
     Recipe conversion CLI utility. By default, recipes print to STDOUT. Messages always print to STDERR. Takes 1 file or
@@ -265,7 +277,7 @@ def convert(
 
     ## Single-file case ##
     if len(files) == 1:
-        result: Final[ConversionResult] = convert_file(files[0], output, True)
+        result: Final[ConversionResult] = convert_file(files[0], output, True, debug)
         print_messages(MessageCategory.WARNING, result.msg_tbl)
         print_messages(MessageCategory.ERROR, result.msg_tbl)
         print_err(result.msg_tbl.get_totals_message())
@@ -276,7 +288,9 @@ def convert(
     # Process recipes in parallel
     thread_pool_size: Final[int] = mp.cpu_count()
     with mp.Pool(thread_pool_size) as pool:
-        results = dict(pool.starmap(process_recipe, [(file, path, output) for file in files]))  # type: ignore[misc]
+        results = dict(
+            pool.starmap(process_recipe, [(file, path, output, debug) for file in files])  # type: ignore[misc]
+        )
 
     # Tracking failures from bulk operation
     recipes_with_except: list[str] = []
