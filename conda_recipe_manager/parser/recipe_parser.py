@@ -532,15 +532,22 @@ class RecipeParser:
         # Don't render a `:` for the non-visible root node. Also don't render invisible collection nodes.
         if depth > -1 and not node.is_collection_element():
             list_prefix = ""
+            # Creating a copy of `spaces` scoped to this check prevents a scenario in which child nodes of this
+            # collection element are missing one indent-level. The indent now only applies to the collection element.
+            # Example:
+            #   - script:
+            #     - foo  # Incorrect
+            #       - foo  # Correct
+            tmp_spaces = spaces
             # Handle special cases for the "parent" key
             if node.list_member_flag:
                 list_prefix = "- "
                 depth_delta += 1
             if is_first_collection_child:
                 list_prefix = "- "
-                spaces = spaces[TAB_SPACE_COUNT:]
+                tmp_spaces = tmp_spaces[TAB_SPACE_COUNT:]
             # Nodes representing collections in a list have nothing to render
-            lines.append(f"{spaces}{list_prefix}{node.value}:  {node.comment}".rstrip())
+            lines.append(f"{tmp_spaces}{list_prefix}{node.value}:  {node.comment}".rstrip())
 
         for child in node.children:
             # Top-level empty-key edge case: Top level keys should have no additional indentation.
