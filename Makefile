@@ -99,7 +99,7 @@ test-debug:		## runs test cases with debugging info enabled
 
 test-cov:		## checks test coverage requirements
 	$(PYTHON3) -m pytest -n auto --cov-config=.coveragerc --cov=$(SRC_DIR) \
-		$(TEST_DIR) --cov-fail-under=45 --cov-report term-missing
+		$(TEST_DIR) --cov-fail-under=80 --cov-report term-missing
 
 lint:			## runs the linter against the project
 	pylint --rcfile=.pylintrc $(SRC_DIR) $(TEST_DIR)
