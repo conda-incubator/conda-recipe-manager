@@ -147,13 +147,16 @@ def convert_file(file_path: Path, output: Optional[Path], print_output: bool, de
             e,
         )
 
-    # Print the initial parsed recipe, if requested
-    print_err("########## PARSED RECIPE FILE ##########", debug)
-    print_err(parser, debug)
+    # Print the initial parser, if requested
+    print_err("########## PARSED RECIPE FILE ##########", print_enabled=debug)
+    print_err(parser, print_enabled=debug)
 
     # Convert the recipe
     try:
-        conversion_result.content, conversion_result.msg_tbl = parser.render_to_new_recipe_format()
+        conversion_result.content, conversion_result.msg_tbl, debug_new_parser = parser.render_to_new_recipe_format()
+        # Print the new parser, if requested
+        print_err("########## CONVERTED RECIPE FILE ##########", print_enabled=debug)
+        print_err(debug_new_parser, print_enabled=debug)
     except Exception as e:  # pylint: disable=broad-exception-caught
         return _record_unrecoverable_failure(
             conversion_result,
