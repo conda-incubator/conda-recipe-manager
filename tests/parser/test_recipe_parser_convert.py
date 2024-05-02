@@ -106,6 +106,19 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
                 "Required field missing: /about/license_url",
             ],
         ),
+        # Regression: Tests a recipe that has multiple `source`` objects in `/source` AND an `about` per `output`
+        # TODO Issue #50 tracks an edge case caused by this project that is not currently handled.
+        (
+            "cctools-ld64.yaml",
+            [],
+            [
+                "Required field missing: /about/summary",
+                "Required field missing: /about/description",
+                "Required field missing: /about/license",
+                "Required field missing: /about/license_file",
+                "Required field missing: /about/license_url",
+            ],
+        ),
         # TODO complete: The `rust.yaml` test contains many edge cases and selectors that aren't directly supported in
         # the new recipe format
         # (
