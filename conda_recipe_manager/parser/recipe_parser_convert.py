@@ -202,12 +202,22 @@ class RecipeParserConvert(RecipeParser):
         Upgrades/converts the `source` section(s) of a recipe file.
         :param base_package_paths: Set of base paths to process that could contain this section.
         """
-        # TODO: SVN and HG source options are no longer supported
-
         for base_path in base_package_paths:
             source_path = RecipeParser.append_to_path(base_path, "/source")
             if not self._new_recipe.contains_value(source_path):
                 continue
+
+            # SVN and HG source options are no longer supported. This seems to have been deprecated a long
+            # time ago and there are unlikely any recipes that fall into this camp. Still, we should flag it.
+            source_fields = cast(dict[str, str], self._new_recipe.get_value(source_path)).keys()
+            if "svn_url" in source_fields:
+                self._msg_tbl.add_message(
+                    MessageCategory.WARNING, "SVN packages are no longer supported in the new format"
+                )
+            if "hg_url" in source_fields:
+                self._msg_tbl.add_message(
+                    MessageCategory.WARNING, "HG (Mercury) packages are no longer supported in the new format"
+                )
 
             # Basic renaming transformations
             self._patch_move_base_path(source_path, "/fn", "/file_name")
