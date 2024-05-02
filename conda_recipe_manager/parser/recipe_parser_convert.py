@@ -282,35 +282,16 @@ class RecipeParserConvert(RecipeParser):
             # Canonically sort this section
             self._sort_subtree_keys(build_path, V1_BUILD_SECTION_KEY_SORT_ORDER)
 
-    def _upgrade_about_section(self) -> None:
+    def _upgrade_about_section(self, base_package_paths: list[str]) -> None:
         """
         Upgrades/converts the `about` section of a recipe file.
+        :param base_package_paths: Set of base paths to process that could contain this section.
         """
-        # Warn if "required" fields are missing
-        about_required: Final[list[str]] = [
-            "summary",
-            "description",
-            "license",
-            "license_file",
-            "license_url",
-        ]
-        for field in about_required:
-            path = f"/about/{field}"
-            if not self._new_recipe.contains_value(path):
-                self._msg_tbl.add_message(MessageCategory.WARNING, f"Required field missing: {path}")
-
-        # Transform renamed fields
-        about_rename: Final[list[tuple[str, str]]] = [
+        about_rename_mapping: Final[list[tuple[str, str]]] = [
             ("home", "homepage"),
             ("dev_url", "repository"),
             ("doc_url", "documentation"),
         ]
-        for old, new in about_rename:
-            self._patch_move_base_path("/about", old, new)
-
-        # TODO validate: /about/license must be SPDX recognized.
-
-        # Remove deprecated `about` fields
         about_deprecated: Final[list[str]] = [
             "prelink_message",
             "license_family",
@@ -319,10 +300,25 @@ class RecipeParserConvert(RecipeParser):
             "keywords",
             "doc_source_url",
         ]
-        for field in about_deprecated:
-            path = f"/about/{field}"
-            if self._new_recipe.contains_value(path):
-                self._patch_and_log({"op": "remove", "path": path})
+
+        for base_path in base_package_paths:
+            about_path = RecipeParser.append_to_path(base_path, "/about")
+
+            # Skip transformations if there is no `/about` section
+            if not self._new_recipe.contains_value(about_path):
+                continue
+
+            # Transform renamed fields
+            for old, new in about_rename_mapping:
+                self._patch_move_base_path(about_path, old, new)
+
+            # TODO validate: /about/license must be SPDX recognized.
+
+            # Remove deprecated `about` fields
+            for field in about_deprecated:
+                path = RecipeParser.append_to_path(about_path, field)
+                if self._new_recipe.contains_value(path):
+                    self._patch_and_log({"op": "remove", "path": path})
 
     def _upgrade_test_pip_check(self, base_path: str, test_path: str) -> None:
         """
@@ -518,7 +514,7 @@ class RecipeParserConvert(RecipeParser):
         # Upgrade common sections found in a recipe
         self._upgrade_source_section(base_package_paths)
         self._upgrade_build_section(base_package_paths)
-        self._upgrade_about_section()
+        self._upgrade_about_section(base_package_paths)
         self._upgrade_test_section(base_package_paths)
         self._upgrade_multi_output(base_package_paths)
 
