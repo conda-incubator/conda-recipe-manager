@@ -256,6 +256,10 @@ class RecipeParserConvert(RecipeParser):
             if not self._new_recipe.contains_value(build_path):
                 continue
 
+            # Simple transformations
+            self._patch_move_base_path(build_path, "merge_build_host", "merge_build_and_host_envs")
+            self._patch_move_base_path(build_path, "no_link", "always_copy_files")
+
             # `build/entry_points` -> `build/python/entry_points`
             self._patch_move_new_path(build_path, "/entry_points", "/python")
 
