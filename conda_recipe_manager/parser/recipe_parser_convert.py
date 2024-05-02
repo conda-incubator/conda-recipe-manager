@@ -15,6 +15,7 @@ from conda_recipe_manager.parser._types import (
     ROOT_NODE_VALUE,
     TOP_LEVEL_KEY_SORT_ORDER,
     V1_BUILD_SECTION_KEY_SORT_ORDER,
+    V1_SOURCE_SECTION_KEY_SORT_ORDER,
     Regex,
 )
 from conda_recipe_manager.parser._utils import stack_path_to_str, str_to_stack_path
@@ -196,6 +197,45 @@ class RecipeParserConvert(RecipeParser):
                 self._patch_and_log(patch)
                 self._new_recipe.remove_selector(selector_path)
 
+    def _upgrade_source_section(self, base_package_paths: list[str]) -> None:
+        """
+        Upgrades/converts the `source` section(s) of a recipe file.
+        :param base_package_paths: Set of base paths to process that could contain this section.
+        """
+        for base_path in base_package_paths:
+            source_path = RecipeParser.append_to_path(base_path, "/source")
+            if not self._new_recipe.contains_value(source_path):
+                continue
+
+            # The `source` field can contain a list of elements or a single element (not encapsulated in a list).
+            # This logic sets up a list to iterate through that will handle both cases.
+            source_data = self._new_recipe.get_value(source_path)
+            source_paths = []
+            if isinstance(source_data, list):
+                for x in range(len(source_data)):
+                    source_paths.append(RecipeParser.append_to_path(source_path, f"/{x}"))
+            else:
+                source_paths.append(source_path)
+
+            for src_path in source_paths:
+                # SVN and HG source options are no longer supported. This seems to have been deprecated a long
+                # time ago and there are unlikely any recipes that fall into this camp. Still, we should flag it.
+                if self._new_recipe.contains_value(RecipeParser.append_to_path(src_path, "svn_url")):
+                    self._msg_tbl.add_message(
+                        MessageCategory.WARNING, "SVN packages are no longer supported in the new format"
+                    )
+                if self._new_recipe.contains_value(RecipeParser.append_to_path(src_path, "hg_url")):
+                    self._msg_tbl.add_message(
+                        MessageCategory.WARNING, "HG (Mercury) packages are no longer supported in the new format"
+                    )
+
+                # Basic renaming transformations
+                self._patch_move_base_path(src_path, "/fn", "/file_name")
+                self._patch_move_base_path(src_path, "/folder", "/target_directory")
+
+                # Canonically sort this section
+                self._sort_subtree_keys(src_path, V1_SOURCE_SECTION_KEY_SORT_ORDER)
+
     def _upgrade_build_section(self, base_package_paths: list[str]) -> None:
         """
         Upgrades/converts the `about` section(s) of a recipe file.
@@ -226,6 +266,10 @@ class RecipeParserConvert(RecipeParser):
             if not self._new_recipe.contains_value(build_path):
                 continue
 
+            # Simple transformations
+            self._patch_move_base_path(build_path, "merge_build_host", "merge_build_and_host_envs")
+            self._patch_move_base_path(build_path, "no_link", "always_copy_files")
+
             # `build/entry_points` -> `build/python/entry_points`
             self._patch_move_new_path(build_path, "/entry_points", "/python")
 
@@ -238,35 +282,16 @@ class RecipeParserConvert(RecipeParser):
             # Canonically sort this section
             self._sort_subtree_keys(build_path, V1_BUILD_SECTION_KEY_SORT_ORDER)
 
-    def _upgrade_about_section(self) -> None:
+    def _upgrade_about_section(self, base_package_paths: list[str]) -> None:
         """
         Upgrades/converts the `about` section of a recipe file.
+        :param base_package_paths: Set of base paths to process that could contain this section.
         """
-        # Warn if "required" fields are missing
-        about_required: Final[list[str]] = [
-            "summary",
-            "description",
-            "license",
-            "license_file",
-            "license_url",
-        ]
-        for field in about_required:
-            path = f"/about/{field}"
-            if not self._new_recipe.contains_value(path):
-                self._msg_tbl.add_message(MessageCategory.WARNING, f"Required field missing: {path}")
-
-        # Transform renamed fields
-        about_rename: Final[list[tuple[str, str]]] = [
+        about_rename_mapping: Final[list[tuple[str, str]]] = [
             ("home", "homepage"),
             ("dev_url", "repository"),
             ("doc_url", "documentation"),
         ]
-        for old, new in about_rename:
-            self._patch_move_base_path("/about", old, new)
-
-        # TODO validate: /about/license must be SPDX recognized.
-
-        # Remove deprecated `about` fields
         about_deprecated: Final[list[str]] = [
             "prelink_message",
             "license_family",
@@ -275,10 +300,25 @@ class RecipeParserConvert(RecipeParser):
             "keywords",
             "doc_source_url",
         ]
-        for field in about_deprecated:
-            path = f"/about/{field}"
-            if self._new_recipe.contains_value(path):
-                self._patch_and_log({"op": "remove", "path": path})
+
+        for base_path in base_package_paths:
+            about_path = RecipeParser.append_to_path(base_path, "/about")
+
+            # Skip transformations if there is no `/about` section
+            if not self._new_recipe.contains_value(about_path):
+                continue
+
+            # Transform renamed fields
+            for old, new in about_rename_mapping:
+                self._patch_move_base_path(about_path, old, new)
+
+            # TODO validate: /about/license must be SPDX recognized.
+
+            # Remove deprecated `about` fields
+            for field in about_deprecated:
+                path = RecipeParser.append_to_path(about_path, field)
+                if self._new_recipe.contains_value(path):
+                    self._patch_and_log({"op": "remove", "path": path})
 
     def _upgrade_test_pip_check(self, base_path: str, test_path: str) -> None:
         """
@@ -472,8 +512,9 @@ class RecipeParserConvert(RecipeParser):
         # TODO Fix: comments are not preserved with patch operations (add a flag to `patch()`?)
 
         # Upgrade common sections found in a recipe
+        self._upgrade_source_section(base_package_paths)
         self._upgrade_build_section(base_package_paths)
-        self._upgrade_about_section()
+        self._upgrade_about_section(base_package_paths)
         self._upgrade_test_section(base_package_paths)
         self._upgrade_multi_output(base_package_paths)
 

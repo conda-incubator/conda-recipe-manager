@@ -40,43 +40,29 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
             [
                 "A non-list item had a selector at: /package/name",
                 "A non-list item had a selector at: /requirements/empty_field2",
-                "Required field missing: /about/license_file",
-                "Required field missing: /about/license_url",
             ],
         ),
         (
             "multi-output.yaml",
             [],
-            [
-                "Required field missing: /about/summary",
-                "Required field missing: /about/description",
-                "Required field missing: /about/license",
-                "Required field missing: /about/license_file",
-                "Required field missing: /about/license_url",
-            ],
+            [],
         ),
         (
             "huggingface_hub.yaml",
             [],
-            [
-                "Required field missing: /about/license_url",
-            ],
+            [],
         ),
         (
             "types-toml.yaml",
             [],
-            [
-                "Required field missing: /about/license_url",
-            ],
+            [],
         ),
         # Regression test: Contains a `test` section that caused an empty dictionary to be inserted in the conversion
         # process, causing an index-out-of-range exception.
         (
             "pytest-pep8.yaml",
             [],
-            [
-                "Required field missing: /about/license_url",
-            ],
+            [],
         ),
         # Regression test: Contains selectors and test section data that caused previous conversion issues.
         (
@@ -87,24 +73,26 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
                 "A non-list item had a selector at: /outputs/1/script",
                 "A non-list item had a selector at: /outputs/0/script",
                 "A non-list item had a selector at: /outputs/1/script",
-                "Required field missing: /about/description",
-                "Required field missing: /about/license_url",
             ],
         ),
         # Tests for transformations related to the new `build/dynamic_linking` section
         (
             "dynamic-linking.yaml",
             [],
-            ["Required field missing: /about/license_url"],
+            [],
         ),
         # Regression: Tests for proper indentation of a list item inside a collection node element
         (
             "boto.yaml",
             [],
-            [
-                "Required field missing: /about/license_file",
-                "Required field missing: /about/license_url",
-            ],
+            [],
+        ),
+        # Regression: Tests a recipe that has multiple `source`` objects in `/source` AND an `about` per `output`
+        # TODO Issue #50 tracks an edge case caused by this project that is not currently handled.
+        (
+            "cctools-ld64.yaml",
+            [],
+            [],
         ),
         # TODO complete: The `rust.yaml` test contains many edge cases and selectors that aren't directly supported in
         # the new recipe format
