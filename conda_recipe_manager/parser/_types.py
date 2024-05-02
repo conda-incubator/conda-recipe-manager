@@ -43,6 +43,28 @@ TOP_LEVEL_KEY_SORT_ORDER: Final[dict[str, int]] = {
 }
 
 # Canonical sort order for the new "v1" recipe format's `build` block
+V1_SOURCE_SECTION_KEY_SORT_ORDER: Final[dict[str, int]] = {
+    # URL source fields
+    "url": 0,
+    "sha256": 10,
+    "md5": 20,
+    # Local source fields (not including above)
+    "path": 30,
+    "use_gitignore": 40,
+    # Git source fields (not including above)
+    "git": 50,
+    "branch": 60,
+    "tag": 70,
+    "rev": 80,
+    "depth": 90,
+    "lfs": 100,
+    # Common fields
+    "target_directory": 120,
+    "file_name": 130,
+    "patches": 140,
+}
+
+# Canonical sort order for the new "v1" recipe format's `build` block
 V1_BUILD_SECTION_KEY_SORT_ORDER: Final[dict[str, int]] = {
     "number": 0,
     "string": 10,

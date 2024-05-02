@@ -15,6 +15,7 @@ from conda_recipe_manager.parser._types import (
     ROOT_NODE_VALUE,
     TOP_LEVEL_KEY_SORT_ORDER,
     V1_BUILD_SECTION_KEY_SORT_ORDER,
+    V1_SOURCE_SECTION_KEY_SORT_ORDER,
     Regex,
 )
 from conda_recipe_manager.parser._utils import stack_path_to_str, str_to_stack_path
@@ -195,6 +196,25 @@ class RecipeParserConvert(RecipeParser):
                 # Apply the patch
                 self._patch_and_log(patch)
                 self._new_recipe.remove_selector(selector_path)
+
+    def _upgrade_source_section(self, base_package_paths: list[str]) -> None:
+        """
+        Upgrades/converts the `source` section(s) of a recipe file.
+        :param base_package_paths: Set of base paths to process that could contain this section.
+        """
+        # TODO: SVN and HG source options are no longer supported
+
+        for base_path in base_package_paths:
+            source_path = RecipeParser.append_to_path(base_path, "/source")
+            if not self._new_recipe.contains_value(source_path):
+                continue
+
+            # Basic renaming transformations
+            self._patch_move_base_path(source_path, "/fn", "/file_name")
+            self._patch_move_base_path(source_path, "/folder", "/target_directory")
+
+            # Canonically sort this section
+            self._sort_subtree_keys(source_path, V1_SOURCE_SECTION_KEY_SORT_ORDER)
 
     def _upgrade_build_section(self, base_package_paths: list[str]) -> None:
         """
@@ -472,6 +492,7 @@ class RecipeParserConvert(RecipeParser):
         # TODO Fix: comments are not preserved with patch operations (add a flag to `patch()`?)
 
         # Upgrade common sections found in a recipe
+        self._upgrade_source_section(base_package_paths)
         self._upgrade_build_section(base_package_paths)
         self._upgrade_about_section()
         self._upgrade_test_section(base_package_paths)
