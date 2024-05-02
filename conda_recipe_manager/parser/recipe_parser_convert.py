@@ -207,24 +207,34 @@ class RecipeParserConvert(RecipeParser):
             if not self._new_recipe.contains_value(source_path):
                 continue
 
-            # SVN and HG source options are no longer supported. This seems to have been deprecated a long
-            # time ago and there are unlikely any recipes that fall into this camp. Still, we should flag it.
-            source_fields = cast(dict[str, str], self._new_recipe.get_value(source_path)).keys()
-            if "svn_url" in source_fields:
-                self._msg_tbl.add_message(
-                    MessageCategory.WARNING, "SVN packages are no longer supported in the new format"
-                )
-            if "hg_url" in source_fields:
-                self._msg_tbl.add_message(
-                    MessageCategory.WARNING, "HG (Mercury) packages are no longer supported in the new format"
-                )
+            # The `source` field can contain a list of elements or a single element (not encapsulated in a list).
+            # This logic sets up a list to iterate through that will handle both cases.
+            source_data = self._new_recipe.get_value(source_path)
+            source_paths = []
+            if isinstance(source_data, list):
+                for x in range(len(source_data)):
+                    source_paths.append(RecipeParser.append_to_path(source_path, f"/{x}"))
+            else:
+                source_paths.append(source_path)
 
-            # Basic renaming transformations
-            self._patch_move_base_path(source_path, "/fn", "/file_name")
-            self._patch_move_base_path(source_path, "/folder", "/target_directory")
+            for src_path in source_paths:
+                # SVN and HG source options are no longer supported. This seems to have been deprecated a long
+                # time ago and there are unlikely any recipes that fall into this camp. Still, we should flag it.
+                if self._new_recipe.contains_value(RecipeParser.append_to_path(src_path, "svn_url")):
+                    self._msg_tbl.add_message(
+                        MessageCategory.WARNING, "SVN packages are no longer supported in the new format"
+                    )
+                if self._new_recipe.contains_value(RecipeParser.append_to_path(src_path, "hg_url")):
+                    self._msg_tbl.add_message(
+                        MessageCategory.WARNING, "HG (Mercury) packages are no longer supported in the new format"
+                    )
 
-            # Canonically sort this section
-            self._sort_subtree_keys(source_path, V1_SOURCE_SECTION_KEY_SORT_ORDER)
+                # Basic renaming transformations
+                self._patch_move_base_path(src_path, "/fn", "/file_name")
+                self._patch_move_base_path(src_path, "/folder", "/target_directory")
+
+                # Canonically sort this section
+                self._sort_subtree_keys(src_path, V1_SOURCE_SECTION_KEY_SORT_ORDER)
 
     def _upgrade_build_section(self, base_package_paths: list[str]) -> None:
         """
