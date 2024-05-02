@@ -107,11 +107,10 @@ outputs:
       run:
         - llvm-lto-tapi
     about:
-      home: https://opensource.apple.com/source
       license: Apple Public Source License 2.0
-      license_family: Other
       license_file: cctools/APPLE_LICENSE
       summary: Assembler, archiver, ranlib, libtool, otool et al for Darwin Mach-O files
+      homepage: https://opensource.apple.com/source
     script: install-cctools.sh
   - package:
       name: ld64
@@ -130,9 +129,8 @@ outputs:
         - if: osx
           then: libcxx
     about:
-      home: https://opensource.apple.com/source
       license: Apple Public Source License 2.0
-      license_family: Other
       license_file: cctools/ld64/APPLE_LICENSE
       summary: Darwin Mach-O linker
+      homepage: https://opensource.apple.com/source
     script: install-ld64.sh
