@@ -95,7 +95,7 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
             [],
         ),
         # TODO complete: The `rust.yaml` test contains many edge cases and selectors that aren't directly supported in
-        # the new recipe format
+        # the V1 recipe format
         # (
         #    "rust.yaml",
         #    [],
@@ -111,14 +111,14 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
         # ),
     ],
 )
-def test_render_to_new_recipe_format(file_base: str, errors: list[str], warnings: list[str]) -> None:
+def test_render_to_v1_recipe_format(file_base: str, errors: list[str], warnings: list[str]) -> None:
     """
-    Validates rendering a recipe in the new format.
+    Validates rendering a recipe in the V1 format.
     :param file_base: Base file name for both the input and the expected out
     """
     parser = load_recipe_convert(file_base)
-    result, tbl, _ = parser.render_to_new_recipe_format()
-    assert result == load_file(f"{TEST_FILES_PATH}/new_format_{file_base}")
+    result, tbl, _ = parser.render_to_v1_recipe_format()
+    assert result == load_file(f"{TEST_FILES_PATH}/v1_format/v1_{file_base}")
     assert tbl.get_messages(MessageCategory.ERROR) == errors
     assert tbl.get_messages(MessageCategory.WARNING) == warnings
     # Ensure that the original file was untouched

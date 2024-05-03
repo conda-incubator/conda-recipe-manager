@@ -20,7 +20,7 @@ import click
 from conda_recipe_manager.commands.utils.print import print_err
 
 # Required file name for the recipe, specified in CEP-13
-NEW_FORMAT_RECIPE_FILE_NAME: Final[str] = "recipe.yaml"
+V1_FORMAT_RECIPE_FILE_NAME: Final[str] = "recipe.yaml"
 # When performing a bulk operation, overall "success" is indicated by the % of recipe files that were built
 # "successfully"
 DEFAULT_BULK_SUCCESS_PASS_THRESHOLD: Final[float] = 0.80
@@ -114,7 +114,7 @@ def rattler_bulk_build(ctx: click.Context, path: Path, min_success_rate: float, 
     """
     start_time: Final[float] = time.time()
     files: Final[list[Path]] = []
-    for file_path in path.rglob(NEW_FORMAT_RECIPE_FILE_NAME):
+    for file_path in path.rglob(V1_FORMAT_RECIPE_FILE_NAME):
         files.append(file_path)
 
     if not files:

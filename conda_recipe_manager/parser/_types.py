@@ -25,7 +25,7 @@ ROOT_NODE_VALUE: Final[str] = "/"
 RECIPE_MANAGER_SUB_MARKER: Final[str] = "__RECIPE_MANAGER_SUBSTITUTION_MARKER__"
 
 # Ideal sort-order of the top-level YAML keys for human readability and traditionally how we organize our files. This
-# should work on both old and new recipe formats.
+# should work on both V0 (pre CEP-13) and V1 recipe formats.
 TOP_LEVEL_KEY_SORT_ORDER: Final[dict[str, int]] = {
     "schema_version": 0,
     "context": 10,

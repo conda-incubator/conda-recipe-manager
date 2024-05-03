@@ -24,7 +24,7 @@ from conda_recipe_manager.parser.types import MessageCategory, MessageTable
 # Pre-CEP-13 name of the recipe file
 OLD_FORMAT_RECIPE_FILE_NAME: Final[str] = "meta.yaml"
 # Required file name for the recipe, specified in CEP-13
-NEW_FORMAT_RECIPE_FILE_NAME: Final[str] = "recipe.yaml"
+V1_FORMAT_RECIPE_FILE_NAME: Final[str] = "recipe.yaml"
 # When performing a bulk operation, overall "success" is indicated by the % of recipe files that were converted
 # "successfully"
 DEFAULT_BULK_SUCCESS_PASS_THRESHOLD: Final[float] = 0.80
@@ -102,7 +102,7 @@ def _record_unrecoverable_failure(
 
 def convert_file(file_path: Path, output: Optional[Path], print_output: bool, debug: bool) -> ConversionResult:
     """
-    Converts a single recipe file to the new format, tracking results.
+    Converts a single recipe file to the V1 format, tracking results.
     :param file_path: Path to the recipe file to convert
     :param output: If specified, the file contents are written to this file path. Otherwise, the file is dumped to
         STDOUT IF `print_output` is set to `True`.
@@ -153,7 +153,7 @@ def convert_file(file_path: Path, output: Optional[Path], print_output: bool, de
 
     # Convert the recipe
     try:
-        conversion_result.content, conversion_result.msg_tbl, debug_new_parser = parser.render_to_new_recipe_format()
+        conversion_result.content, conversion_result.msg_tbl, debug_new_parser = parser.render_to_v1_recipe_format()
         # Print the new parser, if requested
         print_err("########## CONVERTED RECIPE FILE ##########", print_enabled=debug)
         print_err(debug_new_parser, print_enabled=debug)
@@ -244,7 +244,7 @@ def _collect_issue_stats(project_name: str, issues: list[str], hist: dict[str, i
     default=None,
     help=(
         "File to dump a new recipe to."
-        f" For bulk operations, specify the file basename only (i.e. {NEW_FORMAT_RECIPE_FILE_NAME})."
+        f" For bulk operations, specify the file basename only (i.e. {V1_FORMAT_RECIPE_FILE_NAME})."
     ),
 )
 @click.option(
