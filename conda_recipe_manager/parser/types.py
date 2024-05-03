@@ -19,7 +19,7 @@ NodeValue = Primitives | list[str]
 #### Constants ####
 
 # The "new" recipe format introduces the concept of a schema version. Presumably the "old" recipe format would be
-# considered "0". When converting to the new format, we'll use this constant value.
+# considered "0". When converting to the V1 format, we'll use this constant value.
 CURRENT_RECIPE_SCHEMA_FORMAT: Final[int] = 1
 
 # Indicates how many spaces are in a level of indentation

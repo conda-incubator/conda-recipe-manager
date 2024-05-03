@@ -105,7 +105,7 @@ def quote_special_strings(s: str, multiline_variant: MultilineVariant = Multilin
     Ensure string quote escaping if quote marks are present. Otherwise this has the unintended consequence of
     quoting all YAML strings. Although not wrong, it does not follow our common practices. Quote escaping is not
     required for multiline strings. We do not escape quotes for Jinja value statements. We make an exception for
-    strings containing the NEW recipe format syntax, ${{ }}, which is valid YAML.
+    strings containing the V1 recipe format syntax, ${{ }}, which is valid YAML.
 
     In addition, there are a handful of special cases that need to be quoted in order to produce valid YAML. PyYaml
     and Ruamel (in safe mode) will drop quotes found in the YAML. This means that round-tripping the YAML can break in
