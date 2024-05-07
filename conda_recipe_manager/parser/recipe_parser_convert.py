@@ -238,7 +238,7 @@ class RecipeParserConvert(RecipeParser):
 
     def _upgrade_build_section(self, base_package_paths: list[str]) -> None:
         """
-        Upgrades/converts the `about` section(s) of a recipe file.
+        Upgrades/converts the `build` section(s) of a recipe file.
         :param base_package_paths: Set of base paths to process that could contain this section.
         """
         for base_path in base_package_paths:
@@ -254,7 +254,7 @@ class RecipeParserConvert(RecipeParser):
                 self._patch_and_log({"op": "move", "from": old_re_path, "path": new_re_path})
             # `ignore_run_exports`
             old_ire_path = RecipeParser.append_to_path(base_path, "/build/ignore_run_exports")
-            if self._v1_recipe.contains_value(old_re_path):
+            if self._v1_recipe.contains_value(old_ire_path):
                 requirements_path = RecipeParser.append_to_path(base_path, "/requirements")
                 new_ire_path = RecipeParser.append_to_path(base_path, "/requirements/ignore_run_exports")
                 if not self._v1_recipe.contains_value(requirements_path):
@@ -281,6 +281,19 @@ class RecipeParserConvert(RecipeParser):
 
             # Canonically sort this section
             self._sort_subtree_keys(build_path, V1_BUILD_SECTION_KEY_SORT_ORDER)
+
+    def _upgrade_requirements_section(self, base_package_paths: list[str]) -> None:
+        """
+        Upgrades/converts the `requirements` section(s) of a recipe file.
+        :param base_package_paths: Set of base paths to process that could contain this section.
+        """
+        for base_path in base_package_paths:
+            requirements_path = RecipeParser.append_to_path(base_path, "/requirements")
+            if not self._v1_recipe.contains_value(requirements_path):
+                continue
+
+            # Simple transformations
+            self._patch_move_base_path(requirements_path, "/run_constrained", "/run_constraints")
 
     def _upgrade_about_section(self, base_package_paths: list[str]) -> None:
         """
@@ -513,6 +526,7 @@ class RecipeParserConvert(RecipeParser):
         # Upgrade common sections found in a recipe
         self._upgrade_source_section(base_package_paths)
         self._upgrade_build_section(base_package_paths)
+        self._upgrade_requirements_section(base_package_paths)
         self._upgrade_about_section(base_package_paths)
         self._upgrade_test_section(base_package_paths)
         self._upgrade_multi_output(base_package_paths)
