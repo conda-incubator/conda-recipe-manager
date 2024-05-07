@@ -101,11 +101,11 @@ outputs:
       version: ${{ cctools_version }}
     build:
       number: 1
-      ignore_run_exports:
-        - zlib
     requirements:
       run:
         - llvm-lto-tapi
+      ignore_run_exports:
+        - zlib
     about:
       license: Apple Public Source License 2.0
       license_file: cctools/APPLE_LICENSE
@@ -117,8 +117,6 @@ outputs:
       version: ${{ ld64_version }}
     build:
       number: 1
-      ignore_run_exports:
-        - zlib
     requirements:
       host:
         - llvm-lto-tapi
@@ -128,6 +126,8 @@ outputs:
         - llvm-lto-tapi
         - if: osx
           then: libcxx
+      ignore_run_exports:
+        - zlib
     about:
       license: Apple Public Source License 2.0
       license_file: cctools/ld64/APPLE_LICENSE
