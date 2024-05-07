@@ -197,6 +197,17 @@ class RecipeParserConvert(RecipeParser):
                 self._patch_and_log(patch)
                 self._v1_recipe.remove_selector(selector_path)
 
+    def _correct_common_misspellings(self) -> None:
+        """
+        Corrects common spelling mistakes in field names.
+        """
+        # "If I had a nickel for every time `skip` was misspelled, I would have several nickels. Which isn't a lot, but
+        #  it is weird that it has happened multiple times."
+        #                                                             - Dr. Doofenshmirtz, probably
+        self._patch_move_base_path("/build", "skipt", "skip")
+        self._patch_move_base_path("/build", "skips", "skip")
+        self._patch_move_base_path("/build", "Skip", "skip")
+
     def _upgrade_source_section(self, base_package_paths: list[str]) -> None:
         """
         Upgrades/converts the `source` section(s) of a recipe file.
@@ -522,6 +533,10 @@ class RecipeParserConvert(RecipeParser):
         base_package_paths: Final[list[str]] = self._v1_recipe.get_package_paths()
 
         # TODO Fix: comments are not preserved with patch operations (add a flag to `patch()`?)
+
+        # There are a number of recipe files that contain the same misspellings. This is an attempt to
+        # solve the more common issues.
+        self._correct_common_misspellings()
 
         # Upgrade common sections found in a recipe
         self._upgrade_source_section(base_package_paths)
