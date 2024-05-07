@@ -23,8 +23,8 @@ jobs:
           - bioconda_recipes_04
         include:
           - test-directory: anaconda_recipes_01
-            convert-success: 0.80
-            rattler-success: 0.50
+            convert-success: 0.90
+            rattler-success: 0.65
           - test-directory: bioconda_recipes_01
             convert-success: 0.55
             rattler-success: 0.05
@@ -39,8 +39,8 @@ jobs:
             rattler-success: 0.30
           # 2,000 randomly selected conda-forge recipes
           - test-directory: conda_forge_recipes_01
-            convert-success: 0.75
-            rattler-success: 0.70
+            convert-success: 0.90
+            rattler-success: 0.65
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
@@ -52,11 +52,14 @@ jobs:
         with:
           python-version: "3.11"
       - name: Convert recipes and dry-run rattler-build
+        # NOTE: `pipefail` must be enabled in order get the exit code from the conda-recipe-manager commands when
+        #       the output is piped into `tee`
         run: |
           source $CONDA/bin/activate
           conda activate conda-recipe-manager
           conda install -y -c conda-forge rattler-build
           mkdir -p logs
+          set -o pipefail
           conda-recipe-manager \
             convert -t -m ${{ matrix.convert-success }} -o recipe.yaml test_data/recipes_v0/${{ matrix.test-directory }} \
             | tee logs/convert_${{ matrix.test-directory }}.log
@@ -87,6 +90,7 @@ jobs:
         run: |
           source $CONDA/bin/activate
           conda activate conda-recipe-manager
+          set -o pipefail
           scripts/parse_ci_output.py logs/ | tee report.json
           echo -e "Integration Report:\n\`\`\`json\n" >> ${GITHUB_STEP_SUMMARY}
           cat report.json >> ${GITHUB_STEP_SUMMARY}
