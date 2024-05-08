@@ -150,7 +150,8 @@ class RecipeParserConvert(RecipeParser):
                     MessageCategory.WARNING, f"A non-string value was found as a JINJA substitution: {value}"
                 )
                 continue
-            value = value.replace("{{", "${{")
+            # Safely replace `{{` but not any existing `${{` instances
+            value = Regex.JINJA_REPLACE_V0_STARTING_MARKER.sub("${{", value)
             self._patch_and_log({"op": "replace", "path": path, "value": value})
 
     def _upgrade_selectors_to_conditionals(self) -> None:
@@ -174,7 +175,6 @@ class RecipeParserConvert(RecipeParser):
                 patch: JsonPatchType = {
                     "op": "replace",
                     "path": selector_path,
-                    # TODO: Sometimes this gets doubled up: $${{ true if win }}
                     "value": "${{ true if " + bool_expression + " }}",
                 }
                 # `skip` is special and needs to be a list of boolean expressions.
