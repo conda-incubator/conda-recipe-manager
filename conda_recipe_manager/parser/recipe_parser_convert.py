@@ -138,8 +138,10 @@ class RecipeParserConvert(RecipeParser):
         # Similarly, patch-in the new `schema_version` value to the top of the file
         self._patch_and_log({"op": "add", "path": "/schema_version", "value": CURRENT_RECIPE_SCHEMA_FORMAT})
 
-        # Swap all JINJA to use the new `${{ }}` format.
-        jinja_sub_locations: Final[list[str]] = self._v1_recipe.search(Regex.JINJA_SUB)
+        # Swap all JINJA to use the new `${{ }}` format. A `set` is used as `str.replace()` will replace all instances
+        # and a value containing multiple variables could be visited multiple times, causing multiple `${{}}`
+        # encapsulations.
+        jinja_sub_locations: Final[set[str]] = set(self._v1_recipe.search(Regex.JINJA_SUB))
         for path in jinja_sub_locations:
             value = self._v1_recipe.get_value(path)
             # Values that match the regex should only be strings. This prevents crashes that should not occur.
@@ -172,6 +174,7 @@ class RecipeParserConvert(RecipeParser):
                 patch: JsonPatchType = {
                     "op": "replace",
                     "path": selector_path,
+                    # TODO: Sometimes this gets doubled up: $${{ true if win }}
                     "value": "${{ true if " + bool_expression + " }}",
                 }
                 # `skip` is special and needs to be a list of boolean expressions.
