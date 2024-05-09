@@ -98,6 +98,8 @@ def create_debug_file(debug_log: Path, results: dict[str, BuildResult], error_hi
             if cur_error in build_result.errors:
                 recipes.append(file)
 
+        # Sort recipes by name. In theory, this will group similar recipes together (like R packages)
+        recipes.sort()
         errors.append(
             {
                 "error": cur_error,
