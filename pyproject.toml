@@ -7,6 +7,8 @@ namespaces = false
 
 [tool.setuptools.package-data]
 "conda_recipe_manager" = ["py.typed"]
+# Allows spdx_licenses.json to be imported properly
+include_package_data=True
 
 [project]
 name = "conda_recipe_manager"
@@ -39,8 +41,6 @@ dependencies = [
   "jsonschema",
   "requests",
 ]
-# Allows spdx_licenses.json to be imported properly
-include_package_data=True
 
 [project.optional-dependencies]
 dev = ["pytest"]
