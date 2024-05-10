@@ -13,8 +13,6 @@ import json
 from pathlib import Path
 from typing import Final, Optional, cast
 
-from conda_recipe_manager.types import JsonType
-
 # Path to the SPDX JSON database. This should remain inside this module. This is stored as the raw JSON file so that
 # we can easily update from the SPDX source on GitHub.
 SPDX_LICENSE_JSON_FILE: Final[Path] = Path(__file__).resolve().parent / "spdx_licenses.json"
@@ -28,19 +26,21 @@ class SpdxUtils:
     Class that provides SPDX tooling from the SPDX license database file.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Constructs a SPDX utility instance. Reads data from the JSON file provided by the module.
         """
         # Initialize the raw data
-        self._raw_spdx_data = cast(JsonType, json.loads(SPDX_LICENSE_JSON_FILE.read_text(encoding="utf-8")))
+        self._raw_spdx_data = cast(
+            dict[str, list[dict[str, str]]], json.loads(SPDX_LICENSE_JSON_FILE.read_text(encoding="utf-8"))
+        )
 
         # Generate a few look-up tables for license matching once during initialization for faster future look-ups.
         self._license_matching_table: dict[str, str] = {}
         self._license_ids: set[str] = set()
         for license_data in self._raw_spdx_data["licenses"]:
-            license_id = cast(str, license_data["licenseId"])
-            license_name = cast(str, license_data["name"])
+            license_id = license_data["licenseId"]
+            license_name = license_data["name"]
             # SPDX IDs are unique and used for SPDX validation. Commonly recipes use variations on names or IDs, so we
             # want to map both options to the same ID.
             self._license_matching_table[license_name] = license_id

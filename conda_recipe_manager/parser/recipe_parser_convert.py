@@ -328,7 +328,7 @@ class RecipeParserConvert(RecipeParser):
             self._msg_tbl.add_message(MessageCategory.WARNING, f"No `license` provided in `{about_path}`")
             return
 
-        corrected_license: Final[str] = self._spdx_utils.find_closest_license_match(old_license)
+        corrected_license: Final[Optional[str]] = self._spdx_utils.find_closest_license_match(old_license)
 
         if corrected_license is None:
             self._msg_tbl.add_message(MessageCategory.WARNING, f"Could not patch unrecognized license: `{old_license}`")
