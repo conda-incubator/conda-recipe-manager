@@ -39,6 +39,8 @@ dependencies = [
   "jsonschema",
   "requests",
 ]
+# Allows spdx_licenses.json to be imported properly
+include_package_data=True
 
 [project.optional-dependencies]
 dev = ["pytest"]
