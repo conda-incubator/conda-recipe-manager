@@ -7,8 +7,10 @@ namespaces = false
 
 [tool.setuptools.package-data]
 "conda_recipe_manager" = ["py.typed"]
+
+[tool.setuptools]
 # Allows spdx_licenses.json to be imported properly
-include_package_data=True
+include-package-data = true
 
 [project]
 name = "conda_recipe_manager"
