@@ -1,0 +1,81 @@
+"""
+File:           spdx_utils.py
+Description:    Provides a class that reads in the SPDX licensing database file to support SPDX utilities.
+
+                SPDX Data Source (freely available for use):
+                  - https://github.com/spdx/license-list-data/blob/main/json/licenses.json
+"""
+
+from __future__ import annotations
+
+import difflib
+import json
+from pathlib import Path
+from typing import Final, Optional, cast
+
+from conda_recipe_manager.types import JsonType
+
+# Path to the SPDX JSON database. This should remain inside this module. This is stored as the raw JSON file so that
+# we can easily update from the SPDX source on GitHub.
+SPDX_LICENSE_JSON_FILE: Final[Path] = Path(__file__).resolve().parent / "spdx_licenses.json"
+
+
+class SpdxUtils:
+    """
+    Class that provides SPDX tooling from the SPDX license database file.
+    """
+
+    def __init__(self):
+        """
+        Constructs a SPDX utility instance. Reads data from the JSON file provided by the module.
+        """
+        # Initialize the raw data
+        self._raw_spdx_data = cast(JsonType, json.loads(SPDX_LICENSE_JSON_FILE.read_text(encoding="utf-8")))
+
+        # Generate a few look-up tables for license matching once during initialization for faster future look-ups.
+        self._license_matching_table: dict[str, str] = {}
+        self._license_ids: set[str] = set()
+        for license in self._raw_spdx_data["licenses"]:
+            license_id = cast(str, license["licenseId"])
+            license_name = cast(str, license["name"])
+            # SPDX IDs are unique and used for SPDX validation. Commonly recipes use variations on names or IDs, so we
+            # want to map both options to the same ID.
+            self._license_matching_table[license_name] = license_id
+            self._license_matching_table[license_id] = license_id
+            self._license_ids.add(license_id)
+
+        # Custom patch table that attempts to correct common SPDX licensing mistakes that our other methodologies cannot
+        # handle. Maps: `MISTAKE` (all uppercase) -> `Corrected`
+        self._license_matching_patch_tbl: Final[dict[str, str]] = {
+            # This commonly used name is not close enough for `difflib` to recognize
+            'BSD 2-CLAUSE "SIMPLIFIED"': "BSD-2-Clause",
+            # Some R packages use "Unlimited". This is the mapping the team agreed to use in a Slack thread.
+            "UNLIMITED": "NOASSERTION",
+        }
+
+    def find_closest_license_match(self, license: str) -> Optional[str]:
+        """
+        Given a license string from a recipe file (from `/about/license`), return the most likely ID in the SPDX
+        database by string approximation.
+        :param license: License string provided by the recipe to match
+        :returns: The closest matching SPDX identifier, if found
+        """
+        # Short-circuit on perfect matches
+        if license in self._license_ids:
+            return license
+
+        # Correct known commonly used licenses that can't be handled by `difflib`
+        sanitized_license = license.strip().upper()
+        if sanitized_license in self._license_matching_patch_tbl:
+            return self._license_matching_patch_tbl[sanitized_license]
+
+        match_list = difflib.get_close_matches(license, self._license_matching_table.keys(), 1)
+        if not match_list:
+            return None
+
+        match_key = match_list[0]
+        # This shouldn't be possible, but we'll guard against it to prevent an illegal dictionary access anyways
+        if match_key not in self._license_matching_table:
+            return None
+
+        return self._license_matching_table[match_key]
