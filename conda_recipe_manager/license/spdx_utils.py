@@ -38,9 +38,9 @@ class SpdxUtils:
         # Generate a few look-up tables for license matching once during initialization for faster future look-ups.
         self._license_matching_table: dict[str, str] = {}
         self._license_ids: set[str] = set()
-        for license in self._raw_spdx_data["licenses"]:
-            license_id = cast(str, license["licenseId"])
-            license_name = cast(str, license["name"])
+        for license_data in self._raw_spdx_data["licenses"]:
+            license_id = cast(str, license_data["licenseId"])
+            license_name = cast(str, license_data["name"])
             # SPDX IDs are unique and used for SPDX validation. Commonly recipes use variations on names or IDs, so we
             # want to map both options to the same ID.
             self._license_matching_table[license_name] = license_id
@@ -56,7 +56,7 @@ class SpdxUtils:
             "UNLIMITED": "NOASSERTION",
         }
 
-    def find_closest_license_match(self, license: str) -> Optional[str]:
+    def find_closest_license_match(self, license_field: str) -> Optional[str]:
         """
         Given a license string from a recipe file (from `/about/license`), return the most likely ID in the SPDX
         database by string approximation.
@@ -66,14 +66,14 @@ class SpdxUtils:
           - https://github.com/spdx/spdx-license-matcher
           - https://github.com/nexB/license-expression
 
-        :param license: License string provided by the recipe to match
+        :param license_field: License string provided by the recipe to match
         :returns: The closest matching SPDX identifier, if found
         """
         # Short-circuit on perfect matches
-        if license in self._license_ids:
-            return license
+        if license_field in self._license_ids:
+            return license_field
 
-        sanitized_license = license.strip().upper()
+        sanitized_license = license_field.strip().upper()
 
         # TODO: Improve this logic to support SPDX expressions.
         # Don't simplify compound licenses that might get accidentally simplified
@@ -87,7 +87,7 @@ class SpdxUtils:
         if sanitized_license in self._license_matching_patch_tbl:
             return self._license_matching_patch_tbl[sanitized_license]
 
-        match_list = difflib.get_close_matches(license, self._license_matching_table.keys(), 1)
+        match_list = difflib.get_close_matches(license_field, self._license_matching_table.keys(), 1)
         if not match_list:
             return None
 

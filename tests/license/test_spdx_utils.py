@@ -11,7 +11,7 @@ from conda_recipe_manager.license.spdx_utils import SpdxUtils
 
 
 @pytest.mark.parametrize(
-    "license,expected",
+    "license_field,expected",
     [
         #### Apache ####
         ("Apache License 1.0", "Apache-1.0"),
@@ -29,27 +29,27 @@ from conda_recipe_manager.license.spdx_utils import SpdxUtils
         ('BSD 2-Clause "SIMPLIFIED"', "BSD-2-Clause"),
     ],
 )
-def test_find_closest_license_match_common_misuse(license: str, expected: str) -> None:
+def test_find_closest_license_match_common_misuse(license_field: str, expected: str) -> None:
     """
     Validates license matching with commonly used incorrect license names
     """
     # TODO fixture
     spdx_utils = SpdxUtils()
-    assert spdx_utils.find_closest_license_match(license) == expected
+    assert spdx_utils.find_closest_license_match(license_field) == expected
 
 
 @pytest.mark.parametrize(
-    "license",
+    "license_field",
     [
         "foobar",
         "batman",
         "fadsjkl;adshbfjkasd",
     ],
 )
-def test_find_closest_license_match_failed_to_find_match(license: str) -> None:
+def test_find_closest_license_match_failed_to_find_match(license_field: str) -> None:
     """
     Validates that the license matcher returns `None` on very far-off inputs
     """
     # TODO fixture
     spdx_utils = SpdxUtils()
-    assert spdx_utils.find_closest_license_match(license) is None
+    assert spdx_utils.find_closest_license_match(license_field) is None
