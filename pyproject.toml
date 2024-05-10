@@ -8,6 +8,9 @@ namespaces = false
 [tool.setuptools.package-data]
 "conda_recipe_manager" = ["py.typed", "*.json"]
 
+[tool.setuptools]
+include-package-data = true
+
 [project]
 name = "conda_recipe_manager"
 version = "0.1.0"
@@ -53,7 +56,3 @@ crm = "conda_recipe_manager.commands.conda_recipe_manager:conda_recipe_manager"
 "Bug Tracker" = "https://github.com/anaconda/conda-recipe-manager/issues"
 "Repository" = "https://github.com/anaconda/conda-recipe-manager"
 "Documentation" = "https://github.com/anaconda/conda-recipe-manager/blob/main/README.md"
-
-# This causes an error saying that 'packages' is already defined and can't be overwritten.
-#[tool.setuptools]
-#packages = ["conda-recipe-manager"]
