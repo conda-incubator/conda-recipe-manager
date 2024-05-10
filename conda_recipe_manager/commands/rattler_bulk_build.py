@@ -7,13 +7,14 @@ from __future__ import annotations
 
 import json
 import multiprocessing as mp
+import operator
 import re
 import subprocess
 import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Final, cast
+from typing import Final, Optional, cast
 
 import click
 
@@ -79,6 +80,39 @@ def build_recipe(file: Path, path: Path, args: list[str]) -> tuple[str, BuildRes
     )
 
 
+def create_debug_file(debug_log: Path, results: dict[str, BuildResult], error_histogram: dict[str, int]) -> None:
+    """
+    Generates a debug file containing an organized dump of all the recipes that got a particular error message.
+    :param debug_log: Log file to write to
+    :param results:
+    :param error_histogram:
+    """
+    # Metric-driven development: list the recipes associated with each failure, tracking how many recipes the failure
+    # is seen in.
+
+    errors = []
+    # TODO: This could probably be done more efficiently, but at our current scale for a debugging tool, this is fine.
+    for cur_error in error_histogram.keys():
+        recipes: list[str] = []
+        for file, build_result in results.items():
+            if cur_error in build_result.errors:
+                recipes.append(file)
+
+        # Sort recipes by name. In theory, this will group similar recipes together (like R packages)
+        recipes.sort()
+        errors.append(
+            {
+                "error": cur_error,
+                "recipe_count": len(recipes),
+                "recipes": recipes,
+            }
+        )
+
+    errors.sort(key=operator.itemgetter("recipe_count"), reverse=True)
+    dump = {"errors": errors}
+    debug_log.write_text(json.dumps(dump, indent=2), encoding="utf-8")
+
+
 @click.command(
     short_help="Given a directory, performs a bulk rattler-build operation. Assumes rattler-build is installed.",
     context_settings=cast(
@@ -103,11 +137,19 @@ def build_recipe(file: Path, path: Path, args: list[str]) -> tuple[str, BuildRes
     is_flag=True,
     help="Truncates logging. On large tests in a GitHub CI environment, this can eliminate log buffering issues.",
 )
+@click.option(
+    "--debug-log",
+    "-l",
+    type=click.Path(exists=False, file_okay=True, dir_okay=False, path_type=Path),  # type: ignore[misc]
+    help="Dumps a large debug log to the file specified.",
+)
 @click.pass_context
-def rattler_bulk_build(ctx: click.Context, path: Path, min_success_rate: float, truncate: bool) -> None:
+def rattler_bulk_build(
+    ctx: click.Context, path: Path, min_success_rate: float, truncate: bool, debug_log: Optional[Path]
+) -> None:
     """
     Given a directory of feedstock repositories, performs multiple recipe builds using rattler-build.
-    All unknown options and arguments for this script are passed directly to `rattler-build build`.
+    All unknown trailing options and arguments for this script are passed directly to `rattler-build build`.
     NOTE:
         - The build command is run as `rattler-build build -r <recipe.yaml> <ARGS>`
         - rattler-build errors are dumped to STDERR
@@ -169,6 +211,9 @@ def rattler_bulk_build(ctx: click.Context, path: Path, min_success_rate: float, 
     }
     if not truncate:
         final_output["recipes_with_build_error_code"] = recipes_with_errors
+
+    if debug_log is not None:
+        create_debug_file(debug_log, results, error_histogram)
 
     print(json.dumps(final_output, indent=2))
     sys.exit(SUCCESS if percent_success >= min_success_rate else MISSED_SUCCESS_THRESHOLD)

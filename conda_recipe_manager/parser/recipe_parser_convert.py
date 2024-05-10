@@ -13,6 +13,7 @@ from conda_recipe_manager.parser._node import Node
 from conda_recipe_manager.parser._traverse import traverse
 from conda_recipe_manager.parser._types import (
     ROOT_NODE_VALUE,
+    SPDX_COMMON_MISSPELLINGS_TBL,
     TOP_LEVEL_KEY_SORT_ORDER,
     V1_BUILD_SECTION_KEY_SORT_ORDER,
     V1_SOURCE_SECTION_KEY_SORT_ORDER,
@@ -45,13 +46,16 @@ class RecipeParserConvert(RecipeParser):
 
     ## Patch utility functions ##
 
-    def _patch_and_log(self, patch: JsonPatchType) -> None:
+    def _patch_and_log(self, patch: JsonPatchType) -> bool:
         """
         Convenience function that logs failed patches to the message table.
         :param patch: Patch operation to perform
+        :returns: Forwards patch results for further logging/error handling
         """
-        if not self._v1_recipe.patch(patch):
+        result: Final[bool] = self._v1_recipe.patch(patch)
+        if not result:
             self._msg_tbl.add_message(MessageCategory.ERROR, f"Failed to patch: {patch}")
+        return result
 
     def _patch_add_missing_path(self, base_path: str, ext: str, value: JsonType = None) -> None:
         """
@@ -138,8 +142,10 @@ class RecipeParserConvert(RecipeParser):
         # Similarly, patch-in the new `schema_version` value to the top of the file
         self._patch_and_log({"op": "add", "path": "/schema_version", "value": CURRENT_RECIPE_SCHEMA_FORMAT})
 
-        # Swap all JINJA to use the new `${{ }}` format.
-        jinja_sub_locations: Final[list[str]] = self._v1_recipe.search(Regex.JINJA_SUB)
+        # Swap all JINJA to use the new `${{ }}` format. A `set` is used as `str.replace()` will replace all instances
+        # and a value containing multiple variables could be visited multiple times, causing multiple `${{}}`
+        # encapsulations.
+        jinja_sub_locations: Final[set[str]] = set(self._v1_recipe.search(Regex.JINJA_SUB))
         for path in jinja_sub_locations:
             value = self._v1_recipe.get_value(path)
             # Values that match the regex should only be strings. This prevents crashes that should not occur.
@@ -148,7 +154,8 @@ class RecipeParserConvert(RecipeParser):
                     MessageCategory.WARNING, f"A non-string value was found as a JINJA substitution: {value}"
                 )
                 continue
-            value = value.replace("{{", "${{")
+            # Safely replace `{{` but not any existing `${{` instances
+            value = Regex.JINJA_REPLACE_V0_STARTING_MARKER.sub("${{", value)
             self._patch_and_log({"op": "replace", "path": path, "value": value})
 
     def _upgrade_selectors_to_conditionals(self) -> None:
@@ -306,6 +313,30 @@ class RecipeParserConvert(RecipeParser):
             # Simple transformations
             self._patch_move_base_path(requirements_path, "/run_constrained", "/run_constraints")
 
+    def _fix_bad_licenses(self, about_path: str) -> None:
+        """
+        Attempt to correct licenses to match SPDX-recognized names.
+
+        For now, this does not call-out to an SPDX database. Instead, we attempt to correct common mistakes.
+        :param about_path: Path to the `about` section, where the `license` field is located.
+        """
+        license_path: Final[str] = RecipeParser.append_to_path(about_path, "/license")
+        old_license: Final[Optional[str]] = cast(Optional[str], self._v1_recipe.get_value(license_path, default=None))
+        if old_license is None:
+            return
+
+        old_license_sanitized: Final[str] = old_license.upper().strip()
+
+        if old_license_sanitized not in SPDX_COMMON_MISSPELLINGS_TBL:
+            return
+
+        new_license: Final[str] = SPDX_COMMON_MISSPELLINGS_TBL[old_license_sanitized]
+        # Alert the user that a patch was made, in case it needs manual verification
+        if self._patch_and_log({"op": "replace", "path": license_path, "value": new_license}):
+            self._msg_tbl.add_message(
+                MessageCategory.WARNING, f"Changed {license_path} from `{old_license}` to `{new_license}`"
+            )
+
     def _upgrade_about_section(self, base_package_paths: list[str]) -> None:
         """
         Upgrades/converts the `about` section of a recipe file.
@@ -336,7 +367,7 @@ class RecipeParserConvert(RecipeParser):
             for old, new in about_rename_mapping:
                 self._patch_move_base_path(about_path, old, new)
 
-            # TODO validate: /about/license must be SPDX recognized.
+            self._fix_bad_licenses(about_path)
 
             # Remove deprecated `about` fields
             for field in about_deprecated:

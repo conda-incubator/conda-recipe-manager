@@ -94,6 +94,12 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
             [],
             [],
         ),
+        # Regression: Tests scenarios where the newer `${{ }}` substitutions got doubled up, causing: `$${{ foo }}`
+        (
+            "regression_jinja_sub.yaml",
+            [],
+            [],
+        ),
         # TODO complete: The `rust.yaml` test contains many edge cases and selectors that aren't directly supported in
         # the V1 recipe format
         # (
