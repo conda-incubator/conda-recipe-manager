@@ -19,6 +19,9 @@ from conda_recipe_manager.types import JsonType
 # we can easily update from the SPDX source on GitHub.
 SPDX_LICENSE_JSON_FILE: Final[Path] = Path(__file__).resolve().parent / "spdx_licenses.json"
 
+# SPDX expression operators
+SPDX_EXPRESSION_OPS: Final[set[str]] = {"AND", "OR", "WITH"}
+
 
 class SpdxUtils:
     """
@@ -57,6 +60,12 @@ class SpdxUtils:
         """
         Given a license string from a recipe file (from `/about/license`), return the most likely ID in the SPDX
         database by string approximation.
+
+        TODO Future: We might want to evaluate these tools for future use as they likely do a better job at matching
+        licenses to the SPDX standard.
+          - https://github.com/spdx/spdx-license-matcher
+          - https://github.com/nexB/license-expression
+
         :param license: License string provided by the recipe to match
         :returns: The closest matching SPDX identifier, if found
         """
@@ -64,8 +73,17 @@ class SpdxUtils:
         if license in self._license_ids:
             return license
 
-        # Correct known commonly used licenses that can't be handled by `difflib`
         sanitized_license = license.strip().upper()
+
+        # TODO: Improve this logic to support SPDX expressions.
+        # Don't simplify compound licenses that might get accidentally simplified
+        for op in SPDX_EXPRESSION_OPS:
+            if op in sanitized_license:
+                return None
+        if "," in sanitized_license:
+            return None
+
+        # Correct known commonly used licenses that can't be handled by `difflib`
         if sanitized_license in self._license_matching_patch_tbl:
             return self._license_matching_patch_tbl[sanitized_license]
 
