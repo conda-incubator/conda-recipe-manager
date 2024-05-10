@@ -107,7 +107,7 @@ outputs:
       ignore_run_exports:
         - zlib
     about:
-      license: Apple Public Source License 2.0
+      license: APSL-2.0
       license_file: cctools/APPLE_LICENSE
       summary: Assembler, archiver, ranlib, libtool, otool et al for Darwin Mach-O files
       homepage: https://opensource.apple.com/source
@@ -129,7 +129,7 @@ outputs:
       ignore_run_exports:
         - zlib
     about:
-      license: Apple Public Source License 2.0
+      license: APSL-2.0
       license_file: cctools/ld64/APPLE_LICENSE
       summary: Darwin Mach-O linker
       homepage: https://opensource.apple.com/source
