@@ -6,11 +6,7 @@ build-backend = "setuptools.build_meta"
 namespaces = false
 
 [tool.setuptools.package-data]
-"conda_recipe_manager" = ["py.typed"]
-
-[tool.setuptools]
-# Allows spdx_licenses.json to be imported properly
-include-package-data = true
+"conda_recipe_manager" = ["py.typed", "*.json"]
 
 [project]
 name = "conda_recipe_manager"
