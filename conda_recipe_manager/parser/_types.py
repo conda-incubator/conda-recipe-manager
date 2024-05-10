@@ -89,23 +89,6 @@ V1_TEST_SECTION_KEY_SORT_ORDER: Final[dict[str, int]] = {
     "downstream": 40,
 }
 
-# Mapping that attempts to correct common SPDX licensing mistakes (`MISTAKE` (all uppercase) -> `Corrected`)
-SPDX_COMMON_MISSPELLINGS_TBL: Final[dict[str, str]] = {
-    #### Apache ####
-    "APACHE LICENSE 1.0": "Apache-1.0",
-    "APACHE LICENSE 1.1": "Apache-1.1",
-    "APACHE LICENSE 2.0": "Apache-2.0",
-    #### BSD ####
-    "BSD 1-CLAUSE": "BSD-1-Clause",
-    'BSD 2-CLAUSE "SIMPLIFIED"': "BSD-2-Clause",  # See: https://spdx.org/licenses/BSD-2-Clause.html
-    "BSD_2_CLAUSE": "BSD-2-Clause",
-    "BSD 3-CLAUSE": "BSD-3-Clause",
-    "BSD_3_CLAUSE": "BSD-3-Clause",
-    #### GPL ####
-    "GPL-2": "GPL-2.0",
-    "GPL-3": "GPL-3.0",
-}
-
 #### Private Classes (Not to be used external to the `parser` module) ####
 
 # NOTE: The classes put in this file should be structures (NamedTuples) and very small support classes that don't make

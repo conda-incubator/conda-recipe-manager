@@ -9,11 +9,11 @@ from __future__ import annotations
 
 from typing import Final, Optional, cast
 
+from conda_recipe_manager.license.spdx_utils import SpdxUtils
 from conda_recipe_manager.parser._node import Node
 from conda_recipe_manager.parser._traverse import traverse
 from conda_recipe_manager.parser._types import (
     ROOT_NODE_VALUE,
-    SPDX_COMMON_MISSPELLINGS_TBL,
     TOP_LEVEL_KEY_SORT_ORDER,
     V1_BUILD_SECTION_KEY_SORT_ORDER,
     V1_SOURCE_SECTION_KEY_SORT_ORDER,
@@ -42,6 +42,8 @@ class RecipeParserConvert(RecipeParser):
         # as list members. Although inefficient, we have tests that validate round-tripping the parser and there
         # is no development cost in utilizing tools we already must maintain.
         self._v1_recipe: RecipeParser = RecipeParser(self.render())
+
+        self._spdx_utils = SpdxUtils()
         self._msg_tbl = MessageTable()
 
     ## Patch utility functions ##
@@ -323,18 +325,24 @@ class RecipeParserConvert(RecipeParser):
         license_path: Final[str] = RecipeParser.append_to_path(about_path, "/license")
         old_license: Final[Optional[str]] = cast(Optional[str], self._v1_recipe.get_value(license_path, default=None))
         if old_license is None:
+            self._msg_tbl.add_message(MessageCategory.WARNING, f"No `license` provided in `{about_path}`")
             return
 
-        old_license_sanitized: Final[str] = old_license.upper().strip()
+        corrected_license: Final[str] = self._spdx_utils.find_closest_license_match(old_license)
 
-        if old_license_sanitized not in SPDX_COMMON_MISSPELLINGS_TBL:
+        if corrected_license is None:
+            self._msg_tbl.add_message(MessageCategory.WARNING, f"Could not patch unrecognized license: `{old_license}`")
             return
 
-        new_license: Final[str] = SPDX_COMMON_MISSPELLINGS_TBL[old_license_sanitized]
-        # Alert the user that a patch was made, in case it needs manual verification
-        if self._patch_and_log({"op": "replace", "path": license_path, "value": new_license}):
+        # If it ain't broke, don't patch it
+        if old_license == corrected_license:
+            return
+
+        # Alert the user that a patch was made, in case it needs manual verification. This warning will not emit if
+        # the patch failed (failure will generate an arguably more important message)
+        if self._patch_and_log({"op": "replace", "path": license_path, "value": corrected_license}):
             self._msg_tbl.add_message(
-                MessageCategory.WARNING, f"Changed {license_path} from `{old_license}` to `{new_license}`"
+                MessageCategory.WARNING, f"Changed {license_path} from `{old_license}` to `{corrected_license}`"
             )
 
     def _upgrade_about_section(self, base_package_paths: list[str]) -> None:
