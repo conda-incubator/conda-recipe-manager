@@ -36,6 +36,7 @@ test:
     - conda_recipe_manager.license
     - conda_recipe_manager.parser
   source_files:
+    - conda_recipe_manager/license/spdx_licenses.json
     - tests/
   requires:
     - pip
