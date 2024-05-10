@@ -2,14 +2,15 @@
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools]
+package-dir = {"" = "conda_recipe_manager"}
+include-package-data = true
+
 [tool.setuptools.packages.find]
 namespaces = false
 
 [tool.setuptools.package-data]
 "conda_recipe_manager" = ["py.typed", "*.json"]
-
-[tool.setuptools]
-include-package-data = true
 
 [project]
 name = "conda_recipe_manager"
