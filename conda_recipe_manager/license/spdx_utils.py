@@ -10,12 +10,13 @@ from __future__ import annotations
 
 import difflib
 import json
-from pathlib import Path
+from importlib.resources import files
+from importlib.resources.abc import Traversable
 from typing import Final, Optional, cast
 
 # Path to the SPDX JSON database. This should remain inside this module. This is stored as the raw JSON file so that
 # we can easily update from the SPDX source on GitHub.
-SPDX_LICENSE_JSON_FILE: Final[Path] = Path(__file__).resolve().parent / "spdx_licenses.json"
+SPDX_LICENSE_JSON_FILE: Final[Traversable] = files("conda_recipe_manager.license").joinpath("spdx_licenses.json")
 
 # SPDX expression operators
 SPDX_EXPRESSION_OPS: Final[set[str]] = {"AND", "OR", "WITH"}
