@@ -9,6 +9,9 @@ include-package-data = true
 namespaces = false
 exclude = ["tests"]
 
+[tool.setuptools.package-data]
+"conda_recipe_manager" = ["py.typed", "licenses/*.json"]
+
 [project]
 name = "conda_recipe_manager"
 version = "0.1.0"
