@@ -40,6 +40,7 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
             [
                 "A non-list item had a selector at: /package/name",
                 "A non-list item had a selector at: /requirements/empty_field2",
+                "Could not patch unrecognized license: `Apache-2.0 AND MIT`",
             ],
         ),
         (
@@ -55,7 +56,7 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
         (
             "types-toml.yaml",
             [],
-            [],
+            ["Could not patch unrecognized license: `Apache-2.0 AND MIT`"],
         ),
         # Regression test: Contains a `test` section that caused an empty dictionary to be inserted in the conversion
         # process, causing an index-out-of-range exception.
@@ -79,7 +80,7 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
         (
             "dynamic-linking.yaml",
             [],
-            [],
+            ["Could not patch unrecognized license: `Apache-2.0 AND MIT`"],
         ),
         # Regression: Tests for proper indentation of a list item inside a collection node element
         (
@@ -92,13 +93,16 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
         (
             "cctools-ld64.yaml",
             [],
-            [],
+            [
+                "Changed /outputs/0/about/license from `Apple Public Source License 2.0` to " "`APSL-2.0`",
+                "Changed /outputs/1/about/license from `Apple Public Source License 2.0` to " "`APSL-2.0`",
+            ],
         ),
         # Regression: Tests scenarios where the newer `${{ }}` substitutions got doubled up, causing: `$${{ foo }}`
         (
             "regression_jinja_sub.yaml",
             [],
-            [],
+            ["No `license` provided in `/about`"],
         ),
         # TODO complete: The `rust.yaml` test contains many edge cases and selectors that aren't directly supported in
         # the V1 recipe format
