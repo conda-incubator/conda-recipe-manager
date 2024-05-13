@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Final, Optional, cast
 
-from conda_recipe_manager.license.spdx_utils import SpdxUtils
+from conda_recipe_manager.licenses.spdx_utils import SpdxUtils
 from conda_recipe_manager.parser._node import Node
 from conda_recipe_manager.parser._traverse import traverse
 from conda_recipe_manager.parser._types import (

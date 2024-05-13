@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import pytest
 
-from conda_recipe_manager.license.spdx_utils import SpdxUtils
+from conda_recipe_manager.licenses.spdx_utils import SpdxUtils
 
 
 @pytest.mark.parametrize(

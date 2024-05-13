@@ -16,7 +16,7 @@ from typing import Final, Optional, cast
 
 # Path to the SPDX JSON database. This should remain inside this module. This is stored as the raw JSON file so that
 # we can easily update from the SPDX source on GitHub.
-SPDX_LICENSE_JSON_FILE: Final[Traversable] = files("conda_recipe_manager.license").joinpath("spdx_licenses.json")
+SPDX_LICENSE_JSON_FILE: Final[Traversable] = files("conda_recipe_manager.licenses").joinpath("spdx_licenses.json")
 
 # SPDX expression operators
 SPDX_EXPRESSION_OPS: Final[set[str]] = {"AND", "OR", "WITH"}

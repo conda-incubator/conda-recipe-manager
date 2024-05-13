@@ -33,7 +33,7 @@ requirements:
 test:
   imports:
     - conda_recipe_manager.commands
-    - conda_recipe_manager.license
+    - conda_recipe_manager.licenses
     - conda_recipe_manager.parser
   source_files:
     - tests/
