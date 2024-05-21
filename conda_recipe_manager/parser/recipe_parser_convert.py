@@ -294,6 +294,8 @@ class RecipeParserConvert(RecipeParser):
             self._patch_move_new_path(build_path, "/entry_points", "/python")
 
             # New `dynamic_linking` section changes
+            self._patch_move_new_path(build_path, "/rpaths", "/dynamic_linking", "/rpaths")
+            self._patch_move_new_path(build_path, "/binary_relocation", "/dynamic_linking", "/binary_relocation")
             self._patch_move_new_path(
                 build_path, "/missing_dso_whitelist", "/dynamic_linking", "/missing_dso_allowlist"
             )
