@@ -105,6 +105,19 @@ class RecipeParserConvert(RecipeParser):
             self._patch_add_missing_path(base_path, new_path)
         self._patch_move_base_path(base_path, old_ext, RecipeParser.append_to_path(new_path, new_ext))
 
+    def _patch_deprecated_fields(self, base_path: str, fields: list[str]) -> None:
+        """
+        Automatically deprecates fields found in a common path.
+        :param base_path: Shared base path where fields can be found
+        :param fields: List of deprecated fields
+        """
+        for field in fields:
+            path = RecipeParser.append_to_path(base_path, field)
+            if not self._v1_recipe.contains_value(path):
+                continue
+            if self._patch_and_log({"op": "remove", "path": path}):
+                self._msg_tbl.add_message(MessageCategory.WARNING, f"Field at `{path}` is no longer supported.")
+
     def _sort_subtree_keys(self, sort_path: str, tbl: dict[str, int], rename: str = "") -> None:
         """
         Convenience function that sorts 1 level of keys, given a path. Optionally allows renaming of the target node.
@@ -261,6 +274,24 @@ class RecipeParserConvert(RecipeParser):
         Upgrades/converts the `build` section(s) of a recipe file.
         :param base_package_paths: Set of base paths to process that could contain this section.
         """
+        build_deprecated: Final[list[str]] = [
+            "pre-link",
+            "noarch_python",
+            "features",
+            "msvc_compiler",
+            "requires_features",
+            "provides_features",
+            "preferred_env",
+            "preferred_env_executable_paths",
+            "disable_pip",
+            "pin_depends",
+            "overlinking_ignore_patterns",
+            "rpaths_patcher",
+            "post-link",
+            "pre-unlink",
+            "pre-link",
+        ]
+
         for base_path in base_package_paths:
             # Move `run_exports` and `ignore_run_exports` from `build` to `requirements`
 
@@ -300,6 +331,10 @@ class RecipeParserConvert(RecipeParser):
                 build_path, "/missing_dso_whitelist", "/dynamic_linking", "/missing_dso_allowlist"
             )
             self._patch_move_new_path(build_path, "/runpath_whitelist", "/dynamic_linking", "/rpath_allowlist")
+
+            # NOTE: `overdepending_behavior` and `overlinking_behavior` are new fields that don't have a direct path
+            #       to conversion.
+            self._patch_deprecated_fields(build_path, build_deprecated)
 
             # Canonically sort this section
             self._sort_subtree_keys(build_path, V1_BUILD_SECTION_KEY_SORT_ORDER)
@@ -380,10 +415,7 @@ class RecipeParserConvert(RecipeParser):
             self._fix_bad_licenses(about_path)
 
             # Remove deprecated `about` fields
-            for field in about_deprecated:
-                path = RecipeParser.append_to_path(about_path, field)
-                if self._v1_recipe.contains_value(path):
-                    self._patch_and_log({"op": "remove", "path": path})
+            self._patch_deprecated_fields(about_path, about_deprecated)
 
     def _upgrade_test_pip_check(self, base_path: str, test_path: str) -> None:
         """
