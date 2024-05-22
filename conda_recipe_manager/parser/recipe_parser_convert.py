@@ -16,6 +16,7 @@ from conda_recipe_manager.parser._types import (
     ROOT_NODE_VALUE,
     TOP_LEVEL_KEY_SORT_ORDER,
     V1_BUILD_SECTION_KEY_SORT_ORDER,
+    V1_PYTHON_TEST_KEY_SORT_ORDER,
     V1_SOURCE_SECTION_KEY_SORT_ORDER,
     Regex,
 )
