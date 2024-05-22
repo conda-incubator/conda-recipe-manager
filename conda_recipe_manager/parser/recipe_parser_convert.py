@@ -146,7 +146,7 @@ class RecipeParserConvert(RecipeParser):
         """
         # Convert the JINJA variable table to a `context` section. Empty tables still add the `context` section for
         # future developers' convenience.
-        context_obj: dict[str,str] = {}
+        context_obj: dict[str, str] = {}
         for name, value in self._v1_recipe._vars_tbl.items():  # pylint: disable=protected-access
             # Filter-out any value not covered in the V1 format
             if not isinstance(value, (str, int, float, bool)):
@@ -494,6 +494,11 @@ class RecipeParserConvert(RecipeParser):
                 self._patch_add_missing_path(test_path, "/python")
                 self._patch_move_base_path(test_path, "/imports", "/python/imports")
             self._patch_move_base_path(test_path, "/downstreams", "/downstream")
+
+            # Canonically sort the python section, if it exists
+            python_test_path = RecipeParser.append_to_path(test_path, "/python")
+            if self._v1_recipe.contains_value(python_test_path):
+                self._sort_subtree_keys(python_test_path, V1_PYTHON_TEST_KEY_SORT_ORDER)
 
             # Move `test` to `tests` and encapsulate the pre-existing object into a list
             new_test_path = f"{test_path}s"

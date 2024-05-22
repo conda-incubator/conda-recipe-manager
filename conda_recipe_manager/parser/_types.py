@@ -89,6 +89,12 @@ V1_TEST_SECTION_KEY_SORT_ORDER: Final[dict[str, int]] = {
     "downstream": 40,
 }
 
+# Canonical sort order for the V1 Python test element
+V1_PYTHON_TEST_KEY_SORT_ORDER: Final[dict[str, int]] = {
+    "imports": 0,
+    "pip_check": 10,
+}
+
 #### Private Classes (Not to be used external to the `parser` module) ####
 
 # NOTE: The classes put in this file should be structures (NamedTuples) and very small support classes that don't make
