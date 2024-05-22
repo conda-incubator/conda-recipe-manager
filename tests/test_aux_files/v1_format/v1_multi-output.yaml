@@ -1,7 +1,5 @@
 schema_version: 1
 
-context:
-
 outputs:
   - package:
       name: libdb
