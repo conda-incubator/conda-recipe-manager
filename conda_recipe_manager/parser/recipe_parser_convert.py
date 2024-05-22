@@ -146,13 +146,16 @@ class RecipeParserConvert(RecipeParser):
         """
         # Convert the JINJA variable table to a `context` section. Empty tables still add the `context` section for
         # future developers' convenience.
-        self._patch_and_log({"op": "add", "path": "/context", "value": None})
-        # Filter-out any value not covered in the V1 format
+        context_obj: dict[str,str] = {}
         for name, value in self._v1_recipe._vars_tbl.items():  # pylint: disable=protected-access
+            # Filter-out any value not covered in the V1 format
             if not isinstance(value, (str, int, float, bool)):
                 self._msg_tbl.add_message(MessageCategory.WARNING, f"The variable `{name}` is an unsupported type.")
                 continue
-            self._patch_and_log({"op": "add", "path": f"/context/{name}", "value": value})
+            context_obj[name] = value
+        # Ensure that we do not include an empty context object (which is forbidden by the schema).
+        if context_obj:
+            self._patch_and_log({"op": "add", "path": "/context", "value": context_obj})
 
         # Similarly, patch-in the new `schema_version` value to the top of the file
         self._patch_and_log({"op": "add", "path": "/schema_version", "value": CURRENT_RECIPE_SCHEMA_FORMAT})
@@ -325,6 +328,8 @@ class RecipeParserConvert(RecipeParser):
             self._patch_move_new_path(build_path, "/entry_points", "/python")
 
             # New `dynamic_linking` section changes
+            # NOTE: `overdepending_behavior` and `overlinking_behavior` are new fields that don't have a direct path
+            #       to conversion.
             self._patch_move_new_path(build_path, "/rpaths", "/dynamic_linking", "/rpaths")
             self._patch_move_new_path(build_path, "/binary_relocation", "/dynamic_linking", "/binary_relocation")
             self._patch_move_new_path(
@@ -332,8 +337,6 @@ class RecipeParserConvert(RecipeParser):
             )
             self._patch_move_new_path(build_path, "/runpath_whitelist", "/dynamic_linking", "/rpath_allowlist")
 
-            # NOTE: `overdepending_behavior` and `overlinking_behavior` are new fields that don't have a direct path
-            #       to conversion.
             self._patch_deprecated_fields(build_path, build_deprecated)
 
             # Canonically sort this section
