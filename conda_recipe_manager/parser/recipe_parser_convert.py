@@ -23,7 +23,7 @@ from conda_recipe_manager.parser._types import (
 from conda_recipe_manager.parser._utils import stack_path_to_str, str_to_stack_path
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
 from conda_recipe_manager.parser.types import CURRENT_RECIPE_SCHEMA_FORMAT, MessageCategory, MessageTable
-from conda_recipe_manager.types import JsonPatchType, JsonType, SentinelType
+from conda_recipe_manager.types import JsonPatchType, JsonType, Primitives, SentinelType
 
 
 class RecipeParserConvert(RecipeParser):
@@ -122,6 +122,7 @@ class RecipeParserConvert(RecipeParser):
     def _sort_subtree_keys(self, sort_path: str, tbl: dict[str, int], rename: str = "") -> None:
         """
         Convenience function that sorts 1 level of keys, given a path. Optionally allows renaming of the target node.
+        No changes are made if the path provided is invalid/does not exist.
         :param sort_path: Top-level path to target sorting of child keys
         :param tbl: Table describing how keys should be sorted. Lower-value key names appear towards the top of the list
         :param rename: (Optional) If specified, renames the top-level key
@@ -132,7 +133,6 @@ class RecipeParserConvert(RecipeParser):
 
         node = traverse(self._v1_recipe._root, str_to_stack_path(sort_path))  # pylint: disable=protected-access
         if node is None:
-            self._msg_tbl.add_message(MessageCategory.WARNING, f"Failed to sort members of {sort_path}")
             return
         if rename:
             node.value = rename
@@ -147,7 +147,7 @@ class RecipeParserConvert(RecipeParser):
         """
         # Convert the JINJA variable table to a `context` section. Empty tables still add the `context` section for
         # future developers' convenience.
-        context_obj: dict[str, str] = {}
+        context_obj: dict[str, Primitives] = {}
         for name, value in self._v1_recipe._vars_tbl.items():  # pylint: disable=protected-access
             # Filter-out any value not covered in the V1 format
             if not isinstance(value, (str, int, float, bool)):
@@ -156,7 +156,7 @@ class RecipeParserConvert(RecipeParser):
             context_obj[name] = value
         # Ensure that we do not include an empty context object (which is forbidden by the schema).
         if context_obj:
-            self._patch_and_log({"op": "add", "path": "/context", "value": context_obj})
+            self._patch_and_log({"op": "add", "path": "/context", "value": cast(JsonType, context_obj)})
 
         # Similarly, patch-in the new `schema_version` value to the top of the file
         self._patch_and_log({"op": "add", "path": "/schema_version", "value": CURRENT_RECIPE_SCHEMA_FORMAT})
@@ -497,9 +497,7 @@ class RecipeParserConvert(RecipeParser):
             self._patch_move_base_path(test_path, "/downstreams", "/downstream")
 
             # Canonically sort the python section, if it exists
-            python_test_path = RecipeParser.append_to_path(test_path, "/python")
-            if self._v1_recipe.contains_value(python_test_path):
-                self._sort_subtree_keys(python_test_path, V1_PYTHON_TEST_KEY_SORT_ORDER)
+            self._sort_subtree_keys(RecipeParser.append_to_path(test_path, "/python"), V1_PYTHON_TEST_KEY_SORT_ORDER)
 
             # Move `test` to `tests` and encapsulate the pre-existing object into a list
             new_test_path = f"{test_path}s"
