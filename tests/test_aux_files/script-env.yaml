@@ -17,6 +17,7 @@ build:
     - FOO=BAR
     - SECRET_SAUCE
     - LINUX_SECRET_SAUCE  # [linux]
+    - MACOS_SECRET_SAUCE=BAZ  # [osx]
 
 requirements:
   host:
