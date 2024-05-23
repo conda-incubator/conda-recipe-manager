@@ -20,7 +20,7 @@ from conda_recipe_manager.parser._types import (
     V1_SOURCE_SECTION_KEY_SORT_ORDER,
     Regex,
 )
-from conda_recipe_manager.parser._utils import stack_path_to_str, str_to_stack_path
+from conda_recipe_manager.parser._utils import set_key_conditionally, stack_path_to_str, str_to_stack_path
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
 from conda_recipe_manager.parser.types import CURRENT_RECIPE_SCHEMA_FORMAT, MessageCategory, MessageTable
 from conda_recipe_manager.types import JsonPatchType, JsonType, Primitives, SentinelType
@@ -273,6 +273,66 @@ class RecipeParserConvert(RecipeParser):
                 # Canonically sort this section
                 self._sort_subtree_keys(src_path, V1_SOURCE_SECTION_KEY_SORT_ORDER)
 
+    def _upgrade_build_script_section(self, build_path: str) -> None:
+        """
+        Upgrades the `/build/script` section if needed. Some fields like `script_env` will need to be wrapped into a new
+        `Script` object. Simple `script` sections can be left unchanged.
+        :param build_path: Build section path to upgrade
+        """
+        script_env_path: Final[str] = RecipeParser.append_to_path(build_path, "/script_env")
+        # The environment list could contain dictionaries if the variables are conditionally included.
+        script_env_lst: Final[list[str | dict[str, str]]] = cast(
+            list[str | dict[str, str]], self._v1_recipe.get_value(script_env_path, [])
+        )
+        if not script_env_lst:
+            return
+
+        script_path: Final[str] = RecipeParser.append_to_path(build_path, "/script")
+        new_script_obj: JsonType = {}
+        # Set environment variables need to be parsed and then re-added as a dictionary. Unset variables are listed
+        # in the `secrets` section.
+        new_env: dict[str, str] = {}
+        new_secrets: list[str | dict[str, str]] = []
+        for item in script_env_lst:
+            # Attempt to edit conditional variables
+            if isinstance(item, dict):
+                if "then" not in item:
+                    self._msg_tbl.add_message(
+                        MessageCategory.ERROR, f"Could not parse dictionary `{item}` found in {script_env_path}"
+                    )
+                    continue
+                tokens = [i.strip() for i in item["then"].split("=")]
+                if len(tokens) == 1:
+                    new_secrets.append(item)
+                else:
+                    # The spec does not support conditional statements in a dictionary. As per discussions with the
+                    # community, the best course of action is manual intervention.
+                    self._msg_tbl.add_message(
+                        MessageCategory.ERROR,
+                        f"Converting `{item}` found in {script_env_path} is not supported."
+                        " Manually replace the selector with a `cmp()` function.",
+                    )
+                continue
+
+            tokens = [i.strip() for i in item.split("=")]
+            if len(tokens) == 1:
+                new_secrets.append(tokens[0])
+            elif len(tokens) == 2:
+                new_env[tokens[0]] = tokens[1]
+            else:
+                self._msg_tbl.add_message(MessageCategory.ERROR, f"Could not parse `{item}` found in {script_env_path}")
+
+        set_key_conditionally(cast(dict[str, JsonType], new_script_obj), "env", cast(JsonType, new_env))
+        set_key_conditionally(cast(dict[str, JsonType], new_script_obj), "secrets", cast(JsonType, new_secrets))
+
+        script_value = self._v1_recipe.get_value(script_path, "")
+        patch_op: Final[str] = "replace" if script_value else "add"
+        # TODO: Simple script files should be set as `file` not `content`
+        set_key_conditionally(cast(dict[str, JsonType], new_script_obj), "content", script_value)
+
+        self._patch_and_log({"op": patch_op, "path": script_path, "value": new_script_obj})
+        self._patch_and_log({"op": "remove", "path": script_env_path})
+
     def _upgrade_build_section(self, base_package_paths: list[str]) -> None:
         """
         Upgrades/converts the `build` section(s) of a recipe file.
@@ -338,6 +398,7 @@ class RecipeParserConvert(RecipeParser):
             )
             self._patch_move_new_path(build_path, "/runpath_whitelist", "/dynamic_linking", "/rpath_allowlist")
 
+            self._upgrade_build_script_section(build_path)
             self._patch_deprecated_fields(build_path, build_deprecated)
 
             # Canonically sort this section
