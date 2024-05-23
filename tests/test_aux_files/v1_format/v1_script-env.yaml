@@ -1,0 +1,41 @@
+schema_version: 1
+
+context:
+  name: script-env
+  version: 0.10.8.6
+
+package:
+  name: ${{ name|lower }}
+  version: ${{ version }}
+
+source:
+  url: https://pypi.io/packages/source/${{ name[0] }}/${{ name }}/script-env-${{ version }}.tar.gz
+  sha256: 6d3ac79e36c9ee593c5d4fb33a50cca0e3adceb6ef5cff8b8e5aef67b4c4aaf2
+
+build:
+  number: 0
+  skip:
+    - py<37
+  script:
+    env:
+      FOO: BAR
+    secrets:
+      - SECRET_SAUCE
+      - if: linux
+        then: LINUX_SECRET_SAUCE
+    content: ${{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+
+requirements:
+  host:
+    - python
+  run:
+    - python
+
+about:
+  summary: Typing stubs for toml
+  description: Tests upgrading a recipe with a `script-env` section
+  license: MIT
+  license_file: LICENSE
+  homepage: https://github.com/python/typeshed
+  repository: https://github.com/python/typeshed
+  documentation: https://pypi.org/project/types-toml/
