@@ -16,13 +16,14 @@ from conda_recipe_manager.parser._types import (
     ROOT_NODE_VALUE,
     TOP_LEVEL_KEY_SORT_ORDER,
     V1_BUILD_SECTION_KEY_SORT_ORDER,
+    V1_PYTHON_TEST_KEY_SORT_ORDER,
     V1_SOURCE_SECTION_KEY_SORT_ORDER,
     Regex,
 )
 from conda_recipe_manager.parser._utils import stack_path_to_str, str_to_stack_path
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
 from conda_recipe_manager.parser.types import CURRENT_RECIPE_SCHEMA_FORMAT, MessageCategory, MessageTable
-from conda_recipe_manager.types import JsonPatchType, JsonType, SentinelType
+from conda_recipe_manager.types import JsonPatchType, JsonType, Primitives, SentinelType
 
 
 class RecipeParserConvert(RecipeParser):
@@ -105,9 +106,23 @@ class RecipeParserConvert(RecipeParser):
             self._patch_add_missing_path(base_path, new_path)
         self._patch_move_base_path(base_path, old_ext, RecipeParser.append_to_path(new_path, new_ext))
 
+    def _patch_deprecated_fields(self, base_path: str, fields: list[str]) -> None:
+        """
+        Automatically deprecates fields found in a common path.
+        :param base_path: Shared base path where fields can be found
+        :param fields: List of deprecated fields
+        """
+        for field in fields:
+            path = RecipeParser.append_to_path(base_path, field)
+            if not self._v1_recipe.contains_value(path):
+                continue
+            if self._patch_and_log({"op": "remove", "path": path}):
+                self._msg_tbl.add_message(MessageCategory.WARNING, f"Field at `{path}` is no longer supported.")
+
     def _sort_subtree_keys(self, sort_path: str, tbl: dict[str, int], rename: str = "") -> None:
         """
         Convenience function that sorts 1 level of keys, given a path. Optionally allows renaming of the target node.
+        No changes are made if the path provided is invalid/does not exist.
         :param sort_path: Top-level path to target sorting of child keys
         :param tbl: Table describing how keys should be sorted. Lower-value key names appear towards the top of the list
         :param rename: (Optional) If specified, renames the top-level key
@@ -118,7 +133,6 @@ class RecipeParserConvert(RecipeParser):
 
         node = traverse(self._v1_recipe._root, str_to_stack_path(sort_path))  # pylint: disable=protected-access
         if node is None:
-            self._msg_tbl.add_message(MessageCategory.WARNING, f"Failed to sort members of {sort_path}")
             return
         if rename:
             node.value = rename
@@ -133,13 +147,16 @@ class RecipeParserConvert(RecipeParser):
         """
         # Convert the JINJA variable table to a `context` section. Empty tables still add the `context` section for
         # future developers' convenience.
-        self._patch_and_log({"op": "add", "path": "/context", "value": None})
-        # Filter-out any value not covered in the V1 format
+        context_obj: dict[str, Primitives] = {}
         for name, value in self._v1_recipe._vars_tbl.items():  # pylint: disable=protected-access
+            # Filter-out any value not covered in the V1 format
             if not isinstance(value, (str, int, float, bool)):
                 self._msg_tbl.add_message(MessageCategory.WARNING, f"The variable `{name}` is an unsupported type.")
                 continue
-            self._patch_and_log({"op": "add", "path": f"/context/{name}", "value": value})
+            context_obj[name] = value
+        # Ensure that we do not include an empty context object (which is forbidden by the schema).
+        if context_obj:
+            self._patch_and_log({"op": "add", "path": "/context", "value": cast(JsonType, context_obj)})
 
         # Similarly, patch-in the new `schema_version` value to the top of the file
         self._patch_and_log({"op": "add", "path": "/schema_version", "value": CURRENT_RECIPE_SCHEMA_FORMAT})
@@ -261,6 +278,24 @@ class RecipeParserConvert(RecipeParser):
         Upgrades/converts the `build` section(s) of a recipe file.
         :param base_package_paths: Set of base paths to process that could contain this section.
         """
+        build_deprecated: Final[list[str]] = [
+            "pre-link",
+            "noarch_python",
+            "features",
+            "msvc_compiler",
+            "requires_features",
+            "provides_features",
+            "preferred_env",
+            "preferred_env_executable_paths",
+            "disable_pip",
+            "pin_depends",
+            "overlinking_ignore_patterns",
+            "rpaths_patcher",
+            "post-link",
+            "pre-unlink",
+            "pre-link",
+        ]
+
         for base_path in base_package_paths:
             # Move `run_exports` and `ignore_run_exports` from `build` to `requirements`
 
@@ -294,10 +329,16 @@ class RecipeParserConvert(RecipeParser):
             self._patch_move_new_path(build_path, "/entry_points", "/python")
 
             # New `dynamic_linking` section changes
+            # NOTE: `overdepending_behavior` and `overlinking_behavior` are new fields that don't have a direct path
+            #       to conversion.
+            self._patch_move_new_path(build_path, "/rpaths", "/dynamic_linking", "/rpaths")
+            self._patch_move_new_path(build_path, "/binary_relocation", "/dynamic_linking", "/binary_relocation")
             self._patch_move_new_path(
                 build_path, "/missing_dso_whitelist", "/dynamic_linking", "/missing_dso_allowlist"
             )
             self._patch_move_new_path(build_path, "/runpath_whitelist", "/dynamic_linking", "/rpath_allowlist")
+
+            self._patch_deprecated_fields(build_path, build_deprecated)
 
             # Canonically sort this section
             self._sort_subtree_keys(build_path, V1_BUILD_SECTION_KEY_SORT_ORDER)
@@ -378,10 +419,7 @@ class RecipeParserConvert(RecipeParser):
             self._fix_bad_licenses(about_path)
 
             # Remove deprecated `about` fields
-            for field in about_deprecated:
-                path = RecipeParser.append_to_path(about_path, field)
-                if self._v1_recipe.contains_value(path):
-                    self._patch_and_log({"op": "remove", "path": path})
+            self._patch_deprecated_fields(about_path, about_deprecated)
 
     def _upgrade_test_pip_check(self, base_path: str, test_path: str) -> None:
         """
@@ -457,6 +495,9 @@ class RecipeParserConvert(RecipeParser):
                 self._patch_add_missing_path(test_path, "/python")
                 self._patch_move_base_path(test_path, "/imports", "/python/imports")
             self._patch_move_base_path(test_path, "/downstreams", "/downstream")
+
+            # Canonically sort the python section, if it exists
+            self._sort_subtree_keys(RecipeParser.append_to_path(test_path, "/python"), V1_PYTHON_TEST_KEY_SORT_ORDER)
 
             # Move `test` to `tests` and encapsulate the pre-existing object into a list
             new_test_path = f"{test_path}s"

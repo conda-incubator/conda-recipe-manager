@@ -51,19 +51,26 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
         (
             "huggingface_hub.yaml",
             [],
-            [],
+            [
+                "Field at `/about/license_family` is no longer supported.",
+            ],
         ),
         (
             "types-toml.yaml",
             [],
-            ["Could not patch unrecognized license: `Apache-2.0 AND MIT`"],
+            [
+                "Could not patch unrecognized license: `Apache-2.0 AND MIT`",
+                "Field at `/about/license_family` is no longer supported.",
+            ],
         ),
         # Regression test: Contains a `test` section that caused an empty dictionary to be inserted in the conversion
         # process, causing an index-out-of-range exception.
         (
             "pytest-pep8.yaml",
             [],
-            [],
+            [
+                "Field at `/about/doc_source_url` is no longer supported.",
+            ],
         ),
         # Regression test: Contains selectors and test section data that caused previous conversion issues.
         (
@@ -74,19 +81,25 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
                 "A non-list item had a selector at: /outputs/1/script",
                 "A non-list item had a selector at: /outputs/0/script",
                 "A non-list item had a selector at: /outputs/1/script",
+                "Field at `/about/license_family` is no longer supported.",
             ],
         ),
         # Tests for transformations related to the new `build/dynamic_linking` section
         (
             "dynamic-linking.yaml",
             [],
-            ["Could not patch unrecognized license: `Apache-2.0 AND MIT`"],
+            [
+                "Could not patch unrecognized license: `Apache-2.0 AND MIT`",
+                "Field at `/about/license_family` is no longer supported.",
+            ],
         ),
         # Regression: Tests for proper indentation of a list item inside a collection node element
         (
             "boto.yaml",
             [],
-            [],
+            [
+                "Field at `/about/doc_source_url` is no longer supported.",
+            ],
         ),
         # Regression: Tests a recipe that has multiple `source`` objects in `/source` AND an `about` per `output`
         # TODO Issue #50 tracks an edge case caused by this project that is not currently handled.
@@ -95,7 +108,9 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
             [],
             [
                 "Changed /outputs/0/about/license from `Apple Public Source License 2.0` to " "`APSL-2.0`",
+                "Field at `/outputs/0/about/license_family` is no longer supported.",
                 "Changed /outputs/1/about/license from `Apple Public Source License 2.0` to " "`APSL-2.0`",
+                "Field at `/outputs/1/about/license_family` is no longer supported.",
             ],
         ),
         # Regression: Tests scenarios where the newer `${{ }}` substitutions got doubled up, causing: `$${{ foo }}`

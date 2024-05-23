@@ -48,7 +48,6 @@ test:
 about:
   home: https://github.com/anaconda/conda-recipe-manager
   license: BSD-3-Clause
-  license_family: BSD
   license_file: LICENSE
   license_url: https://github.com/anaconda/conda-recipe-manager/blob/main/LICENSE
   summary: Helper tool for recipes on aggregate.

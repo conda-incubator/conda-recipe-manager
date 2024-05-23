@@ -48,11 +48,11 @@ multi_level:
   list_3:
     - ls
     - George:
-        has_mop: false
         role: owner
+        has_mop: false
       Stanley:
-        has_mop: true
         role: janitor
+        has_mop: true
     - sl
     - cowsay
 
