@@ -1,0 +1,33 @@
+{% set name = "script-env" %}
+{% set version = "0.10.8.6" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/script-env-{{ version }}.tar.gz
+  sha256: A123
+  sha256: B456
+  sha256: C789
+  sha256: D101112
+
+build:
+  number: 0
+  skip: true  # [py<37]
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+
+requirements:
+  host:
+    - python
+  run:
+    - python
+
+about:
+  home: https://github.com/python/typeshed
+  summary: Typing stubs for toml
+  description: Tests various "hash_type" key replacements
+  license: MIT
+  license_file: LICENSE
+  dev_url: https://github.com/python/typeshed
+  doc_url: https://pypi.org/project/types-toml/
