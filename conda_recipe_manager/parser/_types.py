@@ -123,6 +123,10 @@ class Regex:
     # Finds `environ[]` used by a some recipe files. Requires a whitespace character to prevent matches with
     # `os.environ[]`, which is very rare.
     PRE_PROCESS_ENVIRON: Final[re.Pattern[str]] = re.compile(r"\s+environ\[(\"|')(.*)(\"|')\]")
+    # Finds commonly used variants of `{{ hash_type }}:` which is a substitution for the `sha256` field
+    PRE_PROCESS_JINJA_HASH_TYPE_KEY: Final[re.Pattern[str]] = re.compile(
+        r"'{0,1}\{\{ (hash_type|hash|hashtype) \}\}'{0,1}:"
+    )
 
     ## Jinja regular expressions ##
     JINJA_SUB: Final[re.Pattern[str]] = re.compile(r"{{\s*" + _JINJA_VAR_FUNCTION_PATTERN + r"\s*}}")
