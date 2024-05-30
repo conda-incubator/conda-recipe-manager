@@ -6,6 +6,8 @@ Description:    Provides private utility functions only used by the parser.
 from __future__ import annotations
 
 import json
+import re
+from collections.abc import Iterable
 from typing import Final, cast
 
 from conda_recipe_manager.parser._types import (
@@ -200,3 +202,17 @@ def set_key_conditionally(dictionary: dict[str, JsonType], key: str, value: Json
     """
     if value:
         dictionary[key] = value
+
+
+def search_any_regex(re_set: Iterable[re.Pattern[str]], s: str) -> bool:
+    """
+    Convenience function that checks a string against many regular expressions
+    :param re_set: Set of regular expressions to check
+    :param s: Target string
+    :returns: True if any regex in the set matches. False otherwise.
+    """
+    for r in re_set:
+        if r.search(s):
+            return True
+
+    return False
