@@ -136,6 +136,12 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
             ],
             [],
         ),
+        # Ensures that multiline summary sections that don't use | or > are converted correctly.
+        (
+            "non_marked_multiline_summary.yaml",
+            [],
+            [],
+        ),
         # TODO complete: The `rust.yaml` test contains many edge cases and selectors that aren't directly supported in
         # the V1 recipe format
         # (
