@@ -487,6 +487,15 @@ class RecipeParserConvert(RecipeParser):
 
             self._fix_bad_licenses(about_path)
 
+            # R packages like to use multiline strings without multiline markers, which get interpreted as list members
+            # TODO address this at parse-time, adding a new multiline mode
+            summary_path = RecipeParser.append_to_path(about_path, "/summary")
+            summary = self._v1_recipe.get_value(summary_path, "")
+            if isinstance(summary, list):
+                self._patch_and_log(
+                    {"op": "replace", "path": summary_path, "value": "\n".join(cast(list[str], summary))}
+                )
+
             # Remove deprecated `about` fields
             self._patch_deprecated_fields(about_path, about_deprecated)
 
