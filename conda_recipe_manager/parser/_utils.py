@@ -16,7 +16,7 @@ from conda_recipe_manager.parser._types import (
     StrStackImmutable,
 )
 from conda_recipe_manager.parser.types import TAB_AS_SPACES, MultilineVariant, NodeValue
-from conda_recipe_manager.types import H, SentinelType
+from conda_recipe_manager.types import H, JsonType, SentinelType
 
 # Commonly used special characters that we need to ensure get quoted when rendered as a YAML string.
 # NOTE: `#`, `|`, `{`, `}`, `>`, and `<` are left out of this list as in our use case, they have specifics meaning that
@@ -188,3 +188,15 @@ def dedupe_and_preserve_order(l: list[H]) -> list[H]:
 
     """
     return list(cast(dict[H, None], dict.fromkeys(l)))
+
+
+def set_key_conditionally(dictionary: dict[str, JsonType], key: str, value: JsonType) -> None:
+    """
+    Convenience function that conditionally includes a key-value pair in a dictionary if the value is truthy.
+    Great for cheating McCabe ratings in complex JSON/YAML operations!
+    :param dictionary: Dictionary to conditionally add a value to
+    :param key: Key to use
+    :param value: Value to conditionally add to the dictionary
+    """
+    if value:
+        dictionary[key] = value

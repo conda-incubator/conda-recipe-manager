@@ -119,6 +119,17 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
             [],
             ["No `license` provided in `/about`"],
         ),
+        # Tests upgrading the `/build/script` when `script_env` is present (this is essentially a test for
+        # `_upgrade_build_script_section()`)
+        (
+            "script-env.yaml",
+            [
+                "Converting `{'if': 'osx', 'then': 'MACOS_SECRET_SAUCE=BAZ'}` found in "
+                "/build/script_env is not supported. Manually replace the selector with a "
+                "`cmp()` function.",
+            ],
+            [],
+        ),
         # TODO complete: The `rust.yaml` test contains many edge cases and selectors that aren't directly supported in
         # the V1 recipe format
         # (
