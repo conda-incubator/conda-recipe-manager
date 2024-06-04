@@ -15,8 +15,12 @@ from tests.file_loading import TEST_FILES_PATH, load_file, load_recipe_convert
 @pytest.mark.parametrize(
     "input_file,expected_file",
     [
-        ("simple-recipe_environ.yaml", "pre-processed-simple-recipe_environ.yaml"),
-        ("simple-recipe.yaml", "simple-recipe.yaml"),  # Unchanged file
+        #
+        ("hash_type_replacement.yaml", "pre_processor/pp_hash_type_replacement.yaml"),
+        # Environment syntax replacement
+        ("simple-recipe_environ.yaml", "pre_processor/pp_simple-recipe_environ.yaml"),
+        # Unchanged file
+        ("simple-recipe.yaml", "simple-recipe.yaml"),
     ],
 )
 def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
