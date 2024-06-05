@@ -15,10 +15,12 @@ from tests.file_loading import TEST_FILES_PATH, load_file, load_recipe_convert
 @pytest.mark.parametrize(
     "input_file,expected_file",
     [
-        #
+        # {{ hash_type }} as a sha256 key replacement
         ("hash_type_replacement.yaml", "pre_processor/pp_hash_type_replacement.yaml"),
         # Environment syntax replacement
         ("simple-recipe_environ.yaml", "pre_processor/pp_simple-recipe_environ.yaml"),
+        # Dot-function for pipe equivalent replacement
+        ("dot_function_replacement.yaml", "pre_processor/pp_dot_function_replacement.yaml"),
         # Unchanged file
         ("simple-recipe.yaml", "simple-recipe.yaml"),
     ],

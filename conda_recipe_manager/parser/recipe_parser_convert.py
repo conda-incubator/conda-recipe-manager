@@ -20,7 +20,12 @@ from conda_recipe_manager.parser._types import (
     V1_SOURCE_SECTION_KEY_SORT_ORDER,
     Regex,
 )
-from conda_recipe_manager.parser._utils import set_key_conditionally, stack_path_to_str, str_to_stack_path
+from conda_recipe_manager.parser._utils import (
+    search_any_regex,
+    set_key_conditionally,
+    stack_path_to_str,
+    str_to_stack_path,
+)
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
 from conda_recipe_manager.parser.types import CURRENT_RECIPE_SCHEMA_FORMAT, MessageCategory, MessageTable
 from conda_recipe_manager.types import JsonPatchType, JsonType, Primitives, SentinelType
@@ -153,6 +158,9 @@ class RecipeParserConvert(RecipeParser):
             if not isinstance(value, (str, int, float, bool)):
                 self._msg_tbl.add_message(MessageCategory.WARNING, f"The variable `{name}` is an unsupported type.")
                 continue
+            # Function calls need to preserve JINJA escaping or else they turn into unevaluated strings.
+            if isinstance(value, str) and search_any_regex(Regex.JINJA_FUNCTIONS_SET, value):
+                value = "{{" + value + "}}"
             context_obj[name] = value
         # Ensure that we do not include an empty context object (which is forbidden by the schema).
         if context_obj:
@@ -622,6 +630,14 @@ class RecipeParserConvert(RecipeParser):
         :param content: Recipe file contents to pre-process
         :returns: Pre-processed recipe file contents
         """
+        # Some recipes use `foo.<function()>` instead of `{{ foo | <function()> }}` in JINJA statements. This causes
+        # rattler-build to fail with `invalid operation: object has no method named <function()>`
+        # NOTE: This is currently done BEFORE converting to use `env.get()` to wipe-out those changes.
+        content = Regex.PRE_PROCESS_JINJA_DOT_FUNCTION_IN_ASSIGNMENT.sub(r"\1 | \2", content)
+        content = Regex.PRE_PROCESS_JINJA_DOT_FUNCTION_IN_SUBSTITUTION.sub(r"\1 | \2", content)
+        # Strip any problematic parenthesis that may be left over from the previous operations.
+        content = Regex.PRE_PROCESS_JINJA_DOT_FUNCTION_STRIP_EMPTY_PARENTHESIS.sub(r"\1", content)
+
         # Convert the old JINJA `environ[""]` variable usage to the new `get.env("")` syntax.
         # NOTE:
         #   - This is mostly used by Bioconda recipes and R-based-packages in the `license_file` field.

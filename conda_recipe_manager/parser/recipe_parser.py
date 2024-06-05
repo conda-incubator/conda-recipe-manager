@@ -241,20 +241,18 @@ class RecipeParser:
         """
         # Search the string, replacing all substitutions we can recognize
         for match in cast(list[str], Regex.JINJA_SUB.findall(s)):
-            lower_case = False
             # The regex guarantees the string starts and ends with double braces
             key = match[2:-2].strip()
-            # A brief search through `aggregate` shows that `|lower` is a commonly used Jinja command. Few, if any,
-            # other commands are used, as of writing. If others are found, we might need to support them here.
+            # Check for and interpret common JINJA functions
+            # TODO add support for UPPER and REPLACE
             lower_match = Regex.JINJA_FUNCTION_LOWER.search(key)
-            if lower_match is not None:
-                lower_case = True
+            if lower_match:
                 key = key.replace(lower_match.group(), "").strip()
 
             if key in self._vars_tbl:
                 # Replace value as a string. Re-interpret the entire value before returning.
                 value = str(self._vars_tbl[key])
-                if lower_case:
+                if lower_match:
                     value = value.lower()
                 s = s.replace(match, value)
         return cast(JsonType, yaml.safe_load(s))

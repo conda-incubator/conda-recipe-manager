@@ -127,15 +127,35 @@ class Regex:
     PRE_PROCESS_JINJA_HASH_TYPE_KEY: Final[re.Pattern[str]] = re.compile(
         r"'{0,1}\{\{ (hash_type|hash|hashtype) \}\}'{0,1}:"
     )
+    # Finds set statements that use dot functions over piped functions (`foo.replace(...)` vs `foo | replace(...)`).
+    # Group 1 and Group 2 match the left and right sides of the period mark.
+    PRE_PROCESS_JINJA_DOT_FUNCTION_IN_ASSIGNMENT: Final[re.Pattern[str]] = re.compile(
+        r"(\{%\s*set.*=.*)\.(.*\(.*\)\s*%\})"
+    )
+    PRE_PROCESS_JINJA_DOT_FUNCTION_IN_SUBSTITUTION: Final[re.Pattern[str]] = re.compile(
+        r"(\{\{\s*[a-zA-Z0-9_]*.*)\.([a-zA-Z0-9_]*\(.*\)\s*\}\})"
+    )
+    # Strips empty parenthesis artifacts on functions like `| lower`
+    PRE_PROCESS_JINJA_DOT_FUNCTION_STRIP_EMPTY_PARENTHESIS = re.compile(r"(\|\s*(lower|upper))(\(\))")
 
     ## Jinja regular expressions ##
     JINJA_SUB: Final[re.Pattern[str]] = re.compile(r"{{\s*" + _JINJA_VAR_FUNCTION_PATTERN + r"\s*}}")
-    JINJA_FUNCTION_LOWER: Final[re.Pattern[str]] = re.compile(r"\|\s*lower")
     JINJA_LINE: Final[re.Pattern[str]] = re.compile(r"({%.*%}|{#.*#})\n")
     JINJA_SET_LINE: Final[re.Pattern[str]] = re.compile(r"{%\s*set\s*" + _JINJA_VAR_FUNCTION_PATTERN + r"\s*=.*%}\s*\n")
     # Useful for replacing the older `{{` JINJA substitution with the newer `${{` WITHOUT accidentally doubling-up the
     # newer syntax when multiple replacements are possible.
     JINJA_REPLACE_V0_STARTING_MARKER: Final[re.Pattern[str]] = re.compile(r"(?<!\$)\{\{")
+
+    # All recognized JINJA functions are kept in a set for the convenience of trying to match against all of them.
+    # Group 1 contains the function name, Group 2 contains the arguments, if any.
+    JINJA_FUNCTION_LOWER: Final[re.Pattern[str]] = re.compile(r"\|\s*(lower)")
+    JINJA_FUNCTION_UPPER: Final[re.Pattern[str]] = re.compile(r"\|\s*(upper)")
+    JINJA_FUNCTION_REPLACE: Final[re.Pattern[str]] = re.compile(r"\|\s*(replace)\((.*)\)")
+    JINJA_FUNCTIONS_SET: Final[set[re.Pattern[str]]] = {
+        JINJA_FUNCTION_LOWER,
+        JINJA_FUNCTION_UPPER,
+        JINJA_FUNCTION_REPLACE,
+    }
 
     SELECTOR: Final[re.Pattern[str]] = re.compile(r"\[.*\]")
     # Detects the 6 common variants (3 |'s, 3 >'s). See this guide for more info:
