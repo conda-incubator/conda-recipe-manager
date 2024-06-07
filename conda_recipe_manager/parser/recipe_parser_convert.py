@@ -98,7 +98,7 @@ class RecipeParserConvert(RecipeParser):
 
         Examples:
             `/build/entry_points` -> `/build/python/entry_points`
-            `/build/missing_dso_whitelist` -> `build/dynamic_linking/missing_dso_allowlist`
+            `/build/missing_dso_whitelist` -> `/build/dynamic_linking/missing_dso_allowlist`
         :param base_path: Shared base path from old and new locations
         :param old_ext: Old extension to the base path containing the data to move
         :param new_path: New path to extend to the base path, if the path does not currently exist
@@ -401,6 +401,13 @@ class RecipeParserConvert(RecipeParser):
 
             # `build/entry_points` -> `build/python/entry_points`
             self._patch_move_new_path(build_path, "/entry_points", "/python")
+
+            # New `prefix_detection` section changes
+            # NOTE: There is a new `force_file_type` field that may map to an unknown field that conda supports.
+            self._patch_move_new_path(build_path, "/ignore_prefix_files", "/prefix_detection", "/ignore")
+            self._patch_move_new_path(
+                build_path, "/detect_binary_files_with_prefix", "/prefix_detection", "/ignore_binary_files"
+            )
 
             # New `dynamic_linking` section changes
             # NOTE: `overdepending_behavior` and `overlinking_behavior` are new fields that don't have a direct path
