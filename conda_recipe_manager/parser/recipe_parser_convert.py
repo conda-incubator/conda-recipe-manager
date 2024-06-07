@@ -284,6 +284,12 @@ class RecipeParserConvert(RecipeParser):
                 self._patch_move_base_path(src_path, "/fn", "/file_name")
                 self._patch_move_base_path(src_path, "/folder", "/target_directory")
 
+                # `git` source transformations (`conda` does not appear to support all of the new features)
+                self._patch_move_base_path(src_path, "/git_url", "/git")
+                self._patch_move_base_path(src_path, "/git_tag", "/tag")
+                self._patch_move_base_path(src_path, "/git_rev", "/rev")
+                self._patch_move_base_path(src_path, "/git_depth", "/depth")
+
                 # Canonically sort this section
                 self._sort_subtree_keys(src_path, V1_SOURCE_SECTION_KEY_SORT_ORDER)
 
