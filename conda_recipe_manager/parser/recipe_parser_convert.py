@@ -518,6 +518,11 @@ class RecipeParserConvert(RecipeParser):
         :param base_path: Base path for the build target to upgrade
         :param test_path: Test path for the build target to upgrade
         """
+        pip_check_variants: Final[set[str]] = {
+            "pip check",
+            "python -m pip check",
+            "python3 -m pip check",
+        }
         # Replace `- pip check` in `commands` with the new flag. If not found, set the flag to `False` (as the
         # flag defaults to `True`). DO NOT ADD THIS FLAG IF THE RECIPE IS NOT A "PYTHON RECIPE".
         if "python" not in cast(
@@ -529,10 +534,10 @@ class RecipeParserConvert(RecipeParser):
         commands = cast(list[str], self._v1_recipe.get_value(RecipeParser.append_to_path(test_path, "/commands"), []))
         pip_check = False
         for i, command in enumerate(commands):
-            if command != "pip check":
+            # TODO Future: handle selector cases (pip check will be in the `then` section of a dictionary object)
+            if not isinstance(command, str) or command not in pip_check_variants:
                 continue
             # For now, we will only patch-out the first instance when no selector is attached
-            # TODO Future: handle selector logic/cases with `pip check || <bool>`
             self._patch_and_log({"op": "remove", "path": RecipeParser.append_to_path(test_path, f"/commands/{i}")})
             pip_check = True
             break
