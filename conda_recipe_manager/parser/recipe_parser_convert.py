@@ -231,16 +231,22 @@ class RecipeParserConvert(RecipeParser):
                 self._patch_and_log(patch)
                 self._v1_recipe.remove_selector(selector_path)
 
-    def _correct_common_misspellings(self) -> None:
+    def _correct_common_misspellings(self, base_package_paths: list[str]) -> None:
         """
         Corrects common spelling mistakes in field names.
+        :param base_package_paths: Set of base paths to process that could contain this section.
         """
-        # "If I had a nickel for every time `skip` was misspelled, I would have several nickels. Which isn't a lot, but
-        #  it is weird that it has happened multiple times."
-        #                                                             - Dr. Doofenshmirtz, probably
-        self._patch_move_base_path("/build", "skipt", "skip")
-        self._patch_move_base_path("/build", "skips", "skip")
-        self._patch_move_base_path("/build", "Skip", "skip")
+        for base_path in base_package_paths:
+            build_path = RecipeParser.append_to_path(base_path, "/build")
+            # "If I had a nickel for every time `skip` was misspelled, I would have several nickels. Which isn't a lot,
+            #  but it is weird that it has happened multiple times."
+            #                                                             - Dr. Doofenshmirtz, probably
+            self._patch_move_base_path(build_path, "skipt", "skip")
+            self._patch_move_base_path(build_path, "skips", "skip")
+            self._patch_move_base_path(build_path, "Skip", "skip")
+
+            # `/extras` -> `/extra`
+            self._patch_move_base_path(base_path, "extras", "extra")
 
     def _upgrade_source_section(self, base_package_paths: list[str]) -> None:
         """
@@ -714,7 +720,7 @@ class RecipeParserConvert(RecipeParser):
 
         # There are a number of recipe files that contain the same misspellings. This is an attempt to
         # solve the more common issues.
-        self._correct_common_misspellings()
+        self._correct_common_misspellings(base_package_paths)
 
         # Upgrade common sections found in a recipe
         self._upgrade_source_section(base_package_paths)
