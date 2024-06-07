@@ -98,7 +98,7 @@ class RecipeParserConvert(RecipeParser):
 
         Examples:
             `/build/entry_points` -> `/build/python/entry_points`
-            `/build/missing_dso_whitelist` -> `build/dynamic_linking/missing_dso_allowlist`
+            `/build/missing_dso_whitelist` -> `/build/dynamic_linking/missing_dso_allowlist`
         :param base_path: Shared base path from old and new locations
         :param old_ext: Old extension to the base path containing the data to move
         :param new_path: New path to extend to the base path, if the path does not currently exist
@@ -231,16 +231,22 @@ class RecipeParserConvert(RecipeParser):
                 self._patch_and_log(patch)
                 self._v1_recipe.remove_selector(selector_path)
 
-    def _correct_common_misspellings(self) -> None:
+    def _correct_common_misspellings(self, base_package_paths: list[str]) -> None:
         """
         Corrects common spelling mistakes in field names.
+        :param base_package_paths: Set of base paths to process that could contain this section.
         """
-        # "If I had a nickel for every time `skip` was misspelled, I would have several nickels. Which isn't a lot, but
-        #  it is weird that it has happened multiple times."
-        #                                                             - Dr. Doofenshmirtz, probably
-        self._patch_move_base_path("/build", "skipt", "skip")
-        self._patch_move_base_path("/build", "skips", "skip")
-        self._patch_move_base_path("/build", "Skip", "skip")
+        for base_path in base_package_paths:
+            build_path = RecipeParser.append_to_path(base_path, "/build")
+            # "If I had a nickel for every time `skip` was misspelled, I would have several nickels. Which isn't a lot,
+            #  but it is weird that it has happened multiple times."
+            #                                                             - Dr. Doofenshmirtz, probably
+            self._patch_move_base_path(build_path, "skipt", "skip")
+            self._patch_move_base_path(build_path, "skips", "skip")
+            self._patch_move_base_path(build_path, "Skip", "skip")
+
+            # `/extras` -> `/extra`
+            self._patch_move_base_path(base_path, "extras", "extra")
 
     def _upgrade_source_section(self, base_package_paths: list[str]) -> None:
         """
@@ -396,6 +402,13 @@ class RecipeParserConvert(RecipeParser):
             # `build/entry_points` -> `build/python/entry_points`
             self._patch_move_new_path(build_path, "/entry_points", "/python")
 
+            # New `prefix_detection` section changes
+            # NOTE: There is a new `force_file_type` field that may map to an unknown field that conda supports.
+            self._patch_move_new_path(build_path, "/ignore_prefix_files", "/prefix_detection", "/ignore")
+            self._patch_move_new_path(
+                build_path, "/detect_binary_files_with_prefix", "/prefix_detection", "/ignore_binary_files"
+            )
+
             # New `dynamic_linking` section changes
             # NOTE: `overdepending_behavior` and `overlinking_behavior` are new fields that don't have a direct path
             #       to conversion.
@@ -505,6 +518,11 @@ class RecipeParserConvert(RecipeParser):
         :param base_path: Base path for the build target to upgrade
         :param test_path: Test path for the build target to upgrade
         """
+        pip_check_variants: Final[set[str]] = {
+            "pip check",
+            "python -m pip check",
+            "python3 -m pip check",
+        }
         # Replace `- pip check` in `commands` with the new flag. If not found, set the flag to `False` (as the
         # flag defaults to `True`). DO NOT ADD THIS FLAG IF THE RECIPE IS NOT A "PYTHON RECIPE".
         if "python" not in cast(
@@ -516,10 +534,10 @@ class RecipeParserConvert(RecipeParser):
         commands = cast(list[str], self._v1_recipe.get_value(RecipeParser.append_to_path(test_path, "/commands"), []))
         pip_check = False
         for i, command in enumerate(commands):
-            if command != "pip check":
+            # TODO Future: handle selector cases (pip check will be in the `then` section of a dictionary object)
+            if not isinstance(command, str) or command not in pip_check_variants:
                 continue
             # For now, we will only patch-out the first instance when no selector is attached
-            # TODO Future: handle selector logic/cases with `pip check || <bool>`
             self._patch_and_log({"op": "remove", "path": RecipeParser.append_to_path(test_path, f"/commands/{i}")})
             pip_check = True
             break
@@ -714,7 +732,7 @@ class RecipeParserConvert(RecipeParser):
 
         # There are a number of recipe files that contain the same misspellings. This is an attempt to
         # solve the more common issues.
-        self._correct_common_misspellings()
+        self._correct_common_misspellings(base_package_paths)
 
         # Upgrade common sections found in a recipe
         self._upgrade_source_section(base_package_paths)
