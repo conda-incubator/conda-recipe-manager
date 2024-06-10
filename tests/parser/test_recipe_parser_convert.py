@@ -142,6 +142,12 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
             [],
             [],
         ),
+        # Ensures git source fields are transformed properly
+        (
+            "git-src.yaml",
+            [],
+            [],
+        ),
         # TODO complete: The `rust.yaml` test contains many edge cases and selectors that aren't directly supported in
         # the V1 recipe format
         # (

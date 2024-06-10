@@ -284,6 +284,12 @@ class RecipeParserConvert(RecipeParser):
                 self._patch_move_base_path(src_path, "/fn", "/file_name")
                 self._patch_move_base_path(src_path, "/folder", "/target_directory")
 
+                # `git` source transformations (`conda` does not appear to support all of the new features)
+                self._patch_move_base_path(src_path, "/git_url", "/git")
+                self._patch_move_base_path(src_path, "/git_tag", "/tag")
+                self._patch_move_base_path(src_path, "/git_rev", "/rev")
+                self._patch_move_base_path(src_path, "/git_depth", "/depth")
+
                 # Canonically sort this section
                 self._sort_subtree_keys(src_path, V1_SOURCE_SECTION_KEY_SORT_ORDER)
 
@@ -697,7 +703,7 @@ class RecipeParserConvert(RecipeParser):
 
         return content
 
-    def render_to_v1_recipe_format(self) -> tuple[str, MessageTable, RecipeParser]:
+    def render_to_v1_recipe_format(self) -> tuple[str, MessageTable, str]:
         """
         Takes the current recipe representation and renders it to the V1 format WITHOUT modifying the current recipe
         state.
@@ -709,7 +715,7 @@ class RecipeParserConvert(RecipeParser):
         :returns: Returns a tuple containing:
             - The converted recipe, as a string
             - A `MessageTbl` instance that contains error logging
-            - The `RecipeParser` instance containing the converted recipe file. USE FOR DEBUGGING PURPOSES ONLY!
+            - Converted recipe file debug string. USE FOR DEBUGGING PURPOSES ONLY!
         """
         # Approach: In the event that we want to expand support later, this function should be implemented in terms
         # of a `RecipeParser` tree. This will make it easier to build an upgrade-path, if we so choose to pursue one.
@@ -765,4 +771,4 @@ class RecipeParserConvert(RecipeParser):
         # "sensible" to a human reader.
         self._sort_subtree_keys("/", TOP_LEVEL_KEY_SORT_ORDER)
 
-        return self._v1_recipe.render(), self._msg_tbl, self._v1_recipe
+        return self._v1_recipe.render(), self._msg_tbl, str(self._v1_recipe)
