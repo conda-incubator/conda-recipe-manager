@@ -21,6 +21,8 @@ from tests.file_loading import TEST_FILES_PATH, load_file, load_recipe_convert
         ("simple-recipe_environ.yaml", "pre_processor/pp_simple-recipe_environ.yaml"),
         # Dot-function for pipe equivalent replacement
         ("dot_function_replacement.yaml", "pre_processor/pp_dot_function_replacement.yaml"),
+        # Upgrading multiline quoted strings
+        ("quoted_multiline_str.yaml", "pre_processor/pp_quoted_multiline_str.yaml"),
         # Unchanged file
         ("simple-recipe.yaml", "simple-recipe.yaml"),
     ],

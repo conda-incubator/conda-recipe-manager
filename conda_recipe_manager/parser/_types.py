@@ -136,7 +136,11 @@ class Regex:
         r"(\{\{\s*[a-zA-Z0-9_]*.*)\.([a-zA-Z0-9_]*\(.*\)\s*\}\})"
     )
     # Strips empty parenthesis artifacts on functions like `| lower`
-    PRE_PROCESS_JINJA_DOT_FUNCTION_STRIP_EMPTY_PARENTHESIS = re.compile(r"(\|\s*(lower|upper))(\(\))")
+    PRE_PROCESS_JINJA_DOT_FUNCTION_STRIP_EMPTY_PARENTHESIS: Final[re.Pattern[str]] = re.compile(
+        r"(\|\s*(lower|upper))(\(\))"
+    )
+    # Attempts to normalize multiline strings containing quoted escaped newlines.
+    PRE_PROCESS_QUOTED_MULTILINE_STRINGS: Final[re.Pattern[str]] = re.compile(r"(\s*)(.*):\s*['\"](.*)\\n(.*)['\"]")
 
     ## Jinja regular expressions ##
     JINJA_SUB: Final[re.Pattern[str]] = re.compile(r"{{\s*" + _JINJA_VAR_FUNCTION_PATTERN + r"\s*}}")

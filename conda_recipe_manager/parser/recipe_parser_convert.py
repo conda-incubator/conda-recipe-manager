@@ -670,6 +670,9 @@ class RecipeParserConvert(RecipeParser):
         content = Regex.PRE_PROCESS_JINJA_DOT_FUNCTION_IN_SUBSTITUTION.sub(r"\1 | \2", content)
         # Strip any problematic parenthesis that may be left over from the previous operations.
         content = Regex.PRE_PROCESS_JINJA_DOT_FUNCTION_STRIP_EMPTY_PARENTHESIS.sub(r"\1", content)
+        # Attempt to normalize quoted multiline strings into the common `|` syntax.
+        # TODO: Handle multiple escaped newlines (very uncommon)
+        content = Regex.PRE_PROCESS_QUOTED_MULTILINE_STRINGS.sub(r"\1\2: |\1  \3\1  \4", content)
 
         # Convert the old JINJA `environ[""]` variable usage to the new `get.env("")` syntax.
         # NOTE:
