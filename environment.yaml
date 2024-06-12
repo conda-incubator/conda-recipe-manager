@@ -16,7 +16,7 @@ dependencies:
   - click >=8.1.7
   - conda
   - jinja2
-  - pygit2
+  - conda-forge::pygit2
   - PyGithub
   - pyyaml
   - types-pyyaml
