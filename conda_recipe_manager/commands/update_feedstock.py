@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import sys
 import time
-from enum import IntEnum
 from pathlib import Path
 from typing import Final, Optional, cast
 
@@ -15,16 +14,7 @@ import click
 from pygit2 import clone_repository  # type: ignore[import-untyped]
 
 from conda_recipe_manager.commands.utils.print import print_err
-from conda_recipe_manager.commands.utils.types import V0_FORMAT_RECIPE_FILE_NAME
-
-
-class ExitCode(IntEnum):
-    """
-    Error codes to return upon script completion
-    """
-
-    SUCCESS = 0
-    NO_FILES_FOUND = 1
+from conda_recipe_manager.commands.utils.types import V0_FORMAT_RECIPE_FILE_NAME, ExitCode
 
 
 def _validate_remote(_0: click.Context, _1: str, value: Optional[str]) -> Optional[str]:
