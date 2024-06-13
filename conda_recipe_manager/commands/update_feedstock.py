@@ -7,34 +7,52 @@ from __future__ import annotations
 
 import sys
 import time
+from enum import IntEnum
 from pathlib import Path
 from typing import Final, Optional, cast
 
 import click
 from pygit2 import clone_repository  # type: ignore[import-untyped]
 
-SUCCESS: Final[int] = 0
+from conda_recipe_manager.commands.utils.print import print_err
+from conda_recipe_manager.commands.utils.types import V0_FORMAT_RECIPE_FILE_NAME
 
 
-def validate_remote(_0: click.Context, _1: str, value: str) -> str:
+class ExitCode(IntEnum):
+    """
+    Error codes to return upon script completion
+    """
+
+    SUCCESS = 0
+    NO_FILES_FOUND = 1
+
+
+def _validate_remote(_0: click.Context, _1: str, value: Optional[str]) -> Optional[str]:
     """
     Validates the REMOTE option.
     :param value: Remote value to validate
+    :raises: BadParameter if the value could not be validated
+    :returns: Validated value
     """
+    if value is None:
+        return None
+
     if (
         not value.endswith(".git")
-        or not value.startswith("git@github.com:")
-        or not value.startswith("https://github.com/")
+        # TODO: Add support for SSH protocol
+        and not value.startswith("https://github.com/")
     ):
         raise click.BadParameter("Remote location provided is not a recognized GitHub repo.")
     return value
 
 
-def validate_path(ctx: click.Context, _: str, value: Path) -> Path:
+def _validate_path(ctx: click.Context, _: str, value: Path) -> Path:
     """
     Validates the PATH argument.
     :param ctx: Click context
     :param value: Path value to validate
+    :raises: BadParameter if the value could not be validated
+    :returns: Validated value
     """
     # If we are pulling from a remote location, we are allowed to create a path
     if "remote" in cast(dict[str, str], ctx.params):
@@ -51,6 +69,18 @@ def validate_path(ctx: click.Context, _: str, value: Path) -> Path:
     return value
 
 
+def _get_v0_files(path: Path) -> list[Path]:
+    """
+    Returns a list of V0 files found in a path.
+    :param path: Path of the feedstock repo
+    :returns: A list of all V0 recipe files found in the feedstock repo
+    """
+    files: list[Path] = []
+    for file_path in path.rglob(V0_FORMAT_RECIPE_FILE_NAME):
+        files.append(file_path)
+    return files
+
+
 @click.command(
     short_help="Streamlines adding a V1 recipe file to an existing feedstock repository.",
 )
@@ -58,13 +88,13 @@ def validate_path(ctx: click.Context, _: str, value: Path) -> Path:
     "--remote",
     "-r",
     type=str,
-    callback=validate_remote,
-    help="URI to a remote feedstock hosted on GitHub. HTTPS and SSH are supported.",
+    callback=_validate_remote,
+    help="URI to a remote feedstock hosted on GitHub. HTTPS is currently supported.",
 )
 @click.argument(
     "path",
     type=click.Path(path_type=Path),  # type: ignore[misc]
-    callback=validate_path,
+    callback=_validate_path,
 )
 @click.pass_context
 def update_feedstock(_: click.Context, path: Path, remote: Optional[str]) -> None:
@@ -80,7 +110,14 @@ def update_feedstock(_: click.Context, path: Path, remote: Optional[str]) -> Non
 
     # If `--remote` is specified, clone to `path`
     if remote is not None:
+        print(f"Cloning {remote}...")
         clone_repository(remote, path)
+
+    # Validate repo has at least 1 meta.yaml
+    v0_files: Final[list[Path]] = _get_v0_files(path)
+    if not v0_files:
+        print_err(f"No `{V0_FORMAT_RECIPE_FILE_NAME}` recipe files found in `{path}`")
+        sys.exit(ExitCode.NO_FILES_FOUND)
 
     # TODO
     # Determine the name of the feedstock.
@@ -89,4 +126,4 @@ def update_feedstock(_: click.Context, path: Path, remote: Optional[str]) -> Non
     exec_time: Final[float] = time.time() - start_time
     print(f"Total time: {exec_time}")
 
-    sys.exit(SUCCESS)
+    sys.exit(ExitCode.SUCCESS)
