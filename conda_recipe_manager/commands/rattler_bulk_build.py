@@ -19,9 +19,8 @@ from typing import Final, Optional, cast
 import click
 
 from conda_recipe_manager.commands.utils.print import print_err
+from conda_recipe_manager.commands.utils.types import V1_FORMAT_RECIPE_FILE_NAME
 
-# Required file name for the recipe, specified in CEP-13
-V1_FORMAT_RECIPE_FILE_NAME: Final[str] = "recipe.yaml"
 # When performing a bulk operation, overall "success" is indicated by the % of recipe files that were built
 # "successfully"
 DEFAULT_BULK_SUCCESS_PASS_THRESHOLD: Final[float] = 0.80
