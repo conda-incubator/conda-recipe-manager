@@ -11,44 +11,20 @@ import os
 import sys
 import time
 from dataclasses import dataclass
-from enum import IntEnum
 from pathlib import Path
 from typing import Final, Optional
 
 import click
 
 from conda_recipe_manager.commands.utils.print import print_err, print_messages, print_out
+from conda_recipe_manager.commands.utils.types import V0_FORMAT_RECIPE_FILE_NAME, V1_FORMAT_RECIPE_FILE_NAME, ExitCode
 from conda_recipe_manager.parser.enums import SchemaVersion
 from conda_recipe_manager.parser.recipe_parser_convert import RecipeParserConvert
 from conda_recipe_manager.parser.types import MessageCategory, MessageTable
 
-# Pre-CEP-13 name of the recipe file
-OLD_FORMAT_RECIPE_FILE_NAME: Final[str] = "meta.yaml"
-# Required file name for the recipe, specified in CEP-13
-V1_FORMAT_RECIPE_FILE_NAME: Final[str] = "recipe.yaml"
 # When performing a bulk operation, overall "success" is indicated by the % of recipe files that were converted
 # "successfully"
 DEFAULT_BULK_SUCCESS_PASS_THRESHOLD: Final[float] = 0.80
-
-
-class ExitCode(IntEnum):
-    """
-    Error codes to return upon script completion
-    """
-
-    SUCCESS = 0
-    CLICK_ERROR = 1  # Controlled by the `click` library
-    CLICK_USAGE = 2  # Controlled by the `click` library
-    # In bulk operation mode, this indicates that the % success threshold was not met
-    MISSED_SUCCESS_THRESHOLD = 42
-    # Errors are roughly ordered by increasing severity
-    RENDER_WARNINGS = 100
-    RENDER_ERRORS = 101
-    PARSE_EXCEPTION = 102
-    RENDER_EXCEPTION = 103
-    READ_EXCEPTION = 104
-    PRE_PROCESS_EXCEPTION = 105
-    ILLEGAL_OPERATION = 106
 
 
 @dataclass
@@ -218,7 +194,7 @@ def _get_files_list(path: Path) -> list[Path]:
     files: list[Path] = []
     # Establish which mode of operation we are in, based on the path passed-in
     if path.is_dir():
-        for file_path in path.rglob(OLD_FORMAT_RECIPE_FILE_NAME):
+        for file_path in path.rglob(V0_FORMAT_RECIPE_FILE_NAME):
             files.append(file_path)
         if not files:
             print_err("Could not find any recipe files in this directory.")
