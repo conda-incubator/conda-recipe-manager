@@ -13,8 +13,9 @@ from typing import Final, Optional, cast
 import click
 from pygit2 import clone_repository  # type: ignore[import-untyped]
 
+from conda_recipe_manager.commands.convert import convert_file
 from conda_recipe_manager.commands.utils.print import print_err
-from conda_recipe_manager.commands.utils.types import V0_FORMAT_RECIPE_FILE_NAME, ExitCode
+from conda_recipe_manager.commands.utils.types import V0_FORMAT_RECIPE_FILE_NAME, V1_FORMAT_RECIPE_FILE_NAME, ExitCode
 
 
 def _validate_remote(_0: click.Context, _1: str, value: Optional[str]) -> Optional[str]:
@@ -44,16 +45,18 @@ def _validate_path(ctx: click.Context, _: str, value: Path) -> Path:
     :raises: BadParameter if the value could not be validated
     :returns: Validated value
     """
-    # If we are pulling from a remote location, we are allowed to create a path
+    # If we are pulling from a remote location, we are allowed to create a new, non-existent path
     if "remote" in cast(dict[str, str], ctx.params):
         try:
-            value.mkdir(parents=True, exist_ok=True)
+            value.mkdir(parents=True, exist_ok=False)
+        except FileExistsError as e:
+            raise click.BadParameter("Path cannot contain an existing git repo.") from e
         except Exception as e:
             raise click.BadParameter("Path could not be created.") from e
         return value
 
     # If we are using an existing repo, the repo must exist.
-    if (value / ".git").exists():
+    if not (value / ".git").exists():
         raise click.BadParameter("Could not find git repo in path provided.")
 
     return value
@@ -109,11 +112,18 @@ def update_feedstock(_: click.Context, path: Path, remote: Optional[str]) -> Non
         print_err(f"No `{V0_FORMAT_RECIPE_FILE_NAME}` recipe files found in `{path}`")
         sys.exit(ExitCode.NO_FILES_FOUND)
 
-    # TODO
-    # Determine the name of the feedstock.
-    # feedstock_name: Final[str] = ""
+    for v0_file in v0_files:
+        v1_file = v0_file.parent / V1_FORMAT_RECIPE_FILE_NAME
 
-    exec_time: Final[float] = time.time() - start_time
+        print(f"Converting {v0_file}...")
+        conversion_result = convert_file(v0_file, v1_file, False, False)
+        if not conversion_result.code in {ExitCode.SUCCESS, ExitCode.RENDER_WARNINGS}:
+            sys.exit(conversion_result.code)
+
+        print(f"Testing {v1_file}...")
+        # TODO add dry-run test
+
+    exec_time: Final[float] = round(time.time() - start_time, 2)
     print(f"Total time: {exec_time}")
 
     sys.exit(ExitCode.SUCCESS)
