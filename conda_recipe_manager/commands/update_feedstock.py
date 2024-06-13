@@ -14,6 +14,7 @@ import click
 from pygit2 import clone_repository  # type: ignore[import-untyped]
 
 from conda_recipe_manager.commands.convert import convert_file
+from conda_recipe_manager.commands.rattler_bulk_build import build_recipe
 from conda_recipe_manager.commands.utils.print import print_err
 from conda_recipe_manager.commands.utils.types import V0_FORMAT_RECIPE_FILE_NAME, V1_FORMAT_RECIPE_FILE_NAME, ExitCode
 
@@ -118,10 +119,20 @@ def update_feedstock(_: click.Context, path: Path, remote: Optional[str]) -> Non
         print(f"Converting {v0_file}...")
         conversion_result = convert_file(v0_file, v1_file, False, False)
         if not conversion_result.code in {ExitCode.SUCCESS, ExitCode.RENDER_WARNINGS}:
+            print_err(f"Failed to convert `{v0_file}`")
             sys.exit(conversion_result.code)
 
-        print(f"Testing {v1_file}...")
-        # TODO add dry-run test
+        print(f"Validating {v1_file}...")
+        dry_run_result = build_recipe(v1_file, path, ["--render-only"])[1]
+        if dry_run_result.code != ExitCode.SUCCESS:
+            print_err(f"Tests failed on {v1_file}")
+            for err in dry_run_result.errors:
+                print_err(f"  {err}")
+            sys.exit(dry_run_result.code)
+
+    # If we have gotten to this point, the conversion and testing process has succeeded on all recipe files in the
+    # provided feedstock. In theory, we should now be good to commit these changes and make a PR.
+    # TODO
 
     exec_time: Final[float] = round(time.time() - start_time, 2)
     print(f"Total time: {exec_time}")
