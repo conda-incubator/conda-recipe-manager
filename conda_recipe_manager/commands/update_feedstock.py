@@ -11,12 +11,15 @@ from pathlib import Path
 from typing import Final, Optional, cast
 
 import click
-from pygit2 import clone_repository  # type: ignore[import-untyped]
+from pygit2 import Repository, Signature, clone_repository  # type: ignore[import-untyped]
 
 from conda_recipe_manager.commands.convert import convert_file
 from conda_recipe_manager.commands.rattler_bulk_build import build_recipe
 from conda_recipe_manager.commands.utils.print import print_err
 from conda_recipe_manager.commands.utils.types import V0_FORMAT_RECIPE_FILE_NAME, V1_FORMAT_RECIPE_FILE_NAME, ExitCode
+
+# Branch created by this script
+UPDATE_BRANCH_NAME: Final[str] = "crm_update_feedstock_v0_to_v1_recipe"
 
 
 def _validate_remote(_0: click.Context, _1: str, value: Optional[str]) -> Optional[str]:
@@ -100,6 +103,7 @@ def update_feedstock(_: click.Context, path: Path, remote: Optional[str]) -> Non
     PATH is a path to a local feedstock repository. If the `--remote` option is used, this is the directory that the
     remote repository will be cloned into.
     """
+    # TODO handle forks for conda-forge
     start_time: Final[float] = time.time()
 
     # If `--remote` is specified, clone to `path`
@@ -109,12 +113,14 @@ def update_feedstock(_: click.Context, path: Path, remote: Optional[str]) -> Non
 
     # Validate repo has at least 1 meta.yaml
     v0_files: Final[list[Path]] = _get_v0_files(path)
+    v1_files: list[Path] = []
     if not v0_files:
         print_err(f"No `{V0_FORMAT_RECIPE_FILE_NAME}` recipe files found in `{path}`")
         sys.exit(ExitCode.NO_FILES_FOUND)
 
     for v0_file in v0_files:
         v1_file = v0_file.parent / V1_FORMAT_RECIPE_FILE_NAME
+        v1_files.append(v1_file)
 
         print(f"Converting {v0_file}...")
         conversion_result = convert_file(v0_file, v1_file, False, False)
@@ -132,7 +138,29 @@ def update_feedstock(_: click.Context, path: Path, remote: Optional[str]) -> Non
 
     # If we have gotten to this point, the conversion and testing process has succeeded on all recipe files in the
     # provided feedstock. In theory, we should now be good to commit these changes and make a PR.
-    # TODO
+    print(f"Creating and committing to `{UPDATE_BRANCH_NAME}` branch...")
+    repo = Repository(path)
+    # If the branch exists from a previous run, delete it and start over.
+    if UPDATE_BRANCH_NAME in repo.branches:
+        repo.branches.delete(UPDATE_BRANCH_NAME)
+    repo.branches.local.create(UPDATE_BRANCH_NAME, repo.revparse_single("HEAD"))
+
+    for v1_file in v1_files:
+        # pygit2 will add files relative to the repo's directory.
+        repo.index.add(v1_file.relative_to(path))
+    repo.index.write()
+    repo_tree = repo.index.write_tree()
+    bot_sig: Final[Signature] = Signature("crm update-feedstock", "conda-recipe-manager.conda-incubator.github.com")
+    repo.create_commit(
+        UPDATE_BRANCH_NAME,
+        bot_sig,
+        bot_sig,
+        "Automated commit from `crm update-feedstock\n\nAdds V1 recipe format to project.",
+        repo_tree,
+        [repo.head.target],
+    )
+
+    # TODO push and file PR on GitHub
 
     exec_time: Final[float] = round(time.time() - start_time, 2)
     print(f"Total time: {exec_time}")
