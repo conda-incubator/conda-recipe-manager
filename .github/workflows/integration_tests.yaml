@@ -9,6 +9,13 @@ name: Integration Tests
 jobs:
   ## Integration tests ##
   integration-rattler:
+    # NOTES:
+    #   - `pipefail` must be enabled in order get the exit code from the conda-recipe-manager commands when
+    #     the output is piped into `tee`
+    #   - We install compilers like `go` and setup empty environment variables like `PREFIX` to suppress rattler-build
+    #     dry-run failures that are specific to the expected build environment. Such a failure does not reflect our
+    #     ability to convert recipe files successfully. We should remove these environment changes if/when rattler-build
+    #     gives us another way to validate recipe files.
     runs-on: ubuntu-latest
     timeout-minutes: 45
     name: Test on ${{ matrix.test-directory }}
@@ -48,18 +55,19 @@ jobs:
           repository: conda-incubator/conda-recipe-manager-test-data
           path: test_data
           sparse-checkout: recipes_v0/${{ matrix.test-directory }}
+      - uses: actions/setup-go@v5
       - uses: ./.github/actions/setup-env
         with:
           python-version: "3.11"
       - name: Convert recipes and dry-run rattler-build
-        # NOTE: `pipefail` must be enabled in order get the exit code from the conda-recipe-manager commands when
-        #       the output is piped into `tee`
         run: |
           source $CONDA/bin/activate
           conda activate conda-recipe-manager
           conda install -y -c conda-forge rattler-build
           mkdir -p logs
           set -o pipefail
+          export PREFIX=""
+          export RECIPE_DIR=""
           conda-recipe-manager \
             convert -t -m ${{ matrix.convert-success }} -o recipe.yaml test_data/recipes_v0/${{ matrix.test-directory }} \
             | tee logs/convert_${{ matrix.test-directory }}.log
