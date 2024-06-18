@@ -143,7 +143,7 @@ def update_feedstock(_: click.Context, path: Path, remote: Optional[str]) -> Non
     # If the branch exists from a previous run, delete it and start over.
     if UPDATE_BRANCH_NAME in repo.branches:
         repo.branches.delete(UPDATE_BRANCH_NAME)
-    repo.branches.local.create(UPDATE_BRANCH_NAME, repo.revparse_single("HEAD"))
+    repo_branch = repo.branches.local.create(UPDATE_BRANCH_NAME, repo.revparse_single("HEAD"))
 
     for v1_file in v1_files:
         # pygit2 will add files relative to the repo's directory.
@@ -151,8 +151,9 @@ def update_feedstock(_: click.Context, path: Path, remote: Optional[str]) -> Non
     repo.index.write()
     repo_tree = repo.index.write_tree()
     bot_sig: Final[Signature] = Signature("crm update-feedstock", "conda-recipe-manager.conda-incubator.github.com")
+    repo.checkout(repo.lookup_reference(repo_branch.name))
     repo.create_commit(
-        UPDATE_BRANCH_NAME,
+        repo_branch.name,
         bot_sig,
         bot_sig,
         "Automated commit from `crm update-feedstock\n\nAdds V1 recipe format to project.",
