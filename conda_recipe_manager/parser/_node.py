@@ -2,6 +2,7 @@
 File:           _node.py
 Description:    Provides a private node class only used by the parser. This class is fundamental to tree formation.
 """
+
 from __future__ import annotations
 
 from typing import Optional

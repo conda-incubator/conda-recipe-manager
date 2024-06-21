@@ -4,10 +4,10 @@ on:
       - main
   pull_request:
 
-name: Test
+name: Commit Checks
 
 jobs:
-  # NOTE: Tests run via `pre-commit`
+  # NOTE: Tests also run via `pre-commit`
   pre-commit:
       runs-on: ubuntu-latest
       steps:
@@ -39,23 +39,11 @@ jobs:
       runs-on: ubuntu-latest
       steps:
         - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-        - name: Cache conda env
-          id: cache-conda
-          uses: actions/cache@13aacd865c20de90d75de3b17ebe84f7a17d57d2 # v4.0.0
-          env:
-            cache-name: conda-env-cache
-          with:
-            path: '/usr/share/miniconda/envs'
-            key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/environment.yml') }}
-            restore-keys: |
-              ${{ runner.os }}-build-${{ env.cache-name }}-
-              ${{ runner.os }}-build-
-              ${{ runner.os }}-
         - name: Build package in conda build
           run: |
             source $CONDA/bin/activate
             conda install -y conda-build
-            conda build .
+            conda build recipe/meta.yaml
   # Eat our own dog food and build this project with rattler-build by converting our existing recipe.
   build-recipe-rattler:
       runs-on: ubuntu-latest
@@ -64,22 +52,11 @@ jobs:
         - uses: ./.github/actions/setup-env
           with:
             python-version: "3.11"
-        - name: Cache conda env
-          id: cache-conda
-          uses: actions/cache@13aacd865c20de90d75de3b17ebe84f7a17d57d2 # v4.0.0
-          env:
-            cache-name: conda-env-cache
-          with:
-            path: '/usr/share/miniconda/envs'
-            key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/environment.yml') }}
-            restore-keys: |
-              ${{ runner.os }}-build-${{ env.cache-name }}-
-              ${{ runner.os }}-build-
-              ${{ runner.os }}-
         - name: Build package in rattler-build (experimental)
           run: |
             source $CONDA/bin/activate
             conda activate conda-recipe-manager
             conda install -y -c conda-forge rattler-build
-            convert -o recipe/recipe.yaml recipe/meta.yaml
-            rattler-build build -r recipe/
+            conda-recipe-manager convert -o recipe/recipe.yaml recipe/meta.yaml
+            mkdir -p ../temp
+            rattler-build build -r recipe/ --output-dir=../temp

@@ -14,7 +14,8 @@ source:
 
 build:
   number: 0
-  skip: ${{ true if py<37 }}
+  skip:
+    - py<37
   script: ${{ PYTHON }} -m pip install . --no-deps --no-build-isolation -vv
   python:
     entry_points:
@@ -37,7 +38,7 @@ requirements:
     - requests
     - tqdm >=4.42.1
     - typing-extensions >=3.7.4.3
-  run_constrained:
+  run_constraints:
     - fastai >=2.4
     - fastcore >=1.3.27
     - InquirerPy ==0.3.4

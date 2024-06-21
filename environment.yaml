@@ -11,7 +11,7 @@ dependencies:
   - pytest
   - pytest-cov
   - pytest-xdist
-  - pylint
+  - conda-forge::pylint ==3.1.0  # Match version with .pre-commit-config.yaml
   - pip
   - click >=8.1.7
   - conda
@@ -21,4 +21,6 @@ dependencies:
   - conda-build
   - jsonschema
   - types-jsonschema
+  - requests
+  - types-requests
   - pre-commit

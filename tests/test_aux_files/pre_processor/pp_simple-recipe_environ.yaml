@@ -1,26 +1,21 @@
-# Comment above a top-level structure
-schema_version: 1
-
-context:
-  zz_non_alpha_first: 42
-  name: types-toml
-  version: 0.10.8.6
+{% set zz_non_alpha_first = 42 %}
+{% set name = "types-toml" %}
+{% set version = "0.10.8.6" %}
 
 package:
-  name: ${{ name|lower }}
+  name: {{ name|lower }}  # [unix]
 
 build:
   number: 0
-  skip: ${{ true if py<37 }}
+  skip: true  # [py<37]
   is_true: true
 
+# Comment above a top-level structure
 requirements:
   empty_field1:
   host:
-    - if: unix
-      then: setuptools
-    - if: unix
-      then: fakereq
+    - setuptools  # [unix]
+    - fakereq  # [unix] selector with comment
   empty_field2:  # [unix and win] # selector with comment with comment symbol
   run:
     - python  # not a selector
@@ -41,7 +36,7 @@ multi_level:
     - bar
   list_2:
     - cat
-    - bat
+    - {{ env.get('baz') }}
     - mat
   list_3:
     - ls
@@ -49,10 +44,10 @@ multi_level:
     - cowsay
 
 test_var_usage:
-  foo: ${{ version }}
+  foo: {{ version }}
   bar:
     - baz
-    - ${{ zz_non_alpha_first }}
+    - {{ env.get("foobar") }}
     - blah
-    - This ${{ name }} is silly
+    - This {{ name }} is silly
     - last

@@ -1,10 +1,10 @@
 """
 File:           test_recipe_parser.py
-Description:    Unit tests for the recipe parser class and tools
+Description:    Unit tests for the RecipeParser class
 """
+
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Final
 
 import pytest
@@ -12,16 +12,15 @@ import pytest
 from conda_recipe_manager.parser.enums import SelectorConflictMode
 from conda_recipe_manager.parser.exceptions import JsonPatchValidationException
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
-from conda_recipe_manager.parser.types import MessageCategory
 from conda_recipe_manager.types import JsonType
-
-# Path to supplementary files used in test cases
-TEST_FILES_PATH: Final[str] = "tests/test_aux_files"
+from tests.file_loading import TEST_FILES_PATH, load_file, load_recipe
 
 # Long multi-line description string found in the `simple-recipe.yaml` test file
-SIMPLE_DESCRIPTION: Final[
-    str
-] = "This is a PEP '561 type stub package for the toml package.\nIt can be used by type-checking tools like mypy, pyright,\npytype, PyCharm, etc. to check code that uses toml."  # pylint: disable=line-too-long
+SIMPLE_DESCRIPTION: Final[str] = (
+    "This is a PEP '561 type stub package for the toml package.\n"
+    "It can be used by type-checking tools like mypy, pyright,\n"
+    "pytype, PyCharm, etc. to check code that uses toml."
+)
 
 # Multiline string used to validate interpretation of the various multiline variations YAML allows
 QUICK_FOX_PIPE: Final[str] = "The quick brown\n{{fox}}\n\njumped over the lazy dog\n"
@@ -37,26 +36,6 @@ QUICK_FOX_SUB_PIPE_MINUS: Final[str] = "The quick brown\ntiger\n\njumped over th
 QUICK_FOX_SUB_CARROT: Final[str] = "The quick brown tiger\njumped over the lazy dog\n"
 QUICK_FOX_SUB_CARROT_PLUS: Final[str] = "The quick brown tiger\njumped over the lazy dog\n"
 QUICK_FOX_SUB_CARROT_MINUS: Final[str] = "The quick brown tiger\njumped over the lazy dog"
-
-
-def load_file(file: Path | str) -> str:
-    """
-    Loads a file into a single string
-    :param file: Filename of the file to read
-    :returns: Text from the file
-    """
-    with open(Path(file), "r", encoding="utf-8") as f:
-        return f.read()
-
-
-def load_recipe(file_name: str) -> RecipeParser:
-    """
-    Convenience function that simplifies initializing a recipe parser.
-    :param file_name: File name of the test recipe to load
-    :returns: RecipeParser instance, based on the file
-    """
-    recipe = load_file(f"{TEST_FILES_PATH}/{file_name}")
-    return RecipeParser(recipe)
 
 
 ## Construction and rendering sanity checks ##
@@ -123,6 +102,11 @@ def test_loading_obj_in_list() -> None:
         "multi-output.yaml",  # Contains a multi-output recipe
         "huggingface_hub.yaml",  # Contains a blank lines in a multiline string
         "simple-recipe_multiline_strings.yaml",  # Contains multiple multiline strings, using various operators
+        "curl.yaml",  # Complex, multi-output recipe
+        "gsm-amzn2-aarch64.yaml",  # Regression test: Contains `- '*'` string that failed to parse
+        "pytest-pep8.yaml",
+        "google-cloud-cpp.yaml",
+        "dynamic-linking.yaml",
     ],
 )
 def test_round_trip(file: str) -> None:
@@ -315,61 +299,6 @@ def test_render_to_object_multi_output() -> None:
             },
         ]
     }
-
-
-@pytest.mark.parametrize(
-    "file_base,errors,warnings",
-    [
-        (
-            "simple-recipe.yaml",
-            [],
-            [
-                "A non-list item had a selector at: /requirements/empty_field2",
-                "Required field missing: /about/license_file",
-                "Required field missing: /about/license_url",
-            ],
-        ),
-        (
-            "multi-output.yaml",
-            [],
-            [
-                "Required field missing: /about/summary",
-                "Required field missing: /about/description",
-                "Required field missing: /about/license",
-                "Required field missing: /about/license_file",
-                "Required field missing: /about/license_url",
-            ],
-        ),
-        (
-            "huggingface_hub.yaml",
-            [],
-            [
-                "Required field missing: /about/license_url",
-            ],
-        ),
-        # TODO Complete: The `curl.yaml` test is far from perfect. It is very much a work in progress.
-        # (
-        #    "curl.yaml",
-        #    [],
-        #    [
-        #        "A non-list item had a selector at: /outputs/0/build/ignore_run_exports",
-        #    ],
-        # ),
-    ],
-)
-def test_render_to_new_recipe_format(file_base: str, errors: list[str], warnings: list[str]) -> None:
-    """
-    Validates rendering a recipe in the new format.
-    :param file_base: Base file name for both the input and the expected out
-    """
-    parser = load_recipe(file_base)
-    result, tbl = parser.render_to_new_recipe_format()
-    assert result == load_file(f"{TEST_FILES_PATH}/new_format_{file_base}")
-    assert tbl.get_messages(MessageCategory.ERROR) == errors
-    assert tbl.get_messages(MessageCategory.WARNING) == warnings
-    # Ensure that the original file was untouched
-    assert not parser.is_modified()
-    assert parser.diff() == ""
 
 
 ## Values ##
@@ -616,11 +545,11 @@ def test_find_value() -> None:
     assert not parser.find_value("")
     # Values that are not supported for searching
     with pytest.raises(ValueError):
-        parser.find_value(["foo", "bar"])
+        parser.find_value(["foo", "bar"])  # type: ignore[arg-type]
     with pytest.raises(ValueError):
-        parser.find_value(("foo", "bar"))
+        parser.find_value(("foo", "bar"))  # type: ignore[arg-type]
     with pytest.raises(ValueError):
-        parser.find_value({"foo": "bar"})
+        parser.find_value({"foo": "bar"})  # type: ignore[arg-type]
     # Find does not modify the parser
     assert not parser.is_modified()
 
@@ -666,7 +595,7 @@ def test_get_package_paths(file: str, expected: list[str]) -> None:
         ("/foo/bar", "/baz", "/foo/bar/baz"),
     ],
 )
-def test_append_to_path(base: str, ext: str, expected) -> None:
+def test_append_to_path(base: str, ext: str, expected: str) -> None:
     """
     :param base: Base string path
     :param ext: Path to extend the base path with
@@ -889,7 +818,7 @@ def test_contains_selector_at_path(file: str, path: str, expected: bool) -> None
         ("simple-recipe.yaml", "/requirements/empty_field2", "[unix and win]"),
     ],
 )
-def test_get_selector_at_path_exists(file: str, path: str, expected: bool) -> None:
+def test_get_selector_at_path_exists(file: str, path: str, expected: str) -> None:
     """
     Tests cases where a selector exists on a path
     :param file: File to run against
@@ -1074,7 +1003,7 @@ def test_add_comment(file: str, ops: list[tuple[str, str]], expected: str) -> No
         ("simple-recipe.yaml", "/build/number", "    ", ValueError),
     ],
 )
-def test_add_comment_raises(file: str, path: str, comment: str, exception: Exception) -> None:
+def test_add_comment_raises(file: str, path: str, comment: str, exception: BaseException) -> None:
     """
     Tests scenarios where `add_comment()` should raise an exception
     :param file: File to test against
@@ -1083,7 +1012,7 @@ def test_add_comment_raises(file: str, path: str, comment: str, exception: Excep
     :param exception: Exception expected to be raised
     """
     parser = load_recipe(file)
-    with pytest.raises(exception):
+    with pytest.raises(exception):  # type: ignore
         parser.add_comment(path, comment)
 
 
@@ -1622,6 +1551,18 @@ def test_patch_add() -> None:
             "value": {
                 "George": ["How'd you like your own TV show?", "You're on"],
                 "Stanley": ["Ok"],
+            },
+        }
+    )
+
+    # Add an object to a list
+    assert parser.patch(
+        {
+            "op": "add",
+            "path": "/multi_level/list_3/1",
+            "value": {
+                "George": {"role": "owner", "has_mop": False},
+                "Stanley": {"role": "janitor", "has_mop": True},
             },
         }
     )

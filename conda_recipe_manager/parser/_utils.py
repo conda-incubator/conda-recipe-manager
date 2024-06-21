@@ -2,10 +2,13 @@
 File:           _utils.py
 Description:    Provides private utility functions only used by the parser.
 """
+
 from __future__ import annotations
 
 import json
-from typing import cast
+import re
+from collections.abc import Iterable
+from typing import Final, cast
 
 from conda_recipe_manager.parser._types import (
     RECIPE_MANAGER_SUB_MARKER,
@@ -15,7 +18,12 @@ from conda_recipe_manager.parser._types import (
     StrStackImmutable,
 )
 from conda_recipe_manager.parser.types import TAB_AS_SPACES, MultilineVariant, NodeValue
-from conda_recipe_manager.types import H, SentinelType
+from conda_recipe_manager.types import H, JsonType, SentinelType
+
+# Commonly used special characters that we need to ensure get quoted when rendered as a YAML string.
+# NOTE: `#`, `|`, `{`, `}`, `>`, and `<` are left out of this list as in our use case, they have specifics meaning that
+#       are already handled in the parser.
+_TO_QUOTE_SPECIAL_CHARS: Final[set[str]] = {"[", "]", ",", "&", ":", "*", "?", "-", "=", "!", "%", "@", "\\"}
 
 
 def str_to_stack_path(path: str) -> StrStack:
@@ -94,6 +102,40 @@ def substitute_markers(s: str, subs: list[str]) -> str:
     return s
 
 
+def quote_special_strings(s: str, multiline_variant: MultilineVariant = MultilineVariant.NONE) -> str:
+    """
+    Ensure string quote escaping if quote marks are present. Otherwise this has the unintended consequence of
+    quoting all YAML strings. Although not wrong, it does not follow our common practices. Quote escaping is not
+    required for multiline strings. We do not escape quotes for Jinja value statements. We make an exception for
+    strings containing the V1 recipe format syntax, ${{ }}, which is valid YAML.
+
+    In addition, there are a handful of special cases that need to be quoted in order to produce valid YAML. PyYaml
+    and Ruamel (in safe mode) will drop quotes found in the YAML. This means that round-tripping the YAML can break in
+    some cases. For example, `"**/lib"` -> `**/lib` and `*` is an illegal character to start a bare YAML string with.
+    So if we parse that value again, the YAML parser will throw.
+
+    :param s: String to modify
+    :param multiline_variant: (Optional) If the value being processed is a multiline string, indicate which YAML
+        descriptor is in use.
+    :returns: YAML version of a value, as a string.
+    """
+
+    def _startswith_check_all() -> bool:
+        for char in _TO_QUOTE_SPECIAL_CHARS:
+            if s.startswith(char):
+                return True
+        return False
+
+    if multiline_variant != MultilineVariant.NONE or Regex.JINJA_SUB.match(s):
+        return s
+
+    # `*` is common enough that we query the set before checking every "startswith" option as a small optimization.
+    if s in _TO_QUOTE_SPECIAL_CHARS or ("${{" not in s and ("'" in s or '"' in s)) or _startswith_check_all():
+        # The PyYaml equivalent function injects newlines, hence why we abuse the JSON library to write our YAML
+        return json.dumps(s)
+    return s
+
+
 def stringify_yaml(
     val: NodeValue | SentinelType, multiline_variant: MultilineVariant = MultilineVariant.NONE
 ) -> NodeValue:
@@ -116,14 +158,9 @@ def stringify_yaml(
         if val:
             return "true"
         return "false"
-    # Ensure string quote escaping if quote marks are present. Otherwise this has the unintended consequence of
-    # quoting all YAML strings. Although not wrong, it does not follow our common practices. Quote escaping is not
-    # required for multiline strings. We do not escape quotes for Jinja value statements. We make an exception for
-    # strings containing the NEW recipe format syntax, ${{ }}, which is valid YAML.
-    if multiline_variant == MultilineVariant.NONE and isinstance(val, str) and not Regex.JINJA_SUB.match(val):
-        if "${{" not in val and ("'" in val or '"' in val):
-            # The PyYaml equivalent function injects newlines, hence why we abuse the JSON library to write our YAML
-            return json.dumps(val)
+    # Handle special string quote cases
+    if isinstance(val, str):
+        return quote_special_strings(val, multiline_variant)
     return val
 
 
@@ -153,3 +190,29 @@ def dedupe_and_preserve_order(l: list[H]) -> list[H]:
 
     """
     return list(cast(dict[H, None], dict.fromkeys(l)))
+
+
+def set_key_conditionally(dictionary: dict[str, JsonType], key: str, value: JsonType) -> None:
+    """
+    Convenience function that conditionally includes a key-value pair in a dictionary if the value is truthy.
+    Great for cheating McCabe ratings in complex JSON/YAML operations!
+    :param dictionary: Dictionary to conditionally add a value to
+    :param key: Key to use
+    :param value: Value to conditionally add to the dictionary
+    """
+    if value:
+        dictionary[key] = value
+
+
+def search_any_regex(re_set: Iterable[re.Pattern[str]], s: str) -> bool:
+    """
+    Convenience function that checks a string against many regular expressions
+    :param re_set: Set of regular expressions to check
+    :param s: Target string
+    :returns: True if any regex in the set matches. False otherwise.
+    """
+    for r in re_set:
+        if r.search(s):
+            return True
+
+    return False

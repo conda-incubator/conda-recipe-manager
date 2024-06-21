@@ -14,6 +14,7 @@ PYTHON3 := "$(CONDA_PREFIX)/bin/python3"
 CONDA_ENV_NAME ?= conda-recipe-manager
 SRC_DIR = conda_recipe_manager
 TEST_DIR = tests/
+SCRIPTS_DIR = scripts/
 
 define BROWSER_PYSCRIPT
 import os, webbrowser, sys
@@ -79,11 +80,11 @@ install: clean	## install the package to the active Python's site-packages
 	pip install .
 
 environment:    ## handles environment creation
-	conda env create -f environment.yaml --name $(CONDA_ENV_NAME) --force
+	conda env create -f environment.yaml --name $(CONDA_ENV_NAME) --yes
 	conda run --name $(CONDA_ENV_NAME) pip install .
 
 dev: clean		## install the package's development version to a fresh environment
-	conda env create -f environment.yaml --name $(CONDA_ENV_NAME) --force
+	conda env create -f environment.yaml --name $(CONDA_ENV_NAME) --yes
 	conda run --name $(CONDA_ENV_NAME) pip install -e .
 	$(CONDA_ACTIVATE) $(CONDA_ENV_NAME) && pre-commit install
 
@@ -98,17 +99,17 @@ test-debug:		## runs test cases with debugging info enabled
 
 test-cov:		## checks test coverage requirements
 	$(PYTHON3) -m pytest -n auto --cov-config=.coveragerc --cov=$(SRC_DIR) \
-		$(TEST_DIR) --cov-fail-under=45 --cov-report term-missing
+		$(TEST_DIR) --cov-fail-under=80 --cov-report term-missing
 
 lint:			## runs the linter against the project
-	pylint --rcfile=.pylintrc $(SRC_DIR)
+	pylint --rcfile=.pylintrc $(SRC_DIR) $(TEST_DIR)
 
 format:			## runs the code auto-formatter
-	isort --profile black --line-length=120 $(SRC_DIR)
-	black --line-length=120 $(SRC_DIR)
+	isort --profile black --line-length=120 $(SRC_DIR) $(TEST_DIR) $(SCRIPTS_DIR)
+	black --line-length=120 $(SRC_DIR) $(TEST_DIR) $(SCRIPTS_DIR)
 
 format-docs:	## runs the docstring auto-formatter. Note this requires manually installing `docconvert`
-	docconvert --in-place --config .docconvert.json $(SRC_DIR)
+	docconvert --in-place --config .docconvert.json $(SRC_DIR) $(TEST_DIR) $(SCRIPTS_DIR)
 
 analyze:		## runs static analyzer on the project
-	mypy --config-file=.mypy.ini --cache-dir=/dev/null $(SRC_DIR)
+	mypy --config-file=.mypy.ini --cache-dir=/dev/null $(SRC_DIR) $(TEST_DIR) $(SCRIPTS_DIR)

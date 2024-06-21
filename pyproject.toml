@@ -2,15 +2,19 @@
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools]
+include-package-data = true
+
 [tool.setuptools.packages.find]
 namespaces = false
+exclude = ["tests"]
 
 [tool.setuptools.package-data]
-"conda_recipe_manager" = ["py.typed"]
+"conda_recipe_manager" = ["py.typed", "licenses/*.json"]
 
 [project]
 name = "conda_recipe_manager"
-version = "0.1.0"
+version = "0.2.0"
 authors = [
   { name="Anaconda, Inc.", email="distribution_team@anaconda.com" },
 ]
@@ -37,6 +41,7 @@ dependencies = [
   "jinja2",
   "pyyaml",
   "jsonschema",
+  "requests",
 ]
 
 [project.optional-dependencies]
@@ -44,14 +49,11 @@ dev = ["pytest"]
 conda_build = ["conda-build"]
 
 [project.scripts]
-convert = "conda_recipe_manager.commands.convert:convert"
+conda-recipe-manager = "conda_recipe_manager.commands.conda_recipe_manager:conda_recipe_manager"
+crm = "conda_recipe_manager.commands.conda_recipe_manager:conda_recipe_manager"
 
 [project.urls]
 "Homepage" = "https://github.com/anaconda/conda-recipe-manager"
 "Bug Tracker" = "https://github.com/anaconda/conda-recipe-manager/issues"
 "Repository" = "https://github.com/anaconda/conda-recipe-manager"
 "Documentation" = "https://github.com/anaconda/conda-recipe-manager/blob/main/README.md"
-
-# This causes an error saying that 'packages' is already defined and can't be overwritten.
-#[tool.setuptools]
-#packages = ["conda-recipe-manager"]
