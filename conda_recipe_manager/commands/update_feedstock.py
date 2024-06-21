@@ -11,7 +11,6 @@ from pathlib import Path
 from typing import Final, Optional, cast
 
 import click
-from pygit2 import Remote, Repository, Signature, clone_repository  # type: ignore[import-untyped]
 
 from conda_recipe_manager.commands.convert import convert_file
 from conda_recipe_manager.commands.rattler_bulk_build import build_recipe
@@ -142,32 +141,15 @@ def update_feedstock(_: click.Context, path: Path, remote: Optional[str]) -> Non
     # If we have gotten to this point, the conversion and testing process has succeeded on all recipe files in the
     # provided feedstock. In theory, we should now be good to commit these changes and make a PR.
     print(f"Creating and committing to `{UPDATE_BRANCH_NAME}` branch...")
-    repo = Repository(path)
     # If the branch exists from a previous run, delete it and start over.
     if UPDATE_BRANCH_NAME in repo.branches:
-        repo.branches.delete(UPDATE_BRANCH_NAME)
-    repo_branch = repo.branches.local.create(UPDATE_BRANCH_NAME, repo.revparse_single("HEAD"))
+        pass
 
     for v1_file in v1_files:
-        # pygit2 will add files relative to the repo's directory.
-        repo.index.add(v1_file.relative_to(path))
-    repo.index.write()
-    repo_tree = repo.index.write_tree()
-    bot_sig: Final[Signature] = Signature("crm update-feedstock", "conda-recipe-manager.conda-incubator.github.com")
-    repo.checkout(repo.lookup_reference(repo_branch.name))
-    repo.create_commit(
-        repo_branch.name,
-        bot_sig,
-        bot_sig,
-        "Automated commit from `crm update-feedstock`\n\nAdds V1 recipe format to project.",
-        repo_tree,
-        [repo.head.target],
-    )
+        pass
 
     # TODO push and file PR on GitHub
     print(f"Attempting to push `{UPDATE_BRANCH_NAME}`...")
-    repo_remote = Remote(repo)
-    repo_remote.push(repo.head.target)
 
     exec_time: Final[float] = round(time.time() - start_time, 2)
     print(f"Total time: {exec_time}")
