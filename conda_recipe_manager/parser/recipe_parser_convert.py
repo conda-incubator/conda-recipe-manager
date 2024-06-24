@@ -676,8 +676,8 @@ class RecipeParserConvert(RecipeParser):
 
         # rattler-build@0.18.0: Introduced checks for deprecated `max_pin` and `min_pin` fields. This replacement
         # addresses the change in numerous JINJA functions that use this nomenclature.
-        content = Regex.PRE_PROCESS_MIN_PIN_REPLACEMENT.sub(r"lower_bound=", content)
-        content = Regex.PRE_PROCESS_MAX_PIN_REPLACEMENT.sub(r"upper_bound=", content)
+        content = Regex.PRE_PROCESS_MIN_PIN_REPLACEMENT.sub("lower_bound=", content)
+        content = Regex.PRE_PROCESS_MAX_PIN_REPLACEMENT.sub("upper_bound=", content)
 
         # Convert the old JINJA `environ[""]` variable usage to the new `get.env("")` syntax.
         # NOTE:

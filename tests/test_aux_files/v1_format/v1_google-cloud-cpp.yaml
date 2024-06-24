@@ -93,9 +93,7 @@ outputs:
           - if: unix
             then: test ! -f $PREFIX/lib/cmake/google_cloud_cpp_kms/google_cloud_cpp_kms-config.cmake
           - if: win
-            then:
-              - if exist %LIBRARY_PREFIX%\\lib\\cmake\\google_cloud_cpp_kms\\google_cloud_cpp_kms-config.cmake
-              - exit 1
+            then: if exist %LIBRARY_PREFIX%\\lib\\cmake\\google_cloud_cpp_kms\\google_cloud_cpp_kms-config.cmake exit 1
     script: install-libgoogle-cloud.sh  # [unix]
     script: install-libgoogle-cloud.bat  # [win]
   - package:
