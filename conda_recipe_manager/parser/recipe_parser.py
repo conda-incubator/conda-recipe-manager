@@ -226,7 +226,9 @@ class RecipeParser:
         if not isinstance(value, PRIMITIVES_TUPLE):
             # Although not technically required by YAML, we add the optional spacing for human readability.
             return RecipeParser(  # pylint: disable=protected-access
-                yaml.dump(value, Dumper=ForceIndentDumper, sort_keys=False)  # type: ignore[misc]
+                # NOTE: `yaml.dump()` defaults to 80 character lines. Longer lines may have newlines unexpectedly
+                #       injected into this value, screwing up the parse-tree.
+                yaml.dump(value, Dumper=ForceIndentDumper, sort_keys=False, width=sys.maxsize)  # type: ignore[misc]
             )._root.children
 
         # Primitives can be safely stringified to generate a parse tree.

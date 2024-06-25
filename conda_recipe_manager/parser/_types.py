@@ -141,6 +141,9 @@ class Regex:
     )
     # Attempts to normalize multiline strings containing quoted escaped newlines.
     PRE_PROCESS_QUOTED_MULTILINE_STRINGS: Final[re.Pattern[str]] = re.compile(r"(\s*)(.*):\s*['\"](.*)\\n(.*)['\"]")
+    # rattler-build@0.18.0 deprecates `min_pin` and `max_pin`
+    PRE_PROCESS_MIN_PIN_REPLACEMENT: Final[re.Pattern[str]] = re.compile(r"min_pin=")
+    PRE_PROCESS_MAX_PIN_REPLACEMENT: Final[re.Pattern[str]] = re.compile(r"max_pin=")
 
     ## Jinja regular expressions ##
     JINJA_SUB: Final[re.Pattern[str]] = re.compile(r"{{\s*" + _JINJA_VAR_FUNCTION_PATTERN + r"\s*}}")
