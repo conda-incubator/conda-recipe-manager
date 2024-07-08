@@ -8,7 +8,7 @@ name: Integration Tests
 
 jobs:
   ## Integration tests ##
-  integration-rattler:
+  integration-rattler-dry-run:
     # NOTES:
     #   - `pipefail` must be enabled in order get the exit code from the conda-recipe-manager commands when
     #     the output is piped into `tee`
@@ -17,7 +17,7 @@ jobs:
     #     files successfully. We should remove these environment changes if/when rattler-build gives us another way to
     #     validate recipe files.
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 15
     name: Test on ${{ matrix.test-directory }}
     strategy:
       fail-fast: false
@@ -77,10 +77,10 @@ jobs:
         with:
           name: integration-logs-${{ matrix.test-directory }}
           path: logs/*.log
-  integration-final-results:
+  integration-dry-run-final-results:
     runs-on: ubuntu-latest
     name: Integration Testing Final Report
-    needs: [integration-rattler]
+    needs: [integration-rattler-dry-run]
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
@@ -102,3 +102,33 @@ jobs:
           echo -e "Integration Report:\n\`\`\`json\n" >> ${GITHUB_STEP_SUMMARY}
           cat report.json >> ${GITHUB_STEP_SUMMARY}
           echo -e "\n\`\`\`" >> ${GITHUB_STEP_SUMMARY}
+  integration-rattler-build:
+    # NOTES:
+    #  - `crm rattler-bulk-build` is used over `rattler-build` so that all recipe files are automatically found in the
+    #    checked-out feedstock directory.
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    name: Build ${{ matrix.feedstock }}
+    strategy:
+      fail-fast: false
+      matrix:
+        feedstock:
+          - conda-forge/types-toml-feedstock
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          repository: ${{ matrix.feedstock }}
+          path: feedstock
+      - uses: ./.github/actions/setup-env
+        with:
+          python-version: "3.11"
+      - name: Convert recipes from a feedstock repo and run a full rattler-build
+        run: |
+          source $CONDA/bin/activate
+          conda activate conda-recipe-manager
+          conda install -y -c conda-forge rattler-build
+          set -o pipefail
+          conda-recipe-manager \
+            convert -t -o recipe.yaml feedstock
+          conda-recipe-manager rattler-bulk-build -t feedstock
