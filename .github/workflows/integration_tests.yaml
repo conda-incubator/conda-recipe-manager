@@ -128,4 +128,4 @@ jobs:
           conda install -y -c conda-forge rattler-build
           set -o pipefail
           conda-recipe-manager convert --ignore-warnings -o recipe.yaml feedstock
-          rattler-build build -r feedstock
+          rattler-build build --recipe-dir feedstock
