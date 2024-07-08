@@ -103,9 +103,6 @@ jobs:
           cat report.json >> ${GITHUB_STEP_SUMMARY}
           echo -e "\n\`\`\`" >> ${GITHUB_STEP_SUMMARY}
   integration-rattler-build:
-    # NOTES:
-    #  - `crm rattler-bulk-build` is used over `rattler-build` so that all recipe files are automatically found in the
-    #    checked-out feedstock directory.
     runs-on: ubuntu-latest
     timeout-minutes: 30
     name: Build ${{ matrix.feedstock }}
@@ -130,4 +127,4 @@ jobs:
           conda install -y -c conda-forge rattler-build
           set -o pipefail
           conda-recipe-manager convert --ignore-warnings -o recipe.yaml feedstock
-          conda-recipe-manager rattler-bulk-build feedstock
+          rattler-build build -r feedstock
