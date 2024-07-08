@@ -62,16 +62,17 @@ class ConversionResult:
     # Extracted out of the path for bulk operations
     project_name: str
 
-    def set_return_code(self) -> None:
+    def set_return_code(self, ignore_warnings: bool) -> None:
         """
         Given the current state of the message table, set the appropriate return code. Does not overwrite the existing
         state unless errors or warnings were found.
+        :param ignore_warnings: If set, warnings are counted as `ExitCode.SUCCESS` and are complete ignored.
         """
         error_count: Final[int] = self.msg_tbl.get_message_count(MessageCategory.ERROR)
         warn_count: Final[int] = self.msg_tbl.get_message_count(MessageCategory.WARNING)
         if error_count > 0:
             self.code = ExitCode.RENDER_ERRORS
-        elif warn_count > 0:
+        elif not ignore_warnings and warn_count > 0:
             self.code = ExitCode.RENDER_WARNINGS
 
 
@@ -100,7 +101,9 @@ def _record_unrecoverable_failure(
     return conversion_result
 
 
-def convert_file(file_path: Path, output: Optional[Path], print_output: bool, debug: bool) -> ConversionResult:
+def convert_file(
+    file_path: Path, output: Optional[Path], print_output: bool, debug: bool, ignore_warnings: bool
+) -> ConversionResult:
     """
     Converts a single recipe file to the V1 format, tracking results.
     :param file_path: Path to the recipe file to convert
@@ -108,6 +111,7 @@ def convert_file(file_path: Path, output: Optional[Path], print_output: bool, de
         STDOUT IF `print_output` is set to `True`.
     :param print_output: Prints the recipe to STDOUT/STDERR if the output file is not specified and this flag is `True`.
     :param debug: Enables debug mode output. Prints to STDERR.
+    :param ignore_warnings: If set, warnings are counted as `ExitCode.SUCCESS` and are complete ignored.
     :returns: A struct containing the results of the conversion process, including debugging metadata.
     """
     conversion_result = ConversionResult(
@@ -176,21 +180,24 @@ def convert_file(file_path: Path, output: Optional[Path], print_output: bool, de
         with open(output, "w", encoding="utf-8") as fptr:
             fptr.write(conversion_result.content)
 
-    conversion_result.set_return_code()
+    conversion_result.set_return_code(ignore_warnings)
     return conversion_result
 
 
-def process_recipe(file: Path, path: Path, output: Optional[Path], debug: bool) -> tuple[str, ConversionResult]:
+def process_recipe(
+    file: Path, path: Path, output: Optional[Path], debug: bool, ignore_warnings: bool
+) -> tuple[str, ConversionResult]:
     """
     Helper function that performs the conversion operation for parallelizable execution.
     :param file: Recipe file to convert
     :param path: Path argument provided by the user
     :param output: Output argument file provided by the user
     :param debug: Enables debug mode output. Prints to STDERR.
+    :param ignore_warnings: If set, warnings are counted as `ExitCode.SUCCESS` and are complete ignored.
     :returns: Tuple containing the key/value pairing that tracks the result of the conversion operation
     """
     out_file: Optional[Path] = None if output is None else file.parent / output
-    conversion_result = convert_file(file, out_file, False, debug)
+    conversion_result = convert_file(file, out_file, False, debug, ignore_warnings)
     conversion_result.project_name = file.relative_to(path).parts[0]
     return str(file.relative_to(path)), conversion_result
 
@@ -266,8 +273,13 @@ def _collect_issue_stats(project_name: str, issues: list[str], hist: dict[str, i
     is_flag=True,
     help="Debug mode, prints debugging information to STDERR.",
 )
+@click.option(
+    "--ignore-warnings",
+    is_flag=True,
+    help="If set, a recipe that generates only warnings will return with a SUCCESS exit code.",
+)
 def convert(
-    path: Path, output: Optional[Path], min_success_rate: float, truncate: bool, debug: bool
+    path: Path, output: Optional[Path], min_success_rate: float, truncate: bool, debug: bool, ignore_warnings: bool
 ) -> None:  # pylint: disable=redefined-outer-name
     """
     Recipe conversion CLI utility. By default, recipes print to STDOUT. Messages always print to STDERR. Takes 1 file or
@@ -280,7 +292,7 @@ def convert(
 
     ## Single-file case ##
     if len(files) == 1:
-        result: Final[ConversionResult] = convert_file(files[0], output, True, debug)
+        result: Final[ConversionResult] = convert_file(files[0], output, True, debug, ignore_warnings)
         print_messages(MessageCategory.WARNING, result.msg_tbl)
         print_messages(MessageCategory.ERROR, result.msg_tbl)
         print_err(result.msg_tbl.get_totals_message())
@@ -292,7 +304,9 @@ def convert(
     thread_pool_size: Final[int] = mp.cpu_count()
     with mp.Pool(thread_pool_size) as pool:
         results = dict(
-            pool.starmap(process_recipe, [(file, path, output, debug) for file in files])  # type: ignore[misc]
+            pool.starmap(
+                process_recipe, [(file, path, output, debug, ignore_warnings) for file in files]  # type: ignore[misc]
+            )
         )
 
     # Tracking failures from bulk operation
