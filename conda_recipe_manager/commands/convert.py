@@ -290,8 +290,8 @@ def convert(
     results: dict[str, ConversionResult] = {}
     files: list[Path] = _get_files_list(path)
 
-    ## Single-file case ##
-    if len(files) == 1:
+    ## Single-file case (file is directly passed in) ##
+    if path.is_file():
         result: Final[ConversionResult] = convert_file(files[0], output, True, debug, ignore_warnings)
         print_messages(MessageCategory.WARNING, result.msg_tbl)
         print_messages(MessageCategory.ERROR, result.msg_tbl)
