@@ -124,7 +124,6 @@ jobs:
         with:
           python-version: "3.11"
       - name: Convert recipes from a feedstock repo and run a build
-        continue-on-error: true
         run: |
           source $CONDA/bin/activate
           conda activate conda-recipe-manager
