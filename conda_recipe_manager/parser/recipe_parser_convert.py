@@ -188,6 +188,11 @@ class RecipeParserConvert(RecipeParser):
     def _upgrade_selectors_to_conditionals(self) -> None:
         """
         Upgrades the proprietary comment-based selector syntax to equivalent conditional logic statements.
+
+        TODO warn if selector is unrecognized? See list:
+          https://prefix-dev.github.io/rattler-build/latest/selectors/#available-variables
+        conda docs for common selectors:
+          https://docs.conda.io/projects/conda-build/en/latest/resources/define-metadata.html#preprocessing-selectors
         """
         for selector, instances in self._v1_recipe._selector_tbl.items():  # pylint: disable=protected-access
             for info in instances:
@@ -201,19 +206,29 @@ class RecipeParserConvert(RecipeParser):
                 # Convert to a public-facing path representation
                 selector_path = stack_path_to_str(info.path)
 
-                # TODO warn if selector is unrecognized? See list:
-                #   https://prefix-dev.github.io/rattler-build/latest/selectors/#available-variables
-
-                # TODO other common selectors to support:
-                # - py2k, py3k
-                # - py27, not py27, py34, etc...
-                # - GPU variants (see pytorch and llama.cpp feedstocks)
-
                 # Some commonly used selectors (like `py<36`) need to be upgraded. Otherwise, these expressions will be
                 # interpreted as strings. See this CEP PR for more details: https://github.com/conda/ceps/pull/71
                 bool_expression = Regex.SELECTOR_PYTHON_VERSION_REPLACEMENT.sub(
                     r'match(python, "\1\2.\3")', bool_expression
                 )
+                # Upgrades for less common `py36` and `not py27` selectors
+                bool_expression = Regex.SELECTOR_PYTHON_VERSION_EQ_REPLACEMENT.sub(
+                    r'match(python, "==\1.\2")', bool_expression
+                )
+                bool_expression = Regex.SELECTOR_PYTHON_VERSION_NE_REPLACEMENT.sub(
+                    r'match(python, "!=\1.\2")', bool_expression
+                )
+                # Upgrades for less common `py2k` and `py3k` selectors
+                bool_expression = Regex.SELECTOR_PYTHON_VERSION_PY2K_REPLACEMENT.sub(
+                    r'match(python, ">=2,<3")', bool_expression
+                )
+                bool_expression = Regex.SELECTOR_PYTHON_VERSION_PY3K_REPLACEMENT.sub(
+                    r'match(python, ">=3,<4")', bool_expression
+                )
+
+                # TODO other common selectors to support:
+                # - py2k, py3k
+                # - GPU variants (see pytorch and llama.cpp feedstocks)
 
                 # For now, if a selector lands on a boolean value, use a ternary statement. Otherwise use the
                 # conditional logic.

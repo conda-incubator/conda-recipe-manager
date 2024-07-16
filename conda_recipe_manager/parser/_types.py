@@ -148,6 +148,10 @@ class Regex:
     ## Selector Replacements ##
     # Replaces Python version expressions with the newer V1 `match()` function
     SELECTOR_PYTHON_VERSION_REPLACEMENT: Final[re.Pattern[str]] = re.compile(r"py\s*(<|>|<=|>=|==|!=)\s*(3|2)([0-9]+)")
+    SELECTOR_PYTHON_VERSION_EQ_REPLACEMENT: Final[re.Pattern[str]] = re.compile(r"py(3|2)([0-9]+)")
+    SELECTOR_PYTHON_VERSION_NE_REPLACEMENT: Final[re.Pattern[str]] = re.compile(r"not py(3|2)([0-9]+)")
+    SELECTOR_PYTHON_VERSION_PY2K_REPLACEMENT: Final[re.Pattern[str]] = re.compile(r"py2k")
+    SELECTOR_PYTHON_VERSION_PY3K_REPLACEMENT: Final[re.Pattern[str]] = re.compile(r"py3k")
 
     ## Jinja regular expressions ##
     JINJA_SUB: Final[re.Pattern[str]] = re.compile(r"{{\s*" + _JINJA_VAR_FUNCTION_PATTERN + r"\s*}}")
