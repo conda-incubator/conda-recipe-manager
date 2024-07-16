@@ -14,8 +14,7 @@ source:
 
 build:
   number: 0
-  skip:
-    - py<37
+  skip: match(python, "<3.7")
   script: ${{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
 
 requirements:
