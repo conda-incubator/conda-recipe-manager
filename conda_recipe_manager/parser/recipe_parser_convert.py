@@ -201,6 +201,20 @@ class RecipeParserConvert(RecipeParser):
                 # Convert to a public-facing path representation
                 selector_path = stack_path_to_str(info.path)
 
+                # TODO warn if selector is unrecognized? See list:
+                #   https://prefix-dev.github.io/rattler-build/latest/selectors/#available-variables
+
+                # TODO other common selectors to support:
+                # - py2k, py3k
+                # - py27, not py27, py34, etc...
+                # - GPU variants (see pytorch and llama.cpp feedstocks)
+
+                # Some commonly used selectors (like `py<36`) need to be upgraded. Otherwise, these expressions will be
+                # interpreted as strings. See this CEP PR for more details: https://github.com/conda/ceps/pull/71
+                bool_expression = Regex.SELECTOR_PYTHON_VERSION_REPLACEMENT.sub(
+                    r'match(python, "\1\2.\3")', bool_expression
+                )
+
                 # For now, if a selector lands on a boolean value, use a ternary statement. Otherwise use the
                 # conditional logic.
                 patch: JsonPatchType = {
@@ -208,9 +222,9 @@ class RecipeParserConvert(RecipeParser):
                     "path": selector_path,
                     "value": "${{ true if " + bool_expression + " }}",
                 }
-                # `skip` is special and needs to be a list of boolean expressions.
+                # `skip` is special and can be a single boolean expression or a list of boolean expressions.
                 if selector_path.endswith("/build/skip"):
-                    patch["value"] = [bool_expression]
+                    patch["value"] = bool_expression
                 if not isinstance(info.node.value, bool):
                     # CEP-13 states that ONLY list members may use the `if/then/else` blocks
                     if not info.node.list_member_flag:

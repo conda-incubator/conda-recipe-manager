@@ -145,6 +145,10 @@ class Regex:
     PRE_PROCESS_MIN_PIN_REPLACEMENT: Final[re.Pattern[str]] = re.compile(r"min_pin=")
     PRE_PROCESS_MAX_PIN_REPLACEMENT: Final[re.Pattern[str]] = re.compile(r"max_pin=")
 
+    ## Selector Replacements ##
+    # Replaces Python version expressions with the newer V1 `match()` function
+    SELECTOR_PYTHON_VERSION_REPLACEMENT: Final[re.Pattern[str]] = re.compile(r"py\s*(<|>|<=|>=|==|!=)\s*(3|2)([0-9]+)")
+
     ## Jinja regular expressions ##
     JINJA_SUB: Final[re.Pattern[str]] = re.compile(r"{{\s*" + _JINJA_VAR_FUNCTION_PATTERN + r"\s*}}")
     JINJA_LINE: Final[re.Pattern[str]] = re.compile(r"({%.*%}|{#.*#})\n")
@@ -158,10 +162,13 @@ class Regex:
     JINJA_FUNCTION_LOWER: Final[re.Pattern[str]] = re.compile(r"\|\s*(lower)")
     JINJA_FUNCTION_UPPER: Final[re.Pattern[str]] = re.compile(r"\|\s*(upper)")
     JINJA_FUNCTION_REPLACE: Final[re.Pattern[str]] = re.compile(r"\|\s*(replace)\((.*)\)")
+    # `match()` is a JINJA function available in the V1 recipe format
+    JINJA_FUNCTION_MATCH: Final[re.Pattern[str]] = re.compile(r"match\(.*,.*\)")
     JINJA_FUNCTIONS_SET: Final[set[re.Pattern[str]]] = {
         JINJA_FUNCTION_LOWER,
         JINJA_FUNCTION_UPPER,
         JINJA_FUNCTION_REPLACE,
+        JINJA_FUNCTION_MATCH,
     }
 
     SELECTOR: Final[re.Pattern[str]] = re.compile(r"\[.*\]")
