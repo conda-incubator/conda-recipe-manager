@@ -11,8 +11,7 @@ package:
 
 build:
   number: 0
-  skip:
-    - py<37
+  skip: match(python, "<3.7")
   is_true: true
 
 requirements:
