@@ -227,7 +227,6 @@ class RecipeParserConvert(RecipeParser):
                 )
 
                 # TODO other common selectors to support:
-                # - py2k, py3k
                 # - GPU variants (see pytorch and llama.cpp feedstocks)
 
                 # For now, if a selector lands on a boolean value, use a ternary statement. Otherwise use the
