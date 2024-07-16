@@ -53,7 +53,13 @@ from conda_recipe_manager.parser._utils import (
 )
 from conda_recipe_manager.parser.enums import SelectorConflictMode
 from conda_recipe_manager.parser.exceptions import JsonPatchValidationException
-from conda_recipe_manager.parser.types import JSON_PATCH_SCHEMA, TAB_AS_SPACES, TAB_SPACE_COUNT, MultilineVariant
+from conda_recipe_manager.parser.types import (
+    JSON_PATCH_SCHEMA,
+    TAB_AS_SPACES,
+    TAB_SPACE_COUNT,
+    MultilineVariant,
+    SchemaVersion,
+)
 from conda_recipe_manager.types import PRIMITIVES_TUPLE, JsonPatchType, JsonType, Primitives, SentinelType
 
 
@@ -381,6 +387,12 @@ class RecipeParser:
             parent.children.append(new_node)
             # Update the last node for the next line interpretation
             last_node = new_node
+
+        # Auto-detect and deserialize the version of the recipe schema. This will change how the class behaves.
+        self._schema_version = SchemaVersion.V0
+        schema_version = cast(SchemaVersion | int, self.get_value("/schema_version", SchemaVersion.V0))
+        if isinstance(schema_version, int) and schema_version == 1:
+            self._schema_version = SchemaVersion.V1
 
         # Now that the tree is built, construct a selector look-up table that tracks all the nodes that use a particular
         # selector. This will make it easier to.

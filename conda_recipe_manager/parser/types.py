@@ -5,7 +5,7 @@ Description:    Provides public types, type aliases, constants, and small classe
 
 from __future__ import annotations
 
-from enum import StrEnum, auto
+from enum import IntEnum, StrEnum, auto
 from typing import Final
 
 from conda_recipe_manager.types import Primitives, SchemaType
@@ -18,9 +18,20 @@ NodeValue = Primitives | list[str]
 
 #### Constants ####
 
+
+class SchemaVersion(IntEnum):
+    """
+    Recipe `schema_version` enumeration. The Pre-CEP-13 "schema" is designated as "Version 0" and does not require
+    a `schema_version` field in the recipe file.
+    """
+
+    V0 = 0  # Pre-CEP-13, effectively defined by conda-build
+    V1 = 1  # CEP-13+
+
+
 # The "new" recipe format introduces the concept of a schema version. Presumably the "old" recipe format would be
 # considered "0". When converting to the V1 format, we'll use this constant value.
-CURRENT_RECIPE_SCHEMA_FORMAT: Final[int] = 1
+CURRENT_RECIPE_SCHEMA_FORMAT: Final[int] = SchemaVersion.V1.value
 
 # Indicates how many spaces are in a level of indentation
 TAB_SPACE_COUNT: Final[int] = 2
