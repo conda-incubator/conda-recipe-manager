@@ -29,10 +29,10 @@ tests:
         - boto
       pip_check: false
   - script:
-      - if: py2k
+      - if: match(python, ">=2,<3")
         then: asadmin -h
       - s3put -h
-      - if: py2k
+      - if: match(python, ">=2,<3")
         then: taskadmin -h
 
 about:
