@@ -440,6 +440,7 @@ class RecipeParser:
         tree_lines: list[str] = []
         RecipeParser._str_tree_recurse(self._root, 0, tree_lines)
         s += "RecipeParser Instance\n"
+        s += f"- Schema Version: {self._schema_version}\n"
         s += "- Variables Table:\n"
         s += json.dumps(self._vars_tbl, indent=TAB_AS_SPACES) + "\n"
         s += "- Selectors Table:\n"
