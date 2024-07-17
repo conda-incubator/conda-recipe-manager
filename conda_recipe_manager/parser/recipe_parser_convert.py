@@ -26,8 +26,9 @@ from conda_recipe_manager.parser._utils import (
     stack_path_to_str,
     str_to_stack_path,
 )
+from conda_recipe_manager.parser.enums import SchemaVersion
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
-from conda_recipe_manager.parser.types import CURRENT_RECIPE_SCHEMA_FORMAT, MessageCategory, MessageTable, SchemaVersion
+from conda_recipe_manager.parser.types import CURRENT_RECIPE_SCHEMA_FORMAT, MessageCategory, MessageTable
 from conda_recipe_manager.types import JsonPatchType, JsonType, Primitives, SentinelType
 
 

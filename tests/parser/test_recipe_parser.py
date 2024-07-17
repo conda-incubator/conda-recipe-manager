@@ -9,7 +9,7 @@ from typing import Final
 
 import pytest
 
-from conda_recipe_manager.parser.enums import SelectorConflictMode
+from conda_recipe_manager.parser.enums import SchemaVersion, SelectorConflictMode
 from conda_recipe_manager.parser.exceptions import JsonPatchValidationException
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
 from conda_recipe_manager.types import JsonType
@@ -41,20 +41,29 @@ QUICK_FOX_SUB_CARROT_MINUS: Final[str] = "The quick brown tiger\njumped over the
 ## Construction and rendering sanity checks ##
 
 
-def test_construction() -> None:
+@pytest.mark.parametrize(
+    "file,schema_version",
+    [
+        ("types-toml.yaml", SchemaVersion.V0),
+        ("v1_format/v1_types-toml.yaml", SchemaVersion.V1),
+    ],
+)
+def test_construction(file: str, schema_version: SchemaVersion) -> None:
     """
     Tests the construction of a recipe parser instance with a simple, common example file.
     """
-    types_toml = load_file(f"{TEST_FILES_PATH}/types-toml.yaml")
+    types_toml = load_file(f"{TEST_FILES_PATH}/{file}")
     parser = RecipeParser(types_toml)
     assert parser._init_content == types_toml  # pylint: disable=protected-access
     assert parser._vars_tbl == {  # pylint: disable=protected-access
         "name": "types-toml",
         "version": "0.10.8.6",
     }
+    assert parser._schema_version == schema_version  # pylint: disable=protected-access
     assert not parser._is_modified  # pylint: disable=protected-access
-    # TODO assert on tree structure
     # TODO assert on selectors table
+
+    # TODO assert on tree structure
     # assert parser._root == TODO
 
 
@@ -97,6 +106,7 @@ def test_loading_obj_in_list() -> None:
 @pytest.mark.parametrize(
     "file",
     [
+        # V0 Recipe Files
         "types-toml.yaml",  # "Easy-difficulty" recipe, representative of common/simple recipes.
         "simple-recipe.yaml",  # "Medium-difficulty" recipe, containing several contrived examples
         "multi-output.yaml",  # Contains a multi-output recipe
@@ -107,6 +117,15 @@ def test_loading_obj_in_list() -> None:
         "pytest-pep8.yaml",
         "google-cloud-cpp.yaml",
         "dynamic-linking.yaml",
+        # V1 Recipe Files
+        "v1_format/v1_types-toml.yaml",
+        "v1_format/v1_simple-recipe.yaml",
+        "v1_format/v1_multi-output.yaml",
+        "v1_format/v1_huggingface_hub.yaml",
+        "v1_format/v1_curl.yaml",
+        "v1_format/v1_pytest-pep8.yaml",
+        "v1_format/v1_google-cloud-cpp.yaml",
+        "v1_format/v1_dynamic-linking.yaml",
     ],
 )
 def test_round_trip(file: str) -> None:

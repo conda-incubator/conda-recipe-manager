@@ -5,7 +5,17 @@ Description:    Provides enumerated types used by the parser.
 
 from __future__ import annotations
 
-from enum import Enum
+from enum import Enum, IntEnum
+
+
+class SchemaVersion(IntEnum):
+    """
+    Recipe `schema_version` enumeration. The Pre-CEP-13 "schema" is designated as "Version 0" and does not require
+    a `schema_version` field in the recipe file.
+    """
+
+    V0 = 0  # Pre-CEP-13, effectively defined by conda-build
+    V1 = 1  # CEP-13+
 
 
 class SelectorConflictMode(Enum):

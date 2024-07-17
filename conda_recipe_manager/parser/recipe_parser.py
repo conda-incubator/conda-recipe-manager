@@ -51,15 +51,9 @@ from conda_recipe_manager.parser._utils import (
     stringify_yaml,
     substitute_markers,
 )
-from conda_recipe_manager.parser.enums import SelectorConflictMode
+from conda_recipe_manager.parser.enums import SchemaVersion, SelectorConflictMode
 from conda_recipe_manager.parser.exceptions import JsonPatchValidationException
-from conda_recipe_manager.parser.types import (
-    JSON_PATCH_SCHEMA,
-    TAB_AS_SPACES,
-    TAB_SPACE_COUNT,
-    MultilineVariant,
-    SchemaVersion,
-)
+from conda_recipe_manager.parser.types import JSON_PATCH_SCHEMA, TAB_AS_SPACES, TAB_SPACE_COUNT, MultilineVariant
 from conda_recipe_manager.types import PRIMITIVES_TUPLE, JsonPatchType, JsonType, Primitives, SentinelType
 
 
