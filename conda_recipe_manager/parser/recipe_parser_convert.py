@@ -172,7 +172,7 @@ class RecipeParserConvert(RecipeParser):
         # Swap all JINJA to use the new `${{ }}` format. A `set` is used as `str.replace()` will replace all instances
         # and a value containing multiple variables could be visited multiple times, causing multiple `${{}}`
         # encapsulations.
-        jinja_sub_locations: Final[set[str]] = set(self._v1_recipe.search(Regex.JINJA_SUB))
+        jinja_sub_locations: Final[set[str]] = set(self._v1_recipe.search(Regex.JINJA_V0_SUB))
         for path in jinja_sub_locations:
             value = self._v1_recipe.get_value(path)
             # Values that match the regex should only be strings. This prevents crashes that should not occur.
