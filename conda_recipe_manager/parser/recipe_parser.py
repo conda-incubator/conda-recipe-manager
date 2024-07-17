@@ -480,6 +480,8 @@ class RecipeParser:
         """
         if not isinstance(other, RecipeParser):
             raise TypeError
+        if self._schema_version != other._schema_version:
+            return False
         return self.render() == other.render()
 
     def is_modified(self) -> bool:

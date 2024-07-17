@@ -51,6 +51,8 @@ QUICK_FOX_SUB_CARROT_MINUS: Final[str] = "The quick brown tiger\njumped over the
 def test_construction(file: str, schema_version: SchemaVersion) -> None:
     """
     Tests the construction of a recipe parser instance with a simple, common example file.
+    :param file: Recipe file to test with
+    :param schema_version: Schema version to match
     """
     types_toml = load_file(f"{TEST_FILES_PATH}/{file}")
     parser = RecipeParser(types_toml)
@@ -67,25 +69,44 @@ def test_construction(file: str, schema_version: SchemaVersion) -> None:
     # assert parser._root == TODO
 
 
-def test_str() -> None:
+@pytest.mark.parametrize(
+    "file,out_file",
+    [
+        ("simple-recipe.yaml", "simple-recipe_to_str.out"),
+        ("v1_format/v1_simple-recipe.yaml", "v1_format/v1_simple-recipe_to_str.out"),
+    ],
+)
+def test_str(file: str, out_file: str) -> None:
     """
-    Tests string casting
+    Tests rendering to a debug string
+    :param file: Recipe file to test with
+    :param out_file: Output string to match
     """
-    parser = load_recipe("simple-recipe.yaml")
-    assert str(parser) == load_file(f"{TEST_FILES_PATH}/simple-recipe_to_str.out")
+    parser = load_recipe(file)
+    assert str(parser) == load_file(f"{TEST_FILES_PATH}/{out_file}")
     # Regression test: Run a function a second time to ensure that `SelectorInfo::__str__()` doesn't accidentally purge
     # the underlying stack when the string is being rendered.
-    assert str(parser) == load_file(f"{TEST_FILES_PATH}/simple-recipe_to_str.out")
+    assert str(parser) == load_file(f"{TEST_FILES_PATH}/{out_file}")
     assert not parser.is_modified()
 
 
-def test_eq() -> None:
+@pytest.mark.parametrize(
+    "file,other_file",
+    [
+        ("simple-recipe.yaml", "types-toml.yaml"),
+        ("v1_format/v1_simple-recipe.yaml", "v1_format/v1_types-toml.yaml"),
+        ("v1_format/v1_simple-recipe.yaml", "simple-recipe.yaml"),
+    ],
+)
+def test_eq(file: str, other_file: str) -> None:
     """
     Tests equivalency function
+    :param file: Recipe file to test with
+    :param other_file: "Other" recipe file to check against
     """
-    parser0 = load_recipe("simple-recipe.yaml")
-    parser1 = load_recipe("simple-recipe.yaml")
-    parser2 = load_recipe("types-toml.yaml")
+    parser0 = load_recipe(file)
+    parser1 = load_recipe(file)
+    parser2 = load_recipe(other_file)
     assert parser0 == parser1
     assert parser0 != parser2
     assert not parser0.is_modified()
@@ -93,7 +114,6 @@ def test_eq() -> None:
     assert not parser2.is_modified()
 
 
-@pytest.mark.skip(reason="To be re-enable when PAT-46 is fixed")
 def test_loading_obj_in_list() -> None:
     """
     Regression test: at one point, the parser would crash loading this file, containing an object in a list.

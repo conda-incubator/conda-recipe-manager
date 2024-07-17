@@ -810,5 +810,8 @@ class RecipeParserConvert(RecipeParser):
 
         # Override the schema value as the recipe conversion is now complete.
         self._v1_recipe._schema_version = SchemaVersion.V1  # pylint: disable=protected-access
+        # Update the variable table
+        self._v1_recipe._init_vars_tbl()  # pylint: disable=protected-access
+        # TODO update selector table when V1 selectors are supported!
 
         return self._v1_recipe.render(), self._msg_tbl, str(self._v1_recipe)
