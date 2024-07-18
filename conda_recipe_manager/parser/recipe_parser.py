@@ -491,6 +491,13 @@ class RecipeParser:
         """
         return self._is_modified
 
+    def get_schema_version(self) -> SchemaVersion:
+        """
+        Returns which version of the schema this recipe uses. Useful for preventing illegal operations.
+        :returns: Schema Version of the recipe file.
+        """
+        return self._schema_version
+
     def has_unsupported_statements(self) -> bool:
         """
         Runs a series of checks against the original recipe file.

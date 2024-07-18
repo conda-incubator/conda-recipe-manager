@@ -61,8 +61,8 @@ def test_construction(file: str, schema_version: SchemaVersion) -> None:
         "name": "types-toml",
         "version": "0.10.8.6",
     }
-    assert parser._schema_version == schema_version  # pylint: disable=protected-access
-    assert not parser._is_modified  # pylint: disable=protected-access
+    assert parser.get_schema_version() == schema_version
+    assert not parser.is_modified()
     # TODO assert on selectors table
 
     # TODO assert on tree structure
@@ -161,6 +161,7 @@ def test_round_trip(file: str) -> None:
 @pytest.mark.parametrize(
     "file,substitute,expected",
     [
+        # V0 Recipes
         (
             "simple-recipe.yaml",
             False,
@@ -292,6 +293,7 @@ def test_round_trip(file: str) -> None:
 def test_render_to_object(file: str, substitute: bool, expected: JsonType) -> None:
     """
     Tests rendering a recipe to an object format.
+    TODO: Does not work with V1 recipes; if/then selectors crash with KeyError
     :param file: File to load and test against
     :param substitute: True to run the function with JINJA substitutions on, False for off
     :param expected: Expected value to return
