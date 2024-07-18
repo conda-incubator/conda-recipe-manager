@@ -109,15 +109,25 @@ class RecipeParser:
             static. Also, during construction, we shouldn't be using a variables until the entire recipe is read/parsed.
         :returns: Pythonic data corresponding to the line of YAML
         """
-
         output: JsonType = None
+
+        # V1 recipes use $-escaped JINJA substitutions that will not throw parse exceptions. If variable substitution
+        # is requested, we will need to handle that directly.
+        def _v1_sub_jinja() -> None:
+            if parser is not None and parser.get_schema_version() == SchemaVersion.V1:
+                output = RecipeParser._parse_yaml_recursive_sub(
+                    output, parser._render_jinja_vars  # pylint: disable=protected-access
+                )
+
         # Our first attempt handles special string cases that require quotes that the YAML parser drops. If that fails,
         # then we fall back to performing JINJA substitutions.
         try:
             try:
                 output = cast(JsonType, yaml.safe_load(s))
+                _v1_sub_jinja()
             except yaml.scanner.ScannerError:
                 output = cast(JsonType, yaml.safe_load(quote_special_strings(s)))
+                _v1_sub_jinja()
         except Exception:  # pylint: disable=broad-exception-caught
             # If a construction exception is thrown, attempt to re-parse by replacing Jinja macros (substrings in
             # `{{}}`) with friendly string substitution markers, then re-inject the substitutions back in. We classify
@@ -248,7 +258,7 @@ class RecipeParser:
                 case SchemaVersion.V0:
                     return 2, Regex.JINJA_V0_SUB
                 case SchemaVersion.V1:
-                    return 3, Regex.JINJA_V0_SUB
+                    return 3, Regex.JINJA_V1_SUB
 
         start_idx, sub_regex = _set_on_schema_version()
 
