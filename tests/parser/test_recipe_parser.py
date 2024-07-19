@@ -809,7 +809,15 @@ def test_find_value_raises(file: str, value: Primitives) -> None:
 ## Dependencies ##
 
 
-@pytest.mark.parametrize("file,expected", [("multi-output.yaml", True), ("simple-recipe.yaml", False)])
+@pytest.mark.parametrize(
+    "file,expected",
+    [
+        ("multi-output.yaml", True),
+        ("simple-recipe.yaml", False),
+        ("v1_format/v1_multi-output.yaml", True),
+        ("v1_format/v1_simple-recipe.yaml", False),
+    ],
+)
 def test_is_multi_output(file: str, expected: bool) -> None:
     """
     Validates if a recipe is in the multi-output format
