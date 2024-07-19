@@ -509,9 +509,14 @@ def test_contains_value(file: str, path: str, expected: bool) -> None:
         # Return a Jinja value
         ("simple-recipe.yaml", "/package/name", False, "{{ name|lower }}"),
         ("simple-recipe.yaml", "/package/name", True, "types-toml"),
+        ("simple-recipe.yaml", "/test_var_usage/foo", False, "{{ version }}"),
+        ("simple-recipe.yaml", "/test_var_usage/foo", True, "0.10.8.6"),
+        ("simple-recipe.yaml", "/test_var_usage/bar/1", False, "{{ zz_non_alpha_first }}"),
+        ("simple-recipe.yaml", "/test_var_usage/bar/1", True, 42),
         # Return a value in a list
         ("simple-recipe.yaml", "/requirements/host", False, ["setuptools", "fakereq"]),
         ("simple-recipe.yaml", "/requirements/host/", False, ["setuptools", "fakereq"]),
+        ("simple-recipe.yaml", "/requirements/host", True, ["setuptools", "fakereq"]),
         ("simple-recipe.yaml", "/requirements/host/0", False, "setuptools"),
         ("simple-recipe.yaml", "/requirements/host/1", False, "fakereq"),
         # Regression: A list containing 1 value may be interpreted as the base type by YAML parsers. This can wreak
@@ -526,6 +531,21 @@ def test_contains_value(file: str, path: str, expected: bool) -> None:
         (
             "simple-recipe.yaml",
             "/test_var_usage",
+            False,
+            {
+                "foo": "{{ version }}",
+                "bar": [
+                    "baz",
+                    "{{ zz_non_alpha_first }}",
+                    "blah",
+                    "This {{ name }} is silly",
+                    "last",
+                ],
+            },
+        ),
+        (
+            "simple-recipe.yaml",
+            "/test_var_usage",
             True,
             {
                 "foo": "0.10.8.6",
@@ -537,6 +557,18 @@ def test_contains_value(file: str, path: str, expected: bool) -> None:
                     "last",
                 ],
             },
+        ),
+        (
+            "simple-recipe.yaml",
+            "/test_var_usage/bar",
+            True,
+            [
+                "baz",
+                42,
+                "blah",
+                "This types-toml is silly",
+                "last",
+            ],
         ),
         ## simple-recipe_multiline_strings.yaml ##
         # Return multiline string variants
@@ -578,6 +610,10 @@ def test_contains_value(file: str, path: str, expected: bool) -> None:
         ),
         ("v1_format/v1_simple-recipe.yaml", "/package/name", False, "${{ name|lower }}"),
         ("v1_format/v1_simple-recipe.yaml", "/package/name", True, "types-toml"),
+        ("v1_format/v1_simple-recipe.yaml", "/test_var_usage/foo", False, "${{ version }}"),
+        ("v1_format/v1_simple-recipe.yaml", "/test_var_usage/foo", True, "0.10.8.6"),
+        ("v1_format/v1_simple-recipe.yaml", "/test_var_usage/bar/1", False, "${{ zz_non_alpha_first }}"),
+        ("v1_format/v1_simple-recipe.yaml", "/test_var_usage/bar/1", True, 42),
         (
             "v1_format/v1_simple-recipe.yaml",
             "/requirements/host",
@@ -588,6 +624,12 @@ def test_contains_value(file: str, path: str, expected: bool) -> None:
             "v1_format/v1_simple-recipe.yaml",
             "/requirements/host/",
             False,
+            [{"if": "unix", "then": "setuptools"}, {"if": "unix", "then": "fakereq"}],
+        ),
+        (
+            "v1_format/v1_simple-recipe.yaml",
+            "/requirements/host",
+            True,
             [{"if": "unix", "then": "setuptools"}, {"if": "unix", "then": "fakereq"}],
         ),
         # TODO fix V1_SUPPORT: yaml.parser.ParserError: while parsing a block collection
@@ -602,6 +644,21 @@ def test_contains_value(file: str, path: str, expected: bool) -> None:
         (
             "v1_format/v1_simple-recipe.yaml",
             "/test_var_usage",
+            False,
+            {
+                "foo": "${{ version }}",
+                "bar": [
+                    "baz",
+                    "${{ zz_non_alpha_first }}",
+                    "blah",
+                    "This ${{ name }} is silly",
+                    "last",
+                ],
+            },
+        ),
+        (
+            "v1_format/v1_simple-recipe.yaml",
+            "/test_var_usage",
             True,
             {
                 "foo": "0.10.8.6",
@@ -613,6 +670,18 @@ def test_contains_value(file: str, path: str, expected: bool) -> None:
                     "last",
                 ],
             },
+        ),
+        (
+            "v1_format/v1_simple-recipe.yaml",
+            "/test_var_usage/bar",
+            True,
+            [
+                "baz",
+                42,
+                "blah",
+                "This types-toml is silly",
+                "last",
+            ],
         ),
         ## multi-output.yaml ##
         ("multi-output.yaml", "/outputs/0/build/run_exports/0", False, "bar"),
@@ -637,57 +706,29 @@ def test_contains_value(file: str, path: str, expected: bool) -> None:
 def test_get_value(file: str, path: str, sub_vars: bool, expected: JsonType) -> None:
     """
     Tests retrieval of a value from a parsed YAML example.
+    :param file: File to work against
+    :param path: Target input path
+    :param sub_vars: True to substitute JINJA variables. False otherwise.
+    :param expected: Expected result of the test
     """
     parser = load_recipe(file)
     assert parser.get_value(path, sub_vars=sub_vars) == expected
     assert not parser.is_modified()
 
 
-def test_get_value_not_found() -> None:
+@pytest.mark.parametrize("file", ["simple-recipe.yaml", "v1_format/v1_simple-recipe.yaml"])
+def test_get_value_not_found(file: str) -> None:
     """
     Tests failure to retrieve a value from a parsed YAML example.
+    :param file: File to work against
     """
-    parser = load_recipe("simple-recipe.yaml")
+    parser = load_recipe(file)
     # Path not found cases
     with pytest.raises(KeyError):
         parser.get_value("/invalid/fake/path")
     assert parser.get_value("/invalid/fake/path", 42) == 42
     # Tests that a user can pass `None` without throwing
     assert parser.get_value("/invalid/fake/path", None) is None
-    assert not parser.is_modified()
-
-
-def test_get_value_with_var_subs() -> None:
-    """
-    Tests retrieval of a value from a parsed YAML example, with Jinja variable substitutions enabled.
-    """
-    parser = load_recipe("simple-recipe.yaml")
-    # No change on lines without any variable substitutions
-    assert parser.get_value("/requirements/host", sub_vars=True) == ["setuptools", "fakereq"]
-
-    ## Test base types
-    assert parser.get_value("/test_var_usage/foo", sub_vars=True) == "0.10.8.6"
-    assert parser.get_value("/test_var_usage/bar/1", sub_vars=True) == 42
-    # Test string with `|lower` function applied
-    assert parser.get_value("/package/name", sub_vars=True) == "types-toml"
-    # Test collection types
-    assert parser.get_value("/test_var_usage/bar", sub_vars=True) == [
-        "baz",
-        42,
-        "blah",
-        "This types-toml is silly",
-        "last",
-    ]
-    assert parser.get_value("/test_var_usage", sub_vars=True) == {
-        "foo": "0.10.8.6",
-        "bar": [
-            "baz",
-            42,
-            "blah",
-            "This types-toml is silly",
-            "last",
-        ],
-    }
     assert not parser.is_modified()
 
 
