@@ -964,12 +964,49 @@ def test_get_dependency_paths(file: str, expected: list[str]) -> None:
 ## Variables ##
 
 
-def test_list_variable() -> None:
+@pytest.mark.parametrize(
+    "file,expected",
+    [
+        ("simple-recipe.yaml", ["zz_non_alpha_first", "name", "version"]),
+        (
+            "cctools-ld64.yaml",
+            [
+                "cctools_version",
+                "cctools_sha256",
+                "ld64_version",
+                "ld64_sha256",
+                "dyld_version",
+                "dyld_sha256",
+                "clang_version",
+                "clang_sha256",
+                "native_compiler_subdir",
+            ],
+        ),
+        ("v1_format/v1_simple-recipe.yaml", ["zz_non_alpha_first", "name", "version"]),
+        (
+            "v1_format/v1_cctools-ld64.yaml",
+            [
+                "cctools_version",
+                "cctools_sha256",
+                "ld64_version",
+                "ld64_sha256",
+                "dyld_version",
+                "dyld_sha256",
+                "clang_version",
+                "clang_sha256",
+                "native_compiler_subdir",
+            ],
+        ),
+    ],
+)
+def test_list_variable(file: str, expected: list[str]) -> None:
     """
     Validates the list of variables found
+    :param file: File to test against
+    :param expected: Expected output
     """
-    parser = load_recipe("simple-recipe.yaml")
-    assert parser.list_variables() == ["zz_non_alpha_first", "name", "version"]
+    parser = load_recipe(file)
+    assert parser.list_variables() == expected
     assert not parser.is_modified()
 
 
