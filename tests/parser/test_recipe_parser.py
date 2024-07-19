@@ -1010,15 +1010,36 @@ def test_list_variable(file: str, expected: list[str]) -> None:
     assert not parser.is_modified()
 
 
-def test_contains_variable() -> None:
+@pytest.mark.parametrize(
+    "file,var,expected",
+    [
+        ("simple-recipe.yaml", "zz_non_alpha_first", True),
+        ("simple-recipe.yaml", "name", True),
+        ("simple-recipe.yaml", "version", True),
+        ("simple-recipe.yaml", "fake_var", False),
+        ("cctools-ld64.yaml", "cctools_version", True),
+        ("cctools-ld64.yaml", "ld64_sha256", True),
+        ("cctools-ld64.yaml", "native_compiler_subdir", True),
+        ("cctools-ld64.yaml", "native_compiler_subdirs", False),
+        ("v1_format/v1_simple-recipe.yaml", "zz_non_alpha_first", True),
+        ("v1_format/v1_simple-recipe.yaml", "name", True),
+        ("v1_format/v1_simple-recipe.yaml", "version", True),
+        ("v1_format/v1_simple-recipe.yaml", "fake_var", False),
+        ("v1_format/v1_cctools-ld64.yaml", "cctools_version", True),
+        ("v1_format/v1_cctools-ld64.yaml", "ld64_sha256", True),
+        ("v1_format/v1_cctools-ld64.yaml", "native_compiler_subdir", True),
+        ("v1_format/v1_cctools-ld64.yaml", "native_compiler_subdirs", False),
+    ],
+)
+def test_contains_variable(file: str, var: str, expected: bool) -> None:
     """
     Validates checking if a variable exists in a recipe
+    :param file: File to test against
+    :param var: Target JINJA variable
+    :param expected: Expected output
     """
-    parser = load_recipe("simple-recipe.yaml")
-    assert parser.contains_variable("zz_non_alpha_first")
-    assert parser.contains_variable("name")
-    assert parser.contains_variable("version")
-    assert not parser.contains_variable("fake_var")
+    parser = load_recipe(file)
+    assert parser.contains_variable(var) == expected
     assert not parser.is_modified()
 
 
