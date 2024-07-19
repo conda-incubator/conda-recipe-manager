@@ -824,8 +824,14 @@ class RecipeParser:
         paths: list[str] = []
 
         def _find_value_paths(node: Node, path_stack: StrStack) -> None:
-            # Special case: empty keys imply a null value, although they don't contain a null child.
-            if (value is None and node.is_empty_key()) or (node.is_leaf() and node.value == value):
+            # Special cases:
+            #   - Empty keys imply a null value, although they don't contain a null child.
+            #   - Types are checked so bools aren't simplified to "truthiness" evaluations.
+            if (value is None and node.is_empty_key()) or (
+                node.is_leaf()
+                and type(node.value) == type(value)  # pylint: disable=unidiomatic-typecheck
+                and node.value == value
+            ):
                 paths.append(stack_path_to_str(path_stack))
 
         traverse_all(self._root, _find_value_paths)

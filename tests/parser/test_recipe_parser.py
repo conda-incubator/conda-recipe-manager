@@ -12,7 +12,7 @@ import pytest
 from conda_recipe_manager.parser.enums import SchemaVersion, SelectorConflictMode
 from conda_recipe_manager.parser.exceptions import JsonPatchValidationException
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
-from conda_recipe_manager.types import JsonType
+from conda_recipe_manager.types import JsonType, Primitives
 from tests.file_loading import TEST_FILES_PATH, load_file, load_recipe
 
 # Long multi-line description string found in the `simple-recipe.yaml` test file
@@ -732,33 +732,77 @@ def test_get_value_not_found(file: str) -> None:
     assert not parser.is_modified()
 
 
-def test_find_value() -> None:
+@pytest.mark.parametrize(
+    "file,value,expected",
+    [
+        ## V0 Format ##
+        (
+            "simple-recipe.yaml",
+            None,
+            [
+                "/requirements/empty_field1",
+                "/requirements/empty_field2",
+                "/requirements/empty_field3",
+            ],
+        ),
+        ("simple-recipe.yaml", "fakereq", ["/requirements/host/1"]),
+        ("simple-recipe.yaml", True, ["/build/skip", "/build/is_true"]),
+        ("simple-recipe.yaml", "foo", ["/multi_level/list_1/0"]),
+        ("simple-recipe.yaml", "Apache-2.0 AND MIT", ["/about/license"]),
+        ("simple-recipe.yaml", 43, []),
+        ("simple-recipe.yaml", "fooz", []),
+        ("simple-recipe.yaml", "", []),
+        ## V1 Format ##
+        (
+            "v1_format/v1_simple-recipe.yaml",
+            None,
+            [
+                "/requirements/empty_field1",
+                "/requirements/empty_field2",
+                "/requirements/empty_field3",
+            ],
+        ),
+        ("v1_format/v1_simple-recipe.yaml", "fakereq", ["/requirements/host/1/then"]),
+        ("v1_format/v1_simple-recipe.yaml", True, ["/build/is_true"]),
+        ("v1_format/v1_simple-recipe.yaml", "foo", ["/multi_level/list_1/0"]),
+        ("v1_format/v1_simple-recipe.yaml", "Apache-2.0 AND MIT", ["/about/license"]),
+        ("v1_format/v1_simple-recipe.yaml", 43, []),
+        ("v1_format/v1_simple-recipe.yaml", "fooz", []),
+        ("v1_format/v1_simple-recipe.yaml", "", []),
+    ],
+)
+def test_find_value(file: str, value: Primitives, expected: list[str]) -> None:
     """
     Tests finding a value from a parsed YAML example.
+    :param file: File to work against
+    :param value: Target value
+    :param expected: Expected result of the test
     """
-    parser = load_recipe("simple-recipe.yaml")
-    # Values in the recipe
-    assert parser.find_value(None) == [
-        "/requirements/empty_field1",
-        "/requirements/empty_field2",
-        "/requirements/empty_field3",
-    ]
-    assert parser.find_value("fakereq") == ["/requirements/host/1"]
-    assert parser.find_value(True) == ["/build/skip", "/build/is_true"]
-    assert parser.find_value("foo") == ["/multi_level/list_1/0"]
-    assert parser.find_value("Apache-2.0 AND MIT") == ["/about/license"]
-    # Values not in the recipe
-    assert not parser.find_value(43)
-    assert not parser.find_value("fooz")
-    assert not parser.find_value("")
-    # Values that are not supported for searching
+    parser = load_recipe(file)
+    assert parser.find_value(value) == expected
+    assert not parser.is_modified()
+
+
+@pytest.mark.parametrize(
+    "file,value",
+    [
+        ("simple-recipe.yaml", ["foo", "bar"]),
+        ("simple-recipe.yaml", ("foo", "bar")),
+        ("simple-recipe.yaml", {"foo": "bar"}),
+        ("v1_format/v1_simple-recipe.yaml", ["foo", "bar"]),
+        ("v1_format/v1_simple-recipe.yaml", ("foo", "bar")),
+        ("v1_format/v1_simple-recipe.yaml", {"foo": "bar"}),
+    ],
+)
+def test_find_value_raises(file: str, value: Primitives) -> None:
+    """
+    Tests finding a value from a parsed YAML example that should throw a `ValueError`.
+    :param file: File to work against
+    :param value: Target value
+    """
+    parser = load_recipe(file)
     with pytest.raises(ValueError):
-        parser.find_value(["foo", "bar"])  # type: ignore[arg-type]
-    with pytest.raises(ValueError):
-        parser.find_value(("foo", "bar"))  # type: ignore[arg-type]
-    with pytest.raises(ValueError):
-        parser.find_value({"foo": "bar"})  # type: ignore[arg-type]
-    # Find does not modify the parser
+        parser.find_value(value)
     assert not parser.is_modified()
 
 
