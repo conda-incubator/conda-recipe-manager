@@ -834,6 +834,8 @@ def test_is_multi_output(file: str, expected: bool) -> None:
         ("simple-recipe.yaml", ["/"]),
         ("simple-recipe_comment_in_requirements.yaml", ["/"]),
         ("huggingface_hub.yaml", ["/"]),
+        ("v1_format/v1_simple-recipe.yaml", ["/"]),
+        ("v1_format/v1_multi-output.yaml", ["/", "/outputs/0", "/outputs/1"]),
     ],
 )
 def test_get_package_paths(file: str, expected: list[str]) -> None:
