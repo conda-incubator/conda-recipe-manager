@@ -1138,21 +1138,26 @@ def test_del_variable(file: str) -> None:
         parser.get_variable("name")
 
 
-def test_get_variable_references() -> None:
+@pytest.mark.parametrize(
+    "file,var,expected",
+    [
+        ("simple-recipe.yaml", "version", ["/test_var_usage/foo"]),
+        ("simple-recipe.yaml", "zz_non_alpha_first", ["/test_var_usage/bar/1"]),
+        ("simple-recipe.yaml", "name", ["/package/name", "/test_var_usage/bar/3"]),
+        ("v1_format/v1_simple-recipe.yaml", "version", ["/test_var_usage/foo"]),
+        ("v1_format/v1_simple-recipe.yaml", "zz_non_alpha_first", ["/test_var_usage/bar/1"]),
+        ("v1_format/v1_simple-recipe.yaml", "name", ["/package/name", "/test_var_usage/bar/3"]),
+    ],
+)
+def test_get_variable_references(file: str, var: str, expected: list[str]) -> None:
     """
     Tests generating a list of paths that use a variable
+    :param file: File to test against
+    :param var: Target JINJA variable
+    :param expected: Expected output
     """
-    parser = load_recipe("simple-recipe.yaml")
-    assert parser.get_variable_references("version") == [
-        "/test_var_usage/foo",
-    ]
-    assert parser.get_variable_references("zz_non_alpha_first") == [
-        "/test_var_usage/bar/1",
-    ]
-    assert parser.get_variable_references("name") == [
-        "/package/name",
-        "/test_var_usage/bar/3",
-    ]
+    parser = load_recipe(file)
+    assert parser.get_variable_references(var) == expected
     assert not parser.is_modified()
 
 
