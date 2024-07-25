@@ -1043,18 +1043,46 @@ def test_contains_variable(file: str, var: str, expected: bool) -> None:
     assert not parser.is_modified()
 
 
-def test_get_variable() -> None:
+@pytest.mark.parametrize(
+    "file,var,expected",
+    [
+        ("simple-recipe.yaml", "zz_non_alpha_first", 42),
+        ("simple-recipe.yaml", "name", "types-toml"),
+        ("simple-recipe.yaml", "version", "0.10.8.6"),
+        ("v1_format/v1_simple-recipe.yaml", "zz_non_alpha_first", 42),
+        ("v1_format/v1_simple-recipe.yaml", "name", "types-toml"),
+        ("v1_format/v1_simple-recipe.yaml", "version", "0.10.8.6"),
+    ],
+)
+def test_get_variable(file: str, var: str, expected: JsonType) -> None:
     """
     Tests the value returned from fetching a variable
+    :param file: File to test against
+    :param var: Target JINJA variable
+    :param expected: Expected output
     """
-    parser = load_recipe("simple-recipe.yaml")
-    assert parser.get_variable("zz_non_alpha_first") == 42
-    assert parser.get_variable("name") == "types-toml"
-    assert parser.get_variable("version") == "0.10.8.6"
+    parser = load_recipe(file)
+    assert parser.get_variable(var) == expected
+    assert not parser.is_modified()
+
+
+@pytest.mark.parametrize(
+    "file",
+    [
+        "simple-recipe.yaml",
+        "v1_format/v1_simple-recipe.yaml",
+    ],
+)
+def test_get_variable_dne(file: str) -> None:
+    """
+    Tests the value returned from fetching a variable when the variable does not exist
+    :param file: File to test against
+    """
+    parser = load_recipe(file)
     with pytest.raises(KeyError):
         parser.get_variable("fake_var")
     assert parser.get_variable("fake_var", 43) == 43
-    # Tests that a user can pass `None` without throwing
+    # Tests that a user can pass `None` without throwing (Python sentinel test)
     assert parser.get_variable("fake_var", None) is None
     assert not parser.is_modified()
 
