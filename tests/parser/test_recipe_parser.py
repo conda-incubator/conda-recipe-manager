@@ -1087,16 +1087,23 @@ def test_get_variable_dne(file: str) -> None:
     assert not parser.is_modified()
 
 
-def test_set_variable() -> None:
+@pytest.mark.parametrize(
+    "file",
+    [
+        "simple-recipe.yaml",
+        "v1_format/v1_simple-recipe.yaml",
+    ],
+)
+def test_set_variable(file: str) -> None:
     """
-    Tests setting and adding a variable
+    Tests setting and adding a variable. Ensures post-op state is accurate.
+    :param file: File to test against
     """
-    parser = load_recipe("simple-recipe.yaml")
+    parser = load_recipe(file)
     parser.set_variable("name", "foobar")
     parser.set_variable("zz_non_alpha_first", 24)
     # Ensure a missing variable gets added
     parser.set_variable("DNE", "The limit doesn't exist")
-    # Validate
     assert parser.is_modified()
     assert parser.list_variables() == [
         "zz_non_alpha_first",
@@ -1109,11 +1116,19 @@ def test_set_variable() -> None:
     assert parser.get_variable("DNE") == "The limit doesn't exist"
 
 
-def test_del_variable() -> None:
+@pytest.mark.parametrize(
+    "file",
+    [
+        "simple-recipe.yaml",
+        "v1_format/v1_simple-recipe.yaml",
+    ],
+)
+def test_del_variable(file: str) -> None:
     """
     Tests deleting a variable
+    :param file: File to test against
     """
-    parser = load_recipe("simple-recipe.yaml")
+    parser = load_recipe(file)
     parser.del_variable("name")
     # Ensure a missing var doesn't crash a delete
     parser.del_variable("DNE")
