@@ -1131,12 +1131,11 @@ def test_del_variable(file: str) -> None:
     parser = load_recipe(file)
     parser.del_variable("name")
     assert parser.is_modified()
+    # Ensure a missing variable doesn't crash a delete operation
+    parser.del_variable("DNE")
     assert parser.list_variables() == ["zz_non_alpha_first", "version"]
     with pytest.raises(KeyError):
         parser.get_variable("name")
-
-    # Ensure a missing variable doesn't crash a delete operation
-    parser.del_variable("DNE")
 
 
 def test_get_variable_references() -> None:
