@@ -126,7 +126,9 @@ def quote_special_strings(s: str, multiline_variant: MultilineVariant = Multilin
                 return True
         return False
 
-    if multiline_variant != MultilineVariant.NONE or Regex.JINJA_SUB.match(s):
+    # Do not mess with quotes in multiline strings or strings containing JINJA substitutions or JINJA functions used
+    # without substitution markers (like `match()`)
+    if multiline_variant != MultilineVariant.NONE or Regex.JINJA_SUB.match(s) or Regex.JINJA_FUNCTION_MATCH.search(s):
         return s
 
     # `*` is common enough that we query the set before checking every "startswith" option as a small optimization.

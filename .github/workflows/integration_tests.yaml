@@ -33,11 +33,11 @@ jobs:
             convert-success: 0.90
             rattler-success: 0.75
           - test-directory: bioconda_recipes_01
-            convert-success: 0.55
-            rattler-success: 0.35
+            convert-success: 0.85
+            rattler-success: 0.70
           - test-directory: bioconda_recipes_02
-            convert-success: 0.60
-            rattler-success: 0.45
+            convert-success: 0.85
+            rattler-success: 0.75
           - test-directory: bioconda_recipes_03
             convert-success: 0.85
             rattler-success: 0.55
