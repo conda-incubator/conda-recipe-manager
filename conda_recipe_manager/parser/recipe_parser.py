@@ -25,6 +25,7 @@ from typing import Callable, Final, Optional, TypeGuard, cast, no_type_check
 import yaml
 from jsonschema import validate as schema_validate
 
+from conda_recipe_manager.parser._is_modifiable import IsModifiable
 from conda_recipe_manager.parser._node import Node
 from conda_recipe_manager.parser._selector_info import SelectorInfo
 from conda_recipe_manager.parser._traverse import (
@@ -57,7 +58,7 @@ from conda_recipe_manager.parser.types import JSON_PATCH_SCHEMA, TAB_AS_SPACES, 
 from conda_recipe_manager.types import PRIMITIVES_TUPLE, JsonPatchType, JsonType, Primitives, SentinelType
 
 
-class RecipeParser:
+class RecipeParser(IsModifiable):
     """
     Class that parses a recipe file string. Provides many useful mechanisms for changing values in the document.
 
@@ -319,6 +320,7 @@ class RecipeParser:
         Constructs a RecipeParser instance.
         :param content: conda-build formatted recipe file, as a single text string.
         """
+        super().__init__()
         # The initial, raw, text is preserved for diffing and debugging purposes
         self._init_content: Final[str] = content
         # Indicates if the original content has changed
@@ -483,13 +485,6 @@ class RecipeParser:
         if self._schema_version != other._schema_version:
             return False
         return self.render() == other.render()
-
-    def is_modified(self) -> bool:
-        """
-        Indicates if the recipe has been changed since construction.
-        :returns: True if the recipe has changed. False otherwise.
-        """
-        return self._is_modified
 
     def get_schema_version(self) -> SchemaVersion:
         """

@@ -11,7 +11,7 @@ class IsModifiable:
     Base class that represents the ability for a class to track where it has been modified.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Constructs a modifiable object that has not been modified.
         """
