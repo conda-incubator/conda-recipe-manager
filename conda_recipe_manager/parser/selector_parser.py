@@ -1,6 +1,7 @@
 """
 File:           selector_parser.py
-Description:    TODO
+Description:    Custom parser for selector recipe selector syntax. This parser does not evaluate Python code directly,
+                and should therefore not be affected by the execution vulnerability in the V0 recipe format.
 """
 
 from __future__ import annotations
@@ -14,9 +15,9 @@ from conda_recipe_manager.parser.enums import LogicOp, Platform, SchemaVersion
 SelectorValue = LogicOp | Platform | str
 
 
-class SelectorNode:
+class _SelectorNode:
     """
-    Represents a node in a selector parse tree
+    Represents a node in a selector parse tree. This class should not be used outside of this module.
     """
 
     def __init__(self, value: str):
@@ -34,36 +35,36 @@ class SelectorNode:
                 return LogicOp(lower_val)
             return value
 
-        self._value: Final[SelectorValue] = _init_value()
-        self._children: list[SelectorNode] = []
+        self.value: Final[SelectorValue] = _init_value()
+        self.children: list[_SelectorNode] = []
 
     def __str__(self) -> str:
         """
         Returns a debug string representation of a node
         :returns: Node's debug string
         """
-        return f"Value: {self._value} | Children #: {len(self._children)}"
+        return f"Value: {self.value} | Children #: {len(self.children)}"
 
     def __repr__(self) -> str:
         """
         Returns a common string representation of a node
         :returns: Node's value
         """
-        return str(self._value)
+        return str(self.value)
 
     def is_op(self) -> bool:
         """
         Indicates if the node represents an operation
         :returns: True if the node represents an operation
         """
-        return self._value in LogicOp
+        return self.value in LogicOp
 
     def is_platform(self) -> bool:
         """
         Indicates if the node represents a build platform
         :returns: True if the node represents a build platform
         """
-        return self._value in Platform
+        return self.value in Platform
 
 
 class SelectorParser(IsModifiable):
@@ -71,22 +72,24 @@ class SelectorParser(IsModifiable):
     Parses a selector statement
     """
 
-    def _process_postfix_stack(stack: list[SelectorNode]) -> SelectorNode:
+    @staticmethod
+    def _process_postfix_stack(stack: list[_SelectorNode]) -> _SelectorNode:
         """
         Recursively processes the postfix stack of nodes, building a tree
         :returns: Current node in the tree
         """
         cur = stack.pop()
-        match cur._value:
+        match cur.value:
             case LogicOp.NOT:
-                cur._children = [SelectorParser._process_postfix_stack(stack)]
+                cur.children = [SelectorParser._process_postfix_stack(stack)]
             case LogicOp.AND | LogicOp.OR:
                 r = SelectorParser._process_postfix_stack(stack)
                 l = SelectorParser._process_postfix_stack(stack)
-                cur._children = [l, r]
+                cur.children = [l, r]
         return cur
 
-    def _parse_selector_tree(tokens: list[str]) -> SelectorNode:
+    @staticmethod
+    def _parse_selector_tree(tokens: list[str]) -> _SelectorNode:
         """
         Constructs a selector parse tree
         :param tokens: Selector tokens to process
@@ -94,11 +97,17 @@ class SelectorParser(IsModifiable):
         """
 
         # Shunting yard
-        op_stack: list[SelectorNode] = []
-        postfix_stack: list[SelectorNode] = []
+        op_stack: list[_SelectorNode] = []
+        postfix_stack: list[_SelectorNode] = []
         while tokens:
-            node = SelectorNode(tokens.pop(0))
+            node = _SelectorNode(tokens.pop(0))
             if node.is_op():
+                # `NOT` has the highest precedence. For example:
+                #   - `not osx and win` is interpreted as `(not osx) and win`
+                #   - In Python, `not True or True` is interpreted as `(not True) or True`, returning `True`
+                if node.value != LogicOp.NOT:
+                    while op_stack and op_stack[-1].value == LogicOp.NOT:
+                        postfix_stack.append(op_stack.pop())
                 op_stack.append(node)
                 continue
             postfix_stack.append(node)
@@ -129,7 +138,7 @@ class SelectorParser(IsModifiable):
 
         self._root = SelectorParser._parse_selector_tree(self._content.split())
 
-    def get_selected_platforms() -> set[Platform]:
+    def get_selected_platforms(self) -> set[Platform]:
         """
         Returns the set of platforms selected by this selector
         """
