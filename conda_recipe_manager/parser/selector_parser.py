@@ -10,10 +10,10 @@ from typing import Final
 
 from conda_recipe_manager.parser._is_modifiable import IsModifiable
 from conda_recipe_manager.parser.enums import LogicOp, SchemaVersion
-from conda_recipe_manager.parser.platform_types import Arch, OperatingSystem, Platform
+from conda_recipe_manager.parser.platform_types import Arch, OperatingSystem, Platform, PlatformQualifiers
 
 # A selector is comprised of known operators and special types, or (in V0 recipes) arbitrary Python strings
-SelectorValue = LogicOp | Platform | OperatingSystem | Arch | str
+SelectorValue = LogicOp | PlatformQualifiers | str
 
 
 class _SelectorNode:

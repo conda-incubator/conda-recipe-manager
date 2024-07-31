@@ -69,6 +69,10 @@ class Platform(StrEnum):
     # ("zos-z", {"zos", "z"}),
 
 
+# Type alias for any enumeration that could represent a set of target build platforms
+PlatformQualifiers = Arch | OperatingSystem | Platform
+
+
 def get_platforms_by_arch(arch: Arch | str) -> set[Platform]:
     """
     Given an architecture, return the list of supported build platforms.
