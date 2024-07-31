@@ -9,10 +9,11 @@ from __future__ import annotations
 from typing import Final
 
 from conda_recipe_manager.parser._is_modifiable import IsModifiable
-from conda_recipe_manager.parser.enums import LogicOp, Platform, SchemaVersion
+from conda_recipe_manager.parser.enums import LogicOp, SchemaVersion
+from conda_recipe_manager.parser.platform_types import Arch, OperatingSystem, Platform
 
 # A selector is comprised of known operators and special types, or (in V0 recipes) arbitrary Python strings
-SelectorValue = LogicOp | Platform | str
+SelectorValue = LogicOp | Platform | OperatingSystem | Arch | str
 
 
 class _SelectorNode:
@@ -31,6 +32,10 @@ class _SelectorNode:
             lower_val: Final[str] = value.lower()
             if lower_val in Platform:
                 return Platform(lower_val)
+            if lower_val in OperatingSystem:
+                return OperatingSystem(lower_val)
+            if lower_val in Arch:
+                return Arch(lower_val)
             if lower_val in LogicOp:
                 return LogicOp(lower_val)
             return value
