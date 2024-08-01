@@ -47,8 +47,8 @@ class Platform(StrEnum):
     LINUX_32 = "linux-32"
     LINUX_64 = "linux-64"
     LINUX_AARCH_64 = "linux-aarch64"
-    LINUX_V6L = "linux-armv6l"
-    LINUX_V7L = "linux-armv7l"
+    LINUX_ARM_V6L = "linux-armv6l"
+    LINUX_ARM_V7L = "linux-armv7l"
     LINUX_PPC_64 = "linux-ppc64"
     LINUX_PPC_64_LE = "linux-ppc64le"
     LINUX_RISC_V64 = "linux-riscv64"
@@ -102,9 +102,9 @@ def get_platforms_by_arch(arch: Arch | str) -> set[Platform]:
         case Arch.ARM_64:
             return {Platform.OSX_ARM_64, Platform.WIN_ARM_64}
         case Arch.ARM_V6L:
-            return {Platform.LINUX_V6L}
+            return {Platform.LINUX_ARM_V6L}
         case Arch.ARM_V7L:
-            return {Platform.LINUX_V7L}
+            return {Platform.LINUX_ARM_V7L}
         case Arch.PPC_64:
             return {Platform.LINUX_PPC_64}
         case Arch.PPC_64_LE:
@@ -131,8 +131,8 @@ def get_platforms_by_os(os: OperatingSystem | str) -> set[Platform]:
         Platform.LINUX_32,
         Platform.LINUX_64,
         Platform.LINUX_AARCH_64,
-        Platform.LINUX_V6L,
-        Platform.LINUX_V7L,
+        Platform.LINUX_ARM_V6L,
+        Platform.LINUX_ARM_V7L,
         Platform.LINUX_PPC_64,
         Platform.LINUX_PPC_64_LE,
         Platform.LINUX_RISC_V64,
