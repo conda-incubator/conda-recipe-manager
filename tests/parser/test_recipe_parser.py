@@ -834,6 +834,8 @@ def test_is_multi_output(file: str, expected: bool) -> None:
         ("simple-recipe.yaml", ["/"]),
         ("simple-recipe_comment_in_requirements.yaml", ["/"]),
         ("huggingface_hub.yaml", ["/"]),
+        ("v1_format/v1_simple-recipe.yaml", ["/"]),
+        ("v1_format/v1_multi-output.yaml", ["/", "/outputs/0", "/outputs/1"]),
     ],
 )
 def test_get_package_paths(file: str, expected: list[str]) -> None:
@@ -883,6 +885,23 @@ def test_append_to_path(base: str, ext: str, expected: str) -> None:
             ["/requirements/host/0", "/requirements/host/1", "/requirements/run/0"],
         ),
         (
+            "cctools-ld64.yaml",
+            [
+                "/requirements/build/0",
+                "/requirements/build/1",
+                "/requirements/build/2",
+                "/requirements/build/3",
+                "/requirements/host/0",
+                "/requirements/host/1",
+                "/requirements/host/2",
+                "/outputs/0/requirements/run/0",
+                "/outputs/1/requirements/host/0",
+                "/outputs/1/requirements/host/1",
+                "/outputs/1/requirements/run/0",
+                "/outputs/1/requirements/run/1",
+            ],
+        ),
+        (
             "huggingface_hub.yaml",
             [
                 "/requirements/host/0",
@@ -903,6 +922,34 @@ def test_append_to_path(base: str, ext: str, expected: str) -> None:
                 "/requirements/run_constrained/2",
             ],
         ),
+        (
+            "v1_format/v1_multi-output.yaml",
+            [
+                "/outputs/1/requirements/build/0",
+                "/outputs/1/requirements/build/1",
+                "/outputs/1/requirements/build/2",
+                "/outputs/1/requirements/build/3",
+                "/outputs/1/requirements/run/0",
+            ],
+        ),
+        ("v1_format/v1_simple-recipe.yaml", ["/requirements/host/0", "/requirements/host/1", "/requirements/run/0"]),
+        (
+            "v1_format/v1_cctools-ld64.yaml",
+            [
+                "/requirements/build/0",
+                "/requirements/build/1",
+                "/requirements/build/2",
+                "/requirements/build/3",
+                "/requirements/host/0",
+                "/requirements/host/1",
+                "/requirements/host/2",
+                "/outputs/0/requirements/run/0",
+                "/outputs/1/requirements/host/0",
+                "/outputs/1/requirements/host/1",
+                "/outputs/1/requirements/run/0",
+                "/outputs/1/requirements/run/1",
+            ],
+        ),
     ],
 )
 def test_get_dependency_paths(file: str, expected: list[str]) -> None:
@@ -917,53 +964,146 @@ def test_get_dependency_paths(file: str, expected: list[str]) -> None:
 ## Variables ##
 
 
-def test_list_variable() -> None:
+@pytest.mark.parametrize(
+    "file,expected",
+    [
+        ("simple-recipe.yaml", ["zz_non_alpha_first", "name", "version"]),
+        (
+            "cctools-ld64.yaml",
+            [
+                "cctools_version",
+                "cctools_sha256",
+                "ld64_version",
+                "ld64_sha256",
+                "dyld_version",
+                "dyld_sha256",
+                "clang_version",
+                "clang_sha256",
+                "native_compiler_subdir",
+            ],
+        ),
+        ("v1_format/v1_simple-recipe.yaml", ["zz_non_alpha_first", "name", "version"]),
+        (
+            "v1_format/v1_cctools-ld64.yaml",
+            [
+                "cctools_version",
+                "cctools_sha256",
+                "ld64_version",
+                "ld64_sha256",
+                "dyld_version",
+                "dyld_sha256",
+                "clang_version",
+                "clang_sha256",
+                "native_compiler_subdir",
+            ],
+        ),
+    ],
+)
+def test_list_variable(file: str, expected: list[str]) -> None:
     """
     Validates the list of variables found
+    :param file: File to test against
+    :param expected: Expected output
     """
-    parser = load_recipe("simple-recipe.yaml")
-    assert parser.list_variables() == ["zz_non_alpha_first", "name", "version"]
+    parser = load_recipe(file)
+    assert parser.list_variables() == expected
     assert not parser.is_modified()
 
 
-def test_contains_variable() -> None:
+@pytest.mark.parametrize(
+    "file,var,expected",
+    [
+        ("simple-recipe.yaml", "zz_non_alpha_first", True),
+        ("simple-recipe.yaml", "name", True),
+        ("simple-recipe.yaml", "version", True),
+        ("simple-recipe.yaml", "fake_var", False),
+        ("cctools-ld64.yaml", "cctools_version", True),
+        ("cctools-ld64.yaml", "ld64_sha256", True),
+        ("cctools-ld64.yaml", "native_compiler_subdir", True),
+        ("cctools-ld64.yaml", "native_compiler_subdirs", False),
+        ("v1_format/v1_simple-recipe.yaml", "zz_non_alpha_first", True),
+        ("v1_format/v1_simple-recipe.yaml", "name", True),
+        ("v1_format/v1_simple-recipe.yaml", "version", True),
+        ("v1_format/v1_simple-recipe.yaml", "fake_var", False),
+        ("v1_format/v1_cctools-ld64.yaml", "cctools_version", True),
+        ("v1_format/v1_cctools-ld64.yaml", "ld64_sha256", True),
+        ("v1_format/v1_cctools-ld64.yaml", "native_compiler_subdir", True),
+        ("v1_format/v1_cctools-ld64.yaml", "native_compiler_subdirs", False),
+    ],
+)
+def test_contains_variable(file: str, var: str, expected: bool) -> None:
     """
     Validates checking if a variable exists in a recipe
+    :param file: File to test against
+    :param var: Target JINJA variable
+    :param expected: Expected output
     """
-    parser = load_recipe("simple-recipe.yaml")
-    assert parser.contains_variable("zz_non_alpha_first")
-    assert parser.contains_variable("name")
-    assert parser.contains_variable("version")
-    assert not parser.contains_variable("fake_var")
+    parser = load_recipe(file)
+    assert parser.contains_variable(var) == expected
     assert not parser.is_modified()
 
 
-def test_get_variable() -> None:
+@pytest.mark.parametrize(
+    "file,var,expected",
+    [
+        ("simple-recipe.yaml", "zz_non_alpha_first", 42),
+        ("simple-recipe.yaml", "name", "types-toml"),
+        ("simple-recipe.yaml", "version", "0.10.8.6"),
+        ("v1_format/v1_simple-recipe.yaml", "zz_non_alpha_first", 42),
+        ("v1_format/v1_simple-recipe.yaml", "name", "types-toml"),
+        ("v1_format/v1_simple-recipe.yaml", "version", "0.10.8.6"),
+    ],
+)
+def test_get_variable(file: str, var: str, expected: JsonType) -> None:
     """
     Tests the value returned from fetching a variable
+    :param file: File to test against
+    :param var: Target JINJA variable
+    :param expected: Expected output
     """
-    parser = load_recipe("simple-recipe.yaml")
-    assert parser.get_variable("zz_non_alpha_first") == 42
-    assert parser.get_variable("name") == "types-toml"
-    assert parser.get_variable("version") == "0.10.8.6"
+    parser = load_recipe(file)
+    assert parser.get_variable(var) == expected
+    assert not parser.is_modified()
+
+
+@pytest.mark.parametrize(
+    "file",
+    [
+        "simple-recipe.yaml",
+        "v1_format/v1_simple-recipe.yaml",
+    ],
+)
+def test_get_variable_dne(file: str) -> None:
+    """
+    Tests the value returned from fetching a variable when the variable does not exist
+    :param file: File to test against
+    """
+    parser = load_recipe(file)
     with pytest.raises(KeyError):
         parser.get_variable("fake_var")
     assert parser.get_variable("fake_var", 43) == 43
-    # Tests that a user can pass `None` without throwing
+    # Tests that a user can pass `None` without throwing (Python sentinel test)
     assert parser.get_variable("fake_var", None) is None
     assert not parser.is_modified()
 
 
-def test_set_variable() -> None:
+@pytest.mark.parametrize(
+    "file",
+    [
+        "simple-recipe.yaml",
+        "v1_format/v1_simple-recipe.yaml",
+    ],
+)
+def test_set_variable(file: str) -> None:
     """
-    Tests setting and adding a variable
+    Tests setting and adding a variable. Ensures post-op state is accurate.
+    :param file: File to test against
     """
-    parser = load_recipe("simple-recipe.yaml")
+    parser = load_recipe(file)
     parser.set_variable("name", "foobar")
     parser.set_variable("zz_non_alpha_first", 24)
     # Ensure a missing variable gets added
     parser.set_variable("DNE", "The limit doesn't exist")
-    # Validate
     assert parser.is_modified()
     assert parser.list_variables() == [
         "zz_non_alpha_first",
@@ -976,36 +1116,48 @@ def test_set_variable() -> None:
     assert parser.get_variable("DNE") == "The limit doesn't exist"
 
 
-def test_del_variable() -> None:
+@pytest.mark.parametrize(
+    "file",
+    [
+        "simple-recipe.yaml",
+        "v1_format/v1_simple-recipe.yaml",
+    ],
+)
+def test_del_variable(file: str) -> None:
     """
     Tests deleting a variable
+    :param file: File to test against
     """
-    parser = load_recipe("simple-recipe.yaml")
+    parser = load_recipe(file)
     parser.del_variable("name")
-    # Ensure a missing var doesn't crash a delete
-    parser.del_variable("DNE")
-    # Validate
     assert parser.is_modified()
+    # Ensure a missing variable doesn't crash a delete operation
+    parser.del_variable("DNE")
     assert parser.list_variables() == ["zz_non_alpha_first", "version"]
     with pytest.raises(KeyError):
         parser.get_variable("name")
 
 
-def test_get_variable_references() -> None:
+@pytest.mark.parametrize(
+    "file,var,expected",
+    [
+        ("simple-recipe.yaml", "version", ["/test_var_usage/foo"]),
+        ("simple-recipe.yaml", "zz_non_alpha_first", ["/test_var_usage/bar/1"]),
+        ("simple-recipe.yaml", "name", ["/package/name", "/test_var_usage/bar/3"]),
+        ("v1_format/v1_simple-recipe.yaml", "version", ["/test_var_usage/foo"]),
+        ("v1_format/v1_simple-recipe.yaml", "zz_non_alpha_first", ["/test_var_usage/bar/1"]),
+        ("v1_format/v1_simple-recipe.yaml", "name", ["/package/name", "/test_var_usage/bar/3"]),
+    ],
+)
+def test_get_variable_references(file: str, var: str, expected: list[str]) -> None:
     """
     Tests generating a list of paths that use a variable
+    :param file: File to test against
+    :param var: Target JINJA variable
+    :param expected: Expected output
     """
-    parser = load_recipe("simple-recipe.yaml")
-    assert parser.get_variable_references("version") == [
-        "/test_var_usage/foo",
-    ]
-    assert parser.get_variable_references("zz_non_alpha_first") == [
-        "/test_var_usage/bar/1",
-    ]
-    assert parser.get_variable_references("name") == [
-        "/package/name",
-        "/test_var_usage/bar/3",
-    ]
+    parser = load_recipe(file)
+    assert parser.get_variable_references(var) == expected
     assert not parser.is_modified()
 
 

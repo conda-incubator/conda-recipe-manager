@@ -982,7 +982,7 @@ class RecipeParser:
                 case SchemaVersion.V0:
                     return re.compile(r"{{.*" + var + r".*}}")
                 case SchemaVersion.V1:
-                    return re.compile(r"${{.*" + var + r".*}}")
+                    return re.compile(r"\${{.*" + var + r".*}}")
 
         var_re: Final[re.Pattern[str]] = _init_re()
 
