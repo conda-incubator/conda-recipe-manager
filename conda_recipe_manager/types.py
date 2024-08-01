@@ -5,7 +5,8 @@ Description:    Provides public types, type aliases, constants, and small classe
 
 from __future__ import annotations
 
-from typing import Final, Hashable, TypeVar, Union
+from collections.abc import Hashable
+from typing import Final, TypeVar, Union
 
 # Base types that can store value
 Primitives = Union[str, int, float, bool, None]

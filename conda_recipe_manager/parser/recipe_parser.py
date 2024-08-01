@@ -51,7 +51,7 @@ from conda_recipe_manager.parser._utils import (
     stringify_yaml,
     substitute_markers,
 )
-from conda_recipe_manager.parser.enums import SelectorConflictMode
+from conda_recipe_manager.parser.enums import SchemaVersion, SelectorConflictMode
 from conda_recipe_manager.parser.exceptions import JsonPatchValidationException
 from conda_recipe_manager.parser.types import JSON_PATCH_SCHEMA, TAB_AS_SPACES, TAB_SPACE_COUNT, MultilineVariant
 from conda_recipe_manager.types import PRIMITIVES_TUPLE, JsonPatchType, JsonType, Primitives, SentinelType
@@ -109,22 +109,32 @@ class RecipeParser:
             static. Also, during construction, we shouldn't be using a variables until the entire recipe is read/parsed.
         :returns: Pythonic data corresponding to the line of YAML
         """
-
         output: JsonType = None
+
+        # V1 recipes use $-escaped JINJA substitutions that will not throw parse exceptions. If variable substitution
+        # is requested, we will need to handle that directly.
+        def _v1_sub_jinja() -> None:
+            if parser is not None and parser.get_schema_version() == SchemaVersion.V1:
+                output = RecipeParser._parse_yaml_recursive_sub(
+                    output, parser._render_jinja_vars  # pylint: disable=protected-access
+                )
+
         # Our first attempt handles special string cases that require quotes that the YAML parser drops. If that fails,
         # then we fall back to performing JINJA substitutions.
         try:
             try:
                 output = cast(JsonType, yaml.safe_load(s))
+                _v1_sub_jinja()
             except yaml.scanner.ScannerError:
                 output = cast(JsonType, yaml.safe_load(quote_special_strings(s)))
+                _v1_sub_jinja()
         except Exception:  # pylint: disable=broad-exception-caught
             # If a construction exception is thrown, attempt to re-parse by replacing Jinja macros (substrings in
             # `{{}}`) with friendly string substitution markers, then re-inject the substitutions back in. We classify
             # all Jinja substitutions as string values, so we don't have to worry about the type of the actual
             # substitution.
-            sub_list: list[str] = Regex.JINJA_SUB.findall(s)
-            s = Regex.JINJA_SUB.sub(RECIPE_MANAGER_SUB_MARKER, s)
+            sub_list: list[str] = Regex.JINJA_V0_SUB.findall(s)
+            s = Regex.JINJA_V0_SUB.sub(RECIPE_MANAGER_SUB_MARKER, s)
             output = RecipeParser._parse_yaml_recursive_sub(
                 cast(JsonType, yaml.safe_load(s)), lambda d: substitute_markers(d, sub_list)
             )
@@ -241,10 +251,21 @@ class RecipeParser:
         :returns: The original value, augmented with Jinja substitutions. Types are re-rendered to account for multiline
             strings that may have been "normalized" prior to this call.
         """
+
+        # Initialize `schema_version` specific details.
+        def _set_on_schema_version() -> tuple[int, re.Pattern[str]]:
+            match self._schema_version:
+                case SchemaVersion.V0:
+                    return 2, Regex.JINJA_V0_SUB
+                case SchemaVersion.V1:
+                    return 3, Regex.JINJA_V1_SUB
+
+        start_idx, sub_regex = _set_on_schema_version()
+
         # Search the string, replacing all substitutions we can recognize
-        for match in cast(list[str], Regex.JINJA_SUB.findall(s)):
+        for match in cast(list[str], sub_regex.findall(s)):
             # The regex guarantees the string starts and ends with double braces
-            key = match[2:-2].strip()
+            key = match[start_idx:-2].strip()
             # Check for and interpret common JINJA functions
             # TODO add support for UPPER and REPLACE
             lower_match = Regex.JINJA_FUNCTION_LOWER.search(key)
@@ -258,6 +279,27 @@ class RecipeParser:
                     value = value.lower()
                 s = s.replace(match, value)
         return cast(JsonType, yaml.safe_load(s))
+
+    def _init_vars_tbl(self) -> None:
+        """
+        Initializes the variable table, `vars_tbl` based on the document content.
+        Requires parse-tree and `_schema_version` to be initialized.
+        """
+        # Tracks Jinja variables set by the file
+        self._vars_tbl: dict[str, JsonType] = {}
+
+        match self._schema_version:
+            case SchemaVersion.V0:
+                # Find all the set statements and record the values
+                for line in cast(list[str], Regex.JINJA_V0_SET_LINE.findall(self._init_content)):
+                    key = line[line.find("set") + len("set") : line.find("=")].strip()
+                    value = line[line.find("=") + len("=") : line.find("%}")].strip()
+                    try:
+                        self._vars_tbl[key] = ast.literal_eval(value)  # type: ignore[misc]
+                    except Exception:  # pylint: disable=broad-exception-caught
+                        self._vars_tbl[key] = value
+            case SchemaVersion.V1:
+                self._vars_tbl = cast(dict[str, JsonType], self.get_value("/context", {}))
 
     def _rebuild_selectors(self) -> None:
         """
@@ -292,21 +334,10 @@ class RecipeParser:
         # Indicates if the original content has changed
         self._is_modified = False
 
-        # Tracks Jinja variables set by the file
-        self._vars_tbl: dict[str, JsonType] = {}
-        # Find all the set statements and record the values
-        for line in cast(list[str], Regex.JINJA_SET_LINE.findall(self._init_content)):
-            key = line[line.find("set") + len("set") : line.find("=")].strip()
-            value = line[line.find("=") + len("=") : line.find("%}")].strip()
-            try:
-                self._vars_tbl[key] = ast.literal_eval(value)  # type: ignore[misc]
-            except Exception:  # pylint: disable=broad-exception-caught
-                self._vars_tbl[key] = value
-
         # Root of the parse tree
         self._root = Node(ROOT_NODE_VALUE)
         # Start by removing all Jinja lines. Then traverse line-by-line
-        sanitized_yaml = Regex.JINJA_LINE.sub("", self._init_content)
+        sanitized_yaml = Regex.JINJA_V0_LINE.sub("", self._init_content)
 
         # Read the YAML line-by-line, maintaining a stack to manage the last owning node in the tree.
         node_stack: list[Node] = [self._root]
@@ -382,6 +413,15 @@ class RecipeParser:
             # Update the last node for the next line interpretation
             last_node = new_node
 
+        # Auto-detect and deserialize the version of the recipe schema. This will change how the class behaves.
+        self._schema_version = SchemaVersion.V0
+        schema_version = cast(SchemaVersion | int, self.get_value("/schema_version", SchemaVersion.V0))
+        if isinstance(schema_version, int) and schema_version == 1:
+            self._schema_version = SchemaVersion.V1
+
+        # Initialize the variables table. This behavior changes per `schema_version`
+        self._init_vars_tbl()
+
         # Now that the tree is built, construct a selector look-up table that tracks all the nodes that use a particular
         # selector. This will make it easier to.
         #
@@ -428,6 +468,7 @@ class RecipeParser:
         tree_lines: list[str] = []
         RecipeParser._str_tree_recurse(self._root, 0, tree_lines)
         s += "RecipeParser Instance\n"
+        s += f"- Schema Version: {self._schema_version}\n"
         s += "- Variables Table:\n"
         s += json.dumps(self._vars_tbl, indent=TAB_AS_SPACES) + "\n"
         s += "- Selectors Table:\n"
@@ -449,6 +490,8 @@ class RecipeParser:
         """
         if not isinstance(other, RecipeParser):
             raise TypeError
+        if self._schema_version != other._schema_version:
+            return False
         return self.render() == other.render()
 
     def is_modified(self) -> bool:
@@ -457,6 +500,13 @@ class RecipeParser:
         :returns: True if the recipe has changed. False otherwise.
         """
         return self._is_modified
+
+    def get_schema_version(self) -> SchemaVersion:
+        """
+        Returns which version of the schema this recipe uses. Useful for preventing illegal operations.
+        :returns: Schema Version of the recipe file.
+        """
+        return self._schema_version
 
     def has_unsupported_statements(self) -> bool:
         """
@@ -576,15 +626,17 @@ class RecipeParser:
         """
         lines: list[str] = []
 
-        # Render variable set section
-        for key, val in self._vars_tbl.items():
-            # Double quote strings
-            if isinstance(val, str):
-                val = f'"{val}"'
-            lines.append(f"{{% set {key} = {val} %}}")
-        # Add spacing if variables have been set
-        if len(self._vars_tbl):
-            lines.append("")
+        # Render variable set section for V0 recipes. V1 recipes have variables stored in the parse tree under
+        # `/context`.
+        if self._schema_version == SchemaVersion.V0:
+            for key, val in self._vars_tbl.items():
+                # Double quote strings
+                if isinstance(val, str):
+                    val = f'"{val}"'
+                lines.append(f"{{% set {key} = {val} %}}")
+            # Add spacing if variables have been set
+            if len(self._vars_tbl):
+                lines.append("")
 
         # Render parse-tree, -1 is passed in as the "root-level" is not directly rendered in a YAML file; it is merely
         # implied.
@@ -772,8 +824,14 @@ class RecipeParser:
         paths: list[str] = []
 
         def _find_value_paths(node: Node, path_stack: StrStack) -> None:
-            # Special case: empty keys imply a null value, although they don't contain a null child.
-            if (value is None and node.is_empty_key()) or (node.is_leaf() and node.value == value):
+            # Special cases:
+            #   - Empty keys imply a null value, although they don't contain a null child.
+            #   - Types are checked so bools aren't simplified to "truthiness" evaluations.
+            if (value is None and node.is_empty_key()) or (
+                node.is_leaf()
+                and type(node.value) == type(value)  # pylint: disable=unidiomatic-typecheck
+                and node.value == value
+            ):
                 paths.append(stack_path_to_str(path_stack))
 
         traverse_all(self._root, _find_value_paths)
@@ -916,9 +974,17 @@ class RecipeParser:
             return []
 
         path_list: list[str] = []
-        # The text between the braces is very forgiving. Just searching for whitespace characters means we will never
-        # match the very common `{{ name | lower }}` expression, or similar piping functions.
-        var_re = re.compile(r"{{.*" + var + r".*}}")
+
+        # The regular expression between the braces is very forgiving to match JINJA expressions like
+        # `{{ name | lower }}`
+        def _init_re() -> re.Pattern[str]:
+            match self._schema_version:
+                case SchemaVersion.V0:
+                    return re.compile(r"{{.*" + var + r".*}}")
+                case SchemaVersion.V1:
+                    return re.compile(r"\${{.*" + var + r".*}}")
+
+        var_re: Final[re.Pattern[str]] = _init_re()
 
         def _collect_var_refs(node: Node, path: StrStack) -> None:
             # Variables can only be found inside string values.
@@ -1039,7 +1105,7 @@ class RecipeParser:
         # If the comment is not a selector, put the selector first, then append the comment.
         else:
             # Strip the existing comment of it's leading `#` symbol
-            comment = f"# {selector} {node.comment.replace('#', '', 1).strip()}"
+            comment = f"# {selector} " + node.comment.replace("#", "", 1).strip()
 
         node.comment = comment
         # Some lines of YAML correspond to multiple nodes. For consistency, we need to ensure that comments are

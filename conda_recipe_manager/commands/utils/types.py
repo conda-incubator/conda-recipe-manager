@@ -38,6 +38,7 @@ class ExitCode(IntEnum):
     RENDER_EXCEPTION = 103
     READ_EXCEPTION = 104
     PRE_PROCESS_EXCEPTION = 105
+    ILLEGAL_OPERATION = 106
 
     ## rattler-bulk-build ##
     # NOTE: There may be overlap with rattler-build

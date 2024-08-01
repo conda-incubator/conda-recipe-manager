@@ -154,12 +154,16 @@ class Regex:
     SELECTOR_PYTHON_VERSION_PY3K_REPLACEMENT: Final[re.Pattern[str]] = re.compile(r"py3k")
 
     ## Jinja regular expressions ##
-    JINJA_SUB: Final[re.Pattern[str]] = re.compile(r"{{\s*" + _JINJA_VAR_FUNCTION_PATTERN + r"\s*}}")
-    JINJA_LINE: Final[re.Pattern[str]] = re.compile(r"({%.*%}|{#.*#})\n")
-    JINJA_SET_LINE: Final[re.Pattern[str]] = re.compile(r"{%\s*set\s*" + _JINJA_VAR_FUNCTION_PATTERN + r"\s*=.*%}\s*\n")
+    JINJA_V0_SUB: Final[re.Pattern[str]] = re.compile(r"{{\s*" + _JINJA_VAR_FUNCTION_PATTERN + r"\s*}}")
+    JINJA_V0_LINE: Final[re.Pattern[str]] = re.compile(r"({%.*%}|{#.*#})\n")
+    JINJA_V0_SET_LINE: Final[re.Pattern[str]] = re.compile(
+        r"{%\s*set\s*" + _JINJA_VAR_FUNCTION_PATTERN + r"\s*=.*%}\s*\n"
+    )
     # Useful for replacing the older `{{` JINJA substitution with the newer `${{` WITHOUT accidentally doubling-up the
     # newer syntax when multiple replacements are possible.
     JINJA_REPLACE_V0_STARTING_MARKER: Final[re.Pattern[str]] = re.compile(r"(?<!\$)\{\{")
+
+    JINJA_V1_SUB: Final[re.Pattern[str]] = re.compile(r"\${{\s*" + _JINJA_VAR_FUNCTION_PATTERN + r"\s*}}")
 
     # All recognized JINJA functions are kept in a set for the convenience of trying to match against all of them.
     # Group 1 contains the function name, Group 2 contains the arguments, if any.

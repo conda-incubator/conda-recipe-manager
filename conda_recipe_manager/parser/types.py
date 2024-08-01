@@ -8,6 +8,7 @@ from __future__ import annotations
 from enum import StrEnum, auto
 from typing import Final
 
+from conda_recipe_manager.parser.enums import SchemaVersion
 from conda_recipe_manager.types import Primitives, SchemaType
 
 #### Types ####
@@ -20,7 +21,7 @@ NodeValue = Primitives | list[str]
 
 # The "new" recipe format introduces the concept of a schema version. Presumably the "old" recipe format would be
 # considered "0". When converting to the V1 format, we'll use this constant value.
-CURRENT_RECIPE_SCHEMA_FORMAT: Final[int] = 1
+CURRENT_RECIPE_SCHEMA_FORMAT: Final[int] = SchemaVersion.V1.value
 
 # Indicates how many spaces are in a level of indentation
 TAB_SPACE_COUNT: Final[int] = 2
@@ -181,10 +182,10 @@ class MessageTable:
             return f"{s}s"
 
         num_errors: Final[int] = 0 if MessageCategory.ERROR not in self._tbl else len(self._tbl[MessageCategory.ERROR])
-        errors: Final[str] = f"{num_errors} {_pluralize(num_errors, 'error')}"
+        errors: Final[str] = f"{num_errors} " + _pluralize(num_errors, "error")
         num_warnings: Final[int] = (
             0 if MessageCategory.WARNING not in self._tbl else len(self._tbl[MessageCategory.WARNING])
         )
-        warnings: Final[str] = f"{num_warnings} {_pluralize(num_warnings, 'warning')}"
+        warnings: Final[str] = f"{num_warnings} " + _pluralize(num_warnings, "warning")
 
         return f"{errors} and {warnings} were found."
