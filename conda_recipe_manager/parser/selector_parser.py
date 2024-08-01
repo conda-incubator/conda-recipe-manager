@@ -55,10 +55,12 @@ class _SelectorNode:
 
     def __str__(self) -> str:
         """
-        Returns a debug string representation of a node
+        Returns a debug string representation of a sub-tree rooted at this node.
         :returns: Node's debug string
         """
-        return f"Value: {self.value} | Left: {self.l_node} | Right: {self.r_node}"
+        l_str: Final[str] = "" if self.l_node is None else f" L {self.l_node}"
+        r_str: Final[str] = "" if self.r_node is None else f" R {self.r_node}"
+        return f"{self.value}{l_str}{r_str}"
 
     def __repr__(self) -> str:
         """
@@ -144,6 +146,13 @@ class SelectorParser(IsModifiable):
         self._content: Final[str] = _init_content()
 
         self._root = SelectorParser._parse_selector_tree(self._content.split())
+
+    def __str__(self) -> str:
+        """
+        Returns a debug string representation of the parser.
+        :returns: Parser's debug string
+        """
+        return f"Schema: V{self._schema_version} | Tree: {self._root}"
 
     def get_selected_platforms(self) -> set[Platform]:
         """
