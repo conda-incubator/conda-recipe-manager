@@ -12,7 +12,7 @@ import pytest
 from conda_recipe_manager.parser.enums import SchemaVersion, SelectorConflictMode
 from conda_recipe_manager.parser.exceptions import JsonPatchValidationException
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
-from conda_recipe_manager.types import JsonType
+from conda_recipe_manager.types import JsonType, Primitives
 from tests.file_loading import TEST_FILES_PATH, load_file, load_recipe
 
 # Long multi-line description string found in the `simple-recipe.yaml` test file
@@ -345,46 +345,96 @@ def test_render_to_object_multi_output() -> None:
 ## Values ##
 
 
-def test_list_value_paths() -> None:
+@pytest.mark.parametrize(
+    "file,expected",
+    [
+        (
+            "simple-recipe.yaml",
+            [
+                "/package/name",
+                "/build/number",
+                "/build/skip",
+                "/build/is_true",
+                "/requirements/empty_field1",
+                "/requirements/host/0",
+                "/requirements/host/1",
+                "/requirements/empty_field2",
+                "/requirements/run/0",
+                "/requirements/empty_field3",
+                "/about/summary",
+                "/about/description",
+                "/about/license",
+                "/multi_level/list_1/0",
+                "/multi_level/list_1/1",
+                "/multi_level/list_2/0",
+                "/multi_level/list_2/1",
+                "/multi_level/list_2/2",
+                "/multi_level/list_3/0",
+                "/multi_level/list_3/1",
+                "/multi_level/list_3/2",
+                "/test_var_usage/foo",
+                "/test_var_usage/bar/0",
+                "/test_var_usage/bar/1",
+                "/test_var_usage/bar/2",
+                "/test_var_usage/bar/3",
+                "/test_var_usage/bar/4",
+            ],
+        ),
+        (
+            "v1_format/v1_simple-recipe.yaml",
+            [
+                "/schema_version",
+                "/context/zz_non_alpha_first",
+                "/context/name",
+                "/context/version",
+                "/package/name",
+                "/build/number",
+                "/build/skip",
+                "/build/is_true",
+                "/requirements/empty_field1",
+                "/requirements/host/0/if",
+                "/requirements/host/0/then",
+                "/requirements/host/1/if",
+                "/requirements/host/1/then",
+                "/requirements/empty_field2",
+                "/requirements/run/0",
+                "/requirements/empty_field3",
+                "/about/summary",
+                "/about/description",
+                "/about/license",
+                "/multi_level/list_1/0",
+                "/multi_level/list_1/1",
+                "/multi_level/list_2/0",
+                "/multi_level/list_2/1",
+                "/multi_level/list_2/2",
+                "/multi_level/list_3/0",
+                "/multi_level/list_3/1",
+                "/multi_level/list_3/2",
+                "/test_var_usage/foo",
+                "/test_var_usage/bar/0",
+                "/test_var_usage/bar/1",
+                "/test_var_usage/bar/2",
+                "/test_var_usage/bar/3",
+                "/test_var_usage/bar/4",
+            ],
+        ),
+    ],
+)
+def test_list_value_paths(file: str, expected: list[str]) -> None:
     """
     Tests retrieval of all value paths
+    :param file: Recipe file to test with
+    :param expected: Expected result
     """
-    parser = load_recipe("simple-recipe.yaml")
-    assert parser.list_value_paths() == [
-        "/package/name",
-        "/build/number",
-        "/build/skip",
-        "/build/is_true",
-        "/requirements/empty_field1",
-        "/requirements/host/0",
-        "/requirements/host/1",
-        "/requirements/empty_field2",
-        "/requirements/run/0",
-        "/requirements/empty_field3",
-        "/about/summary",
-        "/about/description",
-        "/about/license",
-        "/multi_level/list_1/0",
-        "/multi_level/list_1/1",
-        "/multi_level/list_2/0",
-        "/multi_level/list_2/1",
-        "/multi_level/list_2/2",
-        "/multi_level/list_3/0",
-        "/multi_level/list_3/1",
-        "/multi_level/list_3/2",
-        "/test_var_usage/foo",
-        "/test_var_usage/bar/0",
-        "/test_var_usage/bar/1",
-        "/test_var_usage/bar/2",
-        "/test_var_usage/bar/3",
-        "/test_var_usage/bar/4",
-    ]
+    parser = load_recipe(file)
+    assert parser.list_value_paths() == expected
 
 
 @pytest.mark.parametrize(
     "file,path,expected",
     [
         ## simple-recipe.yaml ##
+        ("simple-recipe.yaml", "/schema_version", False),
         ("simple-recipe.yaml", "/build/number", True),
         ("simple-recipe.yaml", "/build/number/", True),
         ("simple-recipe.yaml", "/build", True),
@@ -401,6 +451,19 @@ def test_list_value_paths() -> None:
         ("multi-output.yaml", "/outputs/1/requirements/build/2", True),
         ("multi-output.yaml", "/outputs/1/requirements/build/3", True),
         ("multi-output.yaml", "/outputs/1/requirements/build/4", False),
+        ## v1_simple-recipe.yaml ##
+        ("v1_format/v1_simple-recipe.yaml", "/schema_version", True),
+        ("v1_format/v1_simple-recipe.yaml", "/build/number", True),
+        ("v1_format/v1_simple-recipe.yaml", "/build/number/", True),
+        ("v1_format/v1_simple-recipe.yaml", "/build", True),
+        ("v1_format/v1_simple-recipe.yaml", "/requirements/host/0", True),
+        ("v1_format/v1_simple-recipe.yaml", "/requirements/host/1", True),
+        (
+            "v1_format/v1_simple-recipe.yaml",
+            "/multi_level/list_1/1",
+            True,
+        ),  # Comments in lists could throw-off array indexing
+        ("v1_format/v1_simple-recipe.yaml", "/invalid/fake/path", False),
     ],
 )
 def test_contains_value(file: str, path: str, expected: bool) -> None:
@@ -443,11 +506,17 @@ def test_contains_value(file: str, path: str, expected: bool) -> None:
                 "is_true": True,
             },
         ),
-        # Return a Jinja value (substitution flag not in use)
+        # Return a Jinja value
         ("simple-recipe.yaml", "/package/name", False, "{{ name|lower }}"),
+        ("simple-recipe.yaml", "/package/name", True, "types-toml"),
+        ("simple-recipe.yaml", "/test_var_usage/foo", False, "{{ version }}"),
+        ("simple-recipe.yaml", "/test_var_usage/foo", True, "0.10.8.6"),
+        ("simple-recipe.yaml", "/test_var_usage/bar/1", False, "{{ zz_non_alpha_first }}"),
+        ("simple-recipe.yaml", "/test_var_usage/bar/1", True, 42),
         # Return a value in a list
         ("simple-recipe.yaml", "/requirements/host", False, ["setuptools", "fakereq"]),
         ("simple-recipe.yaml", "/requirements/host/", False, ["setuptools", "fakereq"]),
+        ("simple-recipe.yaml", "/requirements/host", True, ["setuptools", "fakereq"]),
         ("simple-recipe.yaml", "/requirements/host/0", False, "setuptools"),
         ("simple-recipe.yaml", "/requirements/host/1", False, "fakereq"),
         # Regression: A list containing 1 value may be interpreted as the base type by YAML parsers. This can wreak
@@ -456,23 +525,24 @@ def test_contains_value(file: str, path: str, expected: bool) -> None:
         # Return a multiline string
         ("simple-recipe.yaml", "/about/description", False, SIMPLE_DESCRIPTION),
         ("simple-recipe.yaml", "/about/description/", False, SIMPLE_DESCRIPTION),
-        # Return multiline string variants
-        ("simple-recipe_multiline_strings.yaml", "/about/description0", False, QUICK_FOX_PIPE),
-        ("simple-recipe_multiline_strings.yaml", "/about/description1", False, QUICK_FOX_PIPE_PLUS),
-        ("simple-recipe_multiline_strings.yaml", "/about/description2", False, QUICK_FOX_PIPE_MINUS),
-        ("simple-recipe_multiline_strings.yaml", "/about/description3", False, QUICK_FOX_CARROT),
-        ("simple-recipe_multiline_strings.yaml", "/about/description4", False, QUICK_FOX_CARROT_PLUS),
-        ("simple-recipe_multiline_strings.yaml", "/about/description5", False, QUICK_FOX_CARROT_MINUS),
-        # Return multiline string variants, with substitution
-        ("simple-recipe_multiline_strings.yaml", "/about/description0", True, QUICK_FOX_SUB_PIPE),
-        ("simple-recipe_multiline_strings.yaml", "/about/description1", True, QUICK_FOX_SUB_PIPE_PLUS),
-        ("simple-recipe_multiline_strings.yaml", "/about/description2", True, QUICK_FOX_SUB_PIPE_MINUS),
-        ("simple-recipe_multiline_strings.yaml", "/about/description3", True, QUICK_FOX_SUB_CARROT),
-        ("simple-recipe_multiline_strings.yaml", "/about/description4", True, QUICK_FOX_SUB_CARROT_PLUS),
-        ("simple-recipe_multiline_strings.yaml", "/about/description5", True, QUICK_FOX_SUB_CARROT_MINUS),
         # Comments in lists could throw-off array indexing
         ("simple-recipe.yaml", "/multi_level/list_1/1", False, "bar"),
         # Render a recursive, complex type.
+        (
+            "simple-recipe.yaml",
+            "/test_var_usage",
+            False,
+            {
+                "foo": "{{ version }}",
+                "bar": [
+                    "baz",
+                    "{{ zz_non_alpha_first }}",
+                    "blah",
+                    "This {{ name }} is silly",
+                    "last",
+                ],
+            },
+        ),
         (
             "simple-recipe.yaml",
             "/test_var_usage",
@@ -487,6 +557,131 @@ def test_contains_value(file: str, path: str, expected: bool) -> None:
                     "last",
                 ],
             },
+        ),
+        (
+            "simple-recipe.yaml",
+            "/test_var_usage/bar",
+            True,
+            [
+                "baz",
+                42,
+                "blah",
+                "This types-toml is silly",
+                "last",
+            ],
+        ),
+        ## simple-recipe_multiline_strings.yaml ##
+        # Return multiline string variants
+        ("simple-recipe_multiline_strings.yaml", "/about/description0", False, QUICK_FOX_PIPE),
+        ("simple-recipe_multiline_strings.yaml", "/about/description1", False, QUICK_FOX_PIPE_PLUS),
+        ("simple-recipe_multiline_strings.yaml", "/about/description2", False, QUICK_FOX_PIPE_MINUS),
+        ("simple-recipe_multiline_strings.yaml", "/about/description3", False, QUICK_FOX_CARROT),
+        ("simple-recipe_multiline_strings.yaml", "/about/description4", False, QUICK_FOX_CARROT_PLUS),
+        ("simple-recipe_multiline_strings.yaml", "/about/description5", False, QUICK_FOX_CARROT_MINUS),
+        # Return multiline string variants, with substitution
+        ("simple-recipe_multiline_strings.yaml", "/about/description0", True, QUICK_FOX_SUB_PIPE),
+        ("simple-recipe_multiline_strings.yaml", "/about/description1", True, QUICK_FOX_SUB_PIPE_PLUS),
+        ("simple-recipe_multiline_strings.yaml", "/about/description2", True, QUICK_FOX_SUB_PIPE_MINUS),
+        ("simple-recipe_multiline_strings.yaml", "/about/description3", True, QUICK_FOX_SUB_CARROT),
+        ("simple-recipe_multiline_strings.yaml", "/about/description4", True, QUICK_FOX_SUB_CARROT_PLUS),
+        ("simple-recipe_multiline_strings.yaml", "/about/description5", True, QUICK_FOX_SUB_CARROT_MINUS),
+        ## v1_simple-recipe.yaml ##
+        ("v1_format/v1_simple-recipe.yaml", "/build/number", False, 0),
+        ("v1_format/v1_simple-recipe.yaml", "/build/number/", False, 0),
+        (
+            "v1_format/v1_simple-recipe.yaml",
+            "/build",
+            False,
+            {
+                "number": 0,
+                "skip": 'match(python, "<3.7")',
+                "is_true": True,
+            },
+        ),
+        (
+            "v1_format/v1_simple-recipe.yaml",
+            "/build/",
+            False,
+            {
+                "number": 0,
+                "skip": 'match(python, "<3.7")',
+                "is_true": True,
+            },
+        ),
+        ("v1_format/v1_simple-recipe.yaml", "/package/name", False, "${{ name|lower }}"),
+        ("v1_format/v1_simple-recipe.yaml", "/package/name", True, "types-toml"),
+        ("v1_format/v1_simple-recipe.yaml", "/test_var_usage/foo", False, "${{ version }}"),
+        ("v1_format/v1_simple-recipe.yaml", "/test_var_usage/foo", True, "0.10.8.6"),
+        ("v1_format/v1_simple-recipe.yaml", "/test_var_usage/bar/1", False, "${{ zz_non_alpha_first }}"),
+        ("v1_format/v1_simple-recipe.yaml", "/test_var_usage/bar/1", True, 42),
+        (
+            "v1_format/v1_simple-recipe.yaml",
+            "/requirements/host",
+            False,
+            [{"if": "unix", "then": "setuptools"}, {"if": "unix", "then": "fakereq"}],
+        ),
+        (
+            "v1_format/v1_simple-recipe.yaml",
+            "/requirements/host/",
+            False,
+            [{"if": "unix", "then": "setuptools"}, {"if": "unix", "then": "fakereq"}],
+        ),
+        (
+            "v1_format/v1_simple-recipe.yaml",
+            "/requirements/host",
+            True,
+            [{"if": "unix", "then": "setuptools"}, {"if": "unix", "then": "fakereq"}],
+        ),
+        # TODO fix V1_SUPPORT: yaml.parser.ParserError: while parsing a block collection
+        # ("v1_format/v1_simple-recipe.yaml", "/requirements/host/0", False, {"if": "unix", "then": "setuptools"}),
+        # ("v1_format/v1_simple-recipe.yaml", "/requirements/host/1", False, {"if": "unix", "then": "fakereq"}),
+        ("v1_format/v1_simple-recipe.yaml", "/requirements/host/0/then", False, "setuptools"),
+        ("v1_format/v1_simple-recipe.yaml", "/requirements/host/1/then", False, "fakereq"),
+        ("v1_format/v1_simple-recipe.yaml", "/requirements/run", False, ["python"]),
+        ("v1_format/v1_simple-recipe.yaml", "/about/description", False, SIMPLE_DESCRIPTION),
+        ("v1_format/v1_simple-recipe.yaml", "/about/description/", False, SIMPLE_DESCRIPTION),
+        ("v1_format/v1_simple-recipe.yaml", "/multi_level/list_1/1", False, "bar"),
+        (
+            "v1_format/v1_simple-recipe.yaml",
+            "/test_var_usage",
+            False,
+            {
+                "foo": "${{ version }}",
+                "bar": [
+                    "baz",
+                    "${{ zz_non_alpha_first }}",
+                    "blah",
+                    "This ${{ name }} is silly",
+                    "last",
+                ],
+            },
+        ),
+        (
+            "v1_format/v1_simple-recipe.yaml",
+            "/test_var_usage",
+            True,
+            {
+                "foo": "0.10.8.6",
+                "bar": [
+                    "baz",
+                    42,
+                    "blah",
+                    "This types-toml is silly",
+                    "last",
+                ],
+            },
+        ),
+        (
+            "v1_format/v1_simple-recipe.yaml",
+            "/test_var_usage/bar",
+            True,
+            [
+                "baz",
+                42,
+                "blah",
+                "This types-toml is silly",
+                "last",
+            ],
         ),
         ## multi-output.yaml ##
         ("multi-output.yaml", "/outputs/0/build/run_exports/0", False, "bar"),
@@ -511,17 +706,23 @@ def test_contains_value(file: str, path: str, expected: bool) -> None:
 def test_get_value(file: str, path: str, sub_vars: bool, expected: JsonType) -> None:
     """
     Tests retrieval of a value from a parsed YAML example.
+    :param file: File to work against
+    :param path: Target input path
+    :param sub_vars: True to substitute JINJA variables. False otherwise.
+    :param expected: Expected result of the test
     """
     parser = load_recipe(file)
     assert parser.get_value(path, sub_vars=sub_vars) == expected
     assert not parser.is_modified()
 
 
-def test_get_value_not_found() -> None:
+@pytest.mark.parametrize("file", ["simple-recipe.yaml", "v1_format/v1_simple-recipe.yaml"])
+def test_get_value_not_found(file: str) -> None:
     """
     Tests failure to retrieve a value from a parsed YAML example.
+    :param file: File to work against
     """
-    parser = load_recipe("simple-recipe.yaml")
+    parser = load_recipe(file)
     # Path not found cases
     with pytest.raises(KeyError):
         parser.get_value("/invalid/fake/path")
@@ -531,74 +732,92 @@ def test_get_value_not_found() -> None:
     assert not parser.is_modified()
 
 
-def test_get_value_with_var_subs() -> None:
+@pytest.mark.parametrize(
+    "file,value,expected",
+    [
+        ## V0 Format ##
+        (
+            "simple-recipe.yaml",
+            None,
+            [
+                "/requirements/empty_field1",
+                "/requirements/empty_field2",
+                "/requirements/empty_field3",
+            ],
+        ),
+        ("simple-recipe.yaml", "fakereq", ["/requirements/host/1"]),
+        ("simple-recipe.yaml", True, ["/build/skip", "/build/is_true"]),
+        ("simple-recipe.yaml", "foo", ["/multi_level/list_1/0"]),
+        ("simple-recipe.yaml", "Apache-2.0 AND MIT", ["/about/license"]),
+        ("simple-recipe.yaml", 43, []),
+        ("simple-recipe.yaml", "fooz", []),
+        ("simple-recipe.yaml", "", []),
+        ## V1 Format ##
+        (
+            "v1_format/v1_simple-recipe.yaml",
+            None,
+            [
+                "/requirements/empty_field1",
+                "/requirements/empty_field2",
+                "/requirements/empty_field3",
+            ],
+        ),
+        ("v1_format/v1_simple-recipe.yaml", "fakereq", ["/requirements/host/1/then"]),
+        ("v1_format/v1_simple-recipe.yaml", True, ["/build/is_true"]),
+        ("v1_format/v1_simple-recipe.yaml", "foo", ["/multi_level/list_1/0"]),
+        ("v1_format/v1_simple-recipe.yaml", "Apache-2.0 AND MIT", ["/about/license"]),
+        ("v1_format/v1_simple-recipe.yaml", 43, []),
+        ("v1_format/v1_simple-recipe.yaml", "fooz", []),
+        ("v1_format/v1_simple-recipe.yaml", "", []),
+    ],
+)
+def test_find_value(file: str, value: Primitives, expected: list[str]) -> None:
     """
-    Tests retrieval of a value from a parsed YAML example, with Jinja variable substitutions enabled.
+    Tests finding a value from a parsed YAML example.
+    :param file: File to work against
+    :param value: Target value
+    :param expected: Expected result of the test
     """
-    parser = load_recipe("simple-recipe.yaml")
-    # No change on lines without any variable substitutions
-    assert parser.get_value("/requirements/host", sub_vars=True) == ["setuptools", "fakereq"]
-
-    ## Test base types
-    assert parser.get_value("/test_var_usage/foo", sub_vars=True) == "0.10.8.6"
-    assert parser.get_value("/test_var_usage/bar/1", sub_vars=True) == 42
-    # Test string with `|lower` function applied
-    assert parser.get_value("/package/name", sub_vars=True) == "types-toml"
-    # Test collection types
-    assert parser.get_value("/test_var_usage/bar", sub_vars=True) == [
-        "baz",
-        42,
-        "blah",
-        "This types-toml is silly",
-        "last",
-    ]
-    assert parser.get_value("/test_var_usage", sub_vars=True) == {
-        "foo": "0.10.8.6",
-        "bar": [
-            "baz",
-            42,
-            "blah",
-            "This types-toml is silly",
-            "last",
-        ],
-    }
+    parser = load_recipe(file)
+    assert parser.find_value(value) == expected
     assert not parser.is_modified()
 
 
-def test_find_value() -> None:
+@pytest.mark.parametrize(
+    "file,value",
+    [
+        ("simple-recipe.yaml", ["foo", "bar"]),
+        ("simple-recipe.yaml", ("foo", "bar")),
+        ("simple-recipe.yaml", {"foo": "bar"}),
+        ("v1_format/v1_simple-recipe.yaml", ["foo", "bar"]),
+        ("v1_format/v1_simple-recipe.yaml", ("foo", "bar")),
+        ("v1_format/v1_simple-recipe.yaml", {"foo": "bar"}),
+    ],
+)
+def test_find_value_raises(file: str, value: Primitives) -> None:
     """
-    Tests finding a value from a parsed YAML example.
+    Tests finding a value from a parsed YAML example that should throw a `ValueError`.
+    :param file: File to work against
+    :param value: Target value
     """
-    parser = load_recipe("simple-recipe.yaml")
-    # Values in the recipe
-    assert parser.find_value(None) == [
-        "/requirements/empty_field1",
-        "/requirements/empty_field2",
-        "/requirements/empty_field3",
-    ]
-    assert parser.find_value("fakereq") == ["/requirements/host/1"]
-    assert parser.find_value(True) == ["/build/skip", "/build/is_true"]
-    assert parser.find_value("foo") == ["/multi_level/list_1/0"]
-    assert parser.find_value("Apache-2.0 AND MIT") == ["/about/license"]
-    # Values not in the recipe
-    assert not parser.find_value(43)
-    assert not parser.find_value("fooz")
-    assert not parser.find_value("")
-    # Values that are not supported for searching
+    parser = load_recipe(file)
     with pytest.raises(ValueError):
-        parser.find_value(["foo", "bar"])  # type: ignore[arg-type]
-    with pytest.raises(ValueError):
-        parser.find_value(("foo", "bar"))  # type: ignore[arg-type]
-    with pytest.raises(ValueError):
-        parser.find_value({"foo": "bar"})  # type: ignore[arg-type]
-    # Find does not modify the parser
+        parser.find_value(value)
     assert not parser.is_modified()
 
 
 ## Dependencies ##
 
 
-@pytest.mark.parametrize("file,expected", [("multi-output.yaml", True), ("simple-recipe.yaml", False)])
+@pytest.mark.parametrize(
+    "file,expected",
+    [
+        ("multi-output.yaml", True),
+        ("simple-recipe.yaml", False),
+        ("v1_format/v1_multi-output.yaml", True),
+        ("v1_format/v1_simple-recipe.yaml", False),
+    ],
+)
 def test_is_multi_output(file: str, expected: bool) -> None:
     """
     Validates if a recipe is in the multi-output format
