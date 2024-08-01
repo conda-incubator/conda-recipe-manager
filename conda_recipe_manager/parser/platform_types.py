@@ -43,8 +43,6 @@ class Platform(StrEnum):
     Platform enumeration. A "platform" is the most specific qualifier recognized by the recipe format.
     """
 
-    # No-arch indicates that there is no specific target platform.
-    NO_ARCH = "noarch"
     # Linux
     LINUX_32 = "linux-32"
     LINUX_64 = "linux-64"
@@ -68,6 +66,12 @@ class Platform(StrEnum):
     # ("freebsd-64", {"freebsd", "x86", "x86_64"}),
     # ("zos-z", {"zos", "z"}),
 
+
+# Set of all Platform options. Used to determine logical NOT operations in selector evaluations.
+ALL_PLATFORMS: Final[set[Platform]] = set(Platform)
+
+# No-arch indicates that there is no specific target platform.
+NO_ARCH: Final[str] = "noarch"
 
 # Type alias for any enumeration that could represent a set of target build platforms
 PlatformQualifiers = Arch | OperatingSystem | Platform

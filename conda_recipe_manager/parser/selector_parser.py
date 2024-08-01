@@ -6,11 +6,19 @@ Description:    Custom parser for selector recipe selector syntax. This parser d
 
 from __future__ import annotations
 
-from typing import Final
+from typing import Final, Optional
 
 from conda_recipe_manager.parser._is_modifiable import IsModifiable
 from conda_recipe_manager.parser.enums import LogicOp, SchemaVersion
-from conda_recipe_manager.parser.platform_types import Arch, OperatingSystem, Platform, PlatformQualifiers
+from conda_recipe_manager.parser.platform_types import (
+    ALL_PLATFORMS,
+    Arch,
+    OperatingSystem,
+    Platform,
+    PlatformQualifiers,
+    get_platforms_by_arch,
+    get_platforms_by_os,
+)
 
 # A selector is comprised of known operators and special types, or (in V0 recipes) arbitrary Python strings
 SelectorValue = LogicOp | PlatformQualifiers | str
@@ -41,14 +49,16 @@ class _SelectorNode:
             return value
 
         self.value: Final[SelectorValue] = _init_value()
-        self.children: list[_SelectorNode] = []
+        # Left and right nodes
+        self.l_node: Optional[_SelectorNode] = None
+        self.r_node: Optional[_SelectorNode] = None
 
     def __str__(self) -> str:
         """
         Returns a debug string representation of a node
         :returns: Node's debug string
         """
-        return f"Value: {self.value} | Children #: {len(self.children)}"
+        return f"Value: {self.value} | Left: {self.l_node} | Right: {self.r_node}"
 
     def __repr__(self) -> str:
         """
@@ -57,19 +67,12 @@ class _SelectorNode:
         """
         return str(self.value)
 
-    def is_op(self) -> bool:
+    def is_logical_op(self) -> bool:
         """
         Indicates if the node represents an operation
         :returns: True if the node represents an operation
         """
         return self.value in LogicOp
-
-    def is_platform(self) -> bool:
-        """
-        Indicates if the node represents a build platform
-        :returns: True if the node represents a build platform
-        """
-        return self.value in Platform
 
 
 class SelectorParser(IsModifiable):
@@ -86,11 +89,10 @@ class SelectorParser(IsModifiable):
         cur = stack.pop()
         match cur.value:
             case LogicOp.NOT:
-                cur.children = [SelectorParser._process_postfix_stack(stack)]
+                cur.l_node = SelectorParser._process_postfix_stack(stack)
             case LogicOp.AND | LogicOp.OR:
-                r = SelectorParser._process_postfix_stack(stack)
-                l = SelectorParser._process_postfix_stack(stack)
-                cur.children = [l, r]
+                cur.r_node = SelectorParser._process_postfix_stack(stack)
+                cur.l_node = SelectorParser._process_postfix_stack(stack)
         return cur
 
     @staticmethod
@@ -106,7 +108,7 @@ class SelectorParser(IsModifiable):
         postfix_stack: list[_SelectorNode] = []
         while tokens:
             node = _SelectorNode(tokens.pop(0))
-            if node.is_op():
+            if node.is_logical_op():
                 # `NOT` has the highest precedence. For example:
                 #   - `not osx and win` is interpreted as `(not osx) and win`
                 #   - In Python, `not True or True` is interpreted as `(not True) or True`, returning `True`
@@ -147,13 +149,29 @@ class SelectorParser(IsModifiable):
         """
         Returns the set of platforms selected by this selector
         """
-        # TODO complete
-        # TODO post-order traversal
 
-        def _eval_node(node: _SelectorNode) -> set[Platform]:
+        # Recursive helper function that performs a post-order traversal
+        def _eval_node(node: Optional[_SelectorNode]) -> set[Platform]:
+            # Typeguard base-case
+            if node is None:
+                return set()
+
             match node.value:
-                case Platform:
+                case Platform():
+                    return {node.value}
+                case Arch():
+                    return get_platforms_by_arch(node.value)
+                case OperatingSystem():
+                    return get_platforms_by_os(node.value)
+                case LogicOp():
+                    match node.value:
+                        case LogicOp.NOT:
+                            return ALL_PLATFORMS - _eval_node(node.l_node)
+                        case LogicOp.AND:
+                            return _eval_node(node.l_node) & _eval_node(node.r_node)
+                        case LogicOp.OR:
+                            return _eval_node(node.l_node) | _eval_node(node.r_node)
+                case _:
                     return set()
-            return set()
 
-        return set()
+        return _eval_node(self._root)
