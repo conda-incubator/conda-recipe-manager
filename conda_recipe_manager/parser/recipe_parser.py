@@ -1089,7 +1089,7 @@ class RecipeParser:
         # If the comment is not a selector, put the selector first, then append the comment.
         else:
             # Strip the existing comment of it's leading `#` symbol
-            comment = f"# {selector} {node.comment.replace('#', '', 1).strip()}"
+            comment = f"# {selector} " + node.comment.replace("#", "", 1).strip()
 
         node.comment = comment
         # Some lines of YAML correspond to multiple nodes. For consistency, we need to ensure that comments are
