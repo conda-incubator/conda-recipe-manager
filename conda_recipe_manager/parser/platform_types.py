@@ -8,11 +8,31 @@ Resources:
 
 from __future__ import annotations
 
-from enum import StrEnum
+from enum import EnumMeta, StrEnum
 from typing import Final
 
 
-class OperatingSystem(StrEnum):
+class ContainsStrEnum(EnumMeta):
+    """
+    Meta enum class to expand upon StrEnum capabilities in Python 3.11
+    """
+
+    def __contains__(cls, item: object) -> bool:
+        """
+        As of Python 3.12, string enums support the ability to query if a string is found in the enumeration options.
+        This function backports that feature to Python 3.11
+        :param cls: Class reference
+        :param item: Item to try to convert to a StrEnum
+        :returns: True if the enum was found, false otherwise.
+        """
+        try:
+            cls(item)  # pylint: disable=no-value-for-parameter
+        except ValueError:
+            return False
+        return True
+
+
+class OperatingSystem(StrEnum, metaclass=ContainsStrEnum):
     """
     Operating System enumeration. This a broad (and sometimes inaccurate) qualifier supported by the recipe format.
     """
@@ -23,7 +43,7 @@ class OperatingSystem(StrEnum):
     WINDOWS = "win"
 
 
-class Arch(StrEnum):
+class Arch(StrEnum, metaclass=ContainsStrEnum):
     """
     System Architecture enumeration, referring to the hardware/CPU/ISA of the target device.
     """
@@ -38,7 +58,7 @@ class Arch(StrEnum):
     PPC_64_LE = "ppc64le"
 
 
-class Platform(StrEnum):
+class Platform(StrEnum, metaclass=ContainsStrEnum):
     """
     Platform enumeration. A "platform" is the most specific qualifier recognized by the recipe format.
     """
