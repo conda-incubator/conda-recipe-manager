@@ -32,7 +32,9 @@ def test_selector_parser_construction(selector: str, schema: SchemaVersion, expe
     :param schema: Target schema version
     :param expected: Expected value to return
     """
-    assert str(SelectorParser(selector, schema)) == expected
+    parser = SelectorParser(selector, schema)
+    assert str(parser) == expected
+    assert not parser.is_modified()
 
 
 @pytest.mark.parametrize(
@@ -122,4 +124,6 @@ def test_get_selected_platforms(selector: str, schema: SchemaVersion, expected: 
     :param schema: Target schema version
     :param expected: Expected value to return
     """
-    assert SelectorParser(selector, schema).get_selected_platforms() == expected
+    parser = SelectorParser(selector, schema)
+    assert parser.get_selected_platforms() == expected
+    assert not parser.is_modified()
