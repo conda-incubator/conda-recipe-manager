@@ -94,7 +94,7 @@ def get_platforms_by_arch(arch: Arch | str) -> set[Platform]:
     """
     if isinstance(arch, str):
         arch_sanitized: Final[str] = arch.strip().lower()
-        if not arch_sanitized in Arch:
+        if not arch_sanitized in ALL_ARCHITECTURES:
             return set()
         arch = Arch(arch_sanitized)
 
@@ -127,7 +127,7 @@ def get_platforms_by_os(os: OperatingSystem | str) -> set[Platform]:
     """
     if isinstance(os, str):
         os_sanitized: Final[str] = os.strip().lower()
-        if not os_sanitized in OperatingSystem:
+        if not os_sanitized in ALL_OPERATING_SYSTEMS:
             return set()
         os = OperatingSystem(os_sanitized)
 

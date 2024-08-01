@@ -76,7 +76,7 @@ class _SelectorNode:
         Indicates if the node represents an operation
         :returns: True if the node represents an operation
         """
-        return self.value in LogicOp
+        return self.value in ALL_LOGIC_OPS
 
 
 class SelectorParser(IsModifiable):
