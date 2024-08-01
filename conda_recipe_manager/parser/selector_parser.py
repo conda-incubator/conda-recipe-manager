@@ -9,8 +9,10 @@ from __future__ import annotations
 from typing import Final, Optional
 
 from conda_recipe_manager.parser._is_modifiable import IsModifiable
-from conda_recipe_manager.parser.enums import LogicOp, SchemaVersion
+from conda_recipe_manager.parser.enums import ALL_LOGIC_OPS, LogicOp, SchemaVersion
 from conda_recipe_manager.parser.platform_types import (
+    ALL_ARCHITECTURES,
+    ALL_OPERATING_SYSTEMS,
     ALL_PLATFORMS,
     Arch,
     OperatingSystem,
@@ -38,13 +40,13 @@ class _SelectorNode:
         # Enumerate special/known selector types
         def _init_value() -> SelectorValue:
             lower_val: Final[str] = value.lower()
-            if lower_val in Platform:
+            if lower_val in ALL_PLATFORMS:
                 return Platform(lower_val)
-            if lower_val in OperatingSystem:
+            if lower_val in ALL_OPERATING_SYSTEMS:
                 return OperatingSystem(lower_val)
-            if lower_val in Arch:
+            if lower_val in ALL_ARCHITECTURES:
                 return Arch(lower_val)
-            if lower_val in LogicOp:
+            if lower_val in ALL_LOGIC_OPS:
                 return LogicOp(lower_val)
             return value
 

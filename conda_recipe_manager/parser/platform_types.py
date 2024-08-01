@@ -8,31 +8,11 @@ Resources:
 
 from __future__ import annotations
 
-from enum import EnumMeta, StrEnum
+from enum import StrEnum
 from typing import Final
 
 
-class ContainsStrEnum(EnumMeta):
-    """
-    Meta enum class to expand upon StrEnum capabilities in Python 3.11
-    """
-
-    def __contains__(cls, item: object) -> bool:
-        """
-        As of Python 3.12, string enums support the ability to query if a string is found in the enumeration options.
-        This function backports that feature to Python 3.11
-        :param cls: Class reference
-        :param item: Item to try to convert to a StrEnum
-        :returns: True if the enum was found, false otherwise.
-        """
-        try:
-            cls(item)  # pylint: disable=no-value-for-parameter
-        except ValueError:
-            return False
-        return True
-
-
-class OperatingSystem(StrEnum, metaclass=ContainsStrEnum):
+class OperatingSystem(StrEnum):
     """
     Operating System enumeration. This a broad (and sometimes inaccurate) qualifier supported by the recipe format.
     """
@@ -43,7 +23,11 @@ class OperatingSystem(StrEnum, metaclass=ContainsStrEnum):
     WINDOWS = "win"
 
 
-class Arch(StrEnum, metaclass=ContainsStrEnum):
+# Set of all Operating System options
+ALL_OPERATING_SYSTEMS: Final[set[OperatingSystem]] = set(OperatingSystem)
+
+
+class Arch(StrEnum):
     """
     System Architecture enumeration, referring to the hardware/CPU/ISA of the target device.
     """
@@ -58,7 +42,11 @@ class Arch(StrEnum, metaclass=ContainsStrEnum):
     PPC_64_LE = "ppc64le"
 
 
-class Platform(StrEnum, metaclass=ContainsStrEnum):
+# Set of all Architecture options
+ALL_ARCHITECTURES: Final[set[Arch]] = set(Arch)
+
+
+class Platform(StrEnum):
     """
     Platform enumeration. A "platform" is the most specific qualifier recognized by the recipe format.
     """
@@ -87,7 +75,7 @@ class Platform(StrEnum, metaclass=ContainsStrEnum):
     # ("zos-z", {"zos", "z"}),
 
 
-# Set of all Platform options. Used to determine logical NOT operations in selector evaluations.
+# Set of all Platform options
 ALL_PLATFORMS: Final[set[Platform]] = set(Platform)
 
 # No-arch indicates that there is no specific target platform.

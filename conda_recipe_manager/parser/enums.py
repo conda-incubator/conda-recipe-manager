@@ -6,6 +6,7 @@ Description:    Provides enumerated types used by the parser.
 from __future__ import annotations
 
 from enum import Enum, IntEnum, StrEnum
+from typing import Final
 
 
 class SchemaVersion(IntEnum):
@@ -36,3 +37,7 @@ class LogicOp(StrEnum):
     AND = "and"
     OR = "or"
     NOT = "not"
+
+
+# Set of all Logic operators
+ALL_LOGIC_OPS: Final[set[LogicOp]] = set(LogicOp)
