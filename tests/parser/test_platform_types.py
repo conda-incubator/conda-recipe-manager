@@ -26,7 +26,7 @@ from conda_recipe_manager.parser.platform_types import (
         ),  # String input
         (Arch.X_86, {Platform.LINUX_32, Platform.LINUX_64, Platform.OSX_64, Platform.WIN_32, Platform.WIN_64}),
         (Arch.X_86_64, {Platform.LINUX_64, Platform.OSX_64, Platform.WIN_64}),
-        (Arch.ARM_64, {Platform.OSX_ARM64, Platform.WIN_ARM_64}),
+        (Arch.ARM_64, {Platform.OSX_ARM_64, Platform.WIN_ARM_64}),
     ],
 )
 def test_get_platforms_by_arch(arch: Arch | str, expected: set[Platform]) -> None:
@@ -42,13 +42,13 @@ def test_get_platforms_by_arch(arch: Arch | str, expected: set[Platform]) -> Non
     "os,expected",
     [
         ("fake_os", set()),  # Bad input
-        ("OSX", {Platform.OSX_64, Platform.OSX_ARM64}),  # String input
+        ("OSX", {Platform.OSX_64, Platform.OSX_ARM_64}),  # String input
         (
             OperatingSystem.LINUX,
             {
                 Platform.LINUX_32,
                 Platform.LINUX_64,
-                Platform.LINUX_AARCH64,
+                Platform.LINUX_AARCH_64,
                 Platform.LINUX_V6L,
                 Platform.LINUX_V7L,
                 Platform.LINUX_PPC_64,
@@ -57,15 +57,15 @@ def test_get_platforms_by_arch(arch: Arch | str, expected: set[Platform]) -> Non
                 Platform.LINUX_SYS_390,
             },
         ),
-        (OperatingSystem.OSX, {Platform.OSX_64, Platform.OSX_ARM64}),
+        (OperatingSystem.OSX, {Platform.OSX_64, Platform.OSX_ARM_64}),
         (
             OperatingSystem.UNIX,
             {
                 Platform.OSX_64,
-                Platform.OSX_ARM64,
+                Platform.OSX_ARM_64,
                 Platform.LINUX_32,
                 Platform.LINUX_64,
-                Platform.LINUX_AARCH64,
+                Platform.LINUX_AARCH_64,
                 Platform.LINUX_V6L,
                 Platform.LINUX_V7L,
                 Platform.LINUX_PPC_64,

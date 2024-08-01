@@ -83,11 +83,13 @@ class SelectorParser(IsModifiable):
     """
 
     @staticmethod
-    def _process_postfix_stack(stack: list[_SelectorNode]) -> _SelectorNode:
+    def _process_postfix_stack(stack: list[_SelectorNode]) -> Optional[_SelectorNode]:
         """
         Recursively processes the postfix stack of nodes, building a tree
         :returns: Current node in the tree
         """
+        if not stack:
+            return None
         cur = stack.pop()
         match cur.value:
             case LogicOp.NOT:
@@ -98,7 +100,7 @@ class SelectorParser(IsModifiable):
         return cur
 
     @staticmethod
-    def _parse_selector_tree(tokens: list[str]) -> _SelectorNode:
+    def _parse_selector_tree(tokens: list[str]) -> Optional[_SelectorNode]:
         """
         Constructs a selector parse tree
         :param tokens: Selector tokens to process
