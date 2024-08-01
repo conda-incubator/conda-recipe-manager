@@ -148,4 +148,12 @@ class SelectorParser(IsModifiable):
         Returns the set of platforms selected by this selector
         """
         # TODO complete
+        # TODO post-order traversal
+
+        def _eval_node(node: _SelectorNode) -> set[Platform]:
+            match node.value:
+                case Platform:
+                    return set()
+            return set()
+
         return set()
