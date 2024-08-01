@@ -1,0 +1,86 @@
+"""
+File:           test_platform_types.py
+Description:    Unit tests for the platform types module
+"""
+
+from __future__ import annotations
+
+import pytest
+
+from conda_recipe_manager.parser.platform_types import (
+    Arch,
+    OperatingSystem,
+    Platform,
+    get_platforms_by_arch,
+    get_platforms_by_os,
+)
+
+
+@pytest.mark.parametrize(
+    "arch,expected",
+    [
+        ("fake_arch", set()),  # Bad input
+        (
+            "x86",
+            {Platform.LINUX_32, Platform.LINUX_64, Platform.OSX_64, Platform.WIN_32, Platform.WIN_64},
+        ),  # String input
+        (Arch.X_86, {Platform.LINUX_32, Platform.LINUX_64, Platform.OSX_64, Platform.WIN_32, Platform.WIN_64}),
+        (Arch.X_86_64, {Platform.LINUX_64, Platform.OSX_64, Platform.WIN_64}),
+        (Arch.ARM_64, {Platform.OSX_ARM64, Platform.WIN_ARM_64}),
+    ],
+)
+def test_get_platforms_by_arch(arch: Arch | str, expected: set[Platform]) -> None:
+    """
+    Tests the construction of a selector parse tree by comparing the debug string representation of the tree.
+    :param arch: Target Architecture
+    :param expected: Expected value to return
+    """
+    assert get_platforms_by_arch(arch) == expected
+
+
+@pytest.mark.parametrize(
+    "os,expected",
+    [
+        ("fake_os", set()),  # Bad input
+        ("OSX", {Platform.OSX_64, Platform.OSX_ARM64}),  # String input
+        (
+            OperatingSystem.LINUX,
+            {
+                Platform.LINUX_32,
+                Platform.LINUX_64,
+                Platform.LINUX_AARCH64,
+                Platform.LINUX_V6L,
+                Platform.LINUX_V7L,
+                Platform.LINUX_PPC_64,
+                Platform.LINUX_PPC_64_LE,
+                Platform.LINUX_RISC_V64,
+                Platform.LINUX_SYS_390,
+            },
+        ),
+        (OperatingSystem.OSX, {Platform.OSX_64, Platform.OSX_ARM64}),
+        (
+            OperatingSystem.UNIX,
+            {
+                Platform.OSX_64,
+                Platform.OSX_ARM64,
+                Platform.LINUX_32,
+                Platform.LINUX_64,
+                Platform.LINUX_AARCH64,
+                Platform.LINUX_V6L,
+                Platform.LINUX_V7L,
+                Platform.LINUX_PPC_64,
+                Platform.LINUX_PPC_64_LE,
+                Platform.LINUX_RISC_V64,
+                Platform.LINUX_SYS_390,
+            },
+        ),
+        (OperatingSystem.WINDOWS, {Platform.WIN_32, Platform.WIN_64, Platform.WIN_ARM_64}),
+    ],
+)
+def test_get_platforms_by_os(os: OperatingSystem | str, expected: set[Platform]) -> None:
+    """
+    Tests the construction of a selector parse tree by comparing the debug string representation of the tree.
+    :param os: Target Operating System
+    :param expected: Expected value to return
+    """
+    assert get_platforms_by_os(os) == expected
