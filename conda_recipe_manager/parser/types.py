@@ -8,6 +8,7 @@ from __future__ import annotations
 from enum import StrEnum, auto
 from typing import Final
 
+from conda_recipe_manager.parser.enums import SchemaVersion
 from conda_recipe_manager.types import Primitives, SchemaType
 
 #### Types ####
@@ -20,7 +21,7 @@ NodeValue = Primitives | list[str]
 
 # The "new" recipe format introduces the concept of a schema version. Presumably the "old" recipe format would be
 # considered "0". When converting to the V1 format, we'll use this constant value.
-CURRENT_RECIPE_SCHEMA_FORMAT: Final[int] = 1
+CURRENT_RECIPE_SCHEMA_FORMAT: Final[int] = SchemaVersion.V1.value
 
 # Indicates how many spaces are in a level of indentation
 TAB_SPACE_COUNT: Final[int] = 2

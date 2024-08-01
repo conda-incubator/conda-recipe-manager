@@ -1,6 +1,6 @@
 --------------------
 RecipeParser Instance
-- Schema Version: 0
+- Schema Version: 1
 - Variables Table:
 {
   "zz_non_alpha_first": 42,
@@ -8,35 +8,44 @@ RecipeParser Instance
   "version": "0.10.8.6"
 }
 - Selectors Table:
-  [unix]
-    - name -> /package/name
-    - {{ name|lower }} -> /package/name
-    - setuptools -> /requirements/host/0
-    - fakereq -> /requirements/host/1
-  [py<37]
-    - skip -> /build/skip
-    - True -> /build/skip
   [unix and win]
     - empty_field2 -> /requirements/empty_field2
 - is_modified?: False
 - Tree:
 /
+  |- <Comment: # Comment above a top-level structure>
+  |- schema_version
+    |- 1
+  |- context
+    |- zz_non_alpha_first
+      |- 42
+    |- name
+      |- types-toml
+    |- version
+      |- 0.10.8.6
   |- package
     |- name
-      |- {{ name|lower }}
+      |- ${{ name|lower }}
   |- build
     |- number
       |- 0
     |- skip
-      |- True
+      |- match(python, "<3.7")
     |- is_true
       |- True
-  |- <Comment: # Comment above a top-level structure>
   |- requirements
     |- empty_field1
     |- host
-      |- setuptools
-      |- fakereq
+      |- <Collection Node>
+        |- if
+          |- unix
+        |- then
+          |- setuptools
+      |- <Collection Node>
+        |- if
+          |- unix
+        |- then
+          |- fakereq
     |- empty_field2
     |- run
       |- python
@@ -63,11 +72,11 @@ RecipeParser Instance
       |- cowsay
   |- test_var_usage
     |- foo
-      |- {{ version }}
+      |- ${{ version }}
     |- bar
       |- baz
-      |- {{ zz_non_alpha_first }}
+      |- ${{ zz_non_alpha_first }}
       |- blah
-      |- This {{ name }} is silly
+      |- This ${{ name }} is silly
       |- last
 --------------------

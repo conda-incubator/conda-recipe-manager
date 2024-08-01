@@ -9,7 +9,7 @@ from typing import Final
 
 import pytest
 
-from conda_recipe_manager.parser.enums import SelectorConflictMode
+from conda_recipe_manager.parser.enums import SchemaVersion, SelectorConflictMode
 from conda_recipe_manager.parser.exceptions import JsonPatchValidationException
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
 from conda_recipe_manager.types import JsonType
@@ -41,42 +41,72 @@ QUICK_FOX_SUB_CARROT_MINUS: Final[str] = "The quick brown tiger\njumped over the
 ## Construction and rendering sanity checks ##
 
 
-def test_construction() -> None:
+@pytest.mark.parametrize(
+    "file,schema_version",
+    [
+        ("types-toml.yaml", SchemaVersion.V0),
+        ("v1_format/v1_types-toml.yaml", SchemaVersion.V1),
+    ],
+)
+def test_construction(file: str, schema_version: SchemaVersion) -> None:
     """
     Tests the construction of a recipe parser instance with a simple, common example file.
+    :param file: Recipe file to test with
+    :param schema_version: Schema version to match
     """
-    types_toml = load_file(f"{TEST_FILES_PATH}/types-toml.yaml")
+    types_toml = load_file(f"{TEST_FILES_PATH}/{file}")
     parser = RecipeParser(types_toml)
     assert parser._init_content == types_toml  # pylint: disable=protected-access
     assert parser._vars_tbl == {  # pylint: disable=protected-access
         "name": "types-toml",
         "version": "0.10.8.6",
     }
-    assert not parser._is_modified  # pylint: disable=protected-access
-    # TODO assert on tree structure
+    assert parser.get_schema_version() == schema_version
+    assert not parser.is_modified()
     # TODO assert on selectors table
+
+    # TODO assert on tree structure
     # assert parser._root == TODO
 
 
-def test_str() -> None:
+@pytest.mark.parametrize(
+    "file,out_file",
+    [
+        ("simple-recipe.yaml", "simple-recipe_to_str.out"),
+        ("v1_format/v1_simple-recipe.yaml", "v1_format/v1_simple-recipe_to_str.out"),
+    ],
+)
+def test_str(file: str, out_file: str) -> None:
     """
-    Tests string casting
+    Tests rendering to a debug string
+    :param file: Recipe file to test with
+    :param out_file: Output string to match
     """
-    parser = load_recipe("simple-recipe.yaml")
-    assert str(parser) == load_file(f"{TEST_FILES_PATH}/simple-recipe_to_str.out")
+    parser = load_recipe(file)
+    assert str(parser) == load_file(f"{TEST_FILES_PATH}/{out_file}")
     # Regression test: Run a function a second time to ensure that `SelectorInfo::__str__()` doesn't accidentally purge
     # the underlying stack when the string is being rendered.
-    assert str(parser) == load_file(f"{TEST_FILES_PATH}/simple-recipe_to_str.out")
+    assert str(parser) == load_file(f"{TEST_FILES_PATH}/{out_file}")
     assert not parser.is_modified()
 
 
-def test_eq() -> None:
+@pytest.mark.parametrize(
+    "file,other_file",
+    [
+        ("simple-recipe.yaml", "types-toml.yaml"),
+        ("v1_format/v1_simple-recipe.yaml", "v1_format/v1_types-toml.yaml"),
+        ("v1_format/v1_simple-recipe.yaml", "simple-recipe.yaml"),
+    ],
+)
+def test_eq(file: str, other_file: str) -> None:
     """
     Tests equivalency function
+    :param file: Recipe file to test with
+    :param other_file: "Other" recipe file to check against
     """
-    parser0 = load_recipe("simple-recipe.yaml")
-    parser1 = load_recipe("simple-recipe.yaml")
-    parser2 = load_recipe("types-toml.yaml")
+    parser0 = load_recipe(file)
+    parser1 = load_recipe(file)
+    parser2 = load_recipe(other_file)
     assert parser0 == parser1
     assert parser0 != parser2
     assert not parser0.is_modified()
@@ -84,7 +114,6 @@ def test_eq() -> None:
     assert not parser2.is_modified()
 
 
-@pytest.mark.skip(reason="To be re-enable when PAT-46 is fixed")
 def test_loading_obj_in_list() -> None:
     """
     Regression test: at one point, the parser would crash loading this file, containing an object in a list.
@@ -97,6 +126,7 @@ def test_loading_obj_in_list() -> None:
 @pytest.mark.parametrize(
     "file",
     [
+        # V0 Recipe Files
         "types-toml.yaml",  # "Easy-difficulty" recipe, representative of common/simple recipes.
         "simple-recipe.yaml",  # "Medium-difficulty" recipe, containing several contrived examples
         "multi-output.yaml",  # Contains a multi-output recipe
@@ -107,6 +137,15 @@ def test_loading_obj_in_list() -> None:
         "pytest-pep8.yaml",
         "google-cloud-cpp.yaml",
         "dynamic-linking.yaml",
+        # V1 Recipe Files
+        "v1_format/v1_types-toml.yaml",
+        "v1_format/v1_simple-recipe.yaml",
+        "v1_format/v1_multi-output.yaml",
+        "v1_format/v1_huggingface_hub.yaml",
+        "v1_format/v1_curl.yaml",
+        "v1_format/v1_pytest-pep8.yaml",
+        "v1_format/v1_google-cloud-cpp.yaml",
+        "v1_format/v1_dynamic-linking.yaml",
     ],
 )
 def test_round_trip(file: str) -> None:
@@ -122,6 +161,7 @@ def test_round_trip(file: str) -> None:
 @pytest.mark.parametrize(
     "file,substitute,expected",
     [
+        # V0 Recipes
         (
             "simple-recipe.yaml",
             False,
@@ -253,6 +293,7 @@ def test_round_trip(file: str) -> None:
 def test_render_to_object(file: str, substitute: bool, expected: JsonType) -> None:
     """
     Tests rendering a recipe to an object format.
+    TODO: Does not work with V1 recipes; if/then selectors crash with KeyError
     :param file: File to load and test against
     :param substitute: True to run the function with JINJA substitutions on, False for off
     :param expected: Expected value to return

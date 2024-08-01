@@ -18,6 +18,7 @@ from typing import Final, Optional
 import click
 
 from conda_recipe_manager.commands.utils.print import print_err, print_messages, print_out
+from conda_recipe_manager.parser.enums import SchemaVersion
 from conda_recipe_manager.parser.recipe_parser_convert import RecipeParserConvert
 from conda_recipe_manager.parser.types import MessageCategory, MessageTable
 
@@ -47,6 +48,7 @@ class ExitCode(IntEnum):
     RENDER_EXCEPTION = 103
     READ_EXCEPTION = 104
     PRE_PROCESS_EXCEPTION = 105
+    ILLEGAL_OPERATION = 106
 
 
 @dataclass
@@ -110,11 +112,12 @@ def convert_file(file_path: Path, output: Optional[Path], print_output: bool, de
     :param debug: Enables debug mode output. Prints to STDERR.
     :returns: A struct containing the results of the conversion process, including debugging metadata.
     """
+    # pylint: disable=too-complex
     conversion_result = ConversionResult(
         code=ExitCode.SUCCESS, content="", file_path=file_path, msg_tbl=MessageTable(), project_name=""
     )
 
-    recipe_content = None
+    recipe_content: str
     try:
         recipe_content = Path(file_path).read_text(encoding="utf-8")
     except Exception as e:  # pylint: disable=broad-exception-caught
@@ -145,6 +148,16 @@ def convert_file(file_path: Path, output: Optional[Path], print_output: bool, de
             "EXCEPTION: An exception occurred while parsing the recipe file",
             print_output,
             e,
+        )
+
+    # Only V0 recipes can be converted
+    if parser.get_schema_version() != SchemaVersion.V0:
+        return _record_unrecoverable_failure(
+            conversion_result,
+            ExitCode.ILLEGAL_OPERATION,
+            "ILLEGAL OPERATION: Only V0-formatted recipe files can be converted",
+            print_output,
+            None,
         )
 
     # Print the initial parser, if requested
