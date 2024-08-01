@@ -26,6 +26,7 @@ from conda_recipe_manager.parser._utils import (
     stack_path_to_str,
     str_to_stack_path,
 )
+from conda_recipe_manager.parser.enums import SchemaVersion
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
 from conda_recipe_manager.parser.types import CURRENT_RECIPE_SCHEMA_FORMAT, MessageCategory, MessageTable
 from conda_recipe_manager.types import JsonPatchType, JsonType, Primitives, SentinelType
@@ -172,7 +173,7 @@ class RecipeParserConvert(RecipeParser):
         # Swap all JINJA to use the new `${{ }}` format. A `set` is used as `str.replace()` will replace all instances
         # and a value containing multiple variables could be visited multiple times, causing multiple `${{}}`
         # encapsulations.
-        jinja_sub_locations: Final[set[str]] = set(self._v1_recipe.search(Regex.JINJA_SUB))
+        jinja_sub_locations: Final[set[str]] = set(self._v1_recipe.search(Regex.JINJA_V0_SUB))
         for path in jinja_sub_locations:
             value = self._v1_recipe.get_value(path)
             # Values that match the regex should only be strings. This prevents crashes that should not occur.
@@ -188,6 +189,11 @@ class RecipeParserConvert(RecipeParser):
     def _upgrade_selectors_to_conditionals(self) -> None:
         """
         Upgrades the proprietary comment-based selector syntax to equivalent conditional logic statements.
+
+        TODO warn if selector is unrecognized? See list:
+          https://prefix-dev.github.io/rattler-build/latest/selectors/#available-variables
+        conda docs for common selectors:
+          https://docs.conda.io/projects/conda-build/en/latest/resources/define-metadata.html#preprocessing-selectors
         """
         for selector, instances in self._v1_recipe._selector_tbl.items():  # pylint: disable=protected-access
             for info in instances:
@@ -201,6 +207,29 @@ class RecipeParserConvert(RecipeParser):
                 # Convert to a public-facing path representation
                 selector_path = stack_path_to_str(info.path)
 
+                # Some commonly used selectors (like `py<36`) need to be upgraded. Otherwise, these expressions will be
+                # interpreted as strings. See this CEP PR for more details: https://github.com/conda/ceps/pull/71
+                bool_expression = Regex.SELECTOR_PYTHON_VERSION_REPLACEMENT.sub(
+                    r'match(python, "\1\2.\3")', bool_expression
+                )
+                # Upgrades for less common `py36` and `not py27` selectors
+                bool_expression = Regex.SELECTOR_PYTHON_VERSION_EQ_REPLACEMENT.sub(
+                    r'match(python, "==\1.\2")', bool_expression
+                )
+                bool_expression = Regex.SELECTOR_PYTHON_VERSION_NE_REPLACEMENT.sub(
+                    r'match(python, "!=\1.\2")', bool_expression
+                )
+                # Upgrades for less common `py2k` and `py3k` selectors
+                bool_expression = Regex.SELECTOR_PYTHON_VERSION_PY2K_REPLACEMENT.sub(
+                    r'match(python, ">=2,<3")', bool_expression
+                )
+                bool_expression = Regex.SELECTOR_PYTHON_VERSION_PY3K_REPLACEMENT.sub(
+                    r'match(python, ">=3,<4")', bool_expression
+                )
+
+                # TODO other common selectors to support:
+                # - GPU variants (see pytorch and llama.cpp feedstocks)
+
                 # For now, if a selector lands on a boolean value, use a ternary statement. Otherwise use the
                 # conditional logic.
                 patch: JsonPatchType = {
@@ -208,9 +237,9 @@ class RecipeParserConvert(RecipeParser):
                     "path": selector_path,
                     "value": "${{ true if " + bool_expression + " }}",
                 }
-                # `skip` is special and needs to be a list of boolean expressions.
+                # `skip` is special and can be a single boolean expression or a list of boolean expressions.
                 if selector_path.endswith("/build/skip"):
-                    patch["value"] = [bool_expression]
+                    patch["value"] = bool_expression
                 if not isinstance(info.node.value, bool):
                     # CEP-13 states that ONLY list members may use the `if/then/else` blocks
                     if not info.node.list_member_flag:
@@ -778,5 +807,11 @@ class RecipeParserConvert(RecipeParser):
         # Sort the top-level keys to a "canonical" ordering. This should make previous patch operations look more
         # "sensible" to a human reader.
         self._sort_subtree_keys("/", TOP_LEVEL_KEY_SORT_ORDER)
+
+        # Override the schema value as the recipe conversion is now complete.
+        self._v1_recipe._schema_version = SchemaVersion.V1  # pylint: disable=protected-access
+        # Update the variable table
+        self._v1_recipe._init_vars_tbl()  # pylint: disable=protected-access
+        # TODO update selector table when V1 selectors are supported!
 
         return self._v1_recipe.render(), self._msg_tbl, str(self._v1_recipe)

@@ -1,0 +1,53 @@
+schema_version: 1
+
+context:
+  name: selector-match-upgrades
+  version: 0.10.8.6
+
+package:
+  name: ${{ name|lower }}
+  version: ${{ version }}
+
+source:
+  url: https://pypi.io/packages/source/${{ name[0] }}/${{ name }}/script-env-${{ version }}.tar.gz
+  sha256: 6d3ac79e36c9ee593c5d4fb33a50cca0e3adceb6ef5cff8b8e5aef67b4c4aaf2
+
+build:
+  # NOTE: `/build/skip` is special and will not be JINJA-escaped.
+  number: 0
+  skip: match(python, "<3.7")
+  script: ${{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  skip1: ${{ true if not match(python, "==3.7") }}
+  skip2: ${{ true if match(python, ">=2.7") }}
+  skip3: ${{ true if match(python, "!=3.10") }}
+  skip4: ${{ true if match(python, ">=2,<3") }}
+  skip5: ${{ true if match(python, ">=3,<4") }}
+
+requirements:
+  host:
+    - if: not match(python, "==2.7")
+      then: python
+  run:
+    - if: match(python, "==2.7")
+      then: python
+    - if: match(python, "<3.7")
+      then: foo
+    - if: not match(python, "==3.7")
+      then: foo
+    - if: match(python, ">=2.7")
+      then: foo
+    - if: match(python, "!=3.10")
+      then: foo
+    - if: match(python, ">=2,<3")
+      then: foo
+    - if: match(python, ">=3,<4")
+      then: foo
+
+about:
+  summary: Typing stubs for toml
+  description: Tests upgrading various selectors that are now replaced by the `match()` function
+  license: MIT
+  license_file: LICENSE
+  homepage: https://github.com/python/typeshed
+  repository: https://github.com/python/typeshed
+  documentation: https://pypi.org/project/types-toml/

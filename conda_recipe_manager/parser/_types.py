@@ -145,23 +145,38 @@ class Regex:
     PRE_PROCESS_MIN_PIN_REPLACEMENT: Final[re.Pattern[str]] = re.compile(r"min_pin=")
     PRE_PROCESS_MAX_PIN_REPLACEMENT: Final[re.Pattern[str]] = re.compile(r"max_pin=")
 
+    ## Selector Replacements ##
+    # Replaces Python version expressions with the newer V1 `match()` function
+    SELECTOR_PYTHON_VERSION_REPLACEMENT: Final[re.Pattern[str]] = re.compile(r"py\s*(<|>|<=|>=|==|!=)\s*(3|2)([0-9]+)")
+    SELECTOR_PYTHON_VERSION_EQ_REPLACEMENT: Final[re.Pattern[str]] = re.compile(r"py(3|2)([0-9]+)")
+    SELECTOR_PYTHON_VERSION_NE_REPLACEMENT: Final[re.Pattern[str]] = re.compile(r"not py(3|2)([0-9]+)")
+    SELECTOR_PYTHON_VERSION_PY2K_REPLACEMENT: Final[re.Pattern[str]] = re.compile(r"py2k")
+    SELECTOR_PYTHON_VERSION_PY3K_REPLACEMENT: Final[re.Pattern[str]] = re.compile(r"py3k")
+
     ## Jinja regular expressions ##
-    JINJA_SUB: Final[re.Pattern[str]] = re.compile(r"{{\s*" + _JINJA_VAR_FUNCTION_PATTERN + r"\s*}}")
-    JINJA_LINE: Final[re.Pattern[str]] = re.compile(r"({%.*%}|{#.*#})\n")
-    JINJA_SET_LINE: Final[re.Pattern[str]] = re.compile(r"{%\s*set\s*" + _JINJA_VAR_FUNCTION_PATTERN + r"\s*=.*%}\s*\n")
+    JINJA_V0_SUB: Final[re.Pattern[str]] = re.compile(r"{{\s*" + _JINJA_VAR_FUNCTION_PATTERN + r"\s*}}")
+    JINJA_V0_LINE: Final[re.Pattern[str]] = re.compile(r"({%.*%}|{#.*#})\n")
+    JINJA_V0_SET_LINE: Final[re.Pattern[str]] = re.compile(
+        r"{%\s*set\s*" + _JINJA_VAR_FUNCTION_PATTERN + r"\s*=.*%}\s*\n"
+    )
     # Useful for replacing the older `{{` JINJA substitution with the newer `${{` WITHOUT accidentally doubling-up the
     # newer syntax when multiple replacements are possible.
     JINJA_REPLACE_V0_STARTING_MARKER: Final[re.Pattern[str]] = re.compile(r"(?<!\$)\{\{")
+
+    JINJA_V1_SUB: Final[re.Pattern[str]] = re.compile(r"\${{\s*" + _JINJA_VAR_FUNCTION_PATTERN + r"\s*}}")
 
     # All recognized JINJA functions are kept in a set for the convenience of trying to match against all of them.
     # Group 1 contains the function name, Group 2 contains the arguments, if any.
     JINJA_FUNCTION_LOWER: Final[re.Pattern[str]] = re.compile(r"\|\s*(lower)")
     JINJA_FUNCTION_UPPER: Final[re.Pattern[str]] = re.compile(r"\|\s*(upper)")
     JINJA_FUNCTION_REPLACE: Final[re.Pattern[str]] = re.compile(r"\|\s*(replace)\((.*)\)")
+    # `match()` is a JINJA function available in the V1 recipe format
+    JINJA_FUNCTION_MATCH: Final[re.Pattern[str]] = re.compile(r"match\(.*,.*\)")
     JINJA_FUNCTIONS_SET: Final[set[re.Pattern[str]]] = {
         JINJA_FUNCTION_LOWER,
         JINJA_FUNCTION_UPPER,
         JINJA_FUNCTION_REPLACE,
+        JINJA_FUNCTION_MATCH,
     }
 
     SELECTOR: Final[re.Pattern[str]] = re.compile(r"\[.*\]")

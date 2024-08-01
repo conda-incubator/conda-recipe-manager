@@ -150,6 +150,12 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
             [],
             [],
         ),
+        # Ensures common comparison selectors can be upgraded
+        (
+            "selector-match-upgrades.yaml",
+            [],
+            [],
+        ),
         # TODO complete: The `rust.yaml` test contains many edge cases and selectors that aren't directly supported in
         # the V1 recipe format
         # (
