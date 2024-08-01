@@ -181,10 +181,10 @@ class MessageTable:
             return f"{s}s"
 
         num_errors: Final[int] = 0 if MessageCategory.ERROR not in self._tbl else len(self._tbl[MessageCategory.ERROR])
-        errors: Final[str] = f"{num_errors} {_pluralize(num_errors, 'error')}"
+        errors: Final[str] = f"{num_errors} " + _pluralize(num_errors, "error")
         num_warnings: Final[int] = (
             0 if MessageCategory.WARNING not in self._tbl else len(self._tbl[MessageCategory.WARNING])
         )
-        warnings: Final[str] = f"{num_warnings} {_pluralize(num_warnings, 'warning')}"
+        warnings: Final[str] = f"{num_warnings} " + _pluralize(num_warnings, "warning")
 
         return f"{errors} and {warnings} were found."
