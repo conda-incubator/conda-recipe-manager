@@ -27,6 +27,11 @@ from conda_recipe_manager.parser.platform_types import (
         (Arch.X_86, {Platform.LINUX_32, Platform.LINUX_64, Platform.OSX_64, Platform.WIN_32, Platform.WIN_64}),
         (Arch.X_86_64, {Platform.LINUX_64, Platform.OSX_64, Platform.WIN_64}),
         (Arch.ARM_64, {Platform.OSX_ARM_64, Platform.WIN_ARM_64}),
+        (Arch.SYS_390, {Platform.LINUX_SYS_390}),
+        (Arch.ARM_V6L, {Platform.LINUX_ARM_V6L}),
+        (Arch.ARM_V7L, {Platform.LINUX_ARM_V7L}),
+        (Arch.PPC_64, {Platform.LINUX_PPC_64}),
+        (Arch.PPC_64_LE, {Platform.LINUX_PPC_64_LE}),
     ],
 )
 def test_get_platforms_by_arch(arch: Arch | str, expected: set[Platform]) -> None:
