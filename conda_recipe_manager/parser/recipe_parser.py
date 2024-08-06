@@ -1158,7 +1158,7 @@ class RecipeParser(IsModifiable):
             - Lines containing only comments are currently not addressable by our pathing scheme, so they are omitted.
               For our current purposes (of upgrading the recipe format) this should be fine. Non-addressable values
               should be less likely to be removed from patch operations.
-        :returns: List of paths where comments can be found.
+        :returns: Dictionary of paths where comments can be found mapped to the comment found.
         """
         comments_tbl: dict[str, str] = {}
 
