@@ -99,7 +99,7 @@ def test_selector_parser_construction(selector: str, schema: SchemaVersion, expe
             },
         ),
         ("[osx and not unix]", SchemaVersion.V0, set()),
-        # TODO FIX: Python versions should have no affect on which Platforms are included
+        # TODO FIX: Python versions should have no effect on which Platforms are included
         # ("[osx and py37]", SchemaVersion.V0, {Platform.OSX_64, Platform.OSX_ARM_64}),
         ("[osx or py37]", SchemaVersion.V0, {Platform.OSX_64, Platform.OSX_ARM_64}),
         ("[win and not x86]", SchemaVersion.V0, {Platform.WIN_ARM_64}),
