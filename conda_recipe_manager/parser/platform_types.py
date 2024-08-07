@@ -14,7 +14,7 @@ from typing import Final
 
 class OperatingSystem(StrEnum):
     """
-    Operating System enumeration. This a broad (and sometimes inaccurate) qualifier supported by the recipe format.
+    Operating System enumeration. This is a broad (and sometimes inaccurate) qualifier supported by the recipe format.
     """
 
     LINUX = "linux"
