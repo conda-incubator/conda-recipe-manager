@@ -5,7 +5,8 @@ Description:    Provides enumerated types used by the parser.
 
 from __future__ import annotations
 
-from enum import Enum, IntEnum
+from enum import Enum, IntEnum, StrEnum
+from typing import Final
 
 
 class SchemaVersion(IntEnum):
@@ -26,3 +27,17 @@ class SelectorConflictMode(Enum):
     AND = 1  # Logically "and" the new selector with the old
     OR = 2  # Logically "or" the new selector with the old
     REPLACE = 3  # Replace the existing selector
+
+
+class LogicOp(StrEnum):
+    """
+    Logic operators used in selector syntax
+    """
+
+    AND = "and"
+    OR = "or"
+    NOT = "not"
+
+
+# Set of all Logic operators
+ALL_LOGIC_OPS: Final[set[LogicOp]] = set(LogicOp)
