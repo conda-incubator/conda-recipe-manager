@@ -113,3 +113,7 @@ format-docs:	## runs the docstring auto-formatter. Note this requires manually i
 
 analyze:		## runs static analyzer on the project
 	mypy --config-file=.mypy.ini --cache-dir=/dev/null $(SRC_DIR) $(TEST_DIR) $(SCRIPTS_DIR)
+
+docs:
+	cd docs
+	make html
