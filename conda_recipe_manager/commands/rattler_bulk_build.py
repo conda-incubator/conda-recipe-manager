@@ -115,7 +115,7 @@ def create_debug_file(debug_log: Path, results: dict[str, BuildResult], error_hi
         },
     ),
 )
-@click.argument("path", type=click.Path(exists=True, path_type=Path))  # type: ignore[misc]
+@click.argument("path", type=click.Path(exists=True, path_type=Path, file_okay=False))  # type: ignore[misc]
 @click.option(
     "--min-success-rate",
     "-m",
