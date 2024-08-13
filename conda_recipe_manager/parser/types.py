@@ -23,6 +23,11 @@ NodeValue = Primitives | list[str]
 # considered "0". When converting to the V1 format, we'll use this constant value.
 CURRENT_RECIPE_SCHEMA_FORMAT: Final[int] = SchemaVersion.V1.value
 
+# Pre-CEP-13 name of the recipe file
+V0_FORMAT_RECIPE_FILE_NAME: Final[str] = "meta.yaml"
+# Required file name for the recipe, specified in CEP-13
+V1_FORMAT_RECIPE_FILE_NAME: Final[str] = "recipe.yaml"
+
 # Indicates how many spaces are in a level of indentation
 TAB_SPACE_COUNT: Final[int] = 2
 TAB_AS_SPACES: Final[str] = " " * TAB_SPACE_COUNT

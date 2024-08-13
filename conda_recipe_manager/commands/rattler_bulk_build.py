@@ -19,7 +19,8 @@ from typing import Final, Optional, cast
 import click
 
 from conda_recipe_manager.commands.utils.print import print_err
-from conda_recipe_manager.commands.utils.types import V1_FORMAT_RECIPE_FILE_NAME, ExitCode
+from conda_recipe_manager.commands.utils.types import ExitCode
+from conda_recipe_manager.parser.types import V1_FORMAT_RECIPE_FILE_NAME
 
 # When performing a bulk operation, overall "success" is indicated by the % of recipe files that were built
 # "successfully"
