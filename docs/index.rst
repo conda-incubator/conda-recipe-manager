@@ -6,17 +6,20 @@
 Welcome to Conda Recipe Manager's documentation!
 ================================================
 
-.. include:: conda_recipe_manager.rst
+A project for libraries and automated tools that manage and manipulate conda recipe files.
+This project started out as a recipe parser library in Anaconda's percy project.
+
+Contents
+========
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 1
 
+   usage
+   developer_guide
 
 
 Indices and tables
 ==================
 
-* :ref:`genindex`
 * :ref:`modindex`
-* :ref:`search`

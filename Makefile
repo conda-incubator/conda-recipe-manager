@@ -115,5 +115,4 @@ analyze:		## runs static analyzer on the project
 	mypy --config-file=.mypy.ini --cache-dir=/dev/null $(SRC_DIR) $(TEST_DIR) $(SCRIPTS_DIR)
 
 docs:
-	cd docs
-	make html
+	$(MAKE) -C docs html
