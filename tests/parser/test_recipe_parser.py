@@ -2368,3 +2368,21 @@ def test_diff() -> None:
         " multi_level:\n"
         "   list_1:"
     )
+
+
+@pytest.mark.parametrize(
+    "file,expected",
+    [
+        ("simple-recipe.yaml", "359215c5ac3460d07470f2e3f524ed24154ff2eb7d274feb98149e6949c2ddbe"),
+        ("v1_format/v1_simple-recipe.yaml", "68c0b7fd829c17715b5b9941c882eda3bb70cb1dcef8cc08a55a9ee2b959fb7f"),
+        ("types-toml.yaml", "e117d210da9ea6507fdea856ee96407265aec40cbc58432aa6e1c7e31998a686"),
+        ("v1_format/v1_types-toml.yaml", "3474ed870eea9c8efbd248d24de8bdf54ad8651a7aed06d240f118272d8a3fd1"),
+        ("v1_format/v1_boto.yaml", "b42349254d020ffeda77f3068e8ad8804a92d1c7b89eb0f3d45632b38fc0a3bc"),
+    ],
+)
+def test_calc_sha256(file: str, expected: str) -> None:
+    """
+    Tests hashing a recipe parser's state with SHA-256
+    """
+    parser = load_recipe(file)
+    assert parser.calc_sha256() == expected
