@@ -20,12 +20,8 @@ from conda_recipe_manager.commands.utils.print import print_err, print_messages,
 from conda_recipe_manager.commands.utils.types import ExitCode
 from conda_recipe_manager.parser.enums import SchemaVersion
 from conda_recipe_manager.parser.recipe_parser_convert import RecipeParserConvert
-from conda_recipe_manager.parser.types import (
-    V0_FORMAT_RECIPE_FILE_NAME,
-    V1_FORMAT_RECIPE_FILE_NAME,
-    MessageCategory,
-    MessageTable,
-)
+from conda_recipe_manager.parser.types import V0_FORMAT_RECIPE_FILE_NAME, V1_FORMAT_RECIPE_FILE_NAME
+from conda_recipe_manager.types import MessageCategory, MessageTable
 
 # When performing a bulk operation, overall "success" is indicated by the % of recipe files that were converted
 # "successfully"

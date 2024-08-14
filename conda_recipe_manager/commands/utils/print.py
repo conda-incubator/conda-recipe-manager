@@ -8,7 +8,7 @@ from __future__ import annotations
 import sys
 from typing import Final
 
-from conda_recipe_manager.parser.types import MessageCategory, MessageTable
+from conda_recipe_manager.types import MessageCategory, MessageTable
 
 
 def print_out(*args, print_enabled: bool = True, **kwargs) -> None:  # type: ignore
