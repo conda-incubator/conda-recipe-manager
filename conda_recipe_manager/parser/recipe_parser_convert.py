@@ -34,7 +34,7 @@ from conda_recipe_manager.types import JsonPatchType, JsonType, MessageCategory,
 
 class RecipeParserConvert(RecipeParser):
     """
-    Extension of the base RecipeParser class to enables upgrading recipes from the old to V1 format.
+    Extension of the base RecipeParser class that enables upgrading recipes from the old to V1 format.
     This was originally part of the RecipeParser class but was broken-out for easier maintenance.
     """
 

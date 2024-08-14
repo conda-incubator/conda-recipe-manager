@@ -53,6 +53,7 @@ from conda_recipe_manager.parser._utils import (
     stringify_yaml,
     substitute_markers,
 )
+from conda_recipe_manager.parser.dependency import DependencySection, dependency_section_to_str
 from conda_recipe_manager.parser.enums import SchemaVersion, SelectorConflictMode
 from conda_recipe_manager.parser.exceptions import JsonPatchValidationException
 from conda_recipe_manager.parser.types import JSON_PATCH_SCHEMA, TAB_AS_SPACES, TAB_SPACE_COUNT, MultilineVariant
@@ -887,7 +888,12 @@ class RecipeParser(IsModifiable):
         :returns: A list of all paths in a recipe file that point to dependencies.
         """
         paths: list[str] = []
-        req_sections: Final[list[str]] = ["build", "host", "run", "run_constrained"]
+        req_sections: Final[list[str]] = [
+            dependency_section_to_str(DependencySection.BUILD, self._schema_version),
+            dependency_section_to_str(DependencySection.HOST, self._schema_version),
+            dependency_section_to_str(DependencySection.RUN, self._schema_version),
+            dependency_section_to_str(DependencySection.RUN_CONSTRAINTS, self._schema_version),
+        ]
 
         # Convenience function that reduces repeated logic between regular and multi-output recipes
         def _scan_requirements(path_prefix: str = "") -> None:
