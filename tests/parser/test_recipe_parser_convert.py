@@ -8,7 +8,7 @@ from __future__ import annotations
 import pytest
 
 from conda_recipe_manager.parser.recipe_parser_convert import RecipeParserConvert
-from conda_recipe_manager.parser.types import MessageCategory
+from conda_recipe_manager.types import MessageCategory
 from tests.file_loading import TEST_FILES_PATH, load_file, load_recipe_convert
 
 

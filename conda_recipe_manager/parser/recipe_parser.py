@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import ast
 import difflib
+import hashlib
 import json
 import re
 import sys
@@ -1585,3 +1586,13 @@ class RecipeParser(IsModifiable):
                 self._init_content.splitlines(), self.render().splitlines(), fromfile="original", tofile="current"
             )
         )
+
+    def calc_sha256(self) -> str:
+        """
+        Generates a SHA-256 hash of recipe's contents. This hash is the same as if the current recipe state was written
+        to a file. NOTE: This may not be the same as the original recipe file as the parser will auto-format text.
+        :returns: SHA-256 hash of the current recipe state.
+        """
+        # NOTE: If we need to hash larger recipes, we may want to consider a buffered
+        #       approach: https://stackoverflow.com/questions/22058048/hashing-a-file-in-python
+        return hashlib.sha256(self.render().encode()).hexdigest()

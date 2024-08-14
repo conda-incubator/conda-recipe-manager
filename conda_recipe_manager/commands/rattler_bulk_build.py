@@ -19,23 +19,15 @@ from typing import Final, Optional, cast
 import click
 
 from conda_recipe_manager.commands.utils.print import print_err
+from conda_recipe_manager.commands.utils.types import ExitCode
+from conda_recipe_manager.parser.types import V1_FORMAT_RECIPE_FILE_NAME
 
-# Required file name for the recipe, specified in CEP-13
-V1_FORMAT_RECIPE_FILE_NAME: Final[str] = "recipe.yaml"
 # When performing a bulk operation, overall "success" is indicated by the % of recipe files that were built
 # "successfully"
 DEFAULT_BULK_SUCCESS_PASS_THRESHOLD: Final[float] = 0.80
 RATTLER_ERROR_REGEX = re.compile(r"Error:\s+.*")
 # Timeout to halt operation
 DEFAULT_RATTLER_BUILD_TIMEOUT: Final[int] = 120
-
-
-## Error codes (NOTE: there may be overlap with rattler-build) ##
-SUCCESS: Final[int] = 0
-NO_FILES_FOUND: Final[int] = 1
-# In bulk operation mode, this indicates that the % success threshold was not met
-MISSED_SUCCESS_THRESHOLD: Final[int] = 42
-TIMEOUT: Final[int] = 43
 
 
 @dataclass
@@ -70,7 +62,7 @@ def build_recipe(file: Path, path: Path, args: list[str]) -> tuple[str, BuildRes
         )
     except subprocess.TimeoutExpired:
         return str(file.relative_to(path)), BuildResult(
-            code=TIMEOUT,
+            code=ExitCode.TIMEOUT,
             errors=["Recipe build dry-run timed out."],
         )
 
@@ -123,7 +115,7 @@ def create_debug_file(debug_log: Path, results: dict[str, BuildResult], error_hi
         },
     ),
 )
-@click.argument("path", type=click.Path(exists=True, path_type=Path))  # type: ignore[misc]
+@click.argument("path", type=click.Path(exists=True, path_type=Path, file_okay=False))  # type: ignore[misc]
 @click.option(
     "--min-success-rate",
     "-m",
@@ -161,7 +153,7 @@ def rattler_bulk_build(
 
     if not files:
         print_err(f"No `recipe.yaml` files found in: {path}")
-        sys.exit(NO_FILES_FOUND)
+        sys.exit(ExitCode.NO_FILES_FOUND)
 
     # Process recipes in parallel
     thread_pool_size: Final[int] = mp.cpu_count()
@@ -176,7 +168,7 @@ def rattler_bulk_build(
     recipes_with_errors: list[str] = []
     error_histogram: dict[str, int] = {}
     for file, build_result in results.items():
-        if build_result.code == SUCCESS:
+        if build_result.code == ExitCode.SUCCESS:
             total_success += 1
         else:
             total_errors += 1
@@ -216,4 +208,4 @@ def rattler_bulk_build(
         create_debug_file(debug_log, results, error_histogram)
 
     print(json.dumps(final_output, indent=2))
-    sys.exit(SUCCESS if percent_success >= min_success_rate else MISSED_SUCCESS_THRESHOLD)
+    sys.exit(ExitCode.SUCCESS if percent_success >= min_success_rate else ExitCode.MISSED_SUCCESS_THRESHOLD)
