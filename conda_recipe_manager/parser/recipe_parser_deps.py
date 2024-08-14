@@ -5,7 +5,7 @@ Description:    Provides a subclass of RecipeParser that adds advanced dependenc
 
 from __future__ import annotations
 
-from typing import Final, Optional, cast
+from typing import Final, cast
 
 from conda.models.match_spec import MatchSpec
 
@@ -20,13 +20,6 @@ class RecipeParserDeps(RecipeParser):
     Extension of the base RecipeParser class to enables advanced dependency management abilities. The base RecipeParser
     class is so large, that this has been broken-out for maintenance purposes.
     """
-
-    def __init__(self, content: str):
-        """
-        Constructs a dependency-management recipe object.
-        :param content: conda-build formatted recipe file, as a single text string.
-        """
-        super().__init__(content)
 
     def get_package_names_to_path(self) -> dict[str, str]:
         """
@@ -77,21 +70,21 @@ class RecipeParserDeps(RecipeParser):
                 for i, dep in enumerate(deps):
                     # NOTE: `get_dependency_paths()` uses the same approach for calculating dependency paths.
                     dep_path = RecipeParser.append_to_path(path, f"/requirements/{section_str}/{i}")
-                    selector = self.get_selector_at_path(dep_path, None)
+                    selector = self.get_selector_at_path(dep_path, "")
                     dep_map[package].append(
                         Dependency(
                             required_by=package,
                             path=dep_path,
                             type=section,
                             match_spec=MatchSpec(dep),
-                            selector=None if selector is None else SelectorParser(selector),
+                            selector=None if not selector else SelectorParser(selector, self._schema_version),
                         )
                     )
 
         # Apply top-level dependencies to multi-output recipe packages
         if len(dep_map) > 1 and root_package in dep_map:
             root_dependencies: Final[list[Dependency]] = dep_map[root_package]
-            for package in dep_map.keys():
+            for package in dep_map:
                 if package == root_package:
                     continue
                 dep_map[root_package].extend(root_dependencies)

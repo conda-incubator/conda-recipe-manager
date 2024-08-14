@@ -8,6 +8,9 @@ from __future__ import annotations
 from enum import Enum, auto
 from typing import NamedTuple, Optional
 
+from conda.models.match_spec import MatchSpec
+
+from conda_recipe_manager.parser.selector_parser import SelectorParser
 from conda_recipe_manager.parser.types import SchemaVersion
 
 
