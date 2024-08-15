@@ -5,7 +5,7 @@ Description:    Provides a subclass of RecipeParser that adds advanced dependenc
 
 from __future__ import annotations
 
-from typing import Final, cast
+from typing import Final, Optional, cast
 
 from conda.models.match_spec import MatchSpec
 
@@ -21,6 +21,33 @@ class RecipeParserDeps(RecipeParser):
     Extension of the base RecipeParser class to enables advanced dependency management abilities. The base RecipeParser
     class is so large, that this has been broken-out for maintenance purposes.
     """
+
+    @staticmethod
+    def _add_top_level_dependencies(root_package: str, dep_map: DependencyMap) -> None:
+        """
+        Helper function that applies "root"/top-level dependencies to packages in multi-output recipes.
+        """
+        if len(dep_map) <= 1 or root_package not in dep_map:
+            return
+        root_dependencies: Final[list[Dependency]] = dep_map[root_package]
+        for package in dep_map:
+            if package == root_package:
+                continue
+            # Change the "required_by" package name to the current package, not the root package name.
+            dep_map[package].extend(
+                [Dependency(package, d.path, d.type, d.match_spec, d.selector) for d in root_dependencies]
+            )
+
+    def _fetch_optional_selector(self, path: str) -> Optional[SelectorParser]:
+        """
+        Given a recipe path, optionally return a SelectorParser object.
+        :param path: Path to the target value
+        :returns: A parsed selector, if one is available. Otherwise, None.
+        """
+        try:
+            return SelectorParser(self.get_selector_at_path(path), self._schema_version)
+        except KeyError:
+            return None
 
     def get_package_names_to_path(self) -> dict[str, str]:
         """
@@ -59,7 +86,7 @@ class RecipeParserDeps(RecipeParser):
         :returns: A structured representation of the dependencies.
         """
         package_path_tbl: Final[dict[str, str]] = self.get_package_names_to_path()
-        root_package = None
+        root_package = ""
         dep_map: DependencyMap = {}
 
         for package, path in package_path_tbl.items():
@@ -67,7 +94,8 @@ class RecipeParserDeps(RecipeParser):
                 root_package = package
 
             requirements = cast(
-                dict[str, list[str]], self.get_value(RecipeParser.append_to_path(path, "/requirements"), [])
+                dict[str, list[str]],
+                self.get_value(RecipeParser.append_to_path(path, "/requirements"), default=[], sub_vars=True),
             )
             dep_map[package] = []
             for section_str, deps in requirements.items():
@@ -79,26 +107,17 @@ class RecipeParserDeps(RecipeParser):
                 for i, dep in enumerate(deps):
                     # NOTE: `get_dependency_paths()` uses the same approach for calculating dependency paths.
                     dep_path = RecipeParser.append_to_path(path, f"/requirements/{section_str}/{i}")
-                    try:
-                        selector = SelectorParser(self.get_selector_at_path(dep_path), self._schema_version)
-                    except KeyError:
-                        selector = None
                     dep_map[package].append(
                         Dependency(
                             required_by=package,
                             path=dep_path,
                             type=section,
                             match_spec=MatchSpec(dep),
-                            selector=selector,
+                            selector=self._fetch_optional_selector(dep_path),
                         )
                     )
 
         # Apply top-level dependencies to multi-output recipe packages
-        if len(dep_map) > 1 and root_package in dep_map:
-            root_dependencies: Final[list[Dependency]] = dep_map[root_package]
-            for package in dep_map:
-                if package == root_package:
-                    continue
-                dep_map[root_package].extend(root_dependencies)
+        RecipeParserDeps._add_top_level_dependencies(root_package, dep_map)
 
         return dep_map
