@@ -80,6 +80,29 @@ def test_get_package_names_to_path(file: str, expected: dict[str, str]) -> None:
                 ]
             },
         ),
+        # simple-recipe.yaml tests that unrecognized requirements fields are ignored
+        (
+            "simple-recipe.yaml",
+            {
+                "types-toml": [
+                    Dependency(
+                        "types-toml",
+                        "/requirements/host/0",
+                        DependencySection.HOST,
+                        MatchSpec("setuptools"),
+                        SelectorParser("[unix]", SchemaVersion.V0),
+                    ),
+                    Dependency(
+                        "types-toml",
+                        "/requirements/host/1",
+                        DependencySection.HOST,
+                        MatchSpec("fakereq"),
+                        SelectorParser("[unix]", SchemaVersion.V0),
+                    ),
+                    Dependency("types-toml", "/requirements/run/0", DependencySection.RUN, MatchSpec("python"), None),
+                ]
+            },
+        ),
         (
             "boto.yaml",
             {
