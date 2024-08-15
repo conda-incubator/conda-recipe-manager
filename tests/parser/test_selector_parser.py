@@ -38,6 +38,28 @@ def test_selector_parser_construction(selector: str, schema: SchemaVersion, expe
 
 
 @pytest.mark.parametrize(
+    "selector0,selector1,expected",
+    [
+        (SelectorParser("[osx]", SchemaVersion.V0), SelectorParser("[osx]", SchemaVersion.V0), True),
+        (SelectorParser("[osx]", SchemaVersion.V0), "[osx]", False),
+        # TODO: This test case will need to be updated when V1 support for selectors is added.
+        (SelectorParser("[osx]", SchemaVersion.V0), SelectorParser("[osx]", SchemaVersion.V1), False),
+        (SelectorParser("[osx]", SchemaVersion.V0), SelectorParser("[unix]", SchemaVersion.V0), False),
+        (SelectorParser("[unix or osx]", SchemaVersion.V0), SelectorParser("[unix or osx]", SchemaVersion.V0), True),
+        (SelectorParser("[unix or osx]", SchemaVersion.V0), SelectorParser("[osx or unix]", SchemaVersion.V0), False),
+    ],
+)
+def test_selector_eq(selector0: SelectorParser, selector1: object, expected: bool) -> None:
+    """
+    Tests checking for selector equivalency.
+    :param selector0: LHS selector
+    :param selector1: RHS selector
+    :param expected: Expected value to return
+    """
+    assert (selector0 == selector1) == expected
+
+
+@pytest.mark.parametrize(
     "selector,schema,expected",
     [
         ("", SchemaVersion.V0, set()),
