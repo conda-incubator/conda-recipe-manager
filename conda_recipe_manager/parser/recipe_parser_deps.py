@@ -13,6 +13,7 @@ from conda_recipe_manager.parser._types import ROOT_NODE_VALUE
 from conda_recipe_manager.parser.dependency import Dependency, DependencyMap, str_to_dependency_section
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
 from conda_recipe_manager.parser.selector_parser import SelectorParser
+from conda_recipe_manager.parser.types import SchemaVersion
 
 
 class RecipeParserDeps(RecipeParser):
@@ -29,12 +30,18 @@ class RecipeParserDeps(RecipeParser):
         :returns: Mapping of package name to path where that package is found
         """
         package_tbl: dict[str, str] = {}
+        root_name_path: Final[str] = (
+            "/recipe/name" if self.is_multi_output() and self._schema_version == SchemaVersion.V1 else "/package/name"
+        )
+        name_path: Final[str] = (
+            "/package/name" if self.is_multi_output() and self._schema_version == SchemaVersion.V1 else "/name"
+        )
         for path in self.get_package_paths():
             try:
                 if path == ROOT_NODE_VALUE:
-                    name = cast(str, self.get_value("/package/name", sub_vars=True))
+                    name = cast(str, self.get_value(root_name_path, sub_vars=True))
                 else:
-                    name = cast(str, self.get_value(RecipeParser.append_to_path(path, "/name"), sub_vars=True))
+                    name = cast(str, self.get_value(RecipeParser.append_to_path(path, name_path), sub_vars=True))
             except KeyError as e:
                 raise KeyError(f"Could not find a package name associated with path: {path}") from e
 
@@ -59,7 +66,9 @@ class RecipeParserDeps(RecipeParser):
             if path == ROOT_NODE_VALUE:
                 root_package = package
 
-            requirements = cast(dict[str, list[str]], self.get_value(path, []))
+            requirements = cast(
+                dict[str, list[str]], self.get_value(RecipeParser.append_to_path(path, "/requirements"), [])
+            )
             dep_map[package] = []
             for section_str, deps in requirements.items():
                 section = str_to_dependency_section(section_str)
@@ -70,14 +79,17 @@ class RecipeParserDeps(RecipeParser):
                 for i, dep in enumerate(deps):
                     # NOTE: `get_dependency_paths()` uses the same approach for calculating dependency paths.
                     dep_path = RecipeParser.append_to_path(path, f"/requirements/{section_str}/{i}")
-                    selector = self.get_selector_at_path(dep_path, "")
+                    try:
+                        selector = SelectorParser(self.get_selector_at_path(dep_path), self._schema_version)
+                    except KeyError:
+                        selector = None
                     dep_map[package].append(
                         Dependency(
                             required_by=package,
                             path=dep_path,
                             type=section,
                             match_spec=MatchSpec(dep),
-                            selector=None if not selector else SelectorParser(selector, self._schema_version),
+                            selector=selector,
                         )
                     )
 

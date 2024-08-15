@@ -10,6 +10,7 @@ from typing import Final
 
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
 from conda_recipe_manager.parser.recipe_parser_convert import RecipeParserConvert
+from conda_recipe_manager.parser.recipe_parser_deps import RecipeParserDeps
 
 # Path to supplementary files used in test cases
 TEST_FILES_PATH: Final[Path] = Path(__file__).parent / "test_aux_files"
@@ -42,3 +43,13 @@ def load_recipe_convert(file_name: str) -> RecipeParserConvert:
     """
     recipe = load_file(TEST_FILES_PATH / file_name)
     return RecipeParserConvert(recipe)
+
+
+def load_recipe_deps(file_name: str) -> RecipeParserDeps:
+    """
+    Convenience function that simplifies initializing a recipe parser.
+    :param file_name: File name of the test recipe to load
+    :returns: RecipeParserDeps instance, based on the file
+    """
+    recipe = load_file(TEST_FILES_PATH / file_name)
+    return RecipeParserDeps(recipe)
