@@ -26,3 +26,4 @@ dependencies:
   - types-requests
   - pre-commit
   - sphinx
+  - sphinx-rtd-theme

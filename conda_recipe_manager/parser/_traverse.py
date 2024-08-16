@@ -125,8 +125,7 @@ def traverse_with_index(root: Node, path: StrStack) -> tuple[Optional[Node], int
 
     :param root: Starting node of the tree/branch to traverse.
     :param path: Path, as a stack, that describes a location in the tree.
-    :returns: A tuple containing:
-        - `Node` object if a node is found in the parse tree at that path. Otherwise
+    :returns: A tuple containing: - `Node` object if a node is found in the parse tree at that path. Otherwise
           returns `None`. If the path terminates in an index, the parent is returned with the index location.
         - If the node is a member of a list, the VIRTUAL index returned will be >= 0
         - If the node is a member of a list, the PHYSICAL index returned will be >= 0

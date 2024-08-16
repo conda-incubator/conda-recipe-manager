@@ -108,8 +108,8 @@ format:			## runs the code auto-formatter
 	isort --profile black --line-length=120 $(SRC_DIR) $(TEST_DIR) $(SCRIPTS_DIR)
 	black --line-length=120 $(SRC_DIR) $(TEST_DIR) $(SCRIPTS_DIR)
 
-format-docs:	## runs the docstring auto-formatter. Note this requires manually installing `docconvert`
-	docconvert --in-place --config .docconvert.json $(SRC_DIR) $(TEST_DIR) $(SCRIPTS_DIR)
+format-docs:	## runs the docstring auto-formatter. Note this requires manually installing `docconvert` with `pip`
+	docconvert --in-place --config .docconvert.json $(SRC_DIR)
 
 analyze:		## runs static analyzer on the project
 	mypy --config-file=.mypy.ini --cache-dir=/dev/null $(SRC_DIR) $(TEST_DIR) $(SCRIPTS_DIR)
