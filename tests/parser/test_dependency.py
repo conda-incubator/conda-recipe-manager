@@ -1,5 +1,5 @@
 """
-:Description:    Unit tests for the dependency module.
+:Description: Unit tests for the dependency module.
 """
 
 from __future__ import annotations

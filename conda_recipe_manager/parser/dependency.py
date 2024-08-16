@@ -1,5 +1,5 @@
 """
-:Description:    Provides types and utilities for managing recipe dependencies.
+:Description: Provides types and utilities for managing recipe dependencies.
 """
 
 from __future__ import annotations

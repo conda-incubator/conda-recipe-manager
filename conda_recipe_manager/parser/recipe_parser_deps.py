@@ -1,5 +1,5 @@
 """
-:Description:    Provides a subclass of RecipeParser that adds advanced dependency management tools.
+:Description: Provides a subclass of RecipeParser that adds advanced dependency management tools.
 """
 
 from __future__ import annotations
