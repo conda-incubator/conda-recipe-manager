@@ -35,8 +35,16 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
+      - uses: conda-incubator/setup-miniconda@v3
+        with:
+          python-version: "3.11"
+          activate-environment: docs-env
       - name: Build Docs
+        shell: bash
         run: |
+          source $CONDA/bin/activate
+          conda activate docs-env
+          conda install sphinx
           make -C docs html
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
