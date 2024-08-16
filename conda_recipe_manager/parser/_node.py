@@ -40,6 +40,7 @@ class Node:
     ):
         """
         Constructs a node
+
         :param value:               Value of the current node
         :param comment:             Comment on the line this node was found on
         :param children:            List of children nodes, descendants of this node
@@ -57,6 +58,7 @@ class Node:
     def __eq__(self, other: object) -> bool:
         """
         Determine if two nodes are equal. Useful for `assert` statements in tests.
+
         :param other: Other object to check against
         :returns: True if the two nodes are identical. False otherwise.
         """

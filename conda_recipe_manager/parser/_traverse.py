@@ -45,6 +45,7 @@ def remap_child_indices_phys_to_virt(children: list[Node]) -> list[int]:
     """
     Produces the "inverted" table created by `remap_child_indices_virt_to_phys()`.
     See `remap_child_indices_virt_to_phys()` for more details.
+
     :param children: Child node list to process.
     :returns: A list of indices. Indexing this list with the "physical" (class-provided) index will return the "virtual"
         list position.
@@ -59,6 +60,7 @@ def remap_child_indices_phys_to_virt(children: list[Node]) -> list[int]:
 def _traverse_recurse(node: Node, path: StrStack) -> Optional[Node]:
     """
     Recursive helper function for traversing a tree.
+
     :param node: Current node on the tree.
     :param path: Path, as a stack, that describes a location in the tree.
     :returns: `Node` object if a node is found in the parse tree at that path. Otherwise returns `None`.
@@ -98,8 +100,8 @@ def _traverse_recurse(node: Node, path: StrStack) -> Optional[Node]:
 def traverse(node: Optional[Node], path: StrStack) -> Optional[Node]:
     """
     Given a path in the recipe tree, traverse the tree and return the node at that path.
-
     If no Node is found at that path, return `None`.
+
     :param node: Starting node of the tree/branch to traverse.
     :param path: Path, as a stack, that describes a location in the tree.
     :returns: `Node` object if a node is found in the parse tree at that path. Otherwise returns `None`.

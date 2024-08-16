@@ -32,6 +32,7 @@ def str_to_stack_path(path: str) -> StrStack:
 
     For example:
         "/foo/bar/baz" -> ["baz", "bar", "foo", "/"]
+
     :param path: Path to deconstruct into a stack
     :returns: Path, described as a stack of strings.
     """
@@ -76,6 +77,7 @@ def num_tab_spaces(s: str) -> int:
     """
     Counts the number of spaces at the start of the string. Used to indicate depth of a field in a YAML file (the YAML
     specification dictates only spaces can be used for indenting).
+
     :param s: Target string
     :returns: Number of preceding spaces in a string
     """
@@ -91,6 +93,7 @@ def num_tab_spaces(s: str) -> int:
 def substitute_markers(s: str, subs: list[str]) -> str:
     """
     Given a string, replace substitution markers with the original Jinja template from a list of options.
+
     :param s: String to replace substitution markers with
     :param subs: List of substitutions to make, in order of appearance
     :returns: New string, with substitutions removed
@@ -146,6 +149,7 @@ def stringify_yaml(
 ) -> NodeValue:
     """
     Special function for handling edge cases when converting values back to YAML.
+
     :param val: Value to check
     :param multiline_variant: (Optional) If the value being processed is a multiline string, indicate which YAML
         descriptor is in use.
@@ -173,6 +177,7 @@ def normalize_multiline_strings(val: NodeValue, variant: MultilineVariant) -> No
     """
     Utility function that takes in a Node's value and "normalizes" multiline strings so that they can be accurately
     interpreted by PyYaml. We use PyYaml to handle the various ways in which a multiline string can be interpreted.
+
     :param val: Value to normalize
     :param variant: Multiline variant rules to follow
     :returns: If the value is a multiline string, this returns the "normalized" string to be re-evaluated by PyYaml.
@@ -191,7 +196,7 @@ def dedupe_and_preserve_order(l: list[H]) -> list[H]:
     """
     Takes a list of strings
     See this StackOverflow post:
-      https://stackoverflow.com/questions/480214/how-do-i-remove-duplicates-from-a-list-while-preserving-order
+      - https://stackoverflow.com/questions/480214/how-do-i-remove-duplicates-from-a-list-while-preserving-order
 
     """
     return list(cast(dict[H, None], dict.fromkeys(l)))
@@ -201,6 +206,7 @@ def set_key_conditionally(dictionary: dict[str, JsonType], key: str, value: Json
     """
     Convenience function that conditionally includes a key-value pair in a dictionary if the value is truthy.
     Great for cheating McCabe ratings in complex JSON/YAML operations!
+
     :param dictionary: Dictionary to conditionally add a value to
     :param key: Key to use
     :param value: Value to conditionally add to the dictionary
@@ -212,6 +218,7 @@ def set_key_conditionally(dictionary: dict[str, JsonType], key: str, value: Json
 def search_any_regex(re_set: Iterable[re.Pattern[str]], s: str) -> bool:
     """
     Convenience function that checks a string against many regular expressions
+
     :param re_set: Set of regular expressions to check
     :param s: Target string
     :returns: True if any regex in the set matches. False otherwise.
