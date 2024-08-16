@@ -42,7 +42,7 @@ jobs:
         run: |
           source $CONDA/bin/activate
           conda activate docs-env
-          conda install sphinx
+          conda install sphinx sphinx-rtd-theme
           make -C docs html
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
