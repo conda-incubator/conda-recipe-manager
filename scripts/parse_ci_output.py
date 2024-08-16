@@ -27,6 +27,7 @@ def aggregate_stats(stats: list[dict[str, int | float]]) -> dict[str, int | floa
     """
     Takes a list of dictionaries full of common statistics. All values are added together, unless the value is a
     percentage. Those are averaged together.
+
     :param stats: List of statistics tables to process
     :returns: One table of accumulated statistics
     """
@@ -107,6 +108,7 @@ def generate_summary(convert_results: list[BasicJsonType], dry_run_results: list
 def read_logs(log_dir: Path) -> tuple[list[BasicJsonType], list[BasicJsonType]]:
     """
     Parses-out all the recognized JSON blobs found in the log files.
+
     :param log_dir: Path to the directory containing all the log files.
     :returns: The lists of parsed JSON blobs from both integration testing phases.
     """

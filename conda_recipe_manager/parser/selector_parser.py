@@ -33,6 +33,7 @@ class _SelectorNode:
     def __init__(self, value: str):
         """
         Constructs a selector node
+
         :param value: Selector value stored in the node
         """
 
@@ -57,6 +58,7 @@ class _SelectorNode:
     def __str__(self) -> str:
         """
         Returns a debug string representation of a sub-tree rooted at this node.
+
         :returns: Node's debug string
         """
         l_str: Final[str] = "" if self.l_node is None else f" L {self.l_node}"
@@ -66,6 +68,7 @@ class _SelectorNode:
     def __repr__(self) -> str:
         """
         Returns a common string representation of a node
+
         :returns: Node's value
         """
         return str(self.value)
@@ -87,6 +90,7 @@ class SelectorParser(IsModifiable):
     def _process_postfix_stack(stack: list[_SelectorNode]) -> Optional[_SelectorNode]:
         """
         Recursively processes the postfix stack of nodes, building a tree
+
         :returns: Current node in the tree
         """
         if not stack:
@@ -104,6 +108,7 @@ class SelectorParser(IsModifiable):
     def _parse_selector_tree(tokens: list[str]) -> Optional[_SelectorNode]:
         """
         Constructs a selector parse tree
+
         :param tokens: Selector tokens to process
         :returns: The root of the parse tree
         """
@@ -134,6 +139,7 @@ class SelectorParser(IsModifiable):
     def __init__(self, content: str, schema_version: SchemaVersion):
         """
         Constructs and parses a selector string
+
         :param content: Selector string to parse
         :param schema_version: Schema the recipe uses
         """
@@ -153,6 +159,7 @@ class SelectorParser(IsModifiable):
     def __str__(self) -> str:
         """
         Returns a debug string representation of the parser.
+
         :returns: Parser's debug string
         """
         return f"Schema: V{self._schema_version} | Tree: {self._root}"

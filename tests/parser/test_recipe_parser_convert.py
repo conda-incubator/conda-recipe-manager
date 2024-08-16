@@ -30,6 +30,7 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
     """
     Validates the pre-processor phase of the conversion process. A recipe file should come in
     as a string and return a modified string, if applicable.
+
     :param input_file: Test input recipe file name
     :param expected_file: Name of the file containing the expected output of a test instance
     """
@@ -175,6 +176,7 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
 def test_render_to_v1_recipe_format(file_base: str, errors: list[str], warnings: list[str]) -> None:
     """
     Validates rendering a recipe in the V1 format.
+
     :param file_base: Base file name for both the input and the expected out
     """
     parser = load_recipe_convert(file_base)

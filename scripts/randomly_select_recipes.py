@@ -18,6 +18,7 @@ HTTP_GET_TIMEOUT: Final[float] = 15
 def fetch_repo(org_repo: str, out_dir: Path) -> str:
     """
     Fetch a feedstock repo's recipe file and dump it to a corresponding location on disk.
+
     :param org_repo: String containing `org/repo`, which is what `gh repo list` returns
     :param out_dir: Path to the directory where files should be saved to
     :returns: The repository identifier, if successfully pulled and saved. Otherwise returns an empty string
