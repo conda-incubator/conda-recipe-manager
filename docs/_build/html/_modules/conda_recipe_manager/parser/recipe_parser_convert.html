@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="English" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>conda_recipe_manager.parser.recipe_parser_convert &mdash; Conda Recipe Manager 0.2.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=6c0f27eb"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+</head>
+
+<body class="wy-body-for-nav">
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+
+
+          <a href="../../../index.html" class="icon icon-home">
+            Conda Recipe Manager
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Getting Started/Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide.html">Developer Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Conda Recipe Manager</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">conda_recipe_manager.parser.recipe_parser_convert</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+
+  <h1>Source code for conda_recipe_manager.parser.recipe_parser_convert</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">File:           recipe_parser_convert.py</span>
+<span class="sd">Description:    Provides a subclass of RecipeParser that performs the conversion of a v0 recipe to the new v1 recipe</span>
+<span class="sd">                format. This tooling was originally part of the base class, but was broken-out for easier/cleaner code</span>
+<span class="sd">                maintenance.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Final</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">cast</span>
+
+<span class="kn">from</span> <span class="nn">conda_recipe_manager.licenses.spdx_utils</span> <span class="kn">import</span> <span class="n">SpdxUtils</span>
+<span class="kn">from</span> <span class="nn">conda_recipe_manager.parser._node</span> <span class="kn">import</span> <span class="n">Node</span>
+<span class="kn">from</span> <span class="nn">conda_recipe_manager.parser._traverse</span> <span class="kn">import</span> <span class="n">traverse</span>
+<span class="kn">from</span> <span class="nn">conda_recipe_manager.parser._types</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ROOT_NODE_VALUE</span><span class="p">,</span>
+    <span class="n">TOP_LEVEL_KEY_SORT_ORDER</span><span class="p">,</span>
+    <span class="n">V1_BUILD_SECTION_KEY_SORT_ORDER</span><span class="p">,</span>
+    <span class="n">V1_PYTHON_TEST_KEY_SORT_ORDER</span><span class="p">,</span>
+    <span class="n">V1_SOURCE_SECTION_KEY_SORT_ORDER</span><span class="p">,</span>
+    <span class="n">Regex</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">conda_recipe_manager.parser._utils</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">search_any_regex</span><span class="p">,</span>
+    <span class="n">set_key_conditionally</span><span class="p">,</span>
+    <span class="n">stack_path_to_str</span><span class="p">,</span>
+    <span class="n">str_to_stack_path</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">conda_recipe_manager.parser.enums</span> <span class="kn">import</span> <span class="n">SchemaVersion</span>
+<span class="kn">from</span> <span class="nn">conda_recipe_manager.parser.recipe_parser</span> <span class="kn">import</span> <span class="n">RecipeParser</span>
+<span class="kn">from</span> <span class="nn">conda_recipe_manager.parser.types</span> <span class="kn">import</span> <span class="n">CURRENT_RECIPE_SCHEMA_FORMAT</span><span class="p">,</span> <span class="n">MessageCategory</span><span class="p">,</span> <span class="n">MessageTable</span>
+<span class="kn">from</span> <span class="nn">conda_recipe_manager.types</span> <span class="kn">import</span> <span class="n">JsonPatchType</span><span class="p">,</span> <span class="n">JsonType</span><span class="p">,</span> <span class="n">Primitives</span><span class="p">,</span> <span class="n">SentinelType</span>
+
+
+<div class="viewcode-block" id="RecipeParserConvert">
+<a class="viewcode-back" href="../../../conda_recipe_manager.parser.html#conda_recipe_manager.parser.recipe_parser_convert.RecipeParserConvert">[docs]</a>
+<span class="k">class</span> <span class="nc">RecipeParserConvert</span><span class="p">(</span><span class="n">RecipeParser</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extension of the base RecipeParser class to enables upgrading recipes from the old to V1 format.</span>
+<span class="sd">    This was originally part of the RecipeParser class but was broken-out for easier maintenance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructs a convertible recipe object. This extension of the parser class keeps a modified copy of the original</span>
+<span class="sd">        recipe to work on and tracks some debugging state.</span>
+<span class="sd">        :param content: conda-build formatted recipe file, as a single text string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+        <span class="c1"># `copy.deepcopy()` produced some bizarre artifacts, namely single-line comments were being incorrectly rendered</span>
+        <span class="c1"># as list members. Although inefficient, we have tests that validate round-tripping the parser and there</span>
+        <span class="c1"># is no development cost in utilizing tools we already must maintain.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="p">:</span> <span class="n">RecipeParser</span> <span class="o">=</span> <span class="n">RecipeParser</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">render</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_spdx_utils</span> <span class="o">=</span> <span class="n">SpdxUtils</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_msg_tbl</span> <span class="o">=</span> <span class="n">MessageTable</span><span class="p">()</span>
+
+    <span class="c1">## Patch utility functions ##</span>
+
+    <span class="k">def</span> <span class="nf">_patch_and_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">patch</span><span class="p">:</span> <span class="n">JsonPatchType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convenience function that logs failed patches to the message table.</span>
+<span class="sd">        :param patch: Patch operation to perform</span>
+<span class="sd">        :returns: Forwards patch results for further logging/error handling</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">patch</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_msg_tbl</span><span class="o">.</span><span class="n">add_message</span><span class="p">(</span><span class="n">MessageCategory</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Failed to patch: </span><span class="si">{</span><span class="n">patch</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">def</span> <span class="nf">_patch_add_missing_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">JsonType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convenience function that constructs missing paths. Useful when you have to construct more than 1 path level at</span>
+<span class="sd">        once (the JSON patch standard only allows the creation of 1 new level at a time).</span>
+<span class="sd">        :param base_path: Base path, to be extended</span>
+<span class="sd">        :param ext: Extension to create the full path to check for</span>
+<span class="sd">        :param value: `value` field for the patch-add operation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">temp_path</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">contains_value</span><span class="p">(</span><span class="n">temp_path</span><span class="p">):</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_patch_and_log</span><span class="p">({</span><span class="s2">&quot;op&quot;</span><span class="p">:</span> <span class="s2">&quot;add&quot;</span><span class="p">,</span> <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">temp_path</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">value</span><span class="p">})</span>
+
+    <span class="k">def</span> <span class="nf">_patch_move_base_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">old_ext</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">new_ext</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convenience function that moves a value under an old path to a new one sharing a common base path BUT only if</span>
+<span class="sd">        the old path exists.</span>
+<span class="sd">        :param base_path: Shared base path from old and new locations</span>
+<span class="sd">        :param old_ext: Old extension to the base path containing the data to move</span>
+<span class="sd">        :param new_ext: New extension to the base path of where the data should go</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">old_path</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="n">old_ext</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">contains_value</span><span class="p">(</span><span class="n">old_path</span><span class="p">):</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_patch_and_log</span><span class="p">({</span><span class="s2">&quot;op&quot;</span><span class="p">:</span> <span class="s2">&quot;move&quot;</span><span class="p">,</span> <span class="s2">&quot;from&quot;</span><span class="p">:</span> <span class="n">old_path</span><span class="p">,</span> <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="n">new_ext</span><span class="p">)})</span>
+
+    <span class="k">def</span> <span class="nf">_patch_move_new_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">old_ext</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">new_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">new_ext</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convenience function that moves an old path to a new path that is now under a new path that must be</span>
+<span class="sd">        conditionally added, if it is not present.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            `/build/entry_points` -&gt; `/build/python/entry_points`</span>
+<span class="sd">            `/build/missing_dso_whitelist` -&gt; `/build/dynamic_linking/missing_dso_allowlist`</span>
+<span class="sd">        :param base_path: Shared base path from old and new locations</span>
+<span class="sd">        :param old_ext: Old extension to the base path containing the data to move</span>
+<span class="sd">        :param new_path: New path to extend to the base path, if the path does not currently exist</span>
+<span class="sd">        :param new_ext: (Optional) New extension to the base path of where the data should go. Use this when the</span>
+<span class="sd">            target value has been renamed. Defaults to the value of `old_ext`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">new_ext</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">new_ext</span> <span class="o">=</span> <span class="n">old_ext</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">contains_value</span><span class="p">(</span><span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="n">old_ext</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_patch_add_missing_path</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="n">new_path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_patch_move_base_path</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="n">old_ext</span><span class="p">,</span> <span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">new_path</span><span class="p">,</span> <span class="n">new_ext</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_patch_deprecated_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fields</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Automatically deprecates fields found in a common path.</span>
+<span class="sd">        :param base_path: Shared base path where fields can be found</span>
+<span class="sd">        :param fields: List of deprecated fields</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">contains_value</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_patch_and_log</span><span class="p">({</span><span class="s2">&quot;op&quot;</span><span class="p">:</span> <span class="s2">&quot;remove&quot;</span><span class="p">,</span> <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">path</span><span class="p">}):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_msg_tbl</span><span class="o">.</span><span class="n">add_message</span><span class="p">(</span><span class="n">MessageCategory</span><span class="o">.</span><span class="n">WARNING</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Field at `</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">` is no longer supported.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_sort_subtree_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sort_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tbl</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">rename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convenience function that sorts 1 level of keys, given a path. Optionally allows renaming of the target node.</span>
+<span class="sd">        No changes are made if the path provided is invalid/does not exist.</span>
+<span class="sd">        :param sort_path: Top-level path to target sorting of child keys</span>
+<span class="sd">        :param tbl: Table describing how keys should be sorted. Lower-value key names appear towards the top of the list</span>
+<span class="sd">        :param rename: (Optional) If specified, renames the top-level key</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">_comparison</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">RecipeParser</span><span class="o">.</span><span class="n">_canonical_sort_keys_comparison</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">tbl</span><span class="p">)</span>
+
+        <span class="n">node</span> <span class="o">=</span> <span class="n">traverse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">_root</span><span class="p">,</span> <span class="n">str_to_stack_path</span><span class="p">(</span><span class="n">sort_path</span><span class="p">))</span>  <span class="c1"># pylint: disable=protected-access</span>
+        <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">rename</span><span class="p">:</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">rename</span>
+        <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">_comparison</span><span class="p">)</span>
+
+    <span class="c1">## Upgrade functions ##</span>
+
+    <span class="k">def</span> <span class="nf">_upgrade_jinja_to_context_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Upgrades the old proprietary JINJA templating usage to the new YAML-parsable `context` object and `$`-escaped</span>
+<span class="sd">        JINJA substitutions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Convert the JINJA variable table to a `context` section. Empty tables still add the `context` section for</span>
+        <span class="c1"># future developers&#39; convenience.</span>
+        <span class="n">context_obj</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Primitives</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">_vars_tbl</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>  <span class="c1"># pylint: disable=protected-access</span>
+            <span class="c1"># Filter-out any value not covered in the V1 format</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_msg_tbl</span><span class="o">.</span><span class="n">add_message</span><span class="p">(</span><span class="n">MessageCategory</span><span class="o">.</span><span class="n">WARNING</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;The variable `</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">` is an unsupported type.&quot;</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="c1"># Function calls need to preserve JINJA escaping or else they turn into unevaluated strings.</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">search_any_regex</span><span class="p">(</span><span class="n">Regex</span><span class="o">.</span><span class="n">JINJA_FUNCTIONS_SET</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="s2">&quot;{{&quot;</span> <span class="o">+</span> <span class="n">value</span> <span class="o">+</span> <span class="s2">&quot;}}&quot;</span>
+            <span class="n">context_obj</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="c1"># Ensure that we do not include an empty context object (which is forbidden by the schema).</span>
+        <span class="k">if</span> <span class="n">context_obj</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_patch_and_log</span><span class="p">({</span><span class="s2">&quot;op&quot;</span><span class="p">:</span> <span class="s2">&quot;add&quot;</span><span class="p">,</span> <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="s2">&quot;/context&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">cast</span><span class="p">(</span><span class="n">JsonType</span><span class="p">,</span> <span class="n">context_obj</span><span class="p">)})</span>
+
+        <span class="c1"># Similarly, patch-in the new `schema_version` value to the top of the file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_patch_and_log</span><span class="p">({</span><span class="s2">&quot;op&quot;</span><span class="p">:</span> <span class="s2">&quot;add&quot;</span><span class="p">,</span> <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="s2">&quot;/schema_version&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">CURRENT_RECIPE_SCHEMA_FORMAT</span><span class="p">})</span>
+
+        <span class="c1"># Swap all JINJA to use the new `${{ }}` format. A `set` is used as `str.replace()` will replace all instances</span>
+        <span class="c1"># and a value containing multiple variables could be visited multiple times, causing multiple `${{}}`</span>
+        <span class="c1"># encapsulations.</span>
+        <span class="n">jinja_sub_locations</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">Regex</span><span class="o">.</span><span class="n">JINJA_V0_SUB</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">jinja_sub_locations</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="c1"># Values that match the regex should only be strings. This prevents crashes that should not occur.</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_msg_tbl</span><span class="o">.</span><span class="n">add_message</span><span class="p">(</span>
+                    <span class="n">MessageCategory</span><span class="o">.</span><span class="n">WARNING</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;A non-string value was found as a JINJA substitution: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="c1"># Safely replace `{{` but not any existing `${{` instances</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">Regex</span><span class="o">.</span><span class="n">JINJA_REPLACE_V0_STARTING_MARKER</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;${{&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_patch_and_log</span><span class="p">({</span><span class="s2">&quot;op&quot;</span><span class="p">:</span> <span class="s2">&quot;replace&quot;</span><span class="p">,</span> <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">path</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">value</span><span class="p">})</span>
+
+    <span class="k">def</span> <span class="nf">_upgrade_selectors_to_conditionals</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Upgrades the proprietary comment-based selector syntax to equivalent conditional logic statements.</span>
+
+<span class="sd">        TODO warn if selector is unrecognized? See list:</span>
+<span class="sd">          https://prefix-dev.github.io/rattler-build/latest/selectors/#available-variables</span>
+<span class="sd">        conda docs for common selectors:</span>
+<span class="sd">          https://docs.conda.io/projects/conda-build/en/latest/resources/define-metadata.html#preprocessing-selectors</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">selector</span><span class="p">,</span> <span class="n">instances</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">_selector_tbl</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>  <span class="c1"># pylint: disable=protected-access</span>
+            <span class="k">for</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">instances</span><span class="p">:</span>
+                <span class="c1"># Selectors can be applied to the parent node if they appear on the same line. We&#39;ll ignore these when</span>
+                <span class="c1"># building replacements.</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">info</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">is_leaf</span><span class="p">():</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># Strip the []&#39;s around the selector</span>
+                <span class="n">bool_expression</span> <span class="o">=</span> <span class="n">selector</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="c1"># Convert to a public-facing path representation</span>
+                <span class="n">selector_path</span> <span class="o">=</span> <span class="n">stack_path_to_str</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+
+                <span class="c1"># Some commonly used selectors (like `py&lt;36`) need to be upgraded. Otherwise, these expressions will be</span>
+                <span class="c1"># interpreted as strings. See this CEP PR for more details: https://github.com/conda/ceps/pull/71</span>
+                <span class="n">bool_expression</span> <span class="o">=</span> <span class="n">Regex</span><span class="o">.</span><span class="n">SELECTOR_PYTHON_VERSION_REPLACEMENT</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span>
+                    <span class="sa">r</span><span class="s1">&#39;match(python, &quot;\1\2.\3&quot;)&#39;</span><span class="p">,</span> <span class="n">bool_expression</span>
+                <span class="p">)</span>
+                <span class="c1"># Upgrades for less common `py36` and `not py27` selectors</span>
+                <span class="n">bool_expression</span> <span class="o">=</span> <span class="n">Regex</span><span class="o">.</span><span class="n">SELECTOR_PYTHON_VERSION_EQ_REPLACEMENT</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span>
+                    <span class="sa">r</span><span class="s1">&#39;match(python, &quot;==\1.\2&quot;)&#39;</span><span class="p">,</span> <span class="n">bool_expression</span>
+                <span class="p">)</span>
+                <span class="n">bool_expression</span> <span class="o">=</span> <span class="n">Regex</span><span class="o">.</span><span class="n">SELECTOR_PYTHON_VERSION_NE_REPLACEMENT</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span>
+                    <span class="sa">r</span><span class="s1">&#39;match(python, &quot;!=\1.\2&quot;)&#39;</span><span class="p">,</span> <span class="n">bool_expression</span>
+                <span class="p">)</span>
+                <span class="c1"># Upgrades for less common `py2k` and `py3k` selectors</span>
+                <span class="n">bool_expression</span> <span class="o">=</span> <span class="n">Regex</span><span class="o">.</span><span class="n">SELECTOR_PYTHON_VERSION_PY2K_REPLACEMENT</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span>
+                    <span class="sa">r</span><span class="s1">&#39;match(python, &quot;&gt;=2,&lt;3&quot;)&#39;</span><span class="p">,</span> <span class="n">bool_expression</span>
+                <span class="p">)</span>
+                <span class="n">bool_expression</span> <span class="o">=</span> <span class="n">Regex</span><span class="o">.</span><span class="n">SELECTOR_PYTHON_VERSION_PY3K_REPLACEMENT</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span>
+                    <span class="sa">r</span><span class="s1">&#39;match(python, &quot;&gt;=3,&lt;4&quot;)&#39;</span><span class="p">,</span> <span class="n">bool_expression</span>
+                <span class="p">)</span>
+
+                <span class="c1"># TODO other common selectors to support:</span>
+                <span class="c1"># - GPU variants (see pytorch and llama.cpp feedstocks)</span>
+
+                <span class="c1"># For now, if a selector lands on a boolean value, use a ternary statement. Otherwise use the</span>
+                <span class="c1"># conditional logic.</span>
+                <span class="n">patch</span><span class="p">:</span> <span class="n">JsonPatchType</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;op&quot;</span><span class="p">:</span> <span class="s2">&quot;replace&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">selector_path</span><span class="p">,</span>
+                    <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;${{ true if &quot;</span> <span class="o">+</span> <span class="n">bool_expression</span> <span class="o">+</span> <span class="s2">&quot; }}&quot;</span><span class="p">,</span>
+                <span class="p">}</span>
+                <span class="c1"># `skip` is special and can be a single boolean expression or a list of boolean expressions.</span>
+                <span class="k">if</span> <span class="n">selector_path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;/build/skip&quot;</span><span class="p">):</span>
+                    <span class="n">patch</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bool_expression</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                    <span class="c1"># CEP-13 states that ONLY list members may use the `if/then/else` blocks</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">info</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">list_member_flag</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_msg_tbl</span><span class="o">.</span><span class="n">add_message</span><span class="p">(</span>
+                            <span class="n">MessageCategory</span><span class="o">.</span><span class="n">WARNING</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;A non-list item had a selector at: </span><span class="si">{</span><span class="n">selector_path</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="p">)</span>
+                        <span class="k">continue</span>
+                    <span class="n">bool_object</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s2">&quot;if&quot;</span><span class="p">:</span> <span class="n">bool_expression</span><span class="p">,</span>
+                        <span class="s2">&quot;then&quot;</span><span class="p">:</span> <span class="kc">None</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">SentinelType</span><span class="p">)</span> <span class="k">else</span> <span class="n">info</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                    <span class="p">}</span>
+                    <span class="n">patch</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s2">&quot;op&quot;</span><span class="p">:</span> <span class="s2">&quot;replace&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">selector_path</span><span class="p">,</span>
+                        <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">cast</span><span class="p">(</span><span class="n">JsonType</span><span class="p">,</span> <span class="n">bool_object</span><span class="p">),</span>
+                    <span class="p">}</span>
+                <span class="c1"># Apply the patch</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_patch_and_log</span><span class="p">(</span><span class="n">patch</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">remove_selector</span><span class="p">(</span><span class="n">selector_path</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_correct_common_misspellings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_package_paths</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Corrects common spelling mistakes in field names.</span>
+<span class="sd">        :param base_package_paths: Set of base paths to process that could contain this section.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">base_path</span> <span class="ow">in</span> <span class="n">base_package_paths</span><span class="p">:</span>
+            <span class="n">build_path</span> <span class="o">=</span> <span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="s2">&quot;/build&quot;</span><span class="p">)</span>
+            <span class="c1"># &quot;If I had a nickel for every time `skip` was misspelled, I would have several nickels. Which isn&#39;t a lot,</span>
+            <span class="c1">#  but it is weird that it has happened multiple times.&quot;</span>
+            <span class="c1">#                                                             - Dr. Doofenshmirtz, probably</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_patch_move_base_path</span><span class="p">(</span><span class="n">build_path</span><span class="p">,</span> <span class="s2">&quot;skipt&quot;</span><span class="p">,</span> <span class="s2">&quot;skip&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_patch_move_base_path</span><span class="p">(</span><span class="n">build_path</span><span class="p">,</span> <span class="s2">&quot;skips&quot;</span><span class="p">,</span> <span class="s2">&quot;skip&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_patch_move_base_path</span><span class="p">(</span><span class="n">build_path</span><span class="p">,</span> <span class="s2">&quot;Skip&quot;</span><span class="p">,</span> <span class="s2">&quot;skip&quot;</span><span class="p">)</span>
+
+            <span class="c1"># `/extras` -&gt; `/extra`</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_patch_move_base_path</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="s2">&quot;extras&quot;</span><span class="p">,</span> <span class="s2">&quot;extra&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_upgrade_source_section</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_package_paths</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Upgrades/converts the `source` section(s) of a recipe file.</span>
+<span class="sd">        :param base_package_paths: Set of base paths to process that could contain this section.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">base_path</span> <span class="ow">in</span> <span class="n">base_package_paths</span><span class="p">:</span>
+            <span class="n">source_path</span> <span class="o">=</span> <span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="s2">&quot;/source&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">contains_value</span><span class="p">(</span><span class="n">source_path</span><span class="p">):</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># The `source` field can contain a list of elements or a single element (not encapsulated in a list).</span>
+            <span class="c1"># This logic sets up a list to iterate through that will handle both cases.</span>
+            <span class="n">source_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="n">source_path</span><span class="p">)</span>
+            <span class="n">source_paths</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source_data</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">source_data</span><span class="p">)):</span>
+                    <span class="n">source_paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">source_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;/</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">source_paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">source_path</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">src_path</span> <span class="ow">in</span> <span class="n">source_paths</span><span class="p">:</span>
+                <span class="c1"># SVN and HG source options are no longer supported. This seems to have been deprecated a long</span>
+                <span class="c1"># time ago and there are unlikely any recipes that fall into this camp. Still, we should flag it.</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">contains_value</span><span class="p">(</span><span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">src_path</span><span class="p">,</span> <span class="s2">&quot;svn_url&quot;</span><span class="p">)):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_msg_tbl</span><span class="o">.</span><span class="n">add_message</span><span class="p">(</span>
+                        <span class="n">MessageCategory</span><span class="o">.</span><span class="n">WARNING</span><span class="p">,</span> <span class="s2">&quot;SVN packages are no longer supported in the V1 format&quot;</span>
+                    <span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">contains_value</span><span class="p">(</span><span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">src_path</span><span class="p">,</span> <span class="s2">&quot;hg_url&quot;</span><span class="p">)):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_msg_tbl</span><span class="o">.</span><span class="n">add_message</span><span class="p">(</span>
+                        <span class="n">MessageCategory</span><span class="o">.</span><span class="n">WARNING</span><span class="p">,</span> <span class="s2">&quot;HG (Mercurial) packages are no longer supported in the V1 format&quot;</span>
+                    <span class="p">)</span>
+
+                <span class="c1"># Basic renaming transformations</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_patch_move_base_path</span><span class="p">(</span><span class="n">src_path</span><span class="p">,</span> <span class="s2">&quot;/fn&quot;</span><span class="p">,</span> <span class="s2">&quot;/file_name&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_patch_move_base_path</span><span class="p">(</span><span class="n">src_path</span><span class="p">,</span> <span class="s2">&quot;/folder&quot;</span><span class="p">,</span> <span class="s2">&quot;/target_directory&quot;</span><span class="p">)</span>
+
+                <span class="c1"># `git` source transformations (`conda` does not appear to support all of the new features)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_patch_move_base_path</span><span class="p">(</span><span class="n">src_path</span><span class="p">,</span> <span class="s2">&quot;/git_url&quot;</span><span class="p">,</span> <span class="s2">&quot;/git&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_patch_move_base_path</span><span class="p">(</span><span class="n">src_path</span><span class="p">,</span> <span class="s2">&quot;/git_tag&quot;</span><span class="p">,</span> <span class="s2">&quot;/tag&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_patch_move_base_path</span><span class="p">(</span><span class="n">src_path</span><span class="p">,</span> <span class="s2">&quot;/git_rev&quot;</span><span class="p">,</span> <span class="s2">&quot;/rev&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_patch_move_base_path</span><span class="p">(</span><span class="n">src_path</span><span class="p">,</span> <span class="s2">&quot;/git_depth&quot;</span><span class="p">,</span> <span class="s2">&quot;/depth&quot;</span><span class="p">)</span>
+
+                <span class="c1"># Canonically sort this section</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sort_subtree_keys</span><span class="p">(</span><span class="n">src_path</span><span class="p">,</span> <span class="n">V1_SOURCE_SECTION_KEY_SORT_ORDER</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_upgrade_build_script_section</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">build_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Upgrades the `/build/script` section if needed. Some fields like `script_env` will need to be wrapped into a new</span>
+<span class="sd">        `Script` object. Simple `script` sections can be left unchanged.</span>
+<span class="sd">        :param build_path: Build section path to upgrade</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">script_env_path</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">build_path</span><span class="p">,</span> <span class="s2">&quot;/script_env&quot;</span><span class="p">)</span>
+        <span class="c1"># The environment list could contain dictionaries if the variables are conditionally included.</span>
+        <span class="n">script_env_lst</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span>
+            <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="n">script_env_path</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">script_env_lst</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">script_path</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">build_path</span><span class="p">,</span> <span class="s2">&quot;/script&quot;</span><span class="p">)</span>
+        <span class="n">new_script_obj</span><span class="p">:</span> <span class="n">JsonType</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># Set environment variables need to be parsed and then re-added as a dictionary. Unset variables are listed</span>
+        <span class="c1"># in the `secrets` section.</span>
+        <span class="n">new_env</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">new_secrets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">script_env_lst</span><span class="p">:</span>
+            <span class="c1"># Attempt to edit conditional variables</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="k">if</span> <span class="s2">&quot;then&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">item</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_msg_tbl</span><span class="o">.</span><span class="n">add_message</span><span class="p">(</span>
+                        <span class="n">MessageCategory</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Could not parse dictionary `</span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2">` found in </span><span class="si">{</span><span class="n">script_env_path</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="p">)</span>
+                    <span class="k">continue</span>
+                <span class="n">tokens</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;then&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">new_secrets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># The spec does not support conditional statements in a dictionary. As per discussions with the</span>
+                    <span class="c1"># community, the best course of action is manual intervention.</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_msg_tbl</span><span class="o">.</span><span class="n">add_message</span><span class="p">(</span>
+                        <span class="n">MessageCategory</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span>
+                        <span class="sa">f</span><span class="s2">&quot;Converting `</span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2">` found in </span><span class="si">{</span><span class="n">script_env_path</span><span class="si">}</span><span class="s2"> is not supported.&quot;</span>
+                        <span class="s2">&quot; Manually replace the selector with a `cmp()` function.&quot;</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="n">tokens</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">item</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">new_secrets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tokens</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">new_env</span><span class="p">[</span><span class="n">tokens</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">tokens</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_msg_tbl</span><span class="o">.</span><span class="n">add_message</span><span class="p">(</span><span class="n">MessageCategory</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Could not parse `</span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2">` found in </span><span class="si">{</span><span class="n">script_env_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">set_key_conditionally</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">JsonType</span><span class="p">],</span> <span class="n">new_script_obj</span><span class="p">),</span> <span class="s2">&quot;env&quot;</span><span class="p">,</span> <span class="n">cast</span><span class="p">(</span><span class="n">JsonType</span><span class="p">,</span> <span class="n">new_env</span><span class="p">))</span>
+        <span class="n">set_key_conditionally</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">JsonType</span><span class="p">],</span> <span class="n">new_script_obj</span><span class="p">),</span> <span class="s2">&quot;secrets&quot;</span><span class="p">,</span> <span class="n">cast</span><span class="p">(</span><span class="n">JsonType</span><span class="p">,</span> <span class="n">new_secrets</span><span class="p">))</span>
+
+        <span class="n">script_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="n">script_path</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">patch_op</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;replace&quot;</span> <span class="k">if</span> <span class="n">script_value</span> <span class="k">else</span> <span class="s2">&quot;add&quot;</span>
+        <span class="c1"># TODO: Simple script files should be set as `file` not `content`</span>
+        <span class="n">set_key_conditionally</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">JsonType</span><span class="p">],</span> <span class="n">new_script_obj</span><span class="p">),</span> <span class="s2">&quot;content&quot;</span><span class="p">,</span> <span class="n">script_value</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_patch_and_log</span><span class="p">({</span><span class="s2">&quot;op&quot;</span><span class="p">:</span> <span class="n">patch_op</span><span class="p">,</span> <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">script_path</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">new_script_obj</span><span class="p">})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_patch_and_log</span><span class="p">({</span><span class="s2">&quot;op&quot;</span><span class="p">:</span> <span class="s2">&quot;remove&quot;</span><span class="p">,</span> <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">script_env_path</span><span class="p">})</span>
+
+    <span class="k">def</span> <span class="nf">_upgrade_build_section</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_package_paths</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Upgrades/converts the `build` section(s) of a recipe file.</span>
+<span class="sd">        :param base_package_paths: Set of base paths to process that could contain this section.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">build_deprecated</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;pre-link&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;noarch_python&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;features&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;msvc_compiler&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;requires_features&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;provides_features&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;preferred_env&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;preferred_env_executable_paths&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;disable_pip&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;pin_depends&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;overlinking_ignore_patterns&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;rpaths_patcher&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;post-link&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;pre-unlink&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;pre-link&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">base_path</span> <span class="ow">in</span> <span class="n">base_package_paths</span><span class="p">:</span>
+            <span class="c1"># Move `run_exports` and `ignore_run_exports` from `build` to `requirements`</span>
+
+            <span class="c1"># `run_exports`</span>
+            <span class="n">old_re_path</span> <span class="o">=</span> <span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="s2">&quot;/build/run_exports&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">contains_value</span><span class="p">(</span><span class="n">old_re_path</span><span class="p">):</span>
+                <span class="n">requirements_path</span> <span class="o">=</span> <span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="s2">&quot;/requirements&quot;</span><span class="p">)</span>
+                <span class="n">new_re_path</span> <span class="o">=</span> <span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="s2">&quot;/requirements/run_exports&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">contains_value</span><span class="p">(</span><span class="n">requirements_path</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_patch_and_log</span><span class="p">({</span><span class="s2">&quot;op&quot;</span><span class="p">:</span> <span class="s2">&quot;add&quot;</span><span class="p">,</span> <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">requirements_path</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">})</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_patch_and_log</span><span class="p">({</span><span class="s2">&quot;op&quot;</span><span class="p">:</span> <span class="s2">&quot;move&quot;</span><span class="p">,</span> <span class="s2">&quot;from&quot;</span><span class="p">:</span> <span class="n">old_re_path</span><span class="p">,</span> <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">new_re_path</span><span class="p">})</span>
+            <span class="c1"># `ignore_run_exports`</span>
+            <span class="n">old_ire_path</span> <span class="o">=</span> <span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="s2">&quot;/build/ignore_run_exports&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">contains_value</span><span class="p">(</span><span class="n">old_ire_path</span><span class="p">):</span>
+                <span class="n">requirements_path</span> <span class="o">=</span> <span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="s2">&quot;/requirements&quot;</span><span class="p">)</span>
+                <span class="n">new_ire_path</span> <span class="o">=</span> <span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="s2">&quot;/requirements/ignore_run_exports&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">contains_value</span><span class="p">(</span><span class="n">requirements_path</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_patch_and_log</span><span class="p">({</span><span class="s2">&quot;op&quot;</span><span class="p">:</span> <span class="s2">&quot;add&quot;</span><span class="p">,</span> <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">requirements_path</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">})</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_patch_and_log</span><span class="p">({</span><span class="s2">&quot;op&quot;</span><span class="p">:</span> <span class="s2">&quot;move&quot;</span><span class="p">,</span> <span class="s2">&quot;from&quot;</span><span class="p">:</span> <span class="n">old_ire_path</span><span class="p">,</span> <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">new_ire_path</span><span class="p">})</span>
+
+            <span class="c1"># Perform internal section changes per `build/` section</span>
+            <span class="n">build_path</span> <span class="o">=</span> <span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="s2">&quot;/build&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">contains_value</span><span class="p">(</span><span class="n">build_path</span><span class="p">):</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Simple transformations</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_patch_move_base_path</span><span class="p">(</span><span class="n">build_path</span><span class="p">,</span> <span class="s2">&quot;merge_build_host&quot;</span><span class="p">,</span> <span class="s2">&quot;merge_build_and_host_envs&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_patch_move_base_path</span><span class="p">(</span><span class="n">build_path</span><span class="p">,</span> <span class="s2">&quot;no_link&quot;</span><span class="p">,</span> <span class="s2">&quot;always_copy_files&quot;</span><span class="p">)</span>
+
+            <span class="c1"># `build/entry_points` -&gt; `build/python/entry_points`</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_patch_move_new_path</span><span class="p">(</span><span class="n">build_path</span><span class="p">,</span> <span class="s2">&quot;/entry_points&quot;</span><span class="p">,</span> <span class="s2">&quot;/python&quot;</span><span class="p">)</span>
+
+            <span class="c1"># New `prefix_detection` section changes</span>
+            <span class="c1"># NOTE: There is a new `force_file_type` field that may map to an unknown field that conda supports.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_patch_move_new_path</span><span class="p">(</span><span class="n">build_path</span><span class="p">,</span> <span class="s2">&quot;/ignore_prefix_files&quot;</span><span class="p">,</span> <span class="s2">&quot;/prefix_detection&quot;</span><span class="p">,</span> <span class="s2">&quot;/ignore&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_patch_move_new_path</span><span class="p">(</span>
+                <span class="n">build_path</span><span class="p">,</span> <span class="s2">&quot;/detect_binary_files_with_prefix&quot;</span><span class="p">,</span> <span class="s2">&quot;/prefix_detection&quot;</span><span class="p">,</span> <span class="s2">&quot;/ignore_binary_files&quot;</span>
+            <span class="p">)</span>
+
+            <span class="c1"># New `dynamic_linking` section changes</span>
+            <span class="c1"># NOTE: `overdepending_behavior` and `overlinking_behavior` are new fields that don&#39;t have a direct path</span>
+            <span class="c1">#       to conversion.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_patch_move_new_path</span><span class="p">(</span><span class="n">build_path</span><span class="p">,</span> <span class="s2">&quot;/rpaths&quot;</span><span class="p">,</span> <span class="s2">&quot;/dynamic_linking&quot;</span><span class="p">,</span> <span class="s2">&quot;/rpaths&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_patch_move_new_path</span><span class="p">(</span><span class="n">build_path</span><span class="p">,</span> <span class="s2">&quot;/binary_relocation&quot;</span><span class="p">,</span> <span class="s2">&quot;/dynamic_linking&quot;</span><span class="p">,</span> <span class="s2">&quot;/binary_relocation&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_patch_move_new_path</span><span class="p">(</span>
+                <span class="n">build_path</span><span class="p">,</span> <span class="s2">&quot;/missing_dso_whitelist&quot;</span><span class="p">,</span> <span class="s2">&quot;/dynamic_linking&quot;</span><span class="p">,</span> <span class="s2">&quot;/missing_dso_allowlist&quot;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_patch_move_new_path</span><span class="p">(</span><span class="n">build_path</span><span class="p">,</span> <span class="s2">&quot;/runpath_whitelist&quot;</span><span class="p">,</span> <span class="s2">&quot;/dynamic_linking&quot;</span><span class="p">,</span> <span class="s2">&quot;/rpath_allowlist&quot;</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_upgrade_build_script_section</span><span class="p">(</span><span class="n">build_path</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_patch_deprecated_fields</span><span class="p">(</span><span class="n">build_path</span><span class="p">,</span> <span class="n">build_deprecated</span><span class="p">)</span>
+
+            <span class="c1"># Canonically sort this section</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sort_subtree_keys</span><span class="p">(</span><span class="n">build_path</span><span class="p">,</span> <span class="n">V1_BUILD_SECTION_KEY_SORT_ORDER</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_upgrade_requirements_section</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_package_paths</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Upgrades/converts the `requirements` section(s) of a recipe file.</span>
+<span class="sd">        :param base_package_paths: Set of base paths to process that could contain this section.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">base_path</span> <span class="ow">in</span> <span class="n">base_package_paths</span><span class="p">:</span>
+            <span class="n">requirements_path</span> <span class="o">=</span> <span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="s2">&quot;/requirements&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">contains_value</span><span class="p">(</span><span class="n">requirements_path</span><span class="p">):</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Simple transformations</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_patch_move_base_path</span><span class="p">(</span><span class="n">requirements_path</span><span class="p">,</span> <span class="s2">&quot;/run_constrained&quot;</span><span class="p">,</span> <span class="s2">&quot;/run_constraints&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_fix_bad_licenses</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">about_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Attempt to correct licenses to match SPDX-recognized names.</span>
+
+<span class="sd">        For now, this does not call-out to an SPDX database. Instead, we attempt to correct common mistakes.</span>
+<span class="sd">        :param about_path: Path to the `about` section, where the `license` field is located.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">license_path</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">about_path</span><span class="p">,</span> <span class="s2">&quot;/license&quot;</span><span class="p">)</span>
+        <span class="n">old_license</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="n">license_path</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">old_license</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_msg_tbl</span><span class="o">.</span><span class="n">add_message</span><span class="p">(</span><span class="n">MessageCategory</span><span class="o">.</span><span class="n">WARNING</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;No `license` provided in `</span><span class="si">{</span><span class="n">about_path</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">corrected_license</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spdx_utils</span><span class="o">.</span><span class="n">find_closest_license_match</span><span class="p">(</span><span class="n">old_license</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">corrected_license</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_msg_tbl</span><span class="o">.</span><span class="n">add_message</span><span class="p">(</span><span class="n">MessageCategory</span><span class="o">.</span><span class="n">WARNING</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Could not patch unrecognized license: `</span><span class="si">{</span><span class="n">old_license</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="c1"># If it ain&#39;t broke, don&#39;t patch it</span>
+        <span class="k">if</span> <span class="n">old_license</span> <span class="o">==</span> <span class="n">corrected_license</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Alert the user that a patch was made, in case it needs manual verification. This warning will not emit if</span>
+        <span class="c1"># the patch failed (failure will generate an arguably more important message)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_patch_and_log</span><span class="p">({</span><span class="s2">&quot;op&quot;</span><span class="p">:</span> <span class="s2">&quot;replace&quot;</span><span class="p">,</span> <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">license_path</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">corrected_license</span><span class="p">}):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_msg_tbl</span><span class="o">.</span><span class="n">add_message</span><span class="p">(</span>
+                <span class="n">MessageCategory</span><span class="o">.</span><span class="n">WARNING</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Changed </span><span class="si">{</span><span class="n">license_path</span><span class="si">}</span><span class="s2"> from `</span><span class="si">{</span><span class="n">old_license</span><span class="si">}</span><span class="s2">` to `</span><span class="si">{</span><span class="n">corrected_license</span><span class="si">}</span><span class="s2">`&quot;</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_upgrade_about_section</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_package_paths</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Upgrades/converts the `about` section of a recipe file.</span>
+<span class="sd">        :param base_package_paths: Set of base paths to process that could contain this section.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">about_rename_mapping</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;home&quot;</span><span class="p">,</span> <span class="s2">&quot;homepage&quot;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;dev_url&quot;</span><span class="p">,</span> <span class="s2">&quot;repository&quot;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;doc_url&quot;</span><span class="p">,</span> <span class="s2">&quot;documentation&quot;</span><span class="p">),</span>
+        <span class="p">]</span>
+        <span class="n">about_deprecated</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;prelink_message&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;license_family&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;identifiers&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;tags&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;keywords&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;doc_source_url&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">base_path</span> <span class="ow">in</span> <span class="n">base_package_paths</span><span class="p">:</span>
+            <span class="n">about_path</span> <span class="o">=</span> <span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="s2">&quot;/about&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Skip transformations if there is no `/about` section</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">contains_value</span><span class="p">(</span><span class="n">about_path</span><span class="p">):</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Transform renamed fields</span>
+            <span class="k">for</span> <span class="n">old</span><span class="p">,</span> <span class="n">new</span> <span class="ow">in</span> <span class="n">about_rename_mapping</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_patch_move_base_path</span><span class="p">(</span><span class="n">about_path</span><span class="p">,</span> <span class="n">old</span><span class="p">,</span> <span class="n">new</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fix_bad_licenses</span><span class="p">(</span><span class="n">about_path</span><span class="p">)</span>
+
+            <span class="c1"># R packages like to use multiline strings without multiline markers, which get interpreted as list members</span>
+            <span class="c1"># TODO address this at parse-time, adding a new multiline mode</span>
+            <span class="n">summary_path</span> <span class="o">=</span> <span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">about_path</span><span class="p">,</span> <span class="s2">&quot;/summary&quot;</span><span class="p">)</span>
+            <span class="n">summary</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="n">summary_path</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">summary</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_patch_and_log</span><span class="p">(</span>
+                    <span class="p">{</span><span class="s2">&quot;op&quot;</span><span class="p">:</span> <span class="s2">&quot;replace&quot;</span><span class="p">,</span> <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">summary_path</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">summary</span><span class="p">))}</span>
+                <span class="p">)</span>
+
+            <span class="c1"># Remove deprecated `about` fields</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_patch_deprecated_fields</span><span class="p">(</span><span class="n">about_path</span><span class="p">,</span> <span class="n">about_deprecated</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_upgrade_test_pip_check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">test_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Replaces the commonly used `pip check` test-case with the new `python/pip_check` attribute, if applicable.</span>
+<span class="sd">        :param base_path: Base path for the build target to upgrade</span>
+<span class="sd">        :param test_path: Test path for the build target to upgrade</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pip_check_variants</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;pip check&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;python -m pip check&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;python3 -m pip check&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="c1"># Replace `- pip check` in `commands` with the new flag. If not found, set the flag to `False` (as the</span>
+        <span class="c1"># flag defaults to `True`). DO NOT ADD THIS FLAG IF THE RECIPE IS NOT A &quot;PYTHON RECIPE&quot;.</span>
+        <span class="k">if</span> <span class="s2">&quot;python&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cast</span><span class="p">(</span>
+            <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="s2">&quot;/requirements/host&quot;</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="p">[]),</span>
+        <span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="n">commands</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">test_path</span><span class="p">,</span> <span class="s2">&quot;/commands&quot;</span><span class="p">),</span> <span class="p">[]))</span>
+        <span class="n">pip_check</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">command</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">commands</span><span class="p">):</span>
+            <span class="c1"># TODO Future: handle selector cases (pip check will be in the `then` section of a dictionary object)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="n">command</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pip_check_variants</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="c1"># For now, we will only patch-out the first instance when no selector is attached</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_patch_and_log</span><span class="p">({</span><span class="s2">&quot;op&quot;</span><span class="p">:</span> <span class="s2">&quot;remove&quot;</span><span class="p">,</span> <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">test_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;/commands/</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)})</span>
+            <span class="n">pip_check</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">break</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_patch_add_missing_path</span><span class="p">(</span><span class="n">test_path</span><span class="p">,</span> <span class="s2">&quot;/python&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_patch_and_log</span><span class="p">(</span>
+            <span class="p">{</span><span class="s2">&quot;op&quot;</span><span class="p">:</span> <span class="s2">&quot;add&quot;</span><span class="p">,</span> <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">test_path</span><span class="p">,</span> <span class="s2">&quot;/python/pip_check&quot;</span><span class="p">),</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">pip_check</span><span class="p">}</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_upgrade_test_section</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_package_paths</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Upgrades/converts the `test` section(s) of a recipe file.</span>
+<span class="sd">        :param base_package_paths: Set of base paths to process that could contain this section.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># NOTE: For now, we assume that the existing test section comprises of a single test entity. Developers will</span>
+        <span class="c1"># have to use their best judgement to manually break-up the test into multiple tests as they see fit.</span>
+        <span class="k">for</span> <span class="n">base_path</span> <span class="ow">in</span> <span class="n">base_package_paths</span><span class="p">:</span>
+            <span class="n">test_path</span> <span class="o">=</span> <span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="s2">&quot;/test&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">contains_value</span><span class="p">(</span><span class="n">test_path</span><span class="p">):</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Moving `files` to `files/recipe` is not possible in a single `move` operation as a new path has to be</span>
+            <span class="c1"># created in the path being moved.</span>
+            <span class="n">test_files_path</span> <span class="o">=</span> <span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">test_path</span><span class="p">,</span> <span class="s2">&quot;/files&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">contains_value</span><span class="p">(</span><span class="n">test_files_path</span><span class="p">):</span>
+                <span class="n">test_files_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="n">test_files_path</span><span class="p">)</span>
+                <span class="c1"># TODO: Fix, replace does not work here, produces `- null`, Issue #20</span>
+                <span class="c1"># self._patch_and_log({&quot;op&quot;: &quot;replace&quot;, &quot;path&quot;: test_files_path, &quot;value&quot;: None})</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_patch_and_log</span><span class="p">({</span><span class="s2">&quot;op&quot;</span><span class="p">:</span> <span class="s2">&quot;remove&quot;</span><span class="p">,</span> <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">test_files_path</span><span class="p">})</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_patch_and_log</span><span class="p">({</span><span class="s2">&quot;op&quot;</span><span class="p">:</span> <span class="s2">&quot;add&quot;</span><span class="p">,</span> <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">test_files_path</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">})</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_patch_and_log</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;op&quot;</span><span class="p">:</span> <span class="s2">&quot;add&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">test_files_path</span><span class="p">,</span> <span class="s2">&quot;/recipe&quot;</span><span class="p">),</span>
+                        <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">test_files_value</span><span class="p">,</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
+            <span class="c1"># Edge case: `/source_files` exists but `/files` does not</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">contains_value</span><span class="p">(</span><span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">test_path</span><span class="p">,</span> <span class="s2">&quot;/source_files&quot;</span><span class="p">)):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_patch_add_missing_path</span><span class="p">(</span><span class="n">test_path</span><span class="p">,</span> <span class="s2">&quot;/files&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_patch_move_base_path</span><span class="p">(</span><span class="n">test_path</span><span class="p">,</span> <span class="s2">&quot;/source_files&quot;</span><span class="p">,</span> <span class="s2">&quot;/files/source&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">contains_value</span><span class="p">(</span><span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">test_path</span><span class="p">,</span> <span class="s2">&quot;/requires&quot;</span><span class="p">)):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_patch_add_missing_path</span><span class="p">(</span><span class="n">test_path</span><span class="p">,</span> <span class="s2">&quot;/requirements&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_patch_move_base_path</span><span class="p">(</span><span class="n">test_path</span><span class="p">,</span> <span class="s2">&quot;/requires&quot;</span><span class="p">,</span> <span class="s2">&quot;/requirements/run&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Upgrade `pip-check`, if applicable</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_upgrade_test_pip_check</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="n">test_path</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_patch_move_base_path</span><span class="p">(</span><span class="n">test_path</span><span class="p">,</span> <span class="s2">&quot;/commands&quot;</span><span class="p">,</span> <span class="s2">&quot;/script&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">contains_value</span><span class="p">(</span><span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">test_path</span><span class="p">,</span> <span class="s2">&quot;/imports&quot;</span><span class="p">)):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_patch_add_missing_path</span><span class="p">(</span><span class="n">test_path</span><span class="p">,</span> <span class="s2">&quot;/python&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_patch_move_base_path</span><span class="p">(</span><span class="n">test_path</span><span class="p">,</span> <span class="s2">&quot;/imports&quot;</span><span class="p">,</span> <span class="s2">&quot;/python/imports&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_patch_move_base_path</span><span class="p">(</span><span class="n">test_path</span><span class="p">,</span> <span class="s2">&quot;/downstreams&quot;</span><span class="p">,</span> <span class="s2">&quot;/downstream&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Canonically sort the python section, if it exists</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sort_subtree_keys</span><span class="p">(</span><span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">test_path</span><span class="p">,</span> <span class="s2">&quot;/python&quot;</span><span class="p">),</span> <span class="n">V1_PYTHON_TEST_KEY_SORT_ORDER</span><span class="p">)</span>
+
+            <span class="c1"># Move `test` to `tests` and encapsulate the pre-existing object into a list</span>
+            <span class="n">new_test_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">test_path</span><span class="si">}</span><span class="s2">s&quot;</span>
+            <span class="n">test_element</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">JsonType</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="n">test_path</span><span class="p">))</span>
+            <span class="n">test_array</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">JsonType</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="c1"># There are 3 types of test elements. We break them out of the original object, if they exist.</span>
+            <span class="c1"># `Python` Test Element</span>
+            <span class="k">if</span> <span class="s2">&quot;python&quot;</span> <span class="ow">in</span> <span class="n">test_element</span><span class="p">:</span>
+                <span class="n">test_array</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;python&quot;</span><span class="p">:</span> <span class="n">test_element</span><span class="p">[</span><span class="s2">&quot;python&quot;</span><span class="p">]})</span>
+                <span class="k">del</span> <span class="n">test_element</span><span class="p">[</span><span class="s2">&quot;python&quot;</span><span class="p">]</span>
+            <span class="c1"># `Downstream` Test Element</span>
+            <span class="k">if</span> <span class="s2">&quot;downstream&quot;</span> <span class="ow">in</span> <span class="n">test_element</span><span class="p">:</span>
+                <span class="n">test_array</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;downstream&quot;</span><span class="p">:</span> <span class="n">test_element</span><span class="p">[</span><span class="s2">&quot;downstream&quot;</span><span class="p">]})</span>
+                <span class="k">del</span> <span class="n">test_element</span><span class="p">[</span><span class="s2">&quot;downstream&quot;</span><span class="p">]</span>
+            <span class="c1"># What remains should be the `Command` Test Element type</span>
+            <span class="k">if</span> <span class="n">test_element</span><span class="p">:</span>
+                <span class="n">test_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">test_element</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_patch_and_log</span><span class="p">({</span><span class="s2">&quot;op&quot;</span><span class="p">:</span> <span class="s2">&quot;add&quot;</span><span class="p">,</span> <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">new_test_path</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">test_array</span><span class="p">})</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_patch_and_log</span><span class="p">({</span><span class="s2">&quot;op&quot;</span><span class="p">:</span> <span class="s2">&quot;remove&quot;</span><span class="p">,</span> <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">test_path</span><span class="p">})</span>
+
+    <span class="k">def</span> <span class="nf">_upgrade_multi_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_package_paths</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Upgrades/converts sections pertaining to multi-output recipes.</span>
+<span class="sd">        :param base_package_paths: Set of base paths to process that could contain this section.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">contains_value</span><span class="p">(</span><span class="s2">&quot;/outputs&quot;</span><span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="c1"># TODO Complete</span>
+        <span class="c1"># On the top-level, `package` -&gt; `recipe`</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_patch_move_base_path</span><span class="p">(</span><span class="n">ROOT_NODE_VALUE</span><span class="p">,</span> <span class="s2">&quot;/package&quot;</span><span class="p">,</span> <span class="s2">&quot;/recipe&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">output_path</span> <span class="ow">in</span> <span class="n">base_package_paths</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">output_path</span> <span class="o">==</span> <span class="n">ROOT_NODE_VALUE</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Move `name` and `version` under `package`</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">contains_value</span><span class="p">(</span>
+                <span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="s2">&quot;/name&quot;</span><span class="p">)</span>
+            <span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">contains_value</span><span class="p">(</span><span class="n">RecipeParser</span><span class="o">.</span><span class="n">append_to_path</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="s2">&quot;/version&quot;</span><span class="p">)):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_patch_add_missing_path</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="s2">&quot;/package&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_patch_move_base_path</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="s2">&quot;/name&quot;</span><span class="p">,</span> <span class="s2">&quot;/package/name&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_patch_move_base_path</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="s2">&quot;/version&quot;</span><span class="p">,</span> <span class="s2">&quot;/package/version&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Not all the top-level keys are found in each output section, but all the output section keys are</span>
+            <span class="c1"># found at the top-level. So for consistency, we sort on that ordering.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sort_subtree_keys</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="n">TOP_LEVEL_KEY_SORT_ORDER</span><span class="p">)</span>
+
+<div class="viewcode-block" id="RecipeParserConvert.pre_process_recipe_text">
+<a class="viewcode-back" href="../../../conda_recipe_manager.parser.html#conda_recipe_manager.parser.recipe_parser_convert.RecipeParserConvert.pre_process_recipe_text">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">pre_process_recipe_text</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Takes the content of a recipe file and performs manipulations prior to the parsing stage. This should be</span>
+<span class="sd">        used sparingly for solving conversion issues.</span>
+
+<span class="sd">        Ideally the pre-processor phase is only used when:</span>
+<span class="sd">          - There is no other feasible way to solve a conversion issue.</span>
+<span class="sd">          - There is a proof-of-concept fix that would be easier to develop as a pre-processor step that could be</span>
+<span class="sd">            refactored into the parser later.</span>
+<span class="sd">          - The number of recipes afflicted by an issue does not justify the engineering effort required to handle</span>
+<span class="sd">            the issue in the parsing phase.</span>
+<span class="sd">        :param content: Recipe file contents to pre-process</span>
+<span class="sd">        :returns: Pre-processed recipe file contents</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Some recipes use `foo.&lt;function()&gt;` instead of `{{ foo | &lt;function()&gt; }}` in JINJA statements. This causes</span>
+        <span class="c1"># rattler-build to fail with `invalid operation: object has no method named &lt;function()&gt;`</span>
+        <span class="c1"># NOTE: This is currently done BEFORE converting to use `env.get()` to wipe-out those changes.</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">Regex</span><span class="o">.</span><span class="n">PRE_PROCESS_JINJA_DOT_FUNCTION_IN_ASSIGNMENT</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\1 | \2&quot;</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">Regex</span><span class="o">.</span><span class="n">PRE_PROCESS_JINJA_DOT_FUNCTION_IN_SUBSTITUTION</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\1 | \2&quot;</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
+        <span class="c1"># Strip any problematic parenthesis that may be left over from the previous operations.</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">Regex</span><span class="o">.</span><span class="n">PRE_PROCESS_JINJA_DOT_FUNCTION_STRIP_EMPTY_PARENTHESIS</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\1&quot;</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
+        <span class="c1"># Attempt to normalize quoted multiline strings into the common `|` syntax.</span>
+        <span class="c1"># TODO: Handle multiple escaped newlines (very uncommon)</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">Regex</span><span class="o">.</span><span class="n">PRE_PROCESS_QUOTED_MULTILINE_STRINGS</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\1\2: |\1  \3\1  \4&quot;</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
+
+        <span class="c1"># rattler-build@0.18.0: Introduced checks for deprecated `max_pin` and `min_pin` fields. This replacement</span>
+        <span class="c1"># addresses the change in numerous JINJA functions that use this nomenclature.</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">Regex</span><span class="o">.</span><span class="n">PRE_PROCESS_MIN_PIN_REPLACEMENT</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;lower_bound=&quot;</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">Regex</span><span class="o">.</span><span class="n">PRE_PROCESS_MAX_PIN_REPLACEMENT</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;upper_bound=&quot;</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
+
+        <span class="c1"># Convert the old JINJA `environ[&quot;&quot;]` variable usage to the new `get.env(&quot;&quot;)` syntax.</span>
+        <span class="c1"># NOTE:</span>
+        <span class="c1">#   - This is mostly used by Bioconda recipes and R-based-packages in the `license_file` field.</span>
+        <span class="c1">#   - From our search, it looks like we never deal with more than one set of outer quotes within the brackets</span>
+        <span class="n">replacements</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">groups</span> <span class="ow">in</span> <span class="n">cast</span><span class="p">(</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Regex</span><span class="o">.</span><span class="n">PRE_PROCESS_ENVIRON</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">content</span><span class="p">)):</span>
+            <span class="c1"># Each match should return [&quot;&lt;quote char&gt;&quot;, &quot;&lt;key&gt;&quot;, &quot;&lt;quote_char&gt;&quot;]</span>
+            <span class="n">quote_char</span> <span class="o">=</span> <span class="n">groups</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">groups</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">replacements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;environ[</span><span class="si">{</span><span class="n">quote_char</span><span class="si">}{</span><span class="n">key</span><span class="si">}{</span><span class="n">quote_char</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">&quot;env.get(</span><span class="si">{</span><span class="n">quote_char</span><span class="si">}{</span><span class="n">key</span><span class="si">}{</span><span class="n">quote_char</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">for</span> <span class="n">old</span><span class="p">,</span> <span class="n">new</span> <span class="ow">in</span> <span class="n">replacements</span><span class="p">:</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">old</span><span class="p">,</span> <span class="n">new</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Replace `{{ hash_type }}:` with the value of `hash_type`, which is likely `sha256`. This is an uncommon</span>
+        <span class="c1"># practice that is not part of the V1 specification. Currently, about 70 AnacondaRecipes and conda-forge files</span>
+        <span class="c1"># do this in our integration testing sample.</span>
+        <span class="n">hash_type_var_variants</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;{</span><span class="si">% s</span><span class="s1">et hash_type = &quot;sha256&quot; %}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;{</span><span class="si">% s</span><span class="s1">et hashtype = &quot;sha256&quot; %}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;{</span><span class="si">% s</span><span class="s1">et hash = &quot;sha256&quot; %}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>  <span class="c1"># NOTE: `hash` is also commonly used for the actual SHA-256 hash value</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">hash_type_variant</span> <span class="ow">in</span> <span class="n">hash_type_var_variants</span><span class="p">:</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">hash_type_variant</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">Regex</span><span class="o">.</span><span class="n">PRE_PROCESS_JINJA_HASH_TYPE_KEY</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;sha256:&quot;</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">content</span></div>
+
+
+<div class="viewcode-block" id="RecipeParserConvert.render_to_v1_recipe_format">
+<a class="viewcode-back" href="../../../conda_recipe_manager.parser.html#conda_recipe_manager.parser.recipe_parser_convert.RecipeParserConvert.render_to_v1_recipe_format">[docs]</a>
+    <span class="k">def</span> <span class="nf">render_to_v1_recipe_format</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">MessageTable</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Takes the current recipe representation and renders it to the V1 format WITHOUT modifying the current recipe</span>
+<span class="sd">        state.</span>
+
+<span class="sd">        This &quot;new&quot; format is defined in the following CEPs:</span>
+<span class="sd">          - https://github.com/conda-incubator/ceps/blob/main/cep-13.md</span>
+<span class="sd">          - https://github.com/conda-incubator/ceps/blob/main/cep-14.md</span>
+
+<span class="sd">        :returns: Returns a tuple containing:</span>
+<span class="sd">            - The converted recipe, as a string</span>
+<span class="sd">            - A `MessageTbl` instance that contains error logging</span>
+<span class="sd">            - Converted recipe file debug string. USE FOR DEBUGGING PURPOSES ONLY!</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Approach: In the event that we want to expand support later, this function should be implemented in terms</span>
+        <span class="c1"># of a `RecipeParser` tree. This will make it easier to build an upgrade-path, if we so choose to pursue one.</span>
+
+        <span class="c1"># Log the original comments</span>
+        <span class="n">old_comments</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">get_comments_table</span><span class="p">()</span>
+
+        <span class="c1"># Convert selectors into ternary statements or `if` blocks. We process selectors first so that there is no</span>
+        <span class="c1"># chance of selector comments getting accidentally wiped by patch or other operations.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_upgrade_selectors_to_conditionals</span><span class="p">()</span>
+
+        <span class="c1"># JINJA templates -&gt; `context` object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_upgrade_jinja_to_context_obj</span><span class="p">()</span>
+
+        <span class="c1"># Cached copy of all of the &quot;outputs&quot; in a recipe. This is useful for easily handling multi and single output</span>
+        <span class="c1"># recipes in 1 loop construct.</span>
+        <span class="n">base_package_paths</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">get_package_paths</span><span class="p">()</span>
+
+        <span class="c1"># TODO Fix: comments are not preserved with patch operations (add a flag to `patch()`?)</span>
+
+        <span class="c1"># There are a number of recipe files that contain the same misspellings. This is an attempt to</span>
+        <span class="c1"># solve the more common issues.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_correct_common_misspellings</span><span class="p">(</span><span class="n">base_package_paths</span><span class="p">)</span>
+
+        <span class="c1"># Upgrade common sections found in a recipe</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_upgrade_source_section</span><span class="p">(</span><span class="n">base_package_paths</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_upgrade_build_section</span><span class="p">(</span><span class="n">base_package_paths</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_upgrade_requirements_section</span><span class="p">(</span><span class="n">base_package_paths</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_upgrade_about_section</span><span class="p">(</span><span class="n">base_package_paths</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_upgrade_test_section</span><span class="p">(</span><span class="n">base_package_paths</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_upgrade_multi_output</span><span class="p">(</span><span class="n">base_package_paths</span><span class="p">)</span>
+
+        <span class="c1">## Final clean-up ##</span>
+
+        <span class="c1"># TODO: Comment tracking may need improvement. The &quot;correct way&quot; of tracking comments with patch changes is a</span>
+        <span class="c1">#       fairly big engineering effort and refactor.</span>
+        <span class="c1"># Alert the user which comments have been dropped.</span>
+        <span class="n">new_comments</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">get_comments_table</span><span class="p">()</span>
+        <span class="n">diff_comments</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">old_comments</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">new_comments</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">path</span><span class="p">,</span> <span class="n">comment</span> <span class="ow">in</span> <span class="n">diff_comments</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">contains_value</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_msg_tbl</span><span class="o">.</span><span class="n">add_message</span><span class="p">(</span><span class="n">MessageCategory</span><span class="o">.</span><span class="n">WARNING</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Could not relocate comment: </span><span class="si">{</span><span class="n">comment</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># TODO Complete: move operations may result in empty fields we can eliminate. This may require changes to</span>
+        <span class="c1">#                `contains_value()`</span>
+        <span class="c1"># TODO Complete: Attempt to combine consecutive If/Then blocks after other modifications. This should reduce the</span>
+        <span class="c1">#                risk of screwing up critical list indices and ordering.</span>
+
+        <span class="c1"># Hack: Wipe the existing table so the JINJA `set` statements don&#39;t render the final form</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">_vars_tbl</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># pylint: disable=protected-access</span>
+
+        <span class="c1"># Sort the top-level keys to a &quot;canonical&quot; ordering. This should make previous patch operations look more</span>
+        <span class="c1"># &quot;sensible&quot; to a human reader.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sort_subtree_keys</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="n">TOP_LEVEL_KEY_SORT_ORDER</span><span class="p">)</span>
+
+        <span class="c1"># Override the schema value as the recipe conversion is now complete.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">_schema_version</span> <span class="o">=</span> <span class="n">SchemaVersion</span><span class="o">.</span><span class="n">V1</span>  <span class="c1"># pylint: disable=protected-access</span>
+        <span class="c1"># Update the variable table</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">_init_vars_tbl</span><span class="p">()</span>  <span class="c1"># pylint: disable=protected-access</span>
+        <span class="c1"># TODO update selector table when V1 selectors are supported!</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="o">.</span><span class="n">render</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_msg_tbl</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_v1_recipe</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+</body>
+</html>

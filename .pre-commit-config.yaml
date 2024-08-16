@@ -4,14 +4,14 @@
 #   pre-commit autoupdate
 exclude: |
   (?x)^(
-    .*/versioneer\.py|.*/_version\.py|.*/.*\.svg|tests/test_aux_files/.*|recipe/meta.yaml
+    .*/versioneer\.py|.*/_version\.py|.*/.*\.svg|tests/test_aux_files/.*|recipe/meta.yaml|docs/.*
   )$
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
   rev: v4.6.0
   hooks:
   - id: check-added-large-files
-    exclude_types: ["json", "yaml", "pdf"]
+    exclude_types: ["json", "yaml", "pdf", "html"]
   - id: check-ast
   - id: fix-byte-order-marker
   - id: check-case-conflict
