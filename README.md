@@ -2,11 +2,33 @@
 
 ## Table of Contents
 <!-- TOC -->
-# Overview
-A project for libraries and automated tools that manage and manipulate conda recipe files.
 
-This project started out as a recipe parser library in Anaconda's
-[percy](https://github.com/anaconda-distribution/percy/tree/main) project.
+- [conda-recipe-manager](#conda-recipe-manager)
+    - [Table of Contents](#table-of-contents)
+- [Overview](#overview)
+    - [History](#history)
+- [Getting Started](#getting-started)
+    - [General Installation](#general-installation)
+        - [Install into your current environment](#install-into-your-current-environment)
+        - [Install into a custom environment](#install-into-a-custom-environment)
+- [Developer Notes](#developer-notes)
+        - [Running pre-commit checks](#running-pre-commit-checks)
+    - [Release process](#release-process)
+- [Special Thanks](#special-thanks)
+
+<!-- /TOC -->
+# Overview
+Conda Recipe Manager (CRM) is a library and tool set capable of parsing Conda recipe files. It is intended to be
+used by package builders and developers to automate the generation and editing of Conda recipe files.
+
+Currently only recipe files in the V0 format are supported, but there is some on-going work to add full support for
+V1-formatted files.
+
+Library documentation can be found [here](https://conda-incubator.github.io/conda-recipe-manager/index.html).
+
+## History
+This project started out as a recipe parsing library in Anaconda's
+[percy](https://github.com/anaconda-distribution/percy) project.
 
 # Getting Started
 
@@ -55,3 +77,6 @@ running all or part of the `pre-commit` automations:
 1. Ensure `environment.yaml` is up to date with the latest dependencies
 1. Create a new release on GitHub with a version tag.
 1. Manage the conda-forge feedstock, as per [this doc](https://conda-forge.org/docs/maintainer/adding_pkgs/)
+
+# Special Thanks
+- @cbouss for his work on the [Percy project](https://github.com/anaconda/percy) that originally inspired the recipe parser.
