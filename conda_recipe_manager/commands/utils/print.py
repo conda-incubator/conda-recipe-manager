@@ -1,6 +1,5 @@
 """
-File:           print.py
-Description:    Provides print utility functions
+:Description: Provides print utility functions
 """
 
 from __future__ import annotations

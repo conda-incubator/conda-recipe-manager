@@ -1,6 +1,5 @@
 """
-File:           rattler_bulk_build.py
-Description:    CLI tool that performs a bulk build operation for rattler-build.
+:Description: CLI tool that performs a bulk build operation for rattler-build.
 """
 
 from __future__ import annotations

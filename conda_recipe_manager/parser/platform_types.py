@@ -1,6 +1,5 @@
 """
-File:           platform_types.py
-Description:    Provides enumerations and look-up tables for conda-recognized platforms.
+:Description: Provides enumerations and look-up tables for conda-recognized platforms.
 Resources:
   - https://github.com/conda/conda-build/blob/6b222c76ac0ba3b9f2efaf2f807ed335a3b46c00/conda_build/cli/main_convert.py
   - https://github.com/conda/conda-build/blob/6b222c76ac0ba3b9f2efaf2f807ed335a3b46c00/tests/test_metadata.py#L485

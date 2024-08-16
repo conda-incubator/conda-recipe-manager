@@ -1,6 +1,5 @@
 """
-File:           test_selector_parser.py
-Description:    Unit tests for the SelectorParser class
+:Description: Unit tests for the SelectorParser class
 """
 
 from __future__ import annotations

@@ -1,6 +1,5 @@
 """
-File:           selector_parser.py
-Description:    Custom parser for selector recipe selector syntax. This parser does not evaluate Python code directly,
+:Description: Custom parser for selector recipe selector syntax. This parser does not evaluate Python code directly,
                 and should therefore not be affected by the execution vulnerability in the V0 recipe format.
 """
 

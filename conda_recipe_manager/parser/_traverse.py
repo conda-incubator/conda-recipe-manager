@@ -1,6 +1,5 @@
 """
-File:           py
-Description:    Provides tree traversal functions only used by the parser.
+:Description: Provides tree traversal functions only used by the parser.
 """
 
 from __future__ import annotations

@@ -1,6 +1,5 @@
 """
-File:           test_platform_types.py
-Description:    Unit tests for the platform types module
+:Description: Unit tests for the platform types module
 """
 
 from __future__ import annotations

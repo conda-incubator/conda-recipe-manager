@@ -1,6 +1,5 @@
 """
-File:           types.py
-Description:    Contains types and constants used by CLI commands.
+:Description: Contains types and constants used by CLI commands.
 """
 
 from __future__ import annotations

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-File:           parse_ci_output.py
-Description:    Given a directory of CI logs, parse and organize the JSON output for easier consumption.
+:Description: Given a directory of CI logs, parse and organize the JSON output for easier consumption.
                 This is a quick and dirty script, not meant to be maintained with the usual standard of quality.
 """
 

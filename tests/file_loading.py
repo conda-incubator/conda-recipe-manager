@@ -1,6 +1,5 @@
 """
-File:           file_loading.py
-Description:    Constants and utilities used for loading files/recipes.
+:Description: Constants and utilities used for loading files/recipes.
 """
 
 from __future__ import annotations

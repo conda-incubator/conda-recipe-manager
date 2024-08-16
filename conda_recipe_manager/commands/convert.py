@@ -1,6 +1,5 @@
 """
-File:           convert.py
-Description:    CLI for converting an old recipe file to the "new" format.
+:Description: CLI for converting an old recipe file to the "new" format.
 """
 
 from __future__ import annotations
@@ -82,6 +81,7 @@ def _record_unrecoverable_failure(
 def convert_file(file_path: Path, output: Optional[Path], print_output: bool, debug: bool) -> ConversionResult:
     """
     Converts a single recipe file to the V1 format, tracking results.
+
     :param file_path: Path to the recipe file to convert
     :param output: If specified, the file contents are written to this file path. Otherwise, the file is dumped to
         STDOUT IF `print_output` is set to `True`.

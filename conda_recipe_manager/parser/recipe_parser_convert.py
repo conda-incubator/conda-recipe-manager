@@ -1,6 +1,5 @@
 """
-File:           recipe_parser_convert.py
-Description:    Provides a subclass of RecipeParser that performs the conversion of a v0 recipe to the new v1 recipe
+:Description: Provides a subclass of RecipeParser that performs the conversion of a v0 recipe to the new v1 recipe
                 format. This tooling was originally part of the base class, but was broken-out for easier/cleaner code
                 maintenance.
 """

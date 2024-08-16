@@ -1,6 +1,5 @@
 """
-File:           spdx_utils.py
-Description:    Provides a class that reads in the SPDX licensing database file to support SPDX utilities.
+:Description: Provides a class that reads in the SPDX licensing database file to support SPDX utilities.
 
                 SPDX Data Source (freely available for use):
                   - https://github.com/spdx/license-list-data/blob/main/json/licenses.json

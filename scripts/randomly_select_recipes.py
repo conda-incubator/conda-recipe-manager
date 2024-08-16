@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-File:           randomly_select_recipes.py
-Description:    Helper script to randomly select and acquire recipe files from a GitHub org.
+:Description: Helper script to randomly select and acquire recipe files from a GitHub org.
 """
 import argparse
 import csv

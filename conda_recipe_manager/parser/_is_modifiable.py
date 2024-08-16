@@ -1,6 +1,5 @@
 """
-File:           _is_modifiable.py
-Description:    Base class that provides basic modification tracking.
+:Description: Base class that provides basic modification tracking.
 """
 
 from __future__ import annotations

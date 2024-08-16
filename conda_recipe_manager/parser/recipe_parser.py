@@ -1,6 +1,5 @@
 """
-File:           recipe_parser.py
-Description:    Provides a class that takes text from a Jinja-formatted recipe file and parses it. This allows for easy
+:Description: Provides a class that takes text from a Jinja-formatted recipe file and parses it. This allows for easy
                 semantic understanding and manipulation of the file.
 
                 Patching these files is done using a JSON-patch like syntax. This project closely conforms to the

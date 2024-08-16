@@ -1,6 +1,5 @@
 """
-File:           _selector_info.py
-Description:    Provides the `SelectorInfo` class, used to store selector information.
+:Description: Provides the `SelectorInfo` class, used to store selector information.
 """
 
 from __future__ import annotations

@@ -1,6 +1,5 @@
 """
-File:           exceptions.py
-Description:    Provides exceptions thrown by the parser.
+:Description: Provides exceptions thrown by the parser.
 """
 
 from __future__ import annotations
