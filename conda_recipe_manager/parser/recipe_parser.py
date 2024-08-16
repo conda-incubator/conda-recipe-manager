@@ -10,6 +10,7 @@ Description:    Provides a class that takes text from a Jinja-formatted recipe f
                 Links:
                 - https://jsonpatch.com/
                 - https://datatracker.ietf.org/doc/html/rfc6902/
+
 """
 
 # Allows older versions of python to use newer forms of type annotation. There are major features introduced in >=3.9
@@ -69,6 +70,7 @@ class RecipeParser(IsModifiable):
     The next few prevalent kinds of statements are:
       - Conditional macros (i.e. if/endif)
       - for loops
+
     And even those only show up in a handful out of thousands of recipes. There are also no current examples of Jinja
     style comments.
 
@@ -852,6 +854,7 @@ class RecipeParser(IsModifiable):
           - Multi-output recipe files
           - Recipes that have both top-level and multi-output sections. An example can be found here:
               https://github.com/AnacondaRecipes/curl-feedstock/blob/master/recipe/meta.yaml
+
         """
         paths: list[str] = ["/"]
 
@@ -1117,6 +1120,7 @@ class RecipeParser(IsModifiable):
         Given a path, remove a selector to the line denoted by path.
         - If a selector does not exist, nothing happens.
         - If a comment exists after the selector, keep it, discard the selector.
+
         :param path: Path to add a selector to
         :raises KeyError: If the path provided is not found
         :returns: If found, the selector removed (includes surrounding brackets). Otherwise, returns None
@@ -1159,6 +1163,7 @@ class RecipeParser(IsModifiable):
             - Lines containing only comments are currently not addressable by our pathing scheme, so they are omitted.
               For our current purposes (of upgrading the recipe format) this should be fine. Non-addressable values
               should be less likely to be removed from patch operations.
+
         :returns: Dictionary of paths where comments can be found mapped to the comment found.
         """
         comments_tbl: dict[str, str] = {}

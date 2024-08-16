@@ -103,8 +103,8 @@ class RecipeParserConvert(RecipeParser):
         :param base_path: Shared base path from old and new locations
         :param old_ext: Old extension to the base path containing the data to move
         :param new_path: New path to extend to the base path, if the path does not currently exist
-        :param new_ext: (Optional) New extension to the base path of where the data should go. Use this when the
-            target value has been renamed. Defaults to the value of `old_ext`.
+        :param new_ext: (Optional) New extension to the base path of where the data should go. Use this when the target
+            value has been renamed. Defaults to the value of `old_ext`.
         """
         if new_ext is None:
             new_ext = old_ext
@@ -689,6 +689,7 @@ class RecipeParserConvert(RecipeParser):
             refactored into the parser later.
           - The number of recipes afflicted by an issue does not justify the engineering effort required to handle
             the issue in the parsing phase.
+
         :param content: Recipe file contents to pre-process
         :returns: Pre-processed recipe file contents
         """
@@ -749,10 +750,8 @@ class RecipeParserConvert(RecipeParser):
           - https://github.com/conda-incubator/ceps/blob/main/cep-13.md
           - https://github.com/conda-incubator/ceps/blob/main/cep-14.md
 
-        :returns: Returns a tuple containing:
-            - The converted recipe, as a string
-            - A `MessageTbl` instance that contains error logging
-            - Converted recipe file debug string. USE FOR DEBUGGING PURPOSES ONLY!
+        :returns: Returns a tuple containing: - The converted recipe, as a string - A `MessageTbl` instance that
+            contains error logging - Converted recipe file debug string. USE FOR DEBUGGING PURPOSES ONLY!
         """
         # Approach: In the event that we want to expand support later, this function should be implemented in terms
         # of a `RecipeParser` tree. This will make it easier to build an upgrade-path, if we so choose to pursue one.

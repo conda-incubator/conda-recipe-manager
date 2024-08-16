@@ -99,7 +99,7 @@ class MessageTable:
         Convenience function that returns a displayable count of the number of warnings and errors contained in the
         messaging object.
         :returns: A message indicating the number of errors and warnings that have been accumulated. If there are none,
-                  an empty string is returned.
+            an empty string is returned.
         """
         if not self._tbl:
             return ""

@@ -145,6 +145,7 @@ def rattler_bulk_build(
     NOTE:
         - The build command is run as `rattler-build build -r <recipe.yaml> <ARGS>`
         - rattler-build errors are dumped to STDERR
+
     """
     start_time: Final[float] = time.time()
     files: Final[list[Path]] = []
