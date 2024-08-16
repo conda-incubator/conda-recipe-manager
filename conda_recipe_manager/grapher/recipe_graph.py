@@ -1,6 +1,5 @@
 """
-File:           recipe_graph.py
-Description:    Defines a base recipe graph class. Derived classes provide initialization details.
+:Description: Defines a base recipe graph class. Derived classes provide initialization details.
 """
 
 from __future__ import annotations
@@ -22,6 +21,7 @@ class RecipeGraph:
     ):
         """
         Constructs common types that all recipe graphs share. Derived classes handle initialization details.
+
         :param recipe_cache: Maps recipe file SHA-256 hashes to recipe parser instances.
         :param failed_to_parse: Set of identifiers of recipes that failed to parse.
         """
@@ -63,6 +63,7 @@ class RecipeGraph:
     def __bool__(self) -> bool:
         """
         Indicates if the RecipeGraph contains information.
+
         :returns: True if the graph is "truthy" and holds information. False otherwise.
         """
         return bool(self._recipe_cache)
@@ -70,6 +71,7 @@ class RecipeGraph:
     def get_failed_recipe_count(self) -> int:
         """
         Provides the number of recipes that failed to parse.
+
         :returns: Count of recipes that failed to parse
         """
         return len(self._failed_to_parse)
@@ -77,6 +79,7 @@ class RecipeGraph:
     def get_total_recipe_count(self) -> int:
         """
         Calculates the total number of recipes processed (includes failures)
+
         :returns: Number of recipes that have been processed
         """
         return len(self._recipe_cache) + self.get_failed_recipe_count()

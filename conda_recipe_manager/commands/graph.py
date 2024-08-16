@@ -1,6 +1,5 @@
 """
-File:           graph.py
-Description:    CLI understanding recipe dependency graphs.
+:Description: CLI understanding recipe dependency graphs.
 """
 
 from __future__ import annotations

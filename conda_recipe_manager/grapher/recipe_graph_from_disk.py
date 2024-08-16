@@ -1,6 +1,5 @@
 """
-File:           recipe_graph_from_disk.py
-Description:    Generates a recipe graph from recipe files on local storage.
+:Description: Generates a recipe graph from recipe files on local storage.
 """
 
 from __future__ import annotations
@@ -23,6 +22,7 @@ class RecipeGraphFromDisk(RecipeGraph):
     def _read_and_parse_recipe(file: Path) -> tuple[str, RecipeParser]:
         """
         Callback that parses a single recipe file.
+
         :param file: File to process
         :returns: A key-value pair to initialize the recipe cache. If parsing failed, this returns a tuple containing
             a debug string and None.
@@ -36,6 +36,7 @@ class RecipeGraphFromDisk(RecipeGraph):
     def __init__(self, directory: str | Path):
         """
         Constructs common types that all recipe graphs share. Derived classes handle initialization details.
+
         :param directory: Path to the directory containing recipe files.
         """
         self._dir_path = Path(directory)
