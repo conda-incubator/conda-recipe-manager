@@ -1,6 +1,5 @@
 """
-File:           test_platform_types.py
-Description:    Unit tests for the platform types module
+:Description: Unit tests for the platform types module
 """
 
 from __future__ import annotations
@@ -37,6 +36,7 @@ from conda_recipe_manager.parser.platform_types import (
 def test_get_platforms_by_arch(arch: Arch | str, expected: set[Platform]) -> None:
     """
     Tests the construction of a selector parse tree by comparing the debug string representation of the tree.
+
     :param arch: Target Architecture
     :param expected: Expected value to return
     """
@@ -85,6 +85,7 @@ def test_get_platforms_by_arch(arch: Arch | str, expected: set[Platform]) -> Non
 def test_get_platforms_by_os(os: OperatingSystem | str, expected: set[Platform]) -> None:
     """
     Tests the construction of a selector parse tree by comparing the debug string representation of the tree.
+
     :param os: Target Operating System
     :param expected: Expected value to return
     """

@@ -1,6 +1,5 @@
 """
-File:           _node.py
-Description:    Provides a private node class only used by the parser. This class is fundamental to tree formation.
+:Description: Provides a private node class only used by the parser. This class is fundamental to tree formation.
 """
 
 from __future__ import annotations
@@ -41,6 +40,7 @@ class Node:
     ):
         """
         Constructs a node
+
         :param value:               Value of the current node
         :param comment:             Comment on the line this node was found on
         :param children:            List of children nodes, descendants of this node
@@ -58,6 +58,7 @@ class Node:
     def __eq__(self, other: object) -> bool:
         """
         Determine if two nodes are equal. Useful for `assert` statements in tests.
+
         :param other: Other object to check against
         :returns: True if the two nodes are identical. False otherwise.
         """
@@ -75,6 +76,7 @@ class Node:
     def __str__(self) -> str:
         """
         Renders the Node as a string. Useful for debugging purposes.
+
         :returns: The node, as a string
         """
         value = self.value
@@ -94,6 +96,7 @@ class Node:
     def short_str(self) -> str:
         """
         Renders the Node as a simple string. Useful for other `__str__()` functions to call.
+
         :returns: The node, as a simplified string.
         """
         if self.is_comment():
@@ -105,6 +108,7 @@ class Node:
     def is_leaf(self) -> bool:
         """
         Indicates if a node is a leaf node
+
         :returns: True if the node is a leaf. False otherwise.
         """
         return not self.children and not self.is_comment()
@@ -112,6 +116,7 @@ class Node:
     def is_root(self) -> bool:
         """
         Indicates if a node is a root node
+
         :returns: True if the node is a root node. False otherwise.
         """
         return self.value == ROOT_NODE_VALUE
@@ -119,6 +124,7 @@ class Node:
     def is_comment(self) -> bool:
         """
         Indicates if a line contains only a comment. When rendered, this will be a comment only-line.
+
         :returns: True if the node represents only a comment. False otherwise.
         """
         return self.value == Node._sentinel and bool(self.comment) and not self.children
@@ -135,6 +141,7 @@ class Node:
             - bar
 
         When converted into a Pythonic data structure, the key will point to an `None` value.
+
         :returns: True if the node represents an empty key. False otherwise.
         """
         return self.key_flag and self.is_leaf()
@@ -145,6 +152,7 @@ class Node:
 
         This special case is used in several edge cases. Namely, it allows the rendering algorithm to print such
         key-value pairs on the same line.
+
         :returns: True if the node represents a single key. False otherwise.
         """
         return self.key_flag and len(self.children) == 1 and self.children[0].is_leaf()
@@ -153,6 +161,7 @@ class Node:
         """
         Indicates if the node is a list member that contains other collection types. In other words, this node has no
         value itself BUT it contains children that do.
+
         :returns: True if the node represents an element that is a collection. False otherwise.
         """
         return self.value == Node._sentinel and self.list_member_flag and bool(self.children)

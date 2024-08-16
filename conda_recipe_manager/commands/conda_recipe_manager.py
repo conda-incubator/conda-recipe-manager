@@ -1,6 +1,5 @@
 """
-File:           conda_recipe_manager.py
-Description:    Base CLI for all `conda-recipe-manager` commands
+:Description: Base CLI for all `conda-recipe-manager` commands
 """
 
 from __future__ import annotations

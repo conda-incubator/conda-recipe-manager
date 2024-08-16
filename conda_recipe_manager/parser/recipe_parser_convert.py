@@ -1,6 +1,5 @@
 """
-File:           recipe_parser_convert.py
-Description:    Provides a subclass of RecipeParser that performs the conversion of a v0 recipe to the new v1 recipe
+:Description: Provides a subclass of RecipeParser that performs the conversion of a v0 recipe to the new v1 recipe
                 format. This tooling was originally part of the base class, but was broken-out for easier/cleaner code
                 maintenance.
 """
@@ -42,6 +41,7 @@ class RecipeParserConvert(RecipeParser):
         """
         Constructs a convertible recipe object. This extension of the parser class keeps a modified copy of the original
         recipe to work on and tracks some debugging state.
+
         :param content: conda-build formatted recipe file, as a single text string.
         """
         super().__init__(content)
@@ -58,6 +58,7 @@ class RecipeParserConvert(RecipeParser):
     def _patch_and_log(self, patch: JsonPatchType) -> bool:
         """
         Convenience function that logs failed patches to the message table.
+
         :param patch: Patch operation to perform
         :returns: Forwards patch results for further logging/error handling
         """
@@ -70,6 +71,7 @@ class RecipeParserConvert(RecipeParser):
         """
         Convenience function that constructs missing paths. Useful when you have to construct more than 1 path level at
         once (the JSON patch standard only allows the creation of 1 new level at a time).
+
         :param base_path: Base path, to be extended
         :param ext: Extension to create the full path to check for
         :param value: `value` field for the patch-add operation
@@ -83,6 +85,7 @@ class RecipeParserConvert(RecipeParser):
         """
         Convenience function that moves a value under an old path to a new one sharing a common base path BUT only if
         the old path exists.
+
         :param base_path: Shared base path from old and new locations
         :param old_ext: Old extension to the base path containing the data to move
         :param new_ext: New extension to the base path of where the data should go
@@ -98,13 +101,14 @@ class RecipeParserConvert(RecipeParser):
         conditionally added, if it is not present.
 
         Examples:
-            `/build/entry_points` -> `/build/python/entry_points`
-            `/build/missing_dso_whitelist` -> `/build/dynamic_linking/missing_dso_allowlist`
+          - `/build/entry_points` -> `/build/python/entry_points`
+          - `/build/missing_dso_whitelist` -> `/build/dynamic_linking/missing_dso_allowlist`
+
         :param base_path: Shared base path from old and new locations
         :param old_ext: Old extension to the base path containing the data to move
         :param new_path: New path to extend to the base path, if the path does not currently exist
-        :param new_ext: (Optional) New extension to the base path of where the data should go. Use this when the
-            target value has been renamed. Defaults to the value of `old_ext`.
+        :param new_ext: (Optional) New extension to the base path of where the data should go. Use this when the target
+            value has been renamed. Defaults to the value of `old_ext`.
         """
         if new_ext is None:
             new_ext = old_ext
@@ -115,6 +119,7 @@ class RecipeParserConvert(RecipeParser):
     def _patch_deprecated_fields(self, base_path: str, fields: list[str]) -> None:
         """
         Automatically deprecates fields found in a common path.
+
         :param base_path: Shared base path where fields can be found
         :param fields: List of deprecated fields
         """
@@ -129,6 +134,7 @@ class RecipeParserConvert(RecipeParser):
         """
         Convenience function that sorts 1 level of keys, given a path. Optionally allows renaming of the target node.
         No changes are made if the path provided is invalid/does not exist.
+
         :param sort_path: Top-level path to target sorting of child keys
         :param tbl: Table describing how keys should be sorted. Lower-value key names appear towards the top of the list
         :param rename: (Optional) If specified, renames the top-level key
@@ -263,6 +269,7 @@ class RecipeParserConvert(RecipeParser):
     def _correct_common_misspellings(self, base_package_paths: list[str]) -> None:
         """
         Corrects common spelling mistakes in field names.
+
         :param base_package_paths: Set of base paths to process that could contain this section.
         """
         for base_path in base_package_paths:
@@ -280,6 +287,7 @@ class RecipeParserConvert(RecipeParser):
     def _upgrade_source_section(self, base_package_paths: list[str]) -> None:
         """
         Upgrades/converts the `source` section(s) of a recipe file.
+
         :param base_package_paths: Set of base paths to process that could contain this section.
         """
         for base_path in base_package_paths:
@@ -326,6 +334,7 @@ class RecipeParserConvert(RecipeParser):
         """
         Upgrades the `/build/script` section if needed. Some fields like `script_env` will need to be wrapped into a new
         `Script` object. Simple `script` sections can be left unchanged.
+
         :param build_path: Build section path to upgrade
         """
         script_env_path: Final[str] = RecipeParser.append_to_path(build_path, "/script_env")
@@ -385,6 +394,7 @@ class RecipeParserConvert(RecipeParser):
     def _upgrade_build_section(self, base_package_paths: list[str]) -> None:
         """
         Upgrades/converts the `build` section(s) of a recipe file.
+
         :param base_package_paths: Set of base paths to process that could contain this section.
         """
         build_deprecated: Final[list[str]] = [
@@ -463,6 +473,7 @@ class RecipeParserConvert(RecipeParser):
     def _upgrade_requirements_section(self, base_package_paths: list[str]) -> None:
         """
         Upgrades/converts the `requirements` section(s) of a recipe file.
+
         :param base_package_paths: Set of base paths to process that could contain this section.
         """
         for base_path in base_package_paths:
@@ -478,6 +489,7 @@ class RecipeParserConvert(RecipeParser):
         Attempt to correct licenses to match SPDX-recognized names.
 
         For now, this does not call-out to an SPDX database. Instead, we attempt to correct common mistakes.
+
         :param about_path: Path to the `about` section, where the `license` field is located.
         """
         license_path: Final[str] = RecipeParser.append_to_path(about_path, "/license")
@@ -506,6 +518,7 @@ class RecipeParserConvert(RecipeParser):
     def _upgrade_about_section(self, base_package_paths: list[str]) -> None:
         """
         Upgrades/converts the `about` section of a recipe file.
+
         :param base_package_paths: Set of base paths to process that could contain this section.
         """
         about_rename_mapping: Final[list[tuple[str, str]]] = [
@@ -550,6 +563,7 @@ class RecipeParserConvert(RecipeParser):
     def _upgrade_test_pip_check(self, base_path: str, test_path: str) -> None:
         """
         Replaces the commonly used `pip check` test-case with the new `python/pip_check` attribute, if applicable.
+
         :param base_path: Base path for the build target to upgrade
         :param test_path: Test path for the build target to upgrade
         """
@@ -584,6 +598,7 @@ class RecipeParserConvert(RecipeParser):
     def _upgrade_test_section(self, base_package_paths: list[str]) -> None:
         """
         Upgrades/converts the `test` section(s) of a recipe file.
+
         :param base_package_paths: Set of base paths to process that could contain this section.
         """
         # NOTE: For now, we assume that the existing test section comprises of a single test entity. Developers will
@@ -652,6 +667,7 @@ class RecipeParserConvert(RecipeParser):
     def _upgrade_multi_output(self, base_package_paths: list[str]) -> None:
         """
         Upgrades/converts sections pertaining to multi-output recipes.
+
         :param base_package_paths: Set of base paths to process that could contain this section.
         """
         if not self._v1_recipe.contains_value("/outputs"):
@@ -689,6 +705,7 @@ class RecipeParserConvert(RecipeParser):
             refactored into the parser later.
           - The number of recipes afflicted by an issue does not justify the engineering effort required to handle
             the issue in the parsing phase.
+
         :param content: Recipe file contents to pre-process
         :returns: Pre-processed recipe file contents
         """
@@ -749,10 +766,8 @@ class RecipeParserConvert(RecipeParser):
           - https://github.com/conda-incubator/ceps/blob/main/cep-13.md
           - https://github.com/conda-incubator/ceps/blob/main/cep-14.md
 
-        :returns: Returns a tuple containing:
-            - The converted recipe, as a string
-            - A `MessageTbl` instance that contains error logging
-            - Converted recipe file debug string. USE FOR DEBUGGING PURPOSES ONLY!
+        :returns: Returns a tuple containing: - The converted recipe, as a string - A `MessageTbl` instance that
+            contains error logging - Converted recipe file debug string. USE FOR DEBUGGING PURPOSES ONLY!
         """
         # Approach: In the event that we want to expand support later, this function should be implemented in terms
         # of a `RecipeParser` tree. This will make it easier to build an upgrade-path, if we so choose to pursue one.

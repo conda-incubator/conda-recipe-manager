@@ -28,3 +28,5 @@ dependencies:
   - matplotlib
   - pygraphviz
   - pre-commit
+  - sphinx
+  - sphinx-rtd-theme
