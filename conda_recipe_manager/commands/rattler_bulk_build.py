@@ -1,6 +1,5 @@
 """
-File:           rattler_bulk_build.py
-Description:    CLI tool that performs a bulk build operation for rattler-build.
+:Description: CLI tool that performs a bulk build operation for rattler-build.
 """
 
 from __future__ import annotations
@@ -44,6 +43,7 @@ def build_recipe(file: Path, path: Path, args: list[str]) -> tuple[str, BuildRes
     """
     Helper function that performs the build operation for parallelizable execution. Logs rattler-build failures to
     STDERR.
+
     :param file: Recipe file to build
     :param path: Path argument provided by the user
     :param args: List of arguments to provide whole-sale to rattler-build
@@ -75,6 +75,7 @@ def build_recipe(file: Path, path: Path, args: list[str]) -> tuple[str, BuildRes
 def create_debug_file(debug_log: Path, results: dict[str, BuildResult], error_histogram: dict[str, int]) -> None:
     """
     Generates a debug file containing an organized dump of all the recipes that got a particular error message.
+
     :param debug_log: Log file to write to
     :param results:
     :param error_histogram:

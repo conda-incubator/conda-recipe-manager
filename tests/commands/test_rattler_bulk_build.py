@@ -1,6 +1,5 @@
 """
-File:           test_rattler_bulk_build.py
-Description:    Tests the `rattler-bulk-build` CLI
+:Description: Tests the `rattler-bulk-build` CLI
 """
 
 from click.testing import CliRunner

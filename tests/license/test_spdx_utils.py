@@ -1,6 +1,5 @@
 """
-File:           test_spdx_utils.py
-Description:    Unit tests for the SpdxUtils class
+:Description: Unit tests for the SpdxUtils class
 """
 
 from __future__ import annotations
