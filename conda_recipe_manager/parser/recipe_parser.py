@@ -865,6 +865,7 @@ class RecipeParser(IsModifiable):
         Convenience function that returns the locations of all "outputs" in the `/outputs` directory AND the root/
         top-level of the recipe file. Combined with a call to `get_value()` with a default value and a for loop, this
         should easily allow the calling code to handle editing/examining configurations found in:
+
           - "Simple" (non-multi-output) recipe files
           - Multi-output recipe files
           - Recipes that have both top-level and multi-output sections. An example can be found here:
@@ -1575,7 +1576,7 @@ class RecipeParser(IsModifiable):
         """
         Given a regex string, return the list of paths that match the regex.
         NOTE: This function only searches against primitive values. All variables and selectors can be fully provided by
-              using their respective `list_*()` functions.
+        using their respective `list_*()` functions.
 
         :param regex: Regular expression to match with
         :param include_comment: (Optional) If set to `True`, this function will execute the regular expression on values
