@@ -28,8 +28,8 @@ from conda_recipe_manager.parser._utils import (
 )
 from conda_recipe_manager.parser.enums import SchemaVersion
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
-from conda_recipe_manager.parser.types import CURRENT_RECIPE_SCHEMA_FORMAT, MessageCategory, MessageTable
-from conda_recipe_manager.types import JsonPatchType, JsonType, Primitives, SentinelType
+from conda_recipe_manager.parser.types import CURRENT_RECIPE_SCHEMA_FORMAT
+from conda_recipe_manager.types import JsonPatchType, JsonType, MessageCategory, MessageTable, Primitives, SentinelType
 
 
 class RecipeParserConvert(RecipeParser):
