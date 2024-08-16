@@ -1,6 +1,5 @@
 """
-File:           test_conda_recipe_manager.py
-Description:    Tests the base `conda-recipe-manager` CLI
+:Description: Tests the base `conda-recipe-manager` CLI
 """
 
 from click.testing import CliRunner

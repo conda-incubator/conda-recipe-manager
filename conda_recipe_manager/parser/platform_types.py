@@ -1,6 +1,5 @@
 """
-File:           platform_types.py
-Description:    Provides enumerations and look-up tables for conda-recognized platforms.
+:Description: Provides enumerations and look-up tables for conda-recognized platforms.
 Resources:
   - https://github.com/conda/conda-build/blob/6b222c76ac0ba3b9f2efaf2f807ed335a3b46c00/conda_build/cli/main_convert.py
   - https://github.com/conda/conda-build/blob/6b222c76ac0ba3b9f2efaf2f807ed335a3b46c00/tests/test_metadata.py#L485
@@ -88,6 +87,7 @@ PlatformQualifiers = Arch | OperatingSystem | Platform
 def get_platforms_by_arch(arch: Arch | str) -> set[Platform]:
     """
     Given an architecture, return the list of supported build platforms.
+
     :param arch: Target architecture
     :returns: Set of supported platforms for that architecture. An empty set is returned if no matching architecture
         is found.
@@ -122,6 +122,7 @@ def get_platforms_by_arch(arch: Arch | str) -> set[Platform]:
 def get_platforms_by_os(os: OperatingSystem | str) -> set[Platform]:
     """
     Given an Operating System, return the list of supported build platforms.
+
     :param os: Target operating system
     :returns: Set of supported platforms for that OS. An empty set is returned if no matching OS is found.
     """

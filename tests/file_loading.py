@@ -1,6 +1,5 @@
 """
-File:           file_loading.py
-Description:    Constants and utilities used for loading files/recipes.
+:Description: Constants and utilities used for loading files/recipes.
 """
 
 from __future__ import annotations
@@ -19,6 +18,7 @@ TEST_FILES_PATH: Final[Path] = Path(__file__).parent / "test_aux_files"
 def load_file(file: Path | str) -> str:
     """
     Loads a file into a single string
+
     :param file: Filename of the file to read
     :returns: Text from the file
     """
@@ -28,6 +28,7 @@ def load_file(file: Path | str) -> str:
 def load_recipe(file_name: str) -> RecipeParser:
     """
     Convenience function that simplifies initializing a recipe parser.
+
     :param file_name: File name of the test recipe to load
     :returns: RecipeParser instance, based on the file
     """
@@ -38,6 +39,7 @@ def load_recipe(file_name: str) -> RecipeParser:
 def load_recipe_convert(file_name: str) -> RecipeParserConvert:
     """
     Convenience function that simplifies initializing a recipe parser.
+
     :param file_name: File name of the test recipe to load
     :returns: RecipeParserConvert instance, based on the file
     """

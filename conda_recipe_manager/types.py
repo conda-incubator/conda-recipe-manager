@@ -1,6 +1,5 @@
 """
-File:           types.py
-Description:    Provides public types, type aliases, constants, and small classes used by all modules.
+:Description: Provides public types, type aliases, constants, and small classes used by all modules.
 """
 
 from __future__ import annotations
@@ -67,6 +66,7 @@ class MessageTable:
     def add_message(self, category: MessageCategory, message: str) -> None:
         """
         Adds a message to the table
+
         :param category:
         :param message:
         """
@@ -77,6 +77,7 @@ class MessageTable:
     def get_messages(self, category: MessageCategory) -> list[str]:
         """
         Returns all the messages stored in a given category
+
         :param category: Category to target
         :returns: A list containing all the messages stored in a category.
         """
@@ -87,6 +88,7 @@ class MessageTable:
     def get_message_count(self, category: MessageCategory) -> int:
         """
         Returns how many messages are stored in a given category
+
         :param category: Category to target
         :returns: A list containing all the messages stored in a category.
         """
@@ -98,8 +100,9 @@ class MessageTable:
         """
         Convenience function that returns a displayable count of the number of warnings and errors contained in the
         messaging object.
+
         :returns: A message indicating the number of errors and warnings that have been accumulated. If there are none,
-                  an empty string is returned.
+            an empty string is returned.
         """
         if not self._tbl:
             return ""

@@ -1,6 +1,5 @@
 """
-File:           convert.py
-Description:    CLI for converting an old recipe file to the "new" format.
+:Description: CLI for converting an old recipe file to the "new" format.
 """
 
 from __future__ import annotations
@@ -63,6 +62,7 @@ def _record_unrecoverable_failure(
 ) -> ConversionResult:
     """
     Convenience function that streamlines the process of recording an unrecoverable conversion failure.
+
     :param conversion_result: Conversion result instance to use. This is passed into aggregate any other messages that
         could be logged prior to reaching this fatal error case.
     :param exit_code: Exit code to return for this error case.
@@ -82,6 +82,7 @@ def _record_unrecoverable_failure(
 def convert_file(file_path: Path, output: Optional[Path], print_output: bool, debug: bool) -> ConversionResult:
     """
     Converts a single recipe file to the V1 format, tracking results.
+
     :param file_path: Path to the recipe file to convert
     :param output: If specified, the file contents are written to this file path. Otherwise, the file is dumped to
         STDOUT IF `print_output` is set to `True`.
@@ -173,6 +174,7 @@ def convert_file(file_path: Path, output: Optional[Path], print_output: bool, de
 def process_recipe(file: Path, path: Path, output: Optional[Path], debug: bool) -> tuple[str, ConversionResult]:
     """
     Helper function that performs the conversion operation for parallelizable execution.
+
     :param file: Recipe file to convert
     :param path: Path argument provided by the user
     :param output: Output argument file provided by the user
@@ -189,6 +191,7 @@ def _get_files_list(path: Path) -> list[Path]:
     """
     Takes the file path from the user and generates the list of target file(s). Exits the script when an unrecoverable
     state has been reached.
+
     :param path: Path provided from the user.
     :returns: List of files to convert.
     """
@@ -211,6 +214,7 @@ def _get_files_list(path: Path) -> list[Path]:
 def _collect_issue_stats(project_name: str, issues: list[str], hist: dict[str, int], recipes_lst: list[str]) -> int:
     """
     Given a list of issues (errors, warnings, etc), collect that data into some useful metrics.
+
     :param project_name: Project/recipe identifier
     :param issues: List of issues to read
     :param hist: Histogram to dump occurrence data into

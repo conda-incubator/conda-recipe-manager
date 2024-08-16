@@ -1,6 +1,5 @@
 """
-File:           recipe_parser.py
-Description:    Provides a class that takes text from a Jinja-formatted recipe file and parses it. This allows for easy
+:Description: Provides a class that takes text from a Jinja-formatted recipe file and parses it. This allows for easy
                 semantic understanding and manipulation of the file.
 
                 Patching these files is done using a JSON-patch like syntax. This project closely conforms to the
@@ -10,6 +9,7 @@ Description:    Provides a class that takes text from a Jinja-formatted recipe f
                 Links:
                 - https://jsonpatch.com/
                 - https://datatracker.ietf.org/doc/html/rfc6902/
+
 """
 
 # Allows older versions of python to use newer forms of type annotation. There are major features introduced in >=3.9
@@ -70,6 +70,7 @@ class RecipeParser(IsModifiable):
     The next few prevalent kinds of statements are:
       - Conditional macros (i.e. if/endif)
       - for loops
+
     And even those only show up in a handful out of thousands of recipes. There are also no current examples of Jinja
     style comments.
 
@@ -87,6 +88,7 @@ class RecipeParser(IsModifiable):
     def _parse_yaml_recursive_sub(data: JsonType, modifier: Callable[[str], JsonType]) -> JsonType:
         """
         Recursive helper function used when we need to perform variable substitutions.
+
         :param data: Data to substitute values in
         :param modifier: Modifier function that performs some kind of substitution.
         :returns: Pythonic data corresponding to the line of YAML
@@ -106,6 +108,7 @@ class RecipeParser(IsModifiable):
     def _parse_yaml(s: str, parser: Optional[RecipeParser] = None) -> JsonType:
         """
         Parse a line (or multiple) of YAML into a Pythonic data structure
+
         :param s: String to parse
         :param parser: (Optional) If provided, this will substitute Jinja variables with values specified in in the
             recipe file. Since `_parse_yaml()` is critical to constructing recipe files, this function must remain
@@ -250,6 +253,7 @@ class RecipeParser(IsModifiable):
     def _render_jinja_vars(self, s: str) -> JsonType:
         """
         Helper function that replaces Jinja substitutions with their actual set values.
+
         :param s: String to be re-rendered
         :returns: The original value, augmented with Jinja substitutions. Types are re-rendered to account for multiline
             strings that may have been "normalized" prior to this call.
@@ -330,6 +334,7 @@ class RecipeParser(IsModifiable):
         # TODO Refactor and simplify ^
         """
         Constructs a RecipeParser instance.
+
         :param content: conda-build formatted recipe file, as a single text string.
         """
         super().__init__()
@@ -436,6 +441,7 @@ class RecipeParser(IsModifiable):
     def _canonical_sort_keys_comparison(n: Node, priority_tbl: dict[str, int]) -> int:
         """
         Given a look-up table defining "canonical" sort order, this function provides a way to compare Nodes.
+
         :param n: Node to evaluate
         :param priority_tbl: Table that provides a "canonical ordering" of keys
         :returns: An integer indicating sort-order priority
@@ -453,6 +459,7 @@ class RecipeParser(IsModifiable):
     def _str_tree_recurse(node: Node, depth: int, lines: list[str]) -> None:
         """
         Helper function that renders a parse tree as a text-based dependency tree. Useful for debugging.
+
         :param node: Node of interest
         :param depth: Current depth of the node
         :param lines: Accumulated list of lines to text to render
@@ -466,6 +473,7 @@ class RecipeParser(IsModifiable):
     def __str__(self) -> str:
         """
         Casts the parser into a string. Useful for debugging.
+
         :returns: String representation of the recipe file
         """
         s = "--------------------\n"
@@ -489,6 +497,7 @@ class RecipeParser(IsModifiable):
     def __eq__(self, other: object) -> bool:
         """
         Checks if two recipe representations match entirely
+
         :param other: Other recipe parser instance to check against.
         :returns: True if both recipes contain the same current state. False otherwise.
         """
@@ -508,6 +517,7 @@ class RecipeParser(IsModifiable):
     def has_unsupported_statements(self) -> bool:
         """
         Runs a series of checks against the original recipe file.
+
         :returns: True if the recipe has statements we do not currently support. False otherwise.
         """
         # TODO complete
@@ -519,6 +529,7 @@ class RecipeParser(IsModifiable):
         # TODO Refactor and simplify ^
         """
         Recursive helper function that traverses the parse tree to generate a file.
+
         :param node: Current node in the tree
         :param depth: Current depth of the recursion
         :param lines: Accumulated list of lines in the recipe file
@@ -619,6 +630,7 @@ class RecipeParser(IsModifiable):
     def render(self) -> str:
         """
         Takes the current state of the parse tree and returns the recipe file as a string.
+
         :returns: String representation of the recipe file
         """
         lines: list[str] = []
@@ -647,6 +659,7 @@ class RecipeParser(IsModifiable):
         # TODO Refactor and simplify ^
         """
         Recursive helper function that traverses the parse tree to generate a Pythonic data object.
+
         :param node: Current node in the tree
         :param replace_variables: If set to True, this replaces all variable substitutions with their set values.
         :param data: Accumulated data structure
@@ -705,6 +718,7 @@ class RecipeParser(IsModifiable):
         """
         Takes the underlying state of the parse tree and produces a Pythonic object/dictionary representation. Analogous
         to `json.load()`.
+
         :param replace_variables: (Optional) If set to True, this replaces all variable substitutions with their set
             values.
         :returns: Pythonic data object representation of the recipe.
@@ -727,6 +741,7 @@ class RecipeParser(IsModifiable):
     def list_value_paths(self) -> list[str]:
         """
         Provides a list of all known terminal paths. This can be used by the caller to perform search operations.
+
         :returns: List of all terminal paths in the parse tree.
         """
         lst: list[str] = []
@@ -752,6 +767,7 @@ class RecipeParser(IsModifiable):
         """
         Retrieves a value at a given path. If the value is not found, return a specified default value or throw.
         TODO Refactor: This function could leverage `render_to_object()` to simplify/de-dupe the logic.
+
         :param path: JSON patch (RFC 6902)-style path to a value.
         :param default: (Optional) If the value is not found, return this value instead.
         :param sub_vars: (Optional) If set to True and the value contains a Jinja template variable, the Jinja value
@@ -840,6 +856,7 @@ class RecipeParser(IsModifiable):
     def is_multi_output(self) -> bool:
         """
         Indicates if a recipe is a "multiple output" recipe.
+
         :returns: True if the recipe produces multiple outputs. False otherwise.
         """
         return self.contains_value("/outputs")
@@ -849,10 +866,12 @@ class RecipeParser(IsModifiable):
         Convenience function that returns the locations of all "outputs" in the `/outputs` directory AND the root/
         top-level of the recipe file. Combined with a call to `get_value()` with a default value and a for loop, this
         should easily allow the calling code to handle editing/examining configurations found in:
+
           - "Simple" (non-multi-output) recipe files
           - Multi-output recipe files
           - Recipes that have both top-level and multi-output sections. An example can be found here:
               https://github.com/AnacondaRecipes/curl-feedstock/blob/master/recipe/meta.yaml
+
         """
         paths: list[str] = ["/"]
 
@@ -868,6 +887,7 @@ class RecipeParser(IsModifiable):
         Convenience function meant to be paired with `get_package_paths()` to generate extended paths. This handles
         issues that arise when concatenating paths that do or do not include a trailing/leading `/` character. Most
         notably, the root path `/` inherently contains a trailing `/`.
+
         :param base_path: Base path, provided by `get_package_paths()`
         :param ext_path: Path to append to the end of the `base_path`
         :returns: A normalized path constructed by the two provided paths.
@@ -885,6 +905,7 @@ class RecipeParser(IsModifiable):
     def get_dependency_paths(self) -> list[str]:
         """
         Convenience function that returns a list of all dependency lines in a recipe.
+
         :returns: A list of all paths in a recipe file that point to dependencies.
         """
         paths: list[str] = []
@@ -920,6 +941,7 @@ class RecipeParser(IsModifiable):
     def list_variables(self) -> list[str]:
         """
         Returns variables found in the recipe, sorted by first appearance.
+
         :returns: List of variables found in the recipe.
         """
         return list(self._vars_tbl.keys())
@@ -927,6 +949,7 @@ class RecipeParser(IsModifiable):
     def contains_variable(self, var: str) -> bool:
         """
         Determines if a variable is set in this recipe.
+
         :param var: Variable to check for.
         :returns: True if a variable name is found in this recipe. False otherwise.
         """
@@ -936,6 +959,7 @@ class RecipeParser(IsModifiable):
         """
         Returns the value of a variable set in the recipe. If specified, a default value will be returned if the
         variable name is not found.
+
         :param var: Variable of interest check for.
         :param default: (Optional) If the value is not found, return this value instead.
         :raises KeyError: If the value is not found AND no default is specified
@@ -950,6 +974,7 @@ class RecipeParser(IsModifiable):
     def set_variable(self, var: str, value: JsonType) -> None:
         """
         Adds or changes an existing Jinja variable.
+
         :param var: Variable to modify
         :param value: Value to set
         """
@@ -959,6 +984,7 @@ class RecipeParser(IsModifiable):
     def del_variable(self, var: str) -> None:
         """
         Remove a variable from the project. If one is not found, no changes are made.
+
         :param var: Variable to delete
         """
         if not var in self._vars_tbl:
@@ -969,6 +995,7 @@ class RecipeParser(IsModifiable):
     def get_variable_references(self, var: str) -> list[str]:
         """
         Returns a list of paths that use particular variables.
+
         :param var: Variable of interest
         :returns: List of paths that use a variable, sorted by first appearance.
         """
@@ -1001,6 +1028,7 @@ class RecipeParser(IsModifiable):
     def list_selectors(self) -> list[str]:
         """
         Returns selectors found in the recipe, sorted by first appearance.
+
         :returns: List of selectors found in the recipe.
         """
         return list(self._selector_tbl.keys())
@@ -1008,6 +1036,7 @@ class RecipeParser(IsModifiable):
     def contains_selector(self, selector: str) -> bool:
         """
         Determines if a selector expression is present in this recipe.
+
         :param selector: Selector to check for.
         :returns: True if a selector is found in this recipe. False otherwise.
         """
@@ -1040,6 +1069,7 @@ class RecipeParser(IsModifiable):
     def contains_selector_at_path(self, path: str) -> bool:
         """
         Given a path, determine if a selector exists on that line.
+
         :param path: Target path
         :returns: True if the selector exists at that path. False otherwise.
         """
@@ -1052,6 +1082,7 @@ class RecipeParser(IsModifiable):
     def get_selector_at_path(self, path: str, default: str | SentinelType = _sentinel) -> str:
         """
         Given a path, return the selector that exists on that line.
+
         :param path: Target path
         :param default: (Optional) Default value to use if no selector is found.
         :raises KeyError: If a selector is not found on the provided path AND no default has been specified.
@@ -1076,6 +1107,7 @@ class RecipeParser(IsModifiable):
     def add_selector(self, path: str, selector: str, mode: SelectorConflictMode = SelectorConflictMode.REPLACE) -> None:
         """
         Given a path, add a selector (include the surrounding brackets) to the line denoted by path.
+
         :param path: Path to add a selector to
         :param selector: Selector statement to add
         :param mode: (Optional) Indicates how to handle a conflict if a selector already exists at this path.
@@ -1123,6 +1155,7 @@ class RecipeParser(IsModifiable):
         Given a path, remove a selector to the line denoted by path.
         - If a selector does not exist, nothing happens.
         - If a comment exists after the selector, keep it, discard the selector.
+
         :param path: Path to add a selector to
         :raises KeyError: If the path provided is not found
         :returns: If found, the selector removed (includes surrounding brackets). Otherwise, returns None
@@ -1165,6 +1198,7 @@ class RecipeParser(IsModifiable):
             - Lines containing only comments are currently not addressable by our pathing scheme, so they are omitted.
               For our current purposes (of upgrading the recipe format) this should be fine. Non-addressable values
               should be less likely to be removed from patch operations.
+
         :returns: Dictionary of paths where comments can be found mapped to the comment found.
         """
         comments_tbl: dict[str, str] = {}
@@ -1195,6 +1229,7 @@ class RecipeParser(IsModifiable):
         """
         Adds a comment to an existing path. If a comment exists, replaces the existing comment. If a selector exists,
         comment is appended after the selector component of the comment.
+
         :param path: Target path to add a comment to
         :param comment: Comment to add
         :raises KeyError: If the path provided is not found
@@ -1238,6 +1273,7 @@ class RecipeParser(IsModifiable):
         """
         Indicates if the target node to perform a patch operation against is a valid node. This is based on the RFC spec
         for JSON patching paths.
+
         :param node: Target node to validate
         :param node_idx: If the caller is evaluating that a list member, exists, this is the VIRTUAL index into that
             list. Otherwise this value should be less than 0.
@@ -1268,6 +1304,7 @@ class RecipeParser(IsModifiable):
         Finds the target node of an `add()` operation, along with some supporting information.
 
         This function does not modify the parse tree.
+
         :param path_stack: Path that describes a location in the tree, as a list, treated like a stack.
         :returns: A tuple containing: - The target node, if found (or the parent node if the target is a list member) -
             The index of a node if the target is a list member - An additional path that needs to be created, if
@@ -1297,6 +1334,7 @@ class RecipeParser(IsModifiable):
     def _patch_add(self, path_stack: StrStack, value: JsonType) -> bool:
         """
         Performs a JSON patch `add` operation.
+
         :param path_stack: Path that describes a location in the tree, as a list, treated like a stack.
         :param value: Value to add.
         :returns: True if the operation was successful. False otherwise.
@@ -1341,6 +1379,7 @@ class RecipeParser(IsModifiable):
     def _patch_remove(self, path_stack: StrStack) -> bool:
         """
         Performs a JSON patch `remove` operation.
+
         :param path_stack: Path that describes a location in the tree, as a list, treated like a stack.
         :returns: True if the operation was successful. False otherwise.
         """
@@ -1375,6 +1414,7 @@ class RecipeParser(IsModifiable):
     def _patch_replace(self, path_stack: StrStack, value: JsonType) -> bool:
         """
         Performs a JSON patch `replace` operation.
+
         :param path_stack: Path that describes a location in the tree, as a list, treated like a stack.
         :param value: Value to update with.
         :returns: True if the operation was successful. False otherwise.
@@ -1406,6 +1446,7 @@ class RecipeParser(IsModifiable):
     def _patch_move(self, path_stack: StrStack, value_from: str) -> bool:
         """
         Performs a JSON patch `add` operation.
+
         :param path_stack: Path that describes a location in the tree, as a list, treated like a stack.
         :param value_from: The "from" value in the JSON payload, i.e. the path the value originates from.
         :returns: True if the operation was successful. False otherwise.
@@ -1430,6 +1471,7 @@ class RecipeParser(IsModifiable):
     def _patch_copy(self, path_stack: StrStack, value_from: str) -> bool:
         """
         Performs a JSON patch `add` operation.
+
         :param path_stack: Path that describes a location in the tree, as a list, treated like a stack.
         :param value_from: The "from" value in the JSON payload, i.e. the path the value originates from.
         :returns: True if the operation was successful. False otherwise.
@@ -1449,6 +1491,7 @@ class RecipeParser(IsModifiable):
     def _patch_test(self, path: str, value: JsonType) -> bool:
         """
         Performs a JSON patch `test` operation.
+
         :param path: Path as a string. Useful for invoking public class members.
         :param value: Value to evaluate against.
         :returns: True if the target value is equal to the provided value. False otherwise.
@@ -1462,6 +1505,7 @@ class RecipeParser(IsModifiable):
     def _call_patch_op(self, op: str, path: str, patch: JsonPatchType) -> bool:
         """
         Switching function that calls the appropriate JSON patch operation.
+
         :param op: Patch operation, pre-sanitized.
         :param path: Path as a string.
         :param patch: The original JSON patch. This is passed to conditionally provide extra arguments, per op.
@@ -1538,7 +1582,7 @@ class RecipeParser(IsModifiable):
         """
         Given a regex string, return the list of paths that match the regex.
         NOTE: This function only searches against primitive values. All variables and selectors can be fully provided by
-              using their respective `list_*()` functions.
+        using their respective `list_*()` functions.
 
         :param regex: Regular expression to match with
         :param include_comment: (Optional) If set to `True`, this function will execute the regular expression on values
@@ -1564,6 +1608,7 @@ class RecipeParser(IsModifiable):
     ) -> bool:
         """
         Given a regex string and a JSON patch, apply the patch to any values that match the search expression.
+
         :param regex: Regular expression to match with
         :param patch: JSON patch to perform. NOTE: The `path` field will be replaced with the path(s) found, so it does
             not need to be provided.
@@ -1582,6 +1627,7 @@ class RecipeParser(IsModifiable):
         """
         Returns a git-like-styled diff of the current recipe state with original state of the recipe. Useful for
         debugging and providing users with some feedback.
+
         :returns: User-friendly displayable string that represents notifications made to the recipe.
         """
         if not self.is_modified():
@@ -1597,6 +1643,7 @@ class RecipeParser(IsModifiable):
         """
         Generates a SHA-256 hash of recipe's contents. This hash is the same as if the current recipe state was written
         to a file. NOTE: This may not be the same as the original recipe file as the parser will auto-format text.
+
         :returns: SHA-256 hash of the current recipe state.
         """
         # NOTE: If we need to hash larger recipes, we may want to consider a buffered

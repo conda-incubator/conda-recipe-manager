@@ -1,6 +1,5 @@
 """
-File:           test_selector_parser.py
-Description:    Unit tests for the SelectorParser class
+:Description: Unit tests for the SelectorParser class
 """
 
 from __future__ import annotations
@@ -28,6 +27,7 @@ from conda_recipe_manager.parser.selector_parser import SelectorParser
 def test_selector_parser_construction(selector: str, schema: SchemaVersion, expected: str) -> None:
     """
     Tests the construction of a selector parse tree by comparing the debug string representation of the tree.
+
     :param selector: Selector string to parse
     :param schema: Target schema version
     :param expected: Expected value to return
@@ -142,6 +142,7 @@ def test_selector_eq(selector0: SelectorParser, selector1: object, expected: boo
 def test_get_selected_platforms(selector: str, schema: SchemaVersion, expected: set[Platform]) -> None:
     """
     Tests the construction of a selector parse tree by comparing the debug string representation of the tree.
+
     :param selector: Selector string to parse
     :param schema: Target schema version
     :param expected: Expected value to return

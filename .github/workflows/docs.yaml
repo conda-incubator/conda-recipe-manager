@@ -33,17 +33,15 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
-      - uses: conda-incubator/setup-miniconda@v3
+      # Install the default CRM environment to ensure Sphinx has access to
+      # the package modules in Python's path.
+      - uses: ./.github/actions/setup-env
         with:
           python-version: "3.11"
-          activate-environment: docs-env
-      - name: Build Docs
-        shell: bash
-        run: |
+      - run: |
           source $CONDA/bin/activate
-          conda activate docs-env
-          conda install sphinx sphinx-rtd-theme
-          make -C docs html
+          conda activate conda-recipe-manager
+          make docs
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

@@ -1,6 +1,5 @@
 """
-File:           exceptions.py
-Description:    Provides exceptions thrown by the parser.
+:Description: Provides exceptions thrown by the parser.
 """
 
 from __future__ import annotations
@@ -19,6 +18,7 @@ class JsonPatchValidationException(Exception):
     def __init__(self, patch: JsonPatchType):
         """
         Constructs a JSON Patch Validation Exception
+
         :param op: Operation being encountered.
         """
         super().__init__(f"Invalid patch was attempted:\n{json.dumps(patch, indent=2)}")

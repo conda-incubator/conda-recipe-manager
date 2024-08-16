@@ -1,6 +1,5 @@
 """
-File:           test_recipe_parser.py
-Description:    Unit tests for the RecipeParser class
+:Description: Unit tests for the RecipeParser class
 """
 
 from __future__ import annotations
@@ -51,6 +50,7 @@ QUICK_FOX_SUB_CARROT_MINUS: Final[str] = "The quick brown tiger\njumped over the
 def test_construction(file: str, schema_version: SchemaVersion) -> None:
     """
     Tests the construction of a recipe parser instance with a simple, common example file.
+
     :param file: Recipe file to test with
     :param schema_version: Schema version to match
     """
@@ -79,6 +79,7 @@ def test_construction(file: str, schema_version: SchemaVersion) -> None:
 def test_str(file: str, out_file: str) -> None:
     """
     Tests rendering to a debug string
+
     :param file: Recipe file to test with
     :param out_file: Output string to match
     """
@@ -101,6 +102,7 @@ def test_str(file: str, out_file: str) -> None:
 def test_eq(file: str, other_file: str) -> None:
     """
     Tests equivalency function
+
     :param file: Recipe file to test with
     :param other_file: "Other" recipe file to check against
     """
@@ -294,6 +296,7 @@ def test_render_to_object(file: str, substitute: bool, expected: JsonType) -> No
     """
     Tests rendering a recipe to an object format.
     TODO: Does not work with V1 recipes; if/then selectors crash with KeyError
+
     :param file: File to load and test against
     :param substitute: True to run the function with JINJA substitutions on, False for off
     :param expected: Expected value to return
@@ -423,6 +426,7 @@ def test_render_to_object_multi_output() -> None:
 def test_list_value_paths(file: str, expected: list[str]) -> None:
     """
     Tests retrieval of all value paths
+
     :param file: Recipe file to test with
     :param expected: Expected result
     """
@@ -469,6 +473,7 @@ def test_list_value_paths(file: str, expected: list[str]) -> None:
 def test_contains_value(file: str, path: str, expected: bool) -> None:
     """
     Tests if a path exists in a parsed recipe file.
+
     :param file: File to work against
     :param path: Target input path
     :param expected: Expected result of the test
@@ -706,6 +711,7 @@ def test_contains_value(file: str, path: str, expected: bool) -> None:
 def test_get_value(file: str, path: str, sub_vars: bool, expected: JsonType) -> None:
     """
     Tests retrieval of a value from a parsed YAML example.
+
     :param file: File to work against
     :param path: Target input path
     :param sub_vars: True to substitute JINJA variables. False otherwise.
@@ -720,6 +726,7 @@ def test_get_value(file: str, path: str, sub_vars: bool, expected: JsonType) -> 
 def test_get_value_not_found(file: str) -> None:
     """
     Tests failure to retrieve a value from a parsed YAML example.
+
     :param file: File to work against
     """
     parser = load_recipe(file)
@@ -774,6 +781,7 @@ def test_get_value_not_found(file: str) -> None:
 def test_find_value(file: str, value: Primitives, expected: list[str]) -> None:
     """
     Tests finding a value from a parsed YAML example.
+
     :param file: File to work against
     :param value: Target value
     :param expected: Expected result of the test
@@ -797,6 +805,7 @@ def test_find_value(file: str, value: Primitives, expected: list[str]) -> None:
 def test_find_value_raises(file: str, value: Primitives) -> None:
     """
     Tests finding a value from a parsed YAML example that should throw a `ValueError`.
+
     :param file: File to work against
     :param value: Target value
     """
@@ -821,6 +830,7 @@ def test_find_value_raises(file: str, value: Primitives) -> None:
 def test_is_multi_output(file: str, expected: bool) -> None:
     """
     Validates if a recipe is in the multi-output format
+
     :param file: File to test against
     :param expected: Expected output
     """
@@ -841,6 +851,7 @@ def test_is_multi_output(file: str, expected: bool) -> None:
 def test_get_package_paths(file: str, expected: list[str]) -> None:
     """
     Validates fetching paths containing recipe dependencies
+
     :param file: File to test against
     :param expected: Expected output
     """
@@ -859,6 +870,8 @@ def test_get_package_paths(file: str, expected: list[str]) -> None:
 )
 def test_append_to_path(base: str, ext: str, expected: str) -> None:
     """
+    Validates expanding recipe structure paths.
+
     :param base: Base string path
     :param ext: Path to extend the base path with
     :param expected: Expected output
@@ -955,6 +968,7 @@ def test_append_to_path(base: str, ext: str, expected: str) -> None:
 def test_get_dependency_paths(file: str, expected: list[str]) -> None:
     """
     Validates fetching paths containing recipe dependencies
+
     :param file: File to test against
     :param expected: Expected output
     """
@@ -1002,6 +1016,7 @@ def test_get_dependency_paths(file: str, expected: list[str]) -> None:
 def test_list_variable(file: str, expected: list[str]) -> None:
     """
     Validates the list of variables found
+
     :param file: File to test against
     :param expected: Expected output
     """
@@ -1034,6 +1049,7 @@ def test_list_variable(file: str, expected: list[str]) -> None:
 def test_contains_variable(file: str, var: str, expected: bool) -> None:
     """
     Validates checking if a variable exists in a recipe
+
     :param file: File to test against
     :param var: Target JINJA variable
     :param expected: Expected output
@@ -1057,6 +1073,7 @@ def test_contains_variable(file: str, var: str, expected: bool) -> None:
 def test_get_variable(file: str, var: str, expected: JsonType) -> None:
     """
     Tests the value returned from fetching a variable
+
     :param file: File to test against
     :param var: Target JINJA variable
     :param expected: Expected output
@@ -1076,6 +1093,7 @@ def test_get_variable(file: str, var: str, expected: JsonType) -> None:
 def test_get_variable_dne(file: str) -> None:
     """
     Tests the value returned from fetching a variable when the variable does not exist
+
     :param file: File to test against
     """
     parser = load_recipe(file)
@@ -1097,6 +1115,7 @@ def test_get_variable_dne(file: str) -> None:
 def test_set_variable(file: str) -> None:
     """
     Tests setting and adding a variable. Ensures post-op state is accurate.
+
     :param file: File to test against
     """
     parser = load_recipe(file)
@@ -1126,6 +1145,7 @@ def test_set_variable(file: str) -> None:
 def test_del_variable(file: str) -> None:
     """
     Tests deleting a variable
+
     :param file: File to test against
     """
     parser = load_recipe(file)
@@ -1152,6 +1172,7 @@ def test_del_variable(file: str) -> None:
 def test_get_variable_references(file: str, var: str, expected: list[str]) -> None:
     """
     Tests generating a list of paths that use a variable
+
     :param file: File to test against
     :param var: Target JINJA variable
     :param expected: Expected output
@@ -1214,6 +1235,7 @@ def test_get_selector_paths() -> None:
 def test_contains_selector_at_path(file: str, path: str, expected: bool) -> None:
     """
     Tests checking if a selector exists on a given path
+
     :param file: File to run against
     :param path: Path to check
     :param expected: Expected value
@@ -1233,6 +1255,7 @@ def test_contains_selector_at_path(file: str, path: str, expected: bool) -> None
 def test_get_selector_at_path_exists(file: str, path: str, expected: str) -> None:
     """
     Tests cases where a selector exists on a path
+
     :param file: File to run against
     :param path: Path to check
     :param expected: Expected value
@@ -1374,6 +1397,9 @@ def test_remove_selector() -> None:
 def test_get_comments_table(file: str, expected: dict[str, str]) -> None:
     """
     Tests generating a table of comment locations
+
+    :param file: File to run against
+    :param expected: Expected value
     """
     parser = load_recipe(file)
     assert parser.get_comments_table() == expected
@@ -1418,6 +1444,7 @@ def test_add_comment(file: str, ops: list[tuple[str, str]], expected: str) -> No
 def test_add_comment_raises(file: str, path: str, comment: str, exception: BaseException) -> None:
     """
     Tests scenarios where `add_comment()` should raise an exception
+
     :param file: File to test against
     :param path: Path to add a comment
     :param comment: Comment to add
