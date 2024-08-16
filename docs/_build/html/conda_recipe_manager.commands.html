@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="English" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>conda_recipe_manager.commands package &mdash; Conda Recipe Manager 0.2.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=6c0f27eb"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="conda_recipe_manager.commands.utils package" href="conda_recipe_manager.commands.utils.html" />
+    <link rel="prev" title="conda_recipe_manager package" href="conda_recipe_manager.html" />
+</head>
+
+<body class="wy-body-for-nav">
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+
+
+          <a href="index.html" class="icon icon-home">
+            Conda Recipe Manager
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Getting Started/Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="developer_guide.html">Developer Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="conda_recipe_manager.html">conda_recipe_manager package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="conda_recipe_manager.parser.html">conda_recipe_manager.parser package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="conda_recipe_manager.licenses.html">conda_recipe_manager.licenses package</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">conda_recipe_manager.commands package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="conda_recipe_manager.commands.utils.html">conda_recipe_manager.commands.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-conda_recipe_manager.commands.conda_recipe_manager">conda_recipe_manager.commands.conda_recipe_manager module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-conda_recipe_manager.commands.convert">conda_recipe_manager.commands.convert module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#conda_recipe_manager.commands.convert.ConversionResult"><code class="docutils literal notranslate"><span class="pre">ConversionResult</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#conda_recipe_manager.commands.convert.ExitCode"><code class="docutils literal notranslate"><span class="pre">ExitCode</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#conda_recipe_manager.commands.convert.convert_file"><code class="docutils literal notranslate"><span class="pre">convert_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#conda_recipe_manager.commands.convert.process_recipe"><code class="docutils literal notranslate"><span class="pre">process_recipe()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-conda_recipe_manager.commands.rattler_bulk_build">conda_recipe_manager.commands.rattler_bulk_build module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#conda_recipe_manager.commands.rattler_bulk_build.BuildResult"><code class="docutils literal notranslate"><span class="pre">BuildResult</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#conda_recipe_manager.commands.rattler_bulk_build.build_recipe"><code class="docutils literal notranslate"><span class="pre">build_recipe()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#conda_recipe_manager.commands.rattler_bulk_build.create_debug_file"><code class="docutils literal notranslate"><span class="pre">create_debug_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-conda_recipe_manager.commands">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="conda_recipe_manager.commands.utils.html">conda_recipe_manager.commands.utils package</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Conda Recipe Manager</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="developer_guide.html">Developer Documentation</a></li>
+          <li class="breadcrumb-item"><a href="conda_recipe_manager.html">conda_recipe_manager package</a></li>
+      <li class="breadcrumb-item active">conda_recipe_manager.commands package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/conda_recipe_manager.commands.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+
+  <section id="conda-recipe-manager-commands-package">
+<h1>conda_recipe_manager.commands package<a class="headerlink" href="#conda-recipe-manager-commands-package" title="Link to this heading"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="conda_recipe_manager.commands.utils.html">conda_recipe_manager.commands.utils package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="conda_recipe_manager.commands.utils.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="conda_recipe_manager.commands.utils.html#module-conda_recipe_manager.commands.utils.print">conda_recipe_manager.commands.utils.print module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="conda_recipe_manager.commands.utils.html#conda_recipe_manager.commands.utils.print.print_err"><code class="docutils literal notranslate"><span class="pre">print_err()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="conda_recipe_manager.commands.utils.html#conda_recipe_manager.commands.utils.print.print_messages"><code class="docutils literal notranslate"><span class="pre">print_messages()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="conda_recipe_manager.commands.utils.html#conda_recipe_manager.commands.utils.print.print_out"><code class="docutils literal notranslate"><span class="pre">print_out()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="conda_recipe_manager.commands.utils.html#module-conda_recipe_manager.commands.utils">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-conda_recipe_manager.commands.conda_recipe_manager">
+<span id="conda-recipe-manager-commands-conda-recipe-manager-module"></span><h2>conda_recipe_manager.commands.conda_recipe_manager module<a class="headerlink" href="#module-conda_recipe_manager.commands.conda_recipe_manager" title="Link to this heading"></a></h2>
+<p>File:           conda_recipe_manager.py
+Description:    Base CLI for all <cite>conda-recipe-manager</cite> commands</p>
+</section>
+<section id="module-conda_recipe_manager.commands.convert">
+<span id="conda-recipe-manager-commands-convert-module"></span><h2>conda_recipe_manager.commands.convert module<a class="headerlink" href="#module-conda_recipe_manager.commands.convert" title="Link to this heading"></a></h2>
+<p>File:           convert.py
+Description:    CLI for converting an old recipe file to the &quot;new&quot; format.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="conda_recipe_manager.commands.convert.ConversionResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">conda_recipe_manager.commands.convert.</span></span><span class="sig-name descname"><span class="pre">ConversionResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#conda_recipe_manager.commands.convert.ExitCode" title="conda_recipe_manager.commands.convert.ExitCode"><span class="pre">ExitCode</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">content</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg_tbl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="conda_recipe_manager.parser.html#conda_recipe_manager.parser.types.MessageTable" title="conda_recipe_manager.parser.types.MessageTable"><span class="pre">MessageTable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">project_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conda_recipe_manager/commands/convert.html#ConversionResult"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.commands.convert.ConversionResult" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Struct that contains the results, metadata, errors, etc of converting a single recipe file.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="conda_recipe_manager.commands.convert.ConversionResult.code">
+<span class="sig-name descname"><span class="pre">code</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#conda_recipe_manager.commands.convert.ExitCode" title="conda_recipe_manager.commands.convert.ExitCode"><span class="pre">ExitCode</span></a></em><a class="headerlink" href="#conda_recipe_manager.commands.convert.ConversionResult.code" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="conda_recipe_manager.commands.convert.ConversionResult.content">
+<span class="sig-name descname"><span class="pre">content</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#conda_recipe_manager.commands.convert.ConversionResult.content" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="conda_recipe_manager.commands.convert.ConversionResult.file_path">
+<span class="sig-name descname"><span class="pre">file_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#conda_recipe_manager.commands.convert.ConversionResult.file_path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="conda_recipe_manager.commands.convert.ConversionResult.msg_tbl">
+<span class="sig-name descname"><span class="pre">msg_tbl</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="conda_recipe_manager.parser.html#conda_recipe_manager.parser.types.MessageTable" title="conda_recipe_manager.parser.types.MessageTable"><span class="pre">MessageTable</span></a></em><a class="headerlink" href="#conda_recipe_manager.commands.convert.ConversionResult.msg_tbl" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="conda_recipe_manager.commands.convert.ConversionResult.project_name">
+<span class="sig-name descname"><span class="pre">project_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#conda_recipe_manager.commands.convert.ConversionResult.project_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.commands.convert.ConversionResult.set_return_code">
+<span class="sig-name descname"><span class="pre">set_return_code</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/commands/convert.html#ConversionResult.set_return_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.commands.convert.ConversionResult.set_return_code" title="Link to this definition"></a></dt>
+<dd><p>Given the current state of the message table, set the appropriate return code. Does not overwrite the existing
+state unless errors or warnings were found.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="conda_recipe_manager.commands.convert.ExitCode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">conda_recipe_manager.commands.convert.</span></span><span class="sig-name descname"><span class="pre">ExitCode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=&lt;not</span> <span class="pre">given&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conda_recipe_manager/commands/convert.html#ExitCode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.commands.convert.ExitCode" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<p>Error codes to return upon script completion</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="conda_recipe_manager.commands.convert.ExitCode.CLICK_ERROR">
+<span class="sig-name descname"><span class="pre">CLICK_ERROR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#conda_recipe_manager.commands.convert.ExitCode.CLICK_ERROR" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="conda_recipe_manager.commands.convert.ExitCode.CLICK_USAGE">
+<span class="sig-name descname"><span class="pre">CLICK_USAGE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#conda_recipe_manager.commands.convert.ExitCode.CLICK_USAGE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="conda_recipe_manager.commands.convert.ExitCode.ILLEGAL_OPERATION">
+<span class="sig-name descname"><span class="pre">ILLEGAL_OPERATION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">106</span></em><a class="headerlink" href="#conda_recipe_manager.commands.convert.ExitCode.ILLEGAL_OPERATION" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="conda_recipe_manager.commands.convert.ExitCode.MISSED_SUCCESS_THRESHOLD">
+<span class="sig-name descname"><span class="pre">MISSED_SUCCESS_THRESHOLD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">42</span></em><a class="headerlink" href="#conda_recipe_manager.commands.convert.ExitCode.MISSED_SUCCESS_THRESHOLD" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="conda_recipe_manager.commands.convert.ExitCode.PARSE_EXCEPTION">
+<span class="sig-name descname"><span class="pre">PARSE_EXCEPTION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">102</span></em><a class="headerlink" href="#conda_recipe_manager.commands.convert.ExitCode.PARSE_EXCEPTION" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="conda_recipe_manager.commands.convert.ExitCode.PRE_PROCESS_EXCEPTION">
+<span class="sig-name descname"><span class="pre">PRE_PROCESS_EXCEPTION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">105</span></em><a class="headerlink" href="#conda_recipe_manager.commands.convert.ExitCode.PRE_PROCESS_EXCEPTION" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="conda_recipe_manager.commands.convert.ExitCode.READ_EXCEPTION">
+<span class="sig-name descname"><span class="pre">READ_EXCEPTION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">104</span></em><a class="headerlink" href="#conda_recipe_manager.commands.convert.ExitCode.READ_EXCEPTION" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="conda_recipe_manager.commands.convert.ExitCode.RENDER_ERRORS">
+<span class="sig-name descname"><span class="pre">RENDER_ERRORS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">101</span></em><a class="headerlink" href="#conda_recipe_manager.commands.convert.ExitCode.RENDER_ERRORS" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="conda_recipe_manager.commands.convert.ExitCode.RENDER_EXCEPTION">
+<span class="sig-name descname"><span class="pre">RENDER_EXCEPTION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">103</span></em><a class="headerlink" href="#conda_recipe_manager.commands.convert.ExitCode.RENDER_EXCEPTION" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="conda_recipe_manager.commands.convert.ExitCode.RENDER_WARNINGS">
+<span class="sig-name descname"><span class="pre">RENDER_WARNINGS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">100</span></em><a class="headerlink" href="#conda_recipe_manager.commands.convert.ExitCode.RENDER_WARNINGS" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="conda_recipe_manager.commands.convert.ExitCode.SUCCESS">
+<span class="sig-name descname"><span class="pre">SUCCESS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#conda_recipe_manager.commands.convert.ExitCode.SUCCESS" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="conda_recipe_manager.commands.convert.convert_file">
+<span class="sig-prename descclassname"><span class="pre">conda_recipe_manager.commands.convert.</span></span><span class="sig-name descname"><span class="pre">convert_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#conda_recipe_manager.commands.convert.ConversionResult" title="conda_recipe_manager.commands.convert.ConversionResult"><span class="pre">ConversionResult</span></a></span></span><a class="reference internal" href="_modules/conda_recipe_manager/commands/convert.html#convert_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.commands.convert.convert_file" title="Link to this definition"></a></dt>
+<dd><p>Converts a single recipe file to the V1 format, tracking results.
+:param file_path: Path to the recipe file to convert
+:param output: If specified, the file contents are written to this file path. Otherwise, the file is dumped to</p>
+<blockquote>
+<div><p>STDOUT IF <cite>print_output</cite> is set to <cite>True</cite>.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>print_output</strong> -- Prints the recipe to STDOUT/STDERR if the output file is not specified and this flag is <cite>True</cite>.</p></li>
+<li><p><strong>debug</strong> -- Enables debug mode output. Prints to STDERR.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A struct containing the results of the conversion process, including debugging metadata.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="conda_recipe_manager.commands.convert.process_recipe">
+<span class="sig-prename descclassname"><span class="pre">conda_recipe_manager.commands.convert.</span></span><span class="sig-name descname"><span class="pre">process_recipe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#conda_recipe_manager.commands.convert.ConversionResult" title="conda_recipe_manager.commands.convert.ConversionResult"><span class="pre">ConversionResult</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/commands/convert.html#process_recipe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.commands.convert.process_recipe" title="Link to this definition"></a></dt>
+<dd><p>Helper function that performs the conversion operation for parallelizable execution.
+:param file: Recipe file to convert
+:param path: Path argument provided by the user
+:param output: Output argument file provided by the user
+:param debug: Enables debug mode output. Prints to STDERR.
+:returns: Tuple containing the key/value pairing that tracks the result of the conversion operation</p>
+</dd></dl>
+
+</section>
+<section id="module-conda_recipe_manager.commands.rattler_bulk_build">
+<span id="conda-recipe-manager-commands-rattler-bulk-build-module"></span><h2>conda_recipe_manager.commands.rattler_bulk_build module<a class="headerlink" href="#module-conda_recipe_manager.commands.rattler_bulk_build" title="Link to this heading"></a></h2>
+<p>File:           rattler_bulk_build.py
+Description:    CLI tool that performs a bulk build operation for rattler-build.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="conda_recipe_manager.commands.rattler_bulk_build.BuildResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">conda_recipe_manager.commands.rattler_bulk_build.</span></span><span class="sig-name descname"><span class="pre">BuildResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conda_recipe_manager/commands/rattler_bulk_build.html#BuildResult"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.commands.rattler_bulk_build.BuildResult" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Struct that contains the results, metadata, errors, etc of building a single recipe file.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="conda_recipe_manager.commands.rattler_bulk_build.BuildResult.code">
+<span class="sig-name descname"><span class="pre">code</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#conda_recipe_manager.commands.rattler_bulk_build.BuildResult.code" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="conda_recipe_manager.commands.rattler_bulk_build.BuildResult.errors">
+<span class="sig-name descname"><span class="pre">errors</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#conda_recipe_manager.commands.rattler_bulk_build.BuildResult.errors" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="conda_recipe_manager.commands.rattler_bulk_build.build_recipe">
+<span class="sig-prename descclassname"><span class="pre">conda_recipe_manager.commands.rattler_bulk_build.</span></span><span class="sig-name descname"><span class="pre">build_recipe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#conda_recipe_manager.commands.rattler_bulk_build.BuildResult" title="conda_recipe_manager.commands.rattler_bulk_build.BuildResult"><span class="pre">BuildResult</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/commands/rattler_bulk_build.html#build_recipe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.commands.rattler_bulk_build.build_recipe" title="Link to this definition"></a></dt>
+<dd><p>Helper function that performs the build operation for parallelizable execution. Logs rattler-build failures to
+STDERR.
+:param file: Recipe file to build
+:param path: Path argument provided by the user
+:param args: List of arguments to provide whole-sale to rattler-build
+:returns: Tuple containing the key/value pairing that tracks the result of the build operation</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="conda_recipe_manager.commands.rattler_bulk_build.create_debug_file">
+<span class="sig-prename descclassname"><span class="pre">conda_recipe_manager.commands.rattler_bulk_build.</span></span><span class="sig-name descname"><span class="pre">create_debug_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">debug_log</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#conda_recipe_manager.commands.rattler_bulk_build.BuildResult" title="conda_recipe_manager.commands.rattler_bulk_build.BuildResult"><span class="pre">BuildResult</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_histogram</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/commands/rattler_bulk_build.html#create_debug_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.commands.rattler_bulk_build.create_debug_file" title="Link to this definition"></a></dt>
+<dd><p>Generates a debug file containing an organized dump of all the recipes that got a particular error message.
+:param debug_log: Log file to write to
+:param results:
+:param error_histogram:</p>
+</dd></dl>
+
+</section>
+<section id="module-conda_recipe_manager.commands">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-conda_recipe_manager.commands" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="conda_recipe_manager.html" class="btn btn-neutral float-left" title="conda_recipe_manager package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="conda_recipe_manager.commands.utils.html" class="btn btn-neutral float-right" title="conda_recipe_manager.commands.utils package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+</body>
+</html>

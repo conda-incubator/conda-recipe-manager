@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="English" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>conda_recipe_manager.parser package &mdash; Conda Recipe Manager 0.2.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=6c0f27eb"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="conda_recipe_manager.licenses package" href="conda_recipe_manager.licenses.html" />
+</head>
+
+<body class="wy-body-for-nav">
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+
+
+          <a href="index.html" class="icon icon-home">
+            Conda Recipe Manager
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Getting Started/Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="developer_guide.html">Developer Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="conda_recipe_manager.html">conda_recipe_manager package</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">conda_recipe_manager.parser package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-conda_recipe_manager.parser.enums">conda_recipe_manager.parser.enums module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#conda_recipe_manager.parser.enums.SchemaVersion"><code class="docutils literal notranslate"><span class="pre">SchemaVersion</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#conda_recipe_manager.parser.enums.SelectorConflictMode"><code class="docutils literal notranslate"><span class="pre">SelectorConflictMode</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-conda_recipe_manager.parser.exceptions">conda_recipe_manager.parser.exceptions module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#conda_recipe_manager.parser.exceptions.JsonPatchValidationException"><code class="docutils literal notranslate"><span class="pre">JsonPatchValidationException</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-conda_recipe_manager.parser.recipe_parser">conda_recipe_manager.parser.recipe_parser module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#conda_recipe_manager.parser.recipe_parser.RecipeParser"><code class="docutils literal notranslate"><span class="pre">RecipeParser</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-conda_recipe_manager.parser.recipe_parser_convert">conda_recipe_manager.parser.recipe_parser_convert module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#conda_recipe_manager.parser.recipe_parser_convert.RecipeParserConvert"><code class="docutils literal notranslate"><span class="pre">RecipeParserConvert</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-conda_recipe_manager.parser.types">conda_recipe_manager.parser.types module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#conda_recipe_manager.parser.types.MessageCategory"><code class="docutils literal notranslate"><span class="pre">MessageCategory</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#conda_recipe_manager.parser.types.MessageTable"><code class="docutils literal notranslate"><span class="pre">MessageTable</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#conda_recipe_manager.parser.types.MultilineVariant"><code class="docutils literal notranslate"><span class="pre">MultilineVariant</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-conda_recipe_manager.parser">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="conda_recipe_manager.licenses.html">conda_recipe_manager.licenses package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="conda_recipe_manager.commands.html">conda_recipe_manager.commands package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="conda_recipe_manager.commands.utils.html">conda_recipe_manager.commands.utils package</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Conda Recipe Manager</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="developer_guide.html">Developer Documentation</a></li>
+          <li class="breadcrumb-item"><a href="conda_recipe_manager.html">conda_recipe_manager package</a></li>
+      <li class="breadcrumb-item active">conda_recipe_manager.parser package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/conda_recipe_manager.parser.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+
+  <section id="conda-recipe-manager-parser-package">
+<h1>conda_recipe_manager.parser package<a class="headerlink" href="#conda-recipe-manager-parser-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-conda_recipe_manager.parser.enums">
+<span id="conda-recipe-manager-parser-enums-module"></span><h2>conda_recipe_manager.parser.enums module<a class="headerlink" href="#module-conda_recipe_manager.parser.enums" title="Link to this heading"></a></h2>
+<p>File:           enums.py
+Description:    Provides enumerated types used by the parser.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.enums.SchemaVersion">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">conda_recipe_manager.parser.enums.</span></span><span class="sig-name descname"><span class="pre">SchemaVersion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=&lt;not</span> <span class="pre">given&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conda_recipe_manager/parser/enums.html#SchemaVersion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.enums.SchemaVersion" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<p>Recipe <cite>schema_version</cite> enumeration. The Pre-CEP-13 &quot;schema&quot; is designated as &quot;Version 0&quot; and does not require
+a <cite>schema_version</cite> field in the recipe file.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.enums.SchemaVersion.V0">
+<span class="sig-name descname"><span class="pre">V0</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#conda_recipe_manager.parser.enums.SchemaVersion.V0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.enums.SchemaVersion.V1">
+<span class="sig-name descname"><span class="pre">V1</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#conda_recipe_manager.parser.enums.SchemaVersion.V1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.enums.SelectorConflictMode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">conda_recipe_manager.parser.enums.</span></span><span class="sig-name descname"><span class="pre">SelectorConflictMode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=&lt;not</span> <span class="pre">given&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conda_recipe_manager/parser/enums.html#SelectorConflictMode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.enums.SelectorConflictMode" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+<p>Defines how to handle the addition of a selector if one already exists.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.enums.SelectorConflictMode.AND">
+<span class="sig-name descname"><span class="pre">AND</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#conda_recipe_manager.parser.enums.SelectorConflictMode.AND" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.enums.SelectorConflictMode.OR">
+<span class="sig-name descname"><span class="pre">OR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#conda_recipe_manager.parser.enums.SelectorConflictMode.OR" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.enums.SelectorConflictMode.REPLACE">
+<span class="sig-name descname"><span class="pre">REPLACE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#conda_recipe_manager.parser.enums.SelectorConflictMode.REPLACE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-conda_recipe_manager.parser.exceptions">
+<span id="conda-recipe-manager-parser-exceptions-module"></span><h2>conda_recipe_manager.parser.exceptions module<a class="headerlink" href="#module-conda_recipe_manager.parser.exceptions" title="Link to this heading"></a></h2>
+<p>File:           exceptions.py
+Description:    Provides exceptions thrown by the parser.</p>
+<dl class="py exception">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.exceptions.JsonPatchValidationException">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">conda_recipe_manager.parser.exceptions.</span></span><span class="sig-name descname"><span class="pre">JsonPatchValidationException</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">patch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">JsonPatchType</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conda_recipe_manager/parser/exceptions.html#JsonPatchValidationException"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.exceptions.JsonPatchValidationException" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Indicates that the calling code has attempted to use an illegal JSON patch payload that does not meet the schema
+criteria.</p>
+</dd></dl>
+
+</section>
+<section id="module-conda_recipe_manager.parser.recipe_parser">
+<span id="conda-recipe-manager-parser-recipe-parser-module"></span><h2>conda_recipe_manager.parser.recipe_parser module<a class="headerlink" href="#module-conda_recipe_manager.parser.recipe_parser" title="Link to this heading"></a></h2>
+<p>File:           recipe_parser.py
+Description:    Provides a class that takes text from a Jinja-formatted recipe file and parses it. This allows for easy</p>
+<blockquote>
+<div><p>semantic understanding and manipulation of the file.</p>
+<p>Patching these files is done using a JSON-patch like syntax. This project closely conforms to the
+RFC 6902 spec, but deviates in some specific ways to handle the Jinja variables and comments found in
+conda recipe files.</p>
+<p>Links:
+- <a class="reference external" href="https://jsonpatch.com/">https://jsonpatch.com/</a>
+- <a class="reference external" href="https://datatracker.ietf.org/doc/html/rfc6902/">https://datatracker.ietf.org/doc/html/rfc6902/</a></p>
+</div></blockquote>
+<dl class="py class">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.recipe_parser.RecipeParser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">conda_recipe_manager.parser.recipe_parser.</span></span><span class="sig-name descname"><span class="pre">RecipeParser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conda_recipe_manager/parser/recipe_parser.html#RecipeParser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.recipe_parser.RecipeParser" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class that parses a recipe file string. Provides many useful mechanisms for changing values in the document.</p>
+<p>A quick search for Jinja statements in YAML files shows that the vast majority of statements are in the form of
+initializing variables with <cite>set</cite>.</p>
+<dl class="simple">
+<dt>The next few prevalent kinds of statements are:</dt><dd><ul class="simple">
+<li><p>Conditional macros (i.e. if/endif)</p></li>
+<li><p>for loops</p></li>
+</ul>
+</dd>
+</dl>
+<p>And even those only show up in a handful out of thousands of recipes. There are also no current examples of Jinja
+style comments.</p>
+<p>So that being said, the initial parser will not support these more edge-case recipes as they don't pass the 80/20
+rule.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.recipe_parser.RecipeParser.add_comment">
+<span class="sig-name descname"><span class="pre">add_comment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/recipe_parser.html#RecipeParser.add_comment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.recipe_parser.RecipeParser.add_comment" title="Link to this definition"></a></dt>
+<dd><p>Adds a comment to an existing path. If a comment exists, replaces the existing comment. If a selector exists,
+comment is appended after the selector component of the comment.
+:param path: Target path to add a comment to
+:param comment: Comment to add
+:raises KeyError: If the path provided is not found
+:raises ValueError: If the comment provided is a selector, the empty string, or consists of only whitespace</p>
+<blockquote>
+<div><p>characters</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.recipe_parser.RecipeParser.add_selector">
+<span class="sig-name descname"><span class="pre">add_selector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#conda_recipe_manager.parser.enums.SelectorConflictMode" title="conda_recipe_manager.parser.enums.SelectorConflictMode"><span class="pre">SelectorConflictMode</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">SelectorConflictMode.REPLACE</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/recipe_parser.html#RecipeParser.add_selector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.recipe_parser.RecipeParser.add_selector" title="Link to this definition"></a></dt>
+<dd><p>Given a path, add a selector (include the surrounding brackets) to the line denoted by path.
+:param path: Path to add a selector to
+:param selector: Selector statement to add
+:param mode: (Optional) Indicates how to handle a conflict if a selector already exists at this path.
+:raises KeyError: If the path provided is not found
+:raises ValueError: If the selector provided is malformed</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.recipe_parser.RecipeParser.append_to_path">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">append_to_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ext_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/recipe_parser.html#RecipeParser.append_to_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.recipe_parser.RecipeParser.append_to_path" title="Link to this definition"></a></dt>
+<dd><p>Convenience function meant to be paired with <cite>get_package_paths()</cite> to generate extended paths. This handles
+issues that arise when concatenating paths that do or do not include a trailing/leading <cite>/</cite> character. Most
+notably, the root path <cite>/</cite> inherently contains a trailing <cite>/</cite>.
+:param base_path: Base path, provided by <cite>get_package_paths()</cite>
+:param ext_path: Path to append to the end of the <cite>base_path</cite>
+:returns: A normalized path constructed by the two provided paths.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.recipe_parser.RecipeParser.contains_selector">
+<span class="sig-name descname"><span class="pre">contains_selector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/recipe_parser.html#RecipeParser.contains_selector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.recipe_parser.RecipeParser.contains_selector" title="Link to this definition"></a></dt>
+<dd><p>Determines if a selector expression is present in this recipe.
+:param selector: Selector to check for.
+:returns: True if a selector is found in this recipe. False otherwise.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.recipe_parser.RecipeParser.contains_selector_at_path">
+<span class="sig-name descname"><span class="pre">contains_selector_at_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/recipe_parser.html#RecipeParser.contains_selector_at_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.recipe_parser.RecipeParser.contains_selector_at_path" title="Link to this definition"></a></dt>
+<dd><p>Given a path, determine if a selector exists on that line.
+:param path: Target path
+:returns: True if the selector exists at that path. False otherwise.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.recipe_parser.RecipeParser.contains_value">
+<span class="sig-name descname"><span class="pre">contains_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/recipe_parser.html#RecipeParser.contains_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.recipe_parser.RecipeParser.contains_value" title="Link to this definition"></a></dt>
+<dd><p>Determines if a value (via a path) is contained in this recipe. This also allows the caller to determine if a
+path exists.
+:param path: JSON patch (RFC 6902)-style path to a value.
+:returns: True if the path exists. False otherwise.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.recipe_parser.RecipeParser.contains_variable">
+<span class="sig-name descname"><span class="pre">contains_variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/recipe_parser.html#RecipeParser.contains_variable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.recipe_parser.RecipeParser.contains_variable" title="Link to this definition"></a></dt>
+<dd><p>Determines if a variable is set in this recipe.
+:param var: Variable to check for.
+:returns: True if a variable name is found in this recipe. False otherwise.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.recipe_parser.RecipeParser.del_variable">
+<span class="sig-name descname"><span class="pre">del_variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/recipe_parser.html#RecipeParser.del_variable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.recipe_parser.RecipeParser.del_variable" title="Link to this definition"></a></dt>
+<dd><p>Remove a variable from the project. If one is not found, no changes are made.
+:param var: Variable to delete</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.recipe_parser.RecipeParser.diff">
+<span class="sig-name descname"><span class="pre">diff</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/recipe_parser.html#RecipeParser.diff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.recipe_parser.RecipeParser.diff" title="Link to this definition"></a></dt>
+<dd><p>Returns a git-like-styled diff of the current recipe state with original state of the recipe. Useful for
+debugging and providing users with some feedback.
+:returns: User-friendly displayable string that represents notifications made to the recipe.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.recipe_parser.RecipeParser.find_value">
+<span class="sig-name descname"><span class="pre">find_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/recipe_parser.html#RecipeParser.find_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.recipe_parser.RecipeParser.find_value" title="Link to this definition"></a></dt>
+<dd><p>Given a value, find all the paths that contain that value.</p>
+<p>NOTE: This only supports searching for &quot;primitive&quot; values, i.e. you cannot search for collections.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> -- Value to find in the recipe.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> -- If the value provided is not a primitive type.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of paths where the value can be found.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.recipe_parser.RecipeParser.get_comments_table">
+<span class="sig-name descname"><span class="pre">get_comments_table</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/recipe_parser.html#RecipeParser.get_comments_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.recipe_parser.RecipeParser.get_comments_table" title="Link to this definition"></a></dt>
+<dd><p>Returns a dictionary containing the location of every comment mapped to the value of the comment.
+.. note:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span> <span class="n">Selectors</span> <span class="n">are</span> <span class="ow">not</span> <span class="n">considered</span> <span class="n">to</span> <span class="n">be</span> <span class="n">comments</span><span class="o">.</span>
+<span class="o">-</span> <span class="n">Lines</span> <span class="n">containing</span> <span class="n">only</span> <span class="n">comments</span> <span class="n">are</span> <span class="n">currently</span> <span class="ow">not</span> <span class="n">addressable</span> <span class="n">by</span> <span class="n">our</span> <span class="n">pathing</span> <span class="n">scheme</span><span class="p">,</span> <span class="n">so</span> <span class="n">they</span> <span class="n">are</span> <span class="n">omitted</span><span class="o">.</span>
+  <span class="n">For</span> <span class="n">our</span> <span class="n">current</span> <span class="n">purposes</span> <span class="p">(</span><span class="n">of</span> <span class="n">upgrading</span> <span class="n">the</span> <span class="n">recipe</span> <span class="nb">format</span><span class="p">)</span> <span class="n">this</span> <span class="n">should</span> <span class="n">be</span> <span class="n">fine</span><span class="o">.</span> <span class="n">Non</span><span class="o">-</span><span class="n">addressable</span> <span class="n">values</span>
+  <span class="n">should</span> <span class="n">be</span> <span class="n">less</span> <span class="n">likely</span> <span class="n">to</span> <span class="n">be</span> <span class="n">removed</span> <span class="kn">from</span> <span class="nn">patch</span> <span class="n">operations</span><span class="o">.</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of paths where comments can be found.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.recipe_parser.RecipeParser.get_dependency_paths">
+<span class="sig-name descname"><span class="pre">get_dependency_paths</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/recipe_parser.html#RecipeParser.get_dependency_paths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.recipe_parser.RecipeParser.get_dependency_paths" title="Link to this definition"></a></dt>
+<dd><p>Convenience function that returns a list of all dependency lines in a recipe.
+:returns: A list of all paths in a recipe file that point to dependencies.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.recipe_parser.RecipeParser.get_package_paths">
+<span class="sig-name descname"><span class="pre">get_package_paths</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/recipe_parser.html#RecipeParser.get_package_paths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.recipe_parser.RecipeParser.get_package_paths" title="Link to this definition"></a></dt>
+<dd><p>Convenience function that returns the locations of all &quot;outputs&quot; in the <cite>/outputs</cite> directory AND the root/
+top-level of the recipe file. Combined with a call to <cite>get_value()</cite> with a default value and a for loop, this
+should easily allow the calling code to handle editing/examining configurations found in:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>&quot;Simple&quot; (non-multi-output) recipe files</p></li>
+<li><p>Multi-output recipe files</p></li>
+<li><dl class="simple">
+<dt>Recipes that have both top-level and multi-output sections. An example can be found here:</dt><dd><p><a class="reference external" href="https://github.com/AnacondaRecipes/curl-feedstock/blob/master/recipe/meta.yaml">https://github.com/AnacondaRecipes/curl-feedstock/blob/master/recipe/meta.yaml</a></p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.recipe_parser.RecipeParser.get_schema_version">
+<span class="sig-name descname"><span class="pre">get_schema_version</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#conda_recipe_manager.parser.enums.SchemaVersion" title="conda_recipe_manager.parser.enums.SchemaVersion"><span class="pre">SchemaVersion</span></a></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/recipe_parser.html#RecipeParser.get_schema_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.recipe_parser.RecipeParser.get_schema_version" title="Link to this definition"></a></dt>
+<dd><p>Returns which version of the schema this recipe uses. Useful for preventing illegal operations.
+:returns: Schema Version of the recipe file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.recipe_parser.RecipeParser.get_selector_at_path">
+<span class="sig-name descname"><span class="pre">get_selector_at_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">~conda_recipe_manager.types.SentinelType</span> <span class="pre">=</span> <span class="pre">&lt;conda_recipe_manager.types.SentinelType</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/recipe_parser.html#RecipeParser.get_selector_at_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.recipe_parser.RecipeParser.get_selector_at_path" title="Link to this definition"></a></dt>
+<dd><p>Given a path, return the selector that exists on that line.
+:param path: Target path
+:param default: (Optional) Default value to use if no selector is found.
+:raises KeyError: If a selector is not found on the provided path AND no default has been specified.
+:raises ValueError: If the default selector provided is malformed
+:returns: Selector on the path provided</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.recipe_parser.RecipeParser.get_selector_paths">
+<span class="sig-name descname"><span class="pre">get_selector_paths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/recipe_parser.html#RecipeParser.get_selector_paths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.recipe_parser.RecipeParser.get_selector_paths" title="Link to this definition"></a></dt>
+<dd><p>Given a selector (including the surrounding brackets), provide a list of paths in the parse tree that use that
+selector.</p>
+<p>Selector paths will be ordered by the line they appear on in the file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>selector</strong> -- Selector of interest.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of all known paths that use a particular selector</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.recipe_parser.RecipeParser.get_value">
+<span class="sig-name descname"><span class="pre">get_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default:</span> <span class="pre">dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">JsonType]</span> <span class="pre">|</span> <span class="pre">list[JsonType]</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">float</span> <span class="pre">|</span> <span class="pre">bool</span> <span class="pre">|</span> <span class="pre">None]</span> <span class="pre">|</span> <span class="pre">list[dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">JsonType]</span> <span class="pre">|</span> <span class="pre">list[JsonType]</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">float</span> <span class="pre">|</span> <span class="pre">bool</span> <span class="pre">|</span> <span class="pre">None]</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">float</span> <span class="pre">|</span> <span class="pre">bool</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">|</span> <span class="pre">~conda_recipe_manager.types.SentinelType</span> <span class="pre">=</span> <span class="pre">&lt;conda_recipe_manager.types.SentinelType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sub_vars:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">JsonType</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">JsonType</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/recipe_parser.html#RecipeParser.get_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.recipe_parser.RecipeParser.get_value" title="Link to this definition"></a></dt>
+<dd><p>Retrieves a value at a given path. If the value is not found, return a specified default value or throw.
+TODO Refactor: This function could leverage <cite>render_to_object()</cite> to simplify/de-dupe the logic.
+:param path: JSON patch (RFC 6902)-style path to a value.
+:param default: (Optional) If the value is not found, return this value instead.
+:param sub_vars: (Optional) If set to True and the value contains a Jinja template variable, the Jinja value</p>
+<blockquote>
+<div><p>will be &quot;rendered&quot;.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>KeyError</strong> -- If the value is not found AND no default is specified</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>If found, the value in the recipe at that path. Otherwise, the caller-specified default value.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.recipe_parser.RecipeParser.get_variable">
+<span class="sig-name descname"><span class="pre">get_variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default:</span> <span class="pre">dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">JsonType]</span> <span class="pre">|</span> <span class="pre">list[JsonType]</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">float</span> <span class="pre">|</span> <span class="pre">bool</span> <span class="pre">|</span> <span class="pre">None]</span> <span class="pre">|</span> <span class="pre">list[dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">JsonType]</span> <span class="pre">|</span> <span class="pre">list[JsonType]</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">float</span> <span class="pre">|</span> <span class="pre">bool</span> <span class="pre">|</span> <span class="pre">None]</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">float</span> <span class="pre">|</span> <span class="pre">bool</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">|</span> <span class="pre">~conda_recipe_manager.types.SentinelType</span> <span class="pre">=</span> <span class="pre">&lt;conda_recipe_manager.types.SentinelType</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">JsonType</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">JsonType</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/recipe_parser.html#RecipeParser.get_variable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.recipe_parser.RecipeParser.get_variable" title="Link to this definition"></a></dt>
+<dd><p>Returns the value of a variable set in the recipe. If specified, a default value will be returned if the
+variable name is not found.
+:param var: Variable of interest check for.
+:param default: (Optional) If the value is not found, return this value instead.
+:raises KeyError: If the value is not found AND no default is specified
+:returns: The value (or specified default value if not found) of the variable name provided.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.recipe_parser.RecipeParser.get_variable_references">
+<span class="sig-name descname"><span class="pre">get_variable_references</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/recipe_parser.html#RecipeParser.get_variable_references"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.recipe_parser.RecipeParser.get_variable_references" title="Link to this definition"></a></dt>
+<dd><p>Returns a list of paths that use particular variables.
+:param var: Variable of interest
+:returns: List of paths that use a variable, sorted by first appearance.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.recipe_parser.RecipeParser.has_unsupported_statements">
+<span class="sig-name descname"><span class="pre">has_unsupported_statements</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/recipe_parser.html#RecipeParser.has_unsupported_statements"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.recipe_parser.RecipeParser.has_unsupported_statements" title="Link to this definition"></a></dt>
+<dd><p>Runs a series of checks against the original recipe file.
+:returns: True if the recipe has statements we do not currently support. False otherwise.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.recipe_parser.RecipeParser.is_modified">
+<span class="sig-name descname"><span class="pre">is_modified</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/recipe_parser.html#RecipeParser.is_modified"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.recipe_parser.RecipeParser.is_modified" title="Link to this definition"></a></dt>
+<dd><p>Indicates if the recipe has been changed since construction.
+:returns: True if the recipe has changed. False otherwise.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.recipe_parser.RecipeParser.is_multi_output">
+<span class="sig-name descname"><span class="pre">is_multi_output</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/recipe_parser.html#RecipeParser.is_multi_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.recipe_parser.RecipeParser.is_multi_output" title="Link to this definition"></a></dt>
+<dd><p>Indicates if a recipe is a &quot;multiple output&quot; recipe.
+:returns: True if the recipe produces multiple outputs. False otherwise.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.recipe_parser.RecipeParser.list_selectors">
+<span class="sig-name descname"><span class="pre">list_selectors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/recipe_parser.html#RecipeParser.list_selectors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.recipe_parser.RecipeParser.list_selectors" title="Link to this definition"></a></dt>
+<dd><p>Returns selectors found in the recipe, sorted by first appearance.
+:returns: List of selectors found in the recipe.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.recipe_parser.RecipeParser.list_value_paths">
+<span class="sig-name descname"><span class="pre">list_value_paths</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/recipe_parser.html#RecipeParser.list_value_paths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.recipe_parser.RecipeParser.list_value_paths" title="Link to this definition"></a></dt>
+<dd><p>Provides a list of all known terminal paths. This can be used by the caller to perform search operations.
+:returns: List of all terminal paths in the parse tree.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.recipe_parser.RecipeParser.list_variables">
+<span class="sig-name descname"><span class="pre">list_variables</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/recipe_parser.html#RecipeParser.list_variables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.recipe_parser.RecipeParser.list_variables" title="Link to this definition"></a></dt>
+<dd><p>Returns variables found in the recipe, sorted by first appearance.
+:returns: List of variables found in the recipe.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.recipe_parser.RecipeParser.patch">
+<span class="sig-name descname"><span class="pre">patch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">patch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">JsonType</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">JsonType</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">JsonType</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">JsonType</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/recipe_parser.html#RecipeParser.patch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.recipe_parser.RecipeParser.patch" title="Link to this definition"></a></dt>
+<dd><p>Given a JSON-patch object, perform a patch operation.</p>
+<dl class="simple">
+<dt>Modifications from RFC 6902</dt><dd><ul class="simple">
+<li><p>We're using a Jinja-formatted YAML file, not JSON</p></li>
+<li><p>To modify comments, specify the <cite>path</cite> AND <cite>comment</cite></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>patch</strong> -- JSON-patch payload to operate with.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#conda_recipe_manager.parser.exceptions.JsonPatchValidationException" title="conda_recipe_manager.parser.exceptions.JsonPatchValidationException"><strong>JsonPatchValidationException</strong></a> -- If the JSON-patch payload does not conform to our schema/spec.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>If the calling code attempts to perform the <cite>test</cite> operation, this indicates the return value of the
+<cite>test</cite> request. In other words, if <cite>value</cite> matches the target variable, return True. False otherwise. For
+all other operations, this indicates if the operation was successful.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.recipe_parser.RecipeParser.remove_selector">
+<span class="sig-name descname"><span class="pre">remove_selector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/recipe_parser.html#RecipeParser.remove_selector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.recipe_parser.RecipeParser.remove_selector" title="Link to this definition"></a></dt>
+<dd><p>Given a path, remove a selector to the line denoted by path.
+- If a selector does not exist, nothing happens.
+- If a comment exists after the selector, keep it, discard the selector.
+:param path: Path to add a selector to
+:raises KeyError: If the path provided is not found
+:returns: If found, the selector removed (includes surrounding brackets). Otherwise, returns None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.recipe_parser.RecipeParser.render">
+<span class="sig-name descname"><span class="pre">render</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/recipe_parser.html#RecipeParser.render"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.recipe_parser.RecipeParser.render" title="Link to this definition"></a></dt>
+<dd><p>Takes the current state of the parse tree and returns the recipe file as a string.
+:returns: String representation of the recipe file</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.recipe_parser.RecipeParser.render_to_object">
+<span class="sig-name descname"><span class="pre">render_to_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">replace_variables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">JsonType</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">JsonType</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/recipe_parser.html#RecipeParser.render_to_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.recipe_parser.RecipeParser.render_to_object" title="Link to this definition"></a></dt>
+<dd><p>Takes the underlying state of the parse tree and produces a Pythonic object/dictionary representation. Analogous
+to <cite>json.load()</cite>.
+:param replace_variables: (Optional) If set to True, this replaces all variable substitutions with their set</p>
+<blockquote>
+<div><p>values.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Pythonic data object representation of the recipe.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.recipe_parser.RecipeParser.search">
+<span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">regex</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Pattern</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_comment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/recipe_parser.html#RecipeParser.search"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.recipe_parser.RecipeParser.search" title="Link to this definition"></a></dt>
+<dd><p>Given a regex string, return the list of paths that match the regex.
+NOTE: This function only searches against primitive values. All variables and selectors can be fully provided by</p>
+<blockquote>
+<div><p>using their respective <cite>list_*()</cite> functions.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>regex</strong> -- Regular expression to match with</p></li>
+<li><p><strong>include_comment</strong> -- (Optional) If set to <cite>True</cite>, this function will execute the regular expression on values
+WITH their comments provided. For example: <cite>42  # This is a comment</cite></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns a list of paths where the matched value was found.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.recipe_parser.RecipeParser.search_and_patch">
+<span class="sig-name descname"><span class="pre">search_and_patch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">regex</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Pattern</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">JsonType</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">JsonType</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">JsonType</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">JsonType</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_comment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/recipe_parser.html#RecipeParser.search_and_patch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.recipe_parser.RecipeParser.search_and_patch" title="Link to this definition"></a></dt>
+<dd><p>Given a regex string and a JSON patch, apply the patch to any values that match the search expression.
+:param regex: Regular expression to match with
+:param patch: JSON patch to perform. NOTE: The <cite>path</cite> field will be replaced with the path(s) found, so it does</p>
+<blockquote>
+<div><p>not need to be provided.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>include_comment</strong> -- (Optional) If set to <cite>True</cite>, this function will execute the regular expression on values
+WITH their comments provided. For example: <cite>42  # This is a comment</cite></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns a list of paths where the matched value was found.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.recipe_parser.RecipeParser.set_variable">
+<span class="sig-name descname"><span class="pre">set_variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">JsonType</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">JsonType</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/recipe_parser.html#RecipeParser.set_variable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.recipe_parser.RecipeParser.set_variable" title="Link to this definition"></a></dt>
+<dd><p>Adds or changes an existing Jinja variable.
+:param var: Variable to modify
+:param value: Value to set</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-conda_recipe_manager.parser.recipe_parser_convert">
+<span id="conda-recipe-manager-parser-recipe-parser-convert-module"></span><h2>conda_recipe_manager.parser.recipe_parser_convert module<a class="headerlink" href="#module-conda_recipe_manager.parser.recipe_parser_convert" title="Link to this heading"></a></h2>
+<p>File:           recipe_parser_convert.py
+Description:    Provides a subclass of RecipeParser that performs the conversion of a v0 recipe to the new v1 recipe</p>
+<blockquote>
+<div><p>format. This tooling was originally part of the base class, but was broken-out for easier/cleaner code
+maintenance.</p>
+</div></blockquote>
+<dl class="py class">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.recipe_parser_convert.RecipeParserConvert">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">conda_recipe_manager.parser.recipe_parser_convert.</span></span><span class="sig-name descname"><span class="pre">RecipeParserConvert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conda_recipe_manager/parser/recipe_parser_convert.html#RecipeParserConvert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.recipe_parser_convert.RecipeParserConvert" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#conda_recipe_manager.parser.recipe_parser.RecipeParser" title="conda_recipe_manager.parser.recipe_parser.RecipeParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecipeParser</span></code></a></p>
+<p>Extension of the base RecipeParser class to enables upgrading recipes from the old to V1 format.
+This was originally part of the RecipeParser class but was broken-out for easier maintenance.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.recipe_parser_convert.RecipeParserConvert.pre_process_recipe_text">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pre_process_recipe_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/recipe_parser_convert.html#RecipeParserConvert.pre_process_recipe_text"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.recipe_parser_convert.RecipeParserConvert.pre_process_recipe_text" title="Link to this definition"></a></dt>
+<dd><p>Takes the content of a recipe file and performs manipulations prior to the parsing stage. This should be
+used sparingly for solving conversion issues.</p>
+<dl class="simple">
+<dt>Ideally the pre-processor phase is only used when:</dt><dd><ul class="simple">
+<li><p>There is no other feasible way to solve a conversion issue.</p></li>
+<li><p>There is a proof-of-concept fix that would be easier to develop as a pre-processor step that could be
+refactored into the parser later.</p></li>
+<li><p>The number of recipes afflicted by an issue does not justify the engineering effort required to handle
+the issue in the parsing phase.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>content</strong> -- Recipe file contents to pre-process</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Pre-processed recipe file contents</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.recipe_parser_convert.RecipeParserConvert.render_to_v1_recipe_format">
+<span class="sig-name descname"><span class="pre">render_to_v1_recipe_format</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#conda_recipe_manager.parser.types.MessageTable" title="conda_recipe_manager.parser.types.MessageTable"><span class="pre">MessageTable</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/recipe_parser_convert.html#RecipeParserConvert.render_to_v1_recipe_format"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.recipe_parser_convert.RecipeParserConvert.render_to_v1_recipe_format" title="Link to this definition"></a></dt>
+<dd><p>Takes the current recipe representation and renders it to the V1 format WITHOUT modifying the current recipe
+state.</p>
+<dl class="simple">
+<dt>This &quot;new&quot; format is defined in the following CEPs:</dt><dd><ul class="simple">
+<li><p><a class="reference external" href="https://github.com/conda-incubator/ceps/blob/main/cep-13.md">https://github.com/conda-incubator/ceps/blob/main/cep-13.md</a></p></li>
+<li><p><a class="reference external" href="https://github.com/conda-incubator/ceps/blob/main/cep-14.md">https://github.com/conda-incubator/ceps/blob/main/cep-14.md</a></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Returns a tuple containing:
+- The converted recipe, as a string
+- A <cite>MessageTbl</cite> instance that contains error logging
+- Converted recipe file debug string. USE FOR DEBUGGING PURPOSES ONLY!</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-conda_recipe_manager.parser.types">
+<span id="conda-recipe-manager-parser-types-module"></span><h2>conda_recipe_manager.parser.types module<a class="headerlink" href="#module-conda_recipe_manager.parser.types" title="Link to this heading"></a></h2>
+<p>File:           types.py
+Description:    Provides public types, type aliases, constants, and small classes used by the parser.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.types.MessageCategory">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">conda_recipe_manager.parser.types.</span></span><span class="sig-name descname"><span class="pre">MessageCategory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=&lt;not</span> <span class="pre">given&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conda_recipe_manager/parser/types.html#MessageCategory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.types.MessageCategory" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">StrEnum</span></code></p>
+<p>Categories to classify <cite>RecipeParser</cite> messages into.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.types.MessageCategory.ERROR">
+<span class="sig-name descname"><span class="pre">ERROR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'error'</span></em><a class="headerlink" href="#conda_recipe_manager.parser.types.MessageCategory.ERROR" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.types.MessageCategory.EXCEPTION">
+<span class="sig-name descname"><span class="pre">EXCEPTION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'exception'</span></em><a class="headerlink" href="#conda_recipe_manager.parser.types.MessageCategory.EXCEPTION" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.types.MessageCategory.WARNING">
+<span class="sig-name descname"><span class="pre">WARNING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'warning'</span></em><a class="headerlink" href="#conda_recipe_manager.parser.types.MessageCategory.WARNING" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.types.MessageTable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">conda_recipe_manager.parser.types.</span></span><span class="sig-name descname"><span class="pre">MessageTable</span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/types.html#MessageTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.types.MessageTable" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Stores and tags messages that may come up during <cite>RecipeParser</cite> operations. It is up to the client program to
+handle the logging of these messages.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.types.MessageTable.add_message">
+<span class="sig-name descname"><span class="pre">add_message</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#conda_recipe_manager.parser.types.MessageCategory" title="conda_recipe_manager.parser.types.MessageCategory"><span class="pre">MessageCategory</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/types.html#MessageTable.add_message"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.types.MessageTable.add_message" title="Link to this definition"></a></dt>
+<dd><p>Adds a message to the table
+:param category:
+:param message:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.types.MessageTable.get_message_count">
+<span class="sig-name descname"><span class="pre">get_message_count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#conda_recipe_manager.parser.types.MessageCategory" title="conda_recipe_manager.parser.types.MessageCategory"><span class="pre">MessageCategory</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/types.html#MessageTable.get_message_count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.types.MessageTable.get_message_count" title="Link to this definition"></a></dt>
+<dd><p>Returns how many messages are stored in a given category
+:param category: Category to target
+:returns: A list containing all the messages stored in a category.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.types.MessageTable.get_messages">
+<span class="sig-name descname"><span class="pre">get_messages</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#conda_recipe_manager.parser.types.MessageCategory" title="conda_recipe_manager.parser.types.MessageCategory"><span class="pre">MessageCategory</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/types.html#MessageTable.get_messages"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.types.MessageTable.get_messages" title="Link to this definition"></a></dt>
+<dd><p>Returns all the messages stored in a given category
+:param category: Category to target
+:returns: A list containing all the messages stored in a category.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.types.MessageTable.get_totals_message">
+<span class="sig-name descname"><span class="pre">get_totals_message</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/conda_recipe_manager/parser/types.html#MessageTable.get_totals_message"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.types.MessageTable.get_totals_message" title="Link to this definition"></a></dt>
+<dd><p>Convenience function that returns a displayable count of the number of warnings and errors contained in the
+messaging object.
+:returns: A message indicating the number of errors and warnings that have been accumulated. If there are none,</p>
+<blockquote>
+<div><p>an empty string is returned.</p>
+</div></blockquote>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.types.MultilineVariant">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">conda_recipe_manager.parser.types.</span></span><span class="sig-name descname"><span class="pre">MultilineVariant</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=&lt;not</span> <span class="pre">given&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conda_recipe_manager/parser/types.html#MultilineVariant"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#conda_recipe_manager.parser.types.MultilineVariant" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">StrEnum</span></code></p>
+<p>Captures which &quot;multiline&quot; descriptor was used on a Node, if one was used at all.</p>
+<dl class="simple">
+<dt>See this guide for details on the YAML spec:</dt><dd><p><a class="reference external" href="https://stackoverflow.com/questions/3790454/how-do-i-break-a-string-in-yaml-over-multiple-lines/21699210">https://stackoverflow.com/questions/3790454/how-do-i-break-a-string-in-yaml-over-multiple-lines/21699210</a></p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.types.MultilineVariant.CARROT">
+<span class="sig-name descname"><span class="pre">CARROT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'&gt;'</span></em><a class="headerlink" href="#conda_recipe_manager.parser.types.MultilineVariant.CARROT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.types.MultilineVariant.CARROT_MINUS">
+<span class="sig-name descname"><span class="pre">CARROT_MINUS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'&gt;-'</span></em><a class="headerlink" href="#conda_recipe_manager.parser.types.MultilineVariant.CARROT_MINUS" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.types.MultilineVariant.CARROT_PLUS">
+<span class="sig-name descname"><span class="pre">CARROT_PLUS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'&gt;+'</span></em><a class="headerlink" href="#conda_recipe_manager.parser.types.MultilineVariant.CARROT_PLUS" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.types.MultilineVariant.NONE">
+<span class="sig-name descname"><span class="pre">NONE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#conda_recipe_manager.parser.types.MultilineVariant.NONE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.types.MultilineVariant.PIPE">
+<span class="sig-name descname"><span class="pre">PIPE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'|'</span></em><a class="headerlink" href="#conda_recipe_manager.parser.types.MultilineVariant.PIPE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.types.MultilineVariant.PIPE_MINUS">
+<span class="sig-name descname"><span class="pre">PIPE_MINUS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'|-'</span></em><a class="headerlink" href="#conda_recipe_manager.parser.types.MultilineVariant.PIPE_MINUS" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="conda_recipe_manager.parser.types.MultilineVariant.PIPE_PLUS">
+<span class="sig-name descname"><span class="pre">PIPE_PLUS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'|+'</span></em><a class="headerlink" href="#conda_recipe_manager.parser.types.MultilineVariant.PIPE_PLUS" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-conda_recipe_manager.parser">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-conda_recipe_manager.parser" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="conda_recipe_manager.licenses.html" class="btn btn-neutral float-left" title="conda_recipe_manager.licenses package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="English" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>conda_recipe_manager.commands.convert &mdash; Conda Recipe Manager 0.2.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=6c0f27eb"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+</head>
+
+<body class="wy-body-for-nav">
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+
+
+          <a href="../../../index.html" class="icon icon-home">
+            Conda Recipe Manager
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Getting Started/Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide.html">Developer Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Conda Recipe Manager</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">conda_recipe_manager.commands.convert</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+
+  <h1>Source code for conda_recipe_manager.commands.convert</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">File:           convert.py</span>
+<span class="sd">Description:    CLI for converting an old recipe file to the &quot;new&quot; format.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span> <span class="k">as</span> <span class="nn">mp</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">IntEnum</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Final</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">import</span> <span class="nn">click</span>
+
+<span class="kn">from</span> <span class="nn">conda_recipe_manager.commands.utils.print</span> <span class="kn">import</span> <span class="n">print_err</span><span class="p">,</span> <span class="n">print_messages</span><span class="p">,</span> <span class="n">print_out</span>
+<span class="kn">from</span> <span class="nn">conda_recipe_manager.parser.enums</span> <span class="kn">import</span> <span class="n">SchemaVersion</span>
+<span class="kn">from</span> <span class="nn">conda_recipe_manager.parser.recipe_parser_convert</span> <span class="kn">import</span> <span class="n">RecipeParserConvert</span>
+<span class="kn">from</span> <span class="nn">conda_recipe_manager.parser.types</span> <span class="kn">import</span> <span class="n">MessageCategory</span><span class="p">,</span> <span class="n">MessageTable</span>
+
+<span class="c1"># Pre-CEP-13 name of the recipe file</span>
+<span class="n">OLD_FORMAT_RECIPE_FILE_NAME</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;meta.yaml&quot;</span>
+<span class="c1"># Required file name for the recipe, specified in CEP-13</span>
+<span class="n">V1_FORMAT_RECIPE_FILE_NAME</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;recipe.yaml&quot;</span>
+<span class="c1"># When performing a bulk operation, overall &quot;success&quot; is indicated by the % of recipe files that were converted</span>
+<span class="c1"># &quot;successfully&quot;</span>
+<span class="n">DEFAULT_BULK_SUCCESS_PASS_THRESHOLD</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.80</span>
+
+
+<div class="viewcode-block" id="ExitCode">
+<a class="viewcode-back" href="../../../conda_recipe_manager.commands.html#conda_recipe_manager.commands.convert.ExitCode">[docs]</a>
+<span class="k">class</span> <span class="nc">ExitCode</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Error codes to return upon script completion</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">SUCCESS</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">CLICK_ERROR</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># Controlled by the `click` library</span>
+    <span class="n">CLICK_USAGE</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># Controlled by the `click` library</span>
+    <span class="c1"># In bulk operation mode, this indicates that the % success threshold was not met</span>
+    <span class="n">MISSED_SUCCESS_THRESHOLD</span> <span class="o">=</span> <span class="mi">42</span>
+    <span class="c1"># Errors are roughly ordered by increasing severity</span>
+    <span class="n">RENDER_WARNINGS</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="n">RENDER_ERRORS</span> <span class="o">=</span> <span class="mi">101</span>
+    <span class="n">PARSE_EXCEPTION</span> <span class="o">=</span> <span class="mi">102</span>
+    <span class="n">RENDER_EXCEPTION</span> <span class="o">=</span> <span class="mi">103</span>
+    <span class="n">READ_EXCEPTION</span> <span class="o">=</span> <span class="mi">104</span>
+    <span class="n">PRE_PROCESS_EXCEPTION</span> <span class="o">=</span> <span class="mi">105</span>
+    <span class="n">ILLEGAL_OPERATION</span> <span class="o">=</span> <span class="mi">106</span></div>
+
+
+
+<div class="viewcode-block" id="ConversionResult">
+<a class="viewcode-back" href="../../../conda_recipe_manager.commands.html#conda_recipe_manager.commands.convert.ConversionResult">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">ConversionResult</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Struct that contains the results, metadata, errors, etc of converting a single recipe file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">code</span><span class="p">:</span> <span class="n">ExitCode</span>
+    <span class="n">content</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span>
+    <span class="n">msg_tbl</span><span class="p">:</span> <span class="n">MessageTable</span>
+    <span class="c1"># Extracted out of the path for bulk operations</span>
+    <span class="n">project_name</span><span class="p">:</span> <span class="nb">str</span>
+
+<div class="viewcode-block" id="ConversionResult.set_return_code">
+<a class="viewcode-back" href="../../../conda_recipe_manager.commands.html#conda_recipe_manager.commands.convert.ConversionResult.set_return_code">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_return_code</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Given the current state of the message table, set the appropriate return code. Does not overwrite the existing</span>
+<span class="sd">        state unless errors or warnings were found.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">error_count</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">msg_tbl</span><span class="o">.</span><span class="n">get_message_count</span><span class="p">(</span><span class="n">MessageCategory</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+        <span class="n">warn_count</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">msg_tbl</span><span class="o">.</span><span class="n">get_message_count</span><span class="p">(</span><span class="n">MessageCategory</span><span class="o">.</span><span class="n">WARNING</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">error_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">code</span> <span class="o">=</span> <span class="n">ExitCode</span><span class="o">.</span><span class="n">RENDER_ERRORS</span>
+        <span class="k">elif</span> <span class="n">warn_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">code</span> <span class="o">=</span> <span class="n">ExitCode</span><span class="o">.</span><span class="n">RENDER_WARNINGS</span></div>
+</div>
+
+
+
+<span class="k">def</span> <span class="nf">_record_unrecoverable_failure</span><span class="p">(</span>
+    <span class="n">conversion_result</span><span class="p">:</span> <span class="n">ConversionResult</span><span class="p">,</span>
+    <span class="n">exit_code</span><span class="p">:</span> <span class="n">ExitCode</span><span class="p">,</span>
+    <span class="n">e_msg</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">print_output</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">e</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="ne">Exception</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ConversionResult</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convenience function that streamlines the process of recording an unrecoverable conversion failure.</span>
+<span class="sd">    :param conversion_result: Conversion result instance to use. This is passed into aggregate any other messages that</span>
+<span class="sd">        could be logged prior to reaching this fatal error case.</span>
+<span class="sd">    :param exit_code: Exit code to return for this error case.</span>
+<span class="sd">    :param e_msg: Error message to display, if enabled.</span>
+<span class="sd">    :param print_output: Prints the recipe to STDERR if the output file is not specified and this flag is `True`.</span>
+<span class="sd">    :param e: (Optional) Exception instance to capture, if applicable</span>
+<span class="sd">    :returns: The final `conversion_result` instance that should be returned immediately.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">print_err</span><span class="p">(</span><span class="n">e_msg</span><span class="p">,</span> <span class="n">print_enabled</span><span class="o">=</span><span class="n">print_output</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">e</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">print_err</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">print_enabled</span><span class="o">=</span><span class="n">print_output</span><span class="p">)</span>
+    <span class="n">conversion_result</span><span class="o">.</span><span class="n">msg_tbl</span><span class="o">.</span><span class="n">add_message</span><span class="p">(</span><span class="n">MessageCategory</span><span class="o">.</span><span class="n">EXCEPTION</span><span class="p">,</span> <span class="n">e_msg</span><span class="p">)</span>
+    <span class="n">conversion_result</span><span class="o">.</span><span class="n">code</span> <span class="o">=</span> <span class="n">exit_code</span>
+    <span class="k">return</span> <span class="n">conversion_result</span>
+
+
+<div class="viewcode-block" id="convert_file">
+<a class="viewcode-back" href="../../../conda_recipe_manager.commands.html#conda_recipe_manager.commands.convert.convert_file">[docs]</a>
+<span class="k">def</span> <span class="nf">convert_file</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">],</span> <span class="n">print_output</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ConversionResult</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a single recipe file to the V1 format, tracking results.</span>
+<span class="sd">    :param file_path: Path to the recipe file to convert</span>
+<span class="sd">    :param output: If specified, the file contents are written to this file path. Otherwise, the file is dumped to</span>
+<span class="sd">        STDOUT IF `print_output` is set to `True`.</span>
+<span class="sd">    :param print_output: Prints the recipe to STDOUT/STDERR if the output file is not specified and this flag is `True`.</span>
+<span class="sd">    :param debug: Enables debug mode output. Prints to STDERR.</span>
+<span class="sd">    :returns: A struct containing the results of the conversion process, including debugging metadata.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># pylint: disable=too-complex</span>
+    <span class="n">conversion_result</span> <span class="o">=</span> <span class="n">ConversionResult</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="n">ExitCode</span><span class="o">.</span><span class="n">SUCCESS</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">file_path</span><span class="o">=</span><span class="n">file_path</span><span class="p">,</span> <span class="n">msg_tbl</span><span class="o">=</span><span class="n">MessageTable</span><span class="p">(),</span> <span class="n">project_name</span><span class="o">=</span><span class="s2">&quot;&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">recipe_content</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">recipe_content</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pylint: disable=broad-exception-caught</span>
+        <span class="k">return</span> <span class="n">_record_unrecoverable_failure</span><span class="p">(</span>
+            <span class="n">conversion_result</span><span class="p">,</span> <span class="n">ExitCode</span><span class="o">.</span><span class="n">READ_EXCEPTION</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;EXCEPTION: Failed to read: </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">print_output</span><span class="p">,</span> <span class="n">e</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Pre-process the recipe</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">recipe_content</span> <span class="o">=</span> <span class="n">RecipeParserConvert</span><span class="o">.</span><span class="n">pre_process_recipe_text</span><span class="p">(</span><span class="n">recipe_content</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pylint: disable=broad-exception-caught</span>
+        <span class="k">return</span> <span class="n">_record_unrecoverable_failure</span><span class="p">(</span>
+            <span class="n">conversion_result</span><span class="p">,</span>
+            <span class="n">ExitCode</span><span class="o">.</span><span class="n">PRE_PROCESS_EXCEPTION</span><span class="p">,</span>
+            <span class="s2">&quot;EXCEPTION: An exception occurred while pre-processing the recipe file&quot;</span><span class="p">,</span>
+            <span class="n">print_output</span><span class="p">,</span>
+            <span class="n">e</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Parse the recipe</span>
+    <span class="n">parser</span><span class="p">:</span> <span class="n">RecipeParserConvert</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">parser</span> <span class="o">=</span> <span class="n">RecipeParserConvert</span><span class="p">(</span><span class="n">recipe_content</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pylint: disable=broad-exception-caught</span>
+        <span class="k">return</span> <span class="n">_record_unrecoverable_failure</span><span class="p">(</span>
+            <span class="n">conversion_result</span><span class="p">,</span>
+            <span class="n">ExitCode</span><span class="o">.</span><span class="n">PARSE_EXCEPTION</span><span class="p">,</span>
+            <span class="s2">&quot;EXCEPTION: An exception occurred while parsing the recipe file&quot;</span><span class="p">,</span>
+            <span class="n">print_output</span><span class="p">,</span>
+            <span class="n">e</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Only V0 recipes can be converted</span>
+    <span class="k">if</span> <span class="n">parser</span><span class="o">.</span><span class="n">get_schema_version</span><span class="p">()</span> <span class="o">!=</span> <span class="n">SchemaVersion</span><span class="o">.</span><span class="n">V0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_record_unrecoverable_failure</span><span class="p">(</span>
+            <span class="n">conversion_result</span><span class="p">,</span>
+            <span class="n">ExitCode</span><span class="o">.</span><span class="n">ILLEGAL_OPERATION</span><span class="p">,</span>
+            <span class="s2">&quot;ILLEGAL OPERATION: Only V0-formatted recipe files can be converted&quot;</span><span class="p">,</span>
+            <span class="n">print_output</span><span class="p">,</span>
+            <span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Print the initial parser, if requested</span>
+    <span class="n">print_err</span><span class="p">(</span><span class="s2">&quot;########## PARSED RECIPE FILE ##########&quot;</span><span class="p">,</span> <span class="n">print_enabled</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+    <span class="n">print_err</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">print_enabled</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+
+    <span class="c1"># Convert the recipe</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">conversion_result</span><span class="o">.</span><span class="n">content</span><span class="p">,</span> <span class="n">conversion_result</span><span class="o">.</span><span class="n">msg_tbl</span><span class="p">,</span> <span class="n">debug_new_parser</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">render_to_v1_recipe_format</span><span class="p">()</span>
+        <span class="c1"># Print the new parser, if requested</span>
+        <span class="n">print_err</span><span class="p">(</span><span class="s2">&quot;########## CONVERTED RECIPE FILE ##########&quot;</span><span class="p">,</span> <span class="n">print_enabled</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+        <span class="n">print_err</span><span class="p">(</span><span class="n">debug_new_parser</span><span class="p">,</span> <span class="n">print_enabled</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pylint: disable=broad-exception-caught</span>
+        <span class="k">return</span> <span class="n">_record_unrecoverable_failure</span><span class="p">(</span>
+            <span class="n">conversion_result</span><span class="p">,</span>
+            <span class="n">ExitCode</span><span class="o">.</span><span class="n">RENDER_EXCEPTION</span><span class="p">,</span>
+            <span class="s2">&quot;EXCEPTION: An exception occurred while converting to the new recipe file&quot;</span><span class="p">,</span>
+            <span class="n">print_output</span><span class="p">,</span>
+            <span class="n">e</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Print or dump the results to a file. Printing is disabled for bulk operations.</span>
+    <span class="n">print_out</span><span class="p">(</span><span class="n">conversion_result</span><span class="o">.</span><span class="n">content</span><span class="p">,</span> <span class="n">print_enabled</span><span class="o">=</span><span class="n">print_output</span> <span class="ow">and</span> <span class="p">(</span><span class="n">output</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">output</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">print_err</span><span class="p">(</span>
+            <span class="s2">&quot;WARNING: File is not called `recipe.yaml`.&quot;</span><span class="p">,</span>
+            <span class="n">print_enabled</span><span class="o">=</span><span class="n">print_output</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">output</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;recipe.yaml&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fptr</span><span class="p">:</span>
+            <span class="n">fptr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">conversion_result</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+
+    <span class="n">conversion_result</span><span class="o">.</span><span class="n">set_return_code</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">conversion_result</span></div>
+
+
+
+<div class="viewcode-block" id="process_recipe">
+<a class="viewcode-back" href="../../../conda_recipe_manager.commands.html#conda_recipe_manager.commands.convert.process_recipe">[docs]</a>
+<span class="k">def</span> <span class="nf">process_recipe</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">],</span> <span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ConversionResult</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Helper function that performs the conversion operation for parallelizable execution.</span>
+<span class="sd">    :param file: Recipe file to convert</span>
+<span class="sd">    :param path: Path argument provided by the user</span>
+<span class="sd">    :param output: Output argument file provided by the user</span>
+<span class="sd">    :param debug: Enables debug mode output. Prints to STDERR.</span>
+<span class="sd">    :returns: Tuple containing the key/value pairing that tracks the result of the conversion operation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">out_file</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">output</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">file</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="n">output</span>
+    <span class="n">conversion_result</span> <span class="o">=</span> <span class="n">convert_file</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">out_file</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">debug</span><span class="p">)</span>
+    <span class="n">conversion_result</span><span class="o">.</span><span class="n">project_name</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">path</span><span class="p">)),</span> <span class="n">conversion_result</span></div>
+
+
+
+<span class="k">def</span> <span class="nf">_get_files_list</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Takes the file path from the user and generates the list of target file(s). Exits the script when an unrecoverable</span>
+<span class="sd">    state has been reached.</span>
+<span class="sd">    :param path: Path provided from the user.</span>
+<span class="sd">    :returns: List of files to convert.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">files</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># Establish which mode of operation we are in, based on the path passed-in</span>
+    <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">file_path</span> <span class="ow">in</span> <span class="n">path</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="n">OLD_FORMAT_RECIPE_FILE_NAME</span><span class="p">):</span>
+            <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">files</span><span class="p">:</span>
+            <span class="n">print_err</span><span class="p">(</span><span class="s2">&quot;Could not find any recipe files in this directory.&quot;</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">ExitCode</span><span class="o">.</span><span class="n">CLICK_USAGE</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">print_err</span><span class="p">(</span><span class="s2">&quot;Could not identify path as file or directory.&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">ExitCode</span><span class="o">.</span><span class="n">CLICK_USAGE</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">files</span>
+
+
+<span class="k">def</span> <span class="nf">_collect_issue_stats</span><span class="p">(</span><span class="n">project_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">issues</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">hist</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">recipes_lst</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given a list of issues (errors, warnings, etc), collect that data into some useful metrics.</span>
+<span class="sd">    :param project_name: Project/recipe identifier</span>
+<span class="sd">    :param issues: List of issues to read</span>
+<span class="sd">    :param hist: Histogram to dump occurrence data into</span>
+<span class="sd">    :param recipes_lst: List to append to containing recipes that had this type of issue</span>
+<span class="sd">    :returns: How many issues were found in this recipe file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">issue</span> <span class="ow">in</span> <span class="n">issues</span><span class="p">:</span>
+        <span class="n">hist</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">issue</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">hist</span><span class="p">[</span><span class="n">issue</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">issues</span><span class="p">:</span>
+        <span class="n">recipes_lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">project_name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">issues</span><span class="p">)</span>
+
+
+<span class="nd">@click</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="n">short_help</span><span class="o">=</span><span class="s2">&quot;Converts a `meta.yaml` formatted-recipe file to the new `recipe.yaml` format.&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">&quot;path&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">path_type</span><span class="o">=</span><span class="n">Path</span><span class="p">))</span>  <span class="c1"># type: ignore[misc]</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;--output&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;-o&quot;</span><span class="p">,</span>
+    <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="p">(</span>
+        <span class="s2">&quot;File to dump a new recipe to.&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot; For bulk operations, specify the file basename only (i.e. </span><span class="si">{</span><span class="n">V1_FORMAT_RECIPE_FILE_NAME</span><span class="si">}</span><span class="s2">).&quot;</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;--min-success-rate&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;-m&quot;</span><span class="p">,</span>
+    <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">FloatRange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">default</span><span class="o">=</span><span class="n">DEFAULT_BULK_SUCCESS_PASS_THRESHOLD</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Sets a minimum passing success rate for bulk operations.&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;--truncate&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;-t&quot;</span><span class="p">,</span>
+    <span class="n">is_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Truncates logging. On large tests in a GitHub CI environment, this can eliminate log buffering issues.&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;--debug&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;-d&quot;</span><span class="p">,</span>
+    <span class="n">is_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Debug mode, prints debugging information to STDERR.&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="k">def</span> <span class="nf">convert</span><span class="p">(</span>
+    <span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">],</span> <span class="n">min_success_rate</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">truncate</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-outer-name</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Recipe conversion CLI utility. By default, recipes print to STDOUT. Messages always print to STDERR. Takes 1 file or</span>
+<span class="sd">    a directory containing multiple feedstock repositories. If the `PATH` provided is a directory, the script will</span>
+<span class="sd">    attempt a bulk operation conversion across all subdirectories.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">start_time</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">results</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ConversionResult</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">files</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="n">_get_files_list</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="c1">## Single-file case ##</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">result</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="n">ConversionResult</span><span class="p">]</span> <span class="o">=</span> <span class="n">convert_file</span><span class="p">(</span><span class="n">files</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">output</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">debug</span><span class="p">)</span>
+        <span class="n">print_messages</span><span class="p">(</span><span class="n">MessageCategory</span><span class="o">.</span><span class="n">WARNING</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">msg_tbl</span><span class="p">)</span>
+        <span class="n">print_messages</span><span class="p">(</span><span class="n">MessageCategory</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">msg_tbl</span><span class="p">)</span>
+        <span class="n">print_err</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">msg_tbl</span><span class="o">.</span><span class="n">get_totals_message</span><span class="p">())</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">code</span><span class="p">)</span>
+
+    <span class="c1">## Bulk operation ##</span>
+
+    <span class="c1"># Process recipes in parallel</span>
+    <span class="n">thread_pool_size</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
+    <span class="k">with</span> <span class="n">mp</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">thread_pool_size</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="n">process_recipe</span><span class="p">,</span> <span class="p">[(</span><span class="n">file</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">debug</span><span class="p">)</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">])</span>  <span class="c1"># type: ignore[misc]</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Tracking failures from bulk operation</span>
+    <span class="n">recipes_with_except</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">recipes_with_errors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">recipes_with_warnings</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">except_histogram</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">errors_histogram</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">warnings_histogram</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1"># Stats from bulk operation</span>
+    <span class="n">total_time</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
+    <span class="n">total_recipes</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
+    <span class="c1"># Total count of errors/warnings</span>
+    <span class="n">total_errors</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">total_warnings</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="c1"># Count of recipes with at least 1 exception/error/warning</span>
+    <span class="n">num_recipe_success</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">project_name</span><span class="p">,</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">code</span> <span class="ow">in</span> <span class="p">{</span><span class="n">ExitCode</span><span class="o">.</span><span class="n">PARSE_EXCEPTION</span><span class="p">,</span> <span class="n">ExitCode</span><span class="o">.</span><span class="n">READ_EXCEPTION</span><span class="p">,</span> <span class="n">ExitCode</span><span class="o">.</span><span class="n">RENDER_EXCEPTION</span><span class="p">}:</span>
+            <span class="n">recipes_with_except</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">project_name</span><span class="p">)</span>
+            <span class="n">exceptions</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">msg_tbl</span><span class="o">.</span><span class="n">get_messages</span><span class="p">(</span><span class="n">MessageCategory</span><span class="o">.</span><span class="n">EXCEPTION</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">exception</span> <span class="ow">in</span> <span class="n">exceptions</span><span class="p">:</span>
+                <span class="n">except_histogram</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">exception</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">except_histogram</span><span class="p">[</span><span class="n">exception</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">errors</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">msg_tbl</span><span class="o">.</span><span class="n">get_messages</span><span class="p">(</span><span class="n">MessageCategory</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+        <span class="n">total_errors</span> <span class="o">+=</span> <span class="n">_collect_issue_stats</span><span class="p">(</span><span class="n">project_name</span><span class="p">,</span> <span class="n">errors</span><span class="p">,</span> <span class="n">errors_histogram</span><span class="p">,</span> <span class="n">recipes_with_errors</span><span class="p">)</span>
+        <span class="n">total_warnings</span> <span class="o">+=</span> <span class="n">_collect_issue_stats</span><span class="p">(</span>
+            <span class="n">project_name</span><span class="p">,</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">msg_tbl</span><span class="o">.</span><span class="n">get_messages</span><span class="p">(</span><span class="n">MessageCategory</span><span class="o">.</span><span class="n">WARNING</span><span class="p">),</span>
+            <span class="n">warnings_histogram</span><span class="p">,</span>
+            <span class="n">recipes_with_warnings</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1">## Success ##</span>
+        <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">code</span> <span class="ow">in</span> <span class="p">{</span><span class="n">ExitCode</span><span class="o">.</span><span class="n">SUCCESS</span><span class="p">,</span> <span class="n">ExitCode</span><span class="o">.</span><span class="n">RENDER_WARNINGS</span><span class="p">}</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">errors</span><span class="p">:</span>
+            <span class="n">num_recipe_success</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># Self-check metric. This should be the same as the other calculated success metric.</span>
+    <span class="n">num_theoretical_recipe_success</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">total_recipes</span> <span class="o">-</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">recipes_with_except</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">recipes_with_errors</span><span class="p">))</span>
+    <span class="n">percent_recipe_success</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">num_recipe_success</span> <span class="o">/</span> <span class="n">total_recipes</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">stats</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;total_recipe_files&quot;</span><span class="p">:</span> <span class="n">total_recipes</span><span class="p">,</span>
+        <span class="s2">&quot;total_recipes_processed&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">),</span>
+        <span class="s2">&quot;total_errors&quot;</span><span class="p">:</span> <span class="n">total_errors</span><span class="p">,</span>
+        <span class="s2">&quot;total_warnings&quot;</span><span class="p">:</span> <span class="n">total_warnings</span><span class="p">,</span>
+        <span class="s2">&quot;num_recipe_exceptions&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">recipes_with_except</span><span class="p">),</span>
+        <span class="s2">&quot;num_recipe_errors&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">recipes_with_errors</span><span class="p">),</span>
+        <span class="s2">&quot;num_recipe_warnings&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">recipes_with_warnings</span><span class="p">),</span>
+        <span class="s2">&quot;num_recipe_success&quot;</span><span class="p">:</span> <span class="n">num_recipe_success</span><span class="p">,</span>
+        <span class="s2">&quot;num_theoretical_recipe_success&quot;</span><span class="p">:</span> <span class="n">num_theoretical_recipe_success</span><span class="p">,</span>
+        <span class="s2">&quot;percent_recipe_exceptions&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">recipes_with_except</span><span class="p">)</span> <span class="o">/</span> <span class="n">total_recipes</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+        <span class="s2">&quot;percent_recipe_errors&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">recipes_with_errors</span><span class="p">)</span> <span class="o">/</span> <span class="n">total_recipes</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+        <span class="s2">&quot;percent_recipe_warnings&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">recipes_with_warnings</span><span class="p">)</span> <span class="o">/</span> <span class="n">total_recipes</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+        <span class="s2">&quot;percent_recipe_success&quot;</span><span class="p">:</span> <span class="n">percent_recipe_success</span><span class="p">,</span>
+        <span class="s2">&quot;percent_recipe_theoretical_success&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">num_theoretical_recipe_success</span> <span class="o">/</span> <span class="n">total_recipes</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+        <span class="s2">&quot;timings&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;total_exec_time&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">total_time</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="s2">&quot;avg_recipe_time&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">total_time</span> <span class="o">/</span> <span class="n">total_recipes</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="s2">&quot;thread_pool_size&quot;</span><span class="p">:</span> <span class="n">thread_pool_size</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">}</span>
+
+    <span class="n">final_output</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;info&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;command_name&quot;</span><span class="p">:</span> <span class="s2">&quot;convert&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;directory&quot;</span><span class="p">:</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;exception_histogram&quot;</span><span class="p">:</span> <span class="n">except_histogram</span><span class="p">,</span>
+        <span class="s2">&quot;error_histogram&quot;</span><span class="p">:</span> <span class="n">errors_histogram</span><span class="p">,</span>
+        <span class="s2">&quot;warnings_histogram&quot;</span><span class="p">:</span> <span class="n">warnings_histogram</span><span class="p">,</span>
+        <span class="s2">&quot;statistics&quot;</span><span class="p">:</span> <span class="n">stats</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">truncate</span><span class="p">:</span>
+        <span class="n">final_output</span><span class="p">[</span><span class="s2">&quot;recipes_with_exceptions&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">recipes_with_except</span>
+        <span class="n">final_output</span><span class="p">[</span><span class="s2">&quot;recipes_with_errors&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">recipes_with_errors</span>
+        <span class="n">final_output</span><span class="p">[</span><span class="s2">&quot;recipes_with_warnings&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">recipes_with_warnings</span>
+
+    <span class="n">print_out</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">final_output</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">ExitCode</span><span class="o">.</span><span class="n">SUCCESS</span> <span class="k">if</span> <span class="n">percent_recipe_success</span> <span class="o">&gt;=</span> <span class="n">min_success_rate</span> <span class="k">else</span> <span class="n">ExitCode</span><span class="o">.</span><span class="n">MISSED_SUCCESS_THRESHOLD</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+</body>
+</html>
