@@ -76,6 +76,7 @@ class _SelectorNode:
     def is_logical_op(self) -> bool:
         """
         Indicates if the node represents an operation
+
         :returns: True if the node represents an operation
         """
         return self.value in ALL_LOGIC_OPS

@@ -19,6 +19,7 @@ class IsModifiable:
     def is_modified(self) -> bool:
         """
         Indicates if the object has been modified.
+
         :returns: True if the object instance has been modified. False otherwise.
         """
         return self._is_modified

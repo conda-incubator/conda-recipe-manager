@@ -22,6 +22,7 @@ class SelectorInfo(NamedTuple):
     def __str__(self) -> str:
         """
         Generates the string form of a `SelectorInfo` object. Useful for debugging.
+
         :returns: String representation of a `SelectorInfo` instance
         """
         path_str = stack_path_to_str(self.path.copy())
