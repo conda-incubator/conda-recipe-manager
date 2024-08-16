@@ -168,6 +168,7 @@ class SelectorParser(IsModifiable):
     def __eq__(self, other: object) -> bool:
         """
         Checks equivalency between two SelectorParsers.
+
         :returns: True if both selectors are equivalent. False otherwise.
         """
         if not isinstance(other, SelectorParser):

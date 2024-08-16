@@ -52,6 +52,7 @@ def test_selector_parser_construction(selector: str, schema: SchemaVersion, expe
 def test_selector_eq(selector0: SelectorParser, selector1: object, expected: bool) -> None:
     """
     Tests checking for selector equivalency.
+
     :param selector0: LHS selector
     :param selector1: RHS selector
     :param expected: Expected value to return

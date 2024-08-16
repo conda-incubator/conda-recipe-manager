@@ -1,6 +1,5 @@
 """
-File:           recipe_parser_deps.py
-Description:    Provides a subclass of RecipeParser that adds advanced dependency management tools.
+:Description:    Provides a subclass of RecipeParser that adds advanced dependency management tools.
 """
 
 from __future__ import annotations
@@ -41,6 +40,7 @@ class RecipeParserDeps(RecipeParser):
     def _fetch_optional_selector(self, path: str) -> Optional[SelectorParser]:
         """
         Given a recipe path, optionally return a SelectorParser object.
+
         :param path: Path to the target value
         :returns: A parsed selector, if one is available. Otherwise, None.
         """
@@ -52,6 +52,7 @@ class RecipeParserDeps(RecipeParser):
     def get_package_names_to_path(self) -> dict[str, str]:
         """
         Get a map containing all the packages (artifacts) named in a recipe to their paths in the recipe structure.
+
         :raises KeyError: If a package in the recipe does not have a name
         :raises ValueError: If a recipe contains a package with duplicate names
         :returns: Mapping of package name to path where that package is found
@@ -81,6 +82,7 @@ class RecipeParserDeps(RecipeParser):
     def get_all_dependencies(self) -> DependencyMap:
         """
         Get a parsed representation of all the dependencies found in the recipe.
+
         :raises KeyError: If a package in the recipe does not have a name
         :raises ValueError: If a recipe contains a package with duplicate names
         :returns: A structured representation of the dependencies.

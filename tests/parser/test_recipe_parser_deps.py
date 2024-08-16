@@ -1,6 +1,5 @@
 """
-File:           test_recipe_parser_deps.py
-Description:    Tests for the advanced dependency tools for the Recipe Parser.
+:Description:    Tests for the advanced dependency tools for the Recipe Parser.
 """
 
 from __future__ import annotations
@@ -42,6 +41,8 @@ from tests.file_loading import load_recipe_deps
 )
 def test_get_package_names_to_path(file: str, expected: dict[str, str]) -> None:
     """
+    Validates generating a map of package names to locations in the recipe file
+
     :param file: File to test against
     :param expected: Expected output
     """
@@ -265,6 +266,8 @@ def test_get_package_names_to_path(file: str, expected: dict[str, str]) -> None:
 )
 def test_get_all_dependencies(file: str, expected: DependencyMap) -> None:
     """
+    Validates generating all the dependency meta data associated with a recipe file.
+
     :param file: File to test against
     :param expected: Expected output
     """

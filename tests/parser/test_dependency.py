@@ -1,6 +1,5 @@
 """
-File:           test_dependency.py
-Description:    Unit tests for the dependency module.
+:Description:    Unit tests for the dependency module.
 """
 
 from __future__ import annotations
@@ -33,6 +32,7 @@ from conda_recipe_manager.parser.types import SchemaVersion
 def test_dependency_section_to_str(section: DependencySection, schema: SchemaVersion, expected: str) -> None:
     """
     Validates deserializing dependency enumerations to strings found in the recipe.
+
     :param section: Enumeration to deserialize
     :param schema: Target schema
     :param expected: Expected value to return
@@ -59,6 +59,7 @@ def test_dependency_section_to_str(section: DependencySection, schema: SchemaVer
 def test_str_to_dependency_section(s: str, expected: DependencySection) -> None:
     """
     Validates serializing dependency section headers to enumerations.
+
     :param s: String to serialize
     :param expected: Expected value to return
     """

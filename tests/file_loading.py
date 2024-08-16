@@ -50,6 +50,7 @@ def load_recipe_convert(file_name: str) -> RecipeParserConvert:
 def load_recipe_deps(file_name: str) -> RecipeParserDeps:
     """
     Convenience function that simplifies initializing a recipe parser.
+
     :param file_name: File name of the test recipe to load
     :returns: RecipeParserDeps instance, based on the file
     """

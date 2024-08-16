@@ -1,6 +1,5 @@
 """
-File:           dependency.py
-Description:    Provides types and utilities for managing recipe dependencies.
+:Description:    Provides types and utilities for managing recipe dependencies.
 """
 
 from __future__ import annotations
@@ -31,6 +30,7 @@ def dependency_section_to_str(section: DependencySection, schema: SchemaVersion)
     """
     Converts a dependency section enumeration to the equivalent string found in the recipe, based on the current
     schema.
+
     :param section: Target dependency section
     :param schema: Target recipe schema
     :returns: String equivalent of the recipe schema
@@ -66,6 +66,7 @@ def dependency_section_to_str(section: DependencySection, schema: SchemaVersion)
 def str_to_dependency_section(s: str) -> Optional[DependencySection]:
     """
     Converts a dependency section string to a section enumeration.
+
     :param s: Target string to convert
     :returns: String equivalent of the recipe schema. None if the string is unrecognized.
     """
