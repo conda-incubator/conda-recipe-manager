@@ -22,7 +22,7 @@ class DependencySection(Enum):
     HOST = auto()
     RUN = auto()
     RUN_CONSTRAINTS = auto()
-    # NOTE: This was not in the `requirements/` section in V0
+    # NOTE: `run_exports` was not in the `requirements/` section in the V0 format
     RUN_EXPORTS = auto()
 
 
