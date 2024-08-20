@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import asdict, dataclass, field, is_dataclass
-from enum import StrEnum
+from enum import Enum, StrEnum, auto
 
 
 class GraphType(StrEnum):
@@ -16,6 +16,17 @@ class GraphType(StrEnum):
 
     BUILD = "build"
     TEST = "test"
+
+
+class GraphDirection(Enum):
+    """
+    Indicates which direction to traverse dependency information.
+    """
+
+    # The target package _depends on_ these other packages.
+    DEPENDS_ON = auto()
+    # The target package is _needed by_ these other packages.
+    NEEDED_BY = auto()
 
 
 class PackageStatsEncoder(json.JSONEncoder):

@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 from networkx.drawing.nx_agraph import graphviz_layout
 
-from conda_recipe_manager.grapher.types import GraphType, PackageStats
+from conda_recipe_manager.grapher.types import GraphDirection, GraphType, PackageStats
 from conda_recipe_manager.parser.dependency import DependencySection
 from conda_recipe_manager.parser.recipe_parser_deps import RecipeParserDeps
 
@@ -104,14 +104,28 @@ class RecipeGraph:
         """
         return self._package_stats
 
-    def plot(self, graph_type: GraphType, package: Optional[str] = None) -> None:
+    def plot(
+        self,
+        graph_type: GraphType,
+        direction: GraphDirection = GraphDirection.DEPENDS_ON,
+        package: Optional[str] = None,
+    ) -> None:
         """
         Draws a dependency graph to the screen.
 
-        :param graph_type: Indicates which kind of graph to render
+        :param graph_type: Indicates which kind of graph to render.
+        :param direction: (Optional) Indicates the direction of the dependency relationship.
         :param package: (Optional) Name of the target package to draw a sub-graph of. If not provided, renders the
             entire graph.
         """
+
+        # Determines direction flag by enumeration.
+        def _reverse_flag() -> bool:
+            match direction:
+                case GraphDirection.DEPENDS_ON:
+                    return False
+                case GraphDirection.NEEDED_BY:
+                    return True
 
         # TODO add blocking flag?
         def _get_graph() -> nx.DiGraph:
@@ -126,15 +140,20 @@ class RecipeGraph:
         plt.figure()
         plt.axis("off")
         if package is None:
-            plt.title(f"{graph_type} Graph")
+            plt.title(f"{graph_type.capitalize()} Graph")
             nx.draw(
                 graph_to_render,
                 pos=graphviz_layout(graph_to_render, "dot"),
                 alpha=0.6,
             )
         else:
-            plt.title(f"{graph_type} Graph of {package}")
-            sub_graph = nx.bfs_tree(graph_to_render, package, reverse=True)
+            match direction:
+                case GraphDirection.DEPENDS_ON:
+                    plt.title(f"{graph_type.capitalize()} Graph of Dependencies of {package}")
+                case GraphDirection.NEEDED_BY:
+                    plt.title(f"{graph_type.capitalize()} Graph of Packages that Need {package}")
+
+            sub_graph = nx.bfs_tree(graph_to_render, package, reverse=_reverse_flag())
             nx.draw(
                 sub_graph,
                 pos=graphviz_layout(sub_graph, "dot"),

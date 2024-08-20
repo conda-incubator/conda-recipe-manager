@@ -16,7 +16,7 @@ import click
 from conda_recipe_manager.commands.utils.print import print_err
 from conda_recipe_manager.grapher.recipe_graph import PackageStats, RecipeGraph
 from conda_recipe_manager.grapher.recipe_graph_from_disk import RecipeGraphFromDisk
-from conda_recipe_manager.grapher.types import GraphType, PackageStatsEncoder
+from conda_recipe_manager.grapher.types import GraphDirection, GraphType, PackageStatsEncoder
 
 
 @click.command(short_help="")
@@ -60,26 +60,37 @@ def graph(path: Path) -> None:
                     "Conda Recipe Manager (CRM) Graph Utility Interactive Shell (GUIS)\n\n"
                     "Use exit, q, or Ctrl-D to quit.\n\n"
                     "Commands:\n"
-                    "  - plot (build|test) (package|all)\n"
+                    "  - plot (build|test) [depends|needed-by] (<package>|all)\n"
                     "    Generates a visual representation of the requested dependency graph.\n"
-                    "    Using `all` prints the entire graph.\n"
+                    "    Using `all` prints the entire graph (no direction required).\n"
                     "  - stats\n"
                     "    Prints graph construction statistics.\n"
                     "  - help\n"
                     "    Prints this help message.\n"
                 )
-            case ["plot", g_type, pkg]:
+            case ["plot", g_type, "all"]:
                 if g_type not in GraphType:
                     print(f"Unrecognized graph type: {g_type}")
                     continue
-                if pkg == "all":
-                    recipe_graph.plot(GraphType(g_type))
+                print("This might take a while...")
+                recipe_graph.plot(GraphType(g_type))
+            case ["plot", g_type, dir_str, pkg]:
+                if g_type not in GraphType:
+                    print(f"Unrecognized graph type: {g_type}")
                     continue
-                # TODO add package-name check
+                direction: GraphDirection
+                match dir_str:
+                    case "depends":
+                        direction = GraphDirection.DEPENDS_ON
+                    case "needed-by":
+                        direction = GraphDirection.NEEDED_BY
+                    case _:
+                        print("Unrecognized graph direction.")
+                        continue
                 if not recipe_graph.contains_package_name(pkg):
                     print(f"Package not found: {pkg}")
                     continue
-                recipe_graph.plot(GraphType(g_type), pkg)
+                recipe_graph.plot(GraphType(g_type), direction, pkg)
             case ["stats"] | ["statistics"]:
                 print(json.dumps(package_stats, indent=2, sort_keys=True, cls=PackageStatsEncoder))
             case ["exit"] | ["esc"] | ["quit"] | ["q"]:
