@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import multiprocessing as mp
 from pathlib import Path
-from typing import Final
+from typing import Final, Optional
 
 from conda_recipe_manager.grapher.recipe_graph import RecipeGraph
 from conda_recipe_manager.parser.recipe_parser_deps import RecipeParserDeps
@@ -19,7 +19,7 @@ class RecipeGraphFromDisk(RecipeGraph):
     """
 
     @staticmethod
-    def _read_and_parse_recipe(file: Path) -> tuple[str, RecipeParserDeps]:
+    def _read_and_parse_recipe(file: Path) -> tuple[str, Optional[RecipeParserDeps]]:
         """
         Callback that parses a single recipe file.
 
@@ -49,7 +49,7 @@ class RecipeGraphFromDisk(RecipeGraph):
         # Process recipes in parallel
         thread_pool_size: Final[int] = mp.cpu_count()
         with mp.Pool(thread_pool_size) as pool:
-            results = pool.map(RecipeGraphFromDisk._read_and_parse_recipe, files)  # type: ignore[misc]
+            results = pool.map(RecipeGraphFromDisk._read_and_parse_recipe, files)
         # Process results
         failed_paths: set[str] = set()
         recipe_cache: dict[str, RecipeParserDeps] = {}

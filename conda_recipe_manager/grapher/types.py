@@ -4,17 +4,37 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from enum import Enum, auto
+import json
+from dataclasses import asdict, dataclass, field, is_dataclass
+from enum import StrEnum
 
 
-class GraphType(Enum):
+class GraphType(StrEnum):
     """
     Categories of graph that the graphing module can work with
     """
 
-    BUILD = auto()
-    TEST = auto()
+    BUILD = "build"
+    TEST = "test"
+
+
+class PackageStatsEncoder(json.JSONEncoder):
+    """
+    Custom JSON Encoder for the `PackageStats` dataclass.
+    Based on: https://stackoverflow.com/questions/51286748/make-the-python-json-encoder-support-pythons-new-dataclasses
+    """
+
+    def default(self, obj: object) -> object:
+        """
+        Encoding instructions for the structure.
+
+        :param obj: Object to recursively encode.
+        """
+        if is_dataclass(obj):
+            return asdict(obj)
+        if isinstance(obj, set):
+            return list(obj)
+        return super().default(obj)
 
 
 @dataclass
@@ -26,12 +46,10 @@ class PackageStats:
 
     # List of packages that have duplicate names
     package_name_duplicates: set[str] = field(default_factory=set)
-    # List of SHA-256 hashes of recipes containing packages without package names
-    recipes_of_unknown_packages: set[str] = field(default_factory=set)
     # List of recipes that failed to parse package names
     recipes_failed_to_parse: set[str] = field(default_factory=set)
     # Tracks packages that failed to parse recipes
-    recipes_failed_to_parse_dependencies: set[str] = field(default_factory=set)
+    recipes_failed_to_parse_dependencies: dict[str, list[str]] = field(default_factory=dict)
     # Total number of successfully parsed recipes
     total_parsed_recipes: int = 0
     # Total number of recipes found
