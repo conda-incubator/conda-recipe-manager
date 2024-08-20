@@ -91,7 +91,9 @@ def graph(path: Path) -> None:
                     continue
                 recipe_graph.plot(GraphType(g_type), direction, pkg)
             case ["stats"] | ["statistics"]:
-                print(json.dumps(package_stats, indent=2, sort_keys=True, cls=PackageStatsEncoder))
+                print(
+                    json.dumps(package_stats, indent=2, sort_keys=True, cls=PackageStatsEncoder)  # type: ignore[misc]
+                )
             case ["exit"] | ["esc"] | ["quit"] | ["q"]:
                 print("Closing interactive menu...")
                 break

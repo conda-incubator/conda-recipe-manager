@@ -7,6 +7,7 @@ from __future__ import annotations
 import json
 from dataclasses import asdict, dataclass, field, is_dataclass
 from enum import Enum, StrEnum, auto
+from typing import no_type_check
 
 
 class GraphType(StrEnum):
@@ -35,6 +36,7 @@ class PackageStatsEncoder(json.JSONEncoder):
     Based on: https://stackoverflow.com/questions/51286748/make-the-python-json-encoder-support-pythons-new-dataclasses
     """
 
+    @no_type_check
     def default(self, o: object) -> object:
         """
         Encoding instructions for the structure.
