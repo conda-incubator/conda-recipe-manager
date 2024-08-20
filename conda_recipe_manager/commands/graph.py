@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import json
 import pickle
 import sys
 import time
@@ -15,6 +16,7 @@ import click
 from conda_recipe_manager.commands.utils.print import print_err
 from conda_recipe_manager.grapher.recipe_graph import PackageStats, RecipeGraph
 from conda_recipe_manager.grapher.recipe_graph_from_disk import RecipeGraphFromDisk
+from conda_recipe_manager.grapher.types import GraphType, PackageStatsEncoder
 
 
 @click.command(short_help="")
@@ -48,5 +50,40 @@ def graph(path: Path) -> None:
     print(f"Estimated memory usage of the graph: {len(pickle.dumps(recipe_graph)) / (2**20):.2f}MiB")
     print(f"Total graph construction time: {round(total_time, 2)}s")
 
-    # TODO implement CLI
-    # recipe_graph.plot()
+    print()
+    print("== Main menu ==")
+    while True:
+        command = input("> ").lower()
+        match command.split():
+            case ["help"] | ["h"]:
+                print(
+                    "Conda Recipe Manager (CRM) Graph Utility Interactive Shell (GUIS)\n\n"
+                    "Use exit, q, or Ctrl-D to quit.\n\n"
+                    "Commands:\n"
+                    "  - plot (build|test) (package|all)\n"
+                    "    Generates a visual representation of the requested dependency graph.\n"
+                    "    Using `all` prints the entire graph.\n"
+                    "  - stats\n"
+                    "    Prints graph construction statistics.\n"
+                    "  - help\n"
+                    "    Prints this help message.\n"
+                )
+            case ["plot", g_type, pkg]:
+                if g_type not in GraphType:
+                    print(f"Unrecognized graph type: {g_type}")
+                    continue
+                if pkg == "all":
+                    recipe_graph.plot(GraphType(g_type))
+                    continue
+                # TODO add package-name check
+                if not recipe_graph.contains_package_name(pkg):
+                    print(f"Package not found: {pkg}")
+                    continue
+                recipe_graph.plot(GraphType(g_type), pkg)
+            case ["stats"] | ["statistics"]:
+                print(json.dumps(package_stats, indent=2, sort_keys=True, cls=PackageStatsEncoder))
+            case ["exit"] | ["esc"] | ["quit"] | ["q"]:
+                print("Closing interactive menu...")
+                break
+            case _:
+                print(f"Invalid command.")
