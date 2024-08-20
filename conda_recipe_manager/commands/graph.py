@@ -86,4 +86,4 @@ def graph(path: Path) -> None:
                 print("Closing interactive menu...")
                 break
             case _:
-                print(f"Invalid command.")
+                print("Invalid command.")

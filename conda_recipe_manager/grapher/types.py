@@ -24,17 +24,17 @@ class PackageStatsEncoder(json.JSONEncoder):
     Based on: https://stackoverflow.com/questions/51286748/make-the-python-json-encoder-support-pythons-new-dataclasses
     """
 
-    def default(self, obj: object) -> object:
+    def default(self, o: object) -> object:
         """
         Encoding instructions for the structure.
 
-        :param obj: Object to recursively encode.
+        :param o: Object to recursively encode.
         """
-        if is_dataclass(obj):
-            return asdict(obj)
-        if isinstance(obj, set):
-            return list(obj)
-        return super().default(obj)
+        if is_dataclass(o):
+            return asdict(o)
+        if isinstance(o, set):
+            return list(o)
+        return super().default(o)
 
 
 @dataclass

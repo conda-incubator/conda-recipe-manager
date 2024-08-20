@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 
-from typing import Final, Optional, cast
+from typing import Final, Optional
 
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -109,8 +109,8 @@ class RecipeGraph:
         Draws a dependency graph to the screen.
 
         :param graph_type: Indicates which kind of graph to render
-        :param pkg: (Optional) Name of the target package to draw a sub-graph of. If not provided, renders the entire
-            graph.
+        :param package: (Optional) Name of the target package to draw a sub-graph of. If not provided, renders the
+            entire graph.
         """
 
         # TODO add blocking flag?
