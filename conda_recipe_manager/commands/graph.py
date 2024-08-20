@@ -31,7 +31,6 @@ def graph(path: Path) -> None:
     print("Constructing dependency graph...")
     start_time: Final[float] = time.time()
 
-    # TODO error on empty graph
     recipe_graph: Final[RecipeGraph] = RecipeGraphFromDisk(path)
     if not recipe_graph:
         print_err(f"The path provided does not contain any recipe files: {path}")
