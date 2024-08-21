@@ -7,12 +7,15 @@ from __future__ import annotations
 from typing import Final, Optional
 
 import matplotlib.pyplot as plt
-import networkx as nx
-from networkx.drawing.nx_agraph import graphviz_layout
+import networkx as nx  # type: ignore[import-untyped]
+from networkx.drawing.nx_agraph import graphviz_layout  # type: ignore[import-untyped]
 
 from conda_recipe_manager.grapher.types import GraphDirection, GraphType, PackageStats
 from conda_recipe_manager.parser.dependency import DependencySection
 from conda_recipe_manager.parser.recipe_parser_deps import RecipeParserDeps
+
+# TODO: Remove all the typing ignore lines tied to `networkx`
+#   See this mypy issue for more details: https://github.com/python/mypy/issues/17699
 
 
 class RecipeGraph:
@@ -44,8 +47,8 @@ class RecipeGraph:
 
         # TODO construct graphs
         # Dependency graph representations, built from the initial cache.
-        self._build_graph = nx.DiGraph()
-        self._test_graph = nx.DiGraph()
+        self._build_graph = nx.DiGraph()  # type: ignore[misc]
+        self._test_graph = nx.DiGraph()  # type: ignore[misc]
 
         for sha, parser in self._recipe_cache.items():
             # TODO fix MatchSpec blowing up on failed sub_vars
@@ -72,12 +75,12 @@ class RecipeGraph:
                         # Build graph
                         case DependencySection.BUILD | DependencySection.HOST:
                             # TODO use hash/UID?
-                            self._build_graph.add_edge(package_name, dep.match_spec.name)
+                            self._build_graph.add_edge(package_name, dep.match_spec.name)  # type: ignore[misc]
 
                         # Test graph
                         # TODO does this include run constraints?
                         case DependencySection.RUN | DependencySection.TESTS:
-                            self._test_graph.add_edge(package_name, dep.match_spec.name)
+                            self._test_graph.add_edge(package_name, dep.match_spec.name)  # type: ignore[misc]
 
     def __bool__(self) -> bool:
         """
@@ -128,22 +131,22 @@ class RecipeGraph:
                     return True
 
         # TODO add blocking flag?
-        def _get_graph() -> nx.DiGraph:
+        def _get_graph() -> nx.DiGraph:  # type: ignore[no-any-unimported]
             match graph_type:
                 case GraphType.BUILD:
-                    return self._build_graph
+                    return self._build_graph  # type: ignore[misc]
                 case GraphType.TEST:
-                    return self._test_graph
+                    return self._test_graph  # type: ignore[misc]
 
-        graph_to_render: Final[nx.DiGraph] = _get_graph()
+        graph_to_render: Final[nx.DiGraph] = _get_graph()  # type: ignore[misc,no-any-unimported]
 
         plt.figure()
         plt.axis("off")
         if package is None:
             plt.title(f"{graph_type.capitalize()} Graph")
-            nx.draw(
-                graph_to_render,
-                pos=graphviz_layout(graph_to_render, "dot"),
+            nx.draw(  # type: ignore[misc]
+                graph_to_render,  # type: ignore[misc]
+                pos=graphviz_layout(graph_to_render, "dot"),  # type: ignore[misc]
                 alpha=0.6,
             )
         else:
@@ -153,10 +156,10 @@ class RecipeGraph:
                 case GraphDirection.NEEDED_BY:
                     plt.title(f"{graph_type.capitalize()} Graph of Packages that Need {package}")
 
-            sub_graph = nx.bfs_tree(graph_to_render, package, reverse=_reverse_flag())
-            nx.draw(
-                sub_graph,
-                pos=graphviz_layout(sub_graph, "dot"),
+            sub_graph = nx.bfs_tree(graph_to_render, package, reverse=_reverse_flag())  # type: ignore[misc]
+            nx.draw(  # type: ignore[misc]
+                sub_graph,  # type: ignore[misc]
+                pos=graphviz_layout(sub_graph, "dot"),  # type: ignore[misc]
                 node_size=2000,
                 with_labels=True,
                 alpha=0.6,
