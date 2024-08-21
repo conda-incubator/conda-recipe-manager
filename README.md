@@ -80,3 +80,4 @@ running all or part of the `pre-commit` automations:
 
 # Special Thanks
 - @cbouss for his work on the [Percy project](https://github.com/anaconda/percy) that originally inspired the recipe parser.
+- @akabanovs for his work and experimentation on package dependency graph building.
