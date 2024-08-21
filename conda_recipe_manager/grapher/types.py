@@ -46,7 +46,10 @@ class PackageStatsEncoder(json.JSONEncoder):
         if is_dataclass(o):
             return asdict(o)
         if isinstance(o, set):
-            return list(o)
+            # Guarantees order for unit testing.
+            l = list(o)
+            l.sort()
+            return l
         return super().default(o)
 
 
