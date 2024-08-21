@@ -165,6 +165,17 @@ class SelectorParser(IsModifiable):
         """
         return f"Schema: V{self._schema_version} | Tree: {self._root}"
 
+    def __eq__(self, other: object) -> bool:
+        """
+        Checks equivalency between two SelectorParsers.
+
+        :returns: True if both selectors are equivalent. False otherwise.
+        """
+        if not isinstance(other, SelectorParser):
+            return False
+        # TODO Improve: This is a short-hand for checking if the two parse trees are the same
+        return self._schema_version == other._schema_version and str(self) == str(other)
+
     def get_selected_platforms(self) -> set[Platform]:
         """
         Returns the set of platforms selected by this selector
