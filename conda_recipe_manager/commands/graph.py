@@ -39,11 +39,17 @@ def graph(path: Path) -> None:
 
     total_time: Final[float] = time.time() - start_time
     package_stats: Final[PackageStats] = recipe_graph.get_package_stats()
-    failed_count: Final[int] = len(package_stats.recipes_failed_to_parse)
-    success_rate: Final[float] = (1 - (failed_count / package_stats.total_recipes)) * 100
+    failed_recipe_count: Final[int] = len(package_stats.recipes_failed_to_parse)
+    failed_dep_count: Final[int] = len(package_stats.recipes_failed_to_parse_dependencies)
+    success_recipe_rate: Final[float] = (1 - (failed_recipe_count / package_stats.total_recipes)) * 100
+    success_dep_rate: Final[float] = (1 - (failed_dep_count / package_stats.total_parsed_recipes)) * 100
     print(
-        f"Failed to parse {failed_count}"
-        f" of {package_stats.total_recipes} recipe files ({success_rate:.2f}% success)."
+        f"Failed to parse {failed_recipe_count}"
+        f" out of {package_stats.total_recipes} recipe files ({success_recipe_rate:.2f}% success)."
+    )
+    print(
+        f"Failed to parse the dependencies from {failed_dep_count}"
+        f" out of {package_stats.total_parsed_recipes} recipe files ({success_dep_rate:.2f}% success)."
     )
     # NOTE: There is no stdlib way to recursively calculate an object's memory usage.
     print(f"Estimated memory usage of the graph: {len(pickle.dumps(recipe_graph)) / (2**20):.2f}MiB")
