@@ -29,6 +29,9 @@ requirements:
     - pyyaml
     - jsonschema
     - requests
+    - networkx
+    - matplotlib
+    - pygraphviz
 
 test:
   imports:
