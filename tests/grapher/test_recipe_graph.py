@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import pytest
 
+from conda_recipe_manager.grapher.types import PackageStats
 from tests.file_loading import load_recipe_graph
 
 
@@ -53,3 +54,21 @@ def test_contains_package_name(files: list[str], package: str, expected: bool) -
     """
     rg = load_recipe_graph(files)
     assert rg.contains_package_name(package) == expected
+
+
+@pytest.mark.parametrize(
+    "files,expected",
+    [
+        ([], PackageStats()),
+        (
+            ["types-toml.yaml", "boto.yaml", "cctools-ld64.yaml"],
+            PackageStats(total_parsed_recipes=3, total_recipes=3, total_packages=5),
+        ),
+    ],
+)
+def test_package_stats(files: list[str], expected: PackageStats) -> None:
+    """
+    Validates gathering package statistics in a RecipeGraph.
+    """
+    rg = load_recipe_graph(files)
+    assert rg.get_package_stats() == expected

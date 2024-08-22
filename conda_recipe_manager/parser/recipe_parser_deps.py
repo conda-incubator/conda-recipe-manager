@@ -57,6 +57,7 @@ class RecipeParserDeps(RecipeParser):
         :raises ValueError: If a recipe contains a package with duplicate names
         :returns: Mapping of package name to path where that package is found
         """
+        # TODO Figure out: Skip top-level packages for multi-output recipe files?
         package_tbl: dict[str, str] = {}
         root_name_path: Final[str] = (
             "/recipe/name" if self.is_multi_output() and self._schema_version == SchemaVersion.V1 else "/package/name"
@@ -87,6 +88,7 @@ class RecipeParserDeps(RecipeParser):
         :raises ValueError: If a recipe contains a package with duplicate names
         :returns: A structured representation of the dependencies.
         """
+        # TODO Figure out: Skip top-level packages for multi-output recipe files?
         package_path_tbl: Final[dict[str, str]] = self.get_package_names_to_path()
         root_package = ""
         dep_map: DependencyMap = {}
