@@ -33,11 +33,12 @@ class RecipeGraphFromDisk(RecipeGraph):
         except Exception:  # pylint: disable=broad-exception-caught
             return (file.as_posix(), None)
 
-    def __init__(self, directory: str | Path):
+    def __init__(self, directory: str | Path, cpu_count: int = 0):
         """
         Constructs common types that all recipe graphs share. Derived classes handle initialization details.
 
         :param directory: Path to the directory containing recipe files.
+        :param cpu_count: (Optional) Overrides the number of CPUs to use when reading from disk.
         """
         self._dir_path = Path(directory)
 
@@ -47,7 +48,7 @@ class RecipeGraphFromDisk(RecipeGraph):
         files = (f for f in self._dir_path.rglob("*.yaml") if f.name in recipe_names)
 
         # Process recipes in parallel
-        thread_pool_size: Final[int] = mp.cpu_count()
+        thread_pool_size: Final[int] = mp.cpu_count() if cpu_count <= 0 else cpu_count
         with mp.Pool(thread_pool_size) as pool:
             results = pool.map(RecipeGraphFromDisk._read_and_parse_recipe, files)
         # Process results
