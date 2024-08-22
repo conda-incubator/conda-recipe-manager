@@ -23,6 +23,33 @@ class RecipeGraph:
     Base class for all Recipe Graph types. This standardizes tooling for multiple recipe storage mechanisms.
     """
 
+    @staticmethod
+    def _reverse_flag(direction: GraphDirection) -> bool:
+        """
+        Determines direction flag by enumeration.
+
+        :param direction: Target direction
+        :returns: The equivalent boolean flag of the graph direction
+        """
+        match direction:
+            case GraphDirection.DEPENDS_ON:
+                return False
+            case GraphDirection.NEEDED_BY:
+                return True
+
+    def _get_graph(self, graph_type: GraphType) -> nx.DiGraph:  # type: ignore[no-any-unimported]
+        """
+        Returns the appropriate graph structure, based on the type.
+
+        :param graph_type: Target graph type
+        :returns: Reference to the target graph object
+        """
+        match graph_type:
+            case GraphType.BUILD:
+                return self._build_graph  # type: ignore[misc]
+            case GraphType.TEST:
+                return self._test_graph  # type: ignore[misc]
+
     def __init__(
         self,
         recipe_cache: dict[str, RecipeParserDeps],
@@ -74,7 +101,6 @@ class RecipeGraph:
                     match dep.type:
                         # Build graph
                         case DependencySection.BUILD | DependencySection.HOST:
-                            # TODO use hash/UID?
                             self._build_graph.add_edge(package_name, dep.match_spec.name)  # type: ignore[misc]
 
                         # Test graph
@@ -121,24 +147,8 @@ class RecipeGraph:
         :param package: (Optional) Name of the target package to draw a sub-graph of. If not provided, renders the
             entire graph.
         """
-
-        # Determines direction flag by enumeration.
-        def _reverse_flag() -> bool:
-            match direction:
-                case GraphDirection.DEPENDS_ON:
-                    return False
-                case GraphDirection.NEEDED_BY:
-                    return True
-
         # TODO add blocking flag?
-        def _get_graph() -> nx.DiGraph:  # type: ignore[no-any-unimported]
-            match graph_type:
-                case GraphType.BUILD:
-                    return self._build_graph  # type: ignore[misc]
-                case GraphType.TEST:
-                    return self._test_graph  # type: ignore[misc]
-
-        graph_to_render: Final[nx.DiGraph] = _get_graph()  # type: ignore[misc,no-any-unimported]
+        graph_to_render: Final[nx.DiGraph] = self._get_graph(graph_type)  # type: ignore[misc,no-any-unimported]
 
         plt.figure()
         plt.axis("off")
@@ -156,7 +166,9 @@ class RecipeGraph:
                 case GraphDirection.NEEDED_BY:
                     plt.title(f"{graph_type.capitalize()} Graph of Packages that Need {package}")
 
-            sub_graph = nx.bfs_tree(graph_to_render, package, reverse=_reverse_flag())  # type: ignore[misc]
+            sub_graph = nx.bfs_tree(  # type: ignore[misc]
+                graph_to_render, package, reverse=RecipeGraph._reverse_flag(direction)  # type: ignore[misc]
+            )
             nx.draw(  # type: ignore[misc]
                 sub_graph,  # type: ignore[misc]
                 pos=graphviz_layout(sub_graph, "dot"),  # type: ignore[misc]
