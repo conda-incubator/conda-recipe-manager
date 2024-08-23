@@ -7,6 +7,7 @@ from __future__ import annotations
 import click
 
 from conda_recipe_manager.commands.convert import convert
+from conda_recipe_manager.commands.graph import graph
 from conda_recipe_manager.commands.rattler_bulk_build import rattler_bulk_build
 
 
@@ -19,6 +20,7 @@ def conda_recipe_manager() -> None:
 
 
 conda_recipe_manager.add_command(convert)
+conda_recipe_manager.add_command(graph)
 conda_recipe_manager.add_command(rattler_bulk_build)
 
 

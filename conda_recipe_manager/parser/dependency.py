@@ -24,6 +24,11 @@ class DependencySection(Enum):
     RUN_CONSTRAINTS = auto()
     # NOTE: `run_exports` was not in the `requirements/` section in the V0 format
     RUN_EXPORTS = auto()
+    # NOTE:
+    #   - Test dependencies are not found under the `requirements/` section, they are found under the testing section.
+    #   - There are major changes to the testing section in V1.
+    # TODO TEST not covered in get_all_dependencies()
+    TESTS = auto()
 
 
 def dependency_section_to_str(section: DependencySection, schema: SchemaVersion) -> str:
@@ -49,6 +54,8 @@ def dependency_section_to_str(section: DependencySection, schema: SchemaVersion)
                     return "run_constrained"
                 case DependencySection.RUN_EXPORTS:
                     return "run_exports"
+                case DependencySection.TESTS:
+                    return "requires"
         case SchemaVersion.V1:
             match section:
                 case DependencySection.BUILD:
@@ -61,6 +68,8 @@ def dependency_section_to_str(section: DependencySection, schema: SchemaVersion)
                     return "run_constraints"
                 case DependencySection.RUN_EXPORTS:
                     return "run_exports"
+                case DependencySection.TESTS:
+                    return "requires"
 
 
 def str_to_dependency_section(s: str) -> Optional[DependencySection]:

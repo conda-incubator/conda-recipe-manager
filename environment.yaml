@@ -24,6 +24,9 @@ dependencies:
   - types-jsonschema
   - requests
   - types-requests
+  - networkx
+  - matplotlib
+  - pygraphviz
   - pre-commit
   - sphinx
   - sphinx-rtd-theme
