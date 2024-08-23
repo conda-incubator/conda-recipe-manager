@@ -6,10 +6,13 @@ from __future__ import annotations
 
 from typing import Final, Optional, cast
 
-from conda.models.match_spec import MatchSpec
-
 from conda_recipe_manager.parser._types import ROOT_NODE_VALUE
-from conda_recipe_manager.parser.dependency import Dependency, DependencyMap, str_to_dependency_section
+from conda_recipe_manager.parser.dependency import (
+    Dependency,
+    DependencyMap,
+    dependency_data_from_string,
+    str_to_dependency_section,
+)
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
 from conda_recipe_manager.parser.selector_parser import SelectorParser
 from conda_recipe_manager.parser.types import SchemaVersion
@@ -34,7 +37,7 @@ class RecipeParserDeps(RecipeParser):
                 continue
             # Change the "required_by" package name to the current package, not the root package name.
             dep_map[package].extend(
-                [Dependency(package, d.path, d.type, d.match_spec, d.selector) for d in root_dependencies]
+                [Dependency(package, d.path, d.type, d.data, d.selector) for d in root_dependencies]
             )
 
     def _fetch_optional_selector(self, path: str) -> Optional[SelectorParser]:
@@ -116,7 +119,7 @@ class RecipeParserDeps(RecipeParser):
                             required_by=package,
                             path=dep_path,
                             type=section,
-                            match_spec=MatchSpec(dep),
+                            data=dependency_data_from_string(dep),
                             selector=self._fetch_optional_selector(dep_path),
                         )
                     )

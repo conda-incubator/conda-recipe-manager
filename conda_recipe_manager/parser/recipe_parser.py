@@ -285,6 +285,12 @@ class RecipeParser(IsModifiable):
                 if lower_match:
                     value = value.lower()
                 s = s.replace(match, value)
+            # $-Escaping the unresolved variable does a few things:
+            #  - Clearly identifies the value as an unresolved variable
+            #  - Normalizes the substitution syntax with V1
+            #  - Ensures the returned value is YAML-parsable
+            elif self._schema_version == SchemaVersion.V0:
+                s = f"${s}"
         return cast(JsonType, yaml.safe_load(s))
 
     def _init_vars_tbl(self) -> None:
@@ -771,7 +777,7 @@ class RecipeParser(IsModifiable):
         :param path: JSON patch (RFC 6902)-style path to a value.
         :param default: (Optional) If the value is not found, return this value instead.
         :param sub_vars: (Optional) If set to True and the value contains a Jinja template variable, the Jinja value
-            will be "rendered".
+            will be "rendered". Any variables that can't be resolved will be escaped with `${{ }}`.
         :raises KeyError: If the value is not found AND no default is specified
         :returns: If found, the value in the recipe at that path. Otherwise, the caller-specified default value.
         """
