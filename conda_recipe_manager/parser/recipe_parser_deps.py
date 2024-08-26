@@ -101,7 +101,7 @@ class RecipeParserDeps(RecipeParser):
                 root_package = package
 
             requirements = cast(
-                dict[str, list[str]],
+                dict[str, list[str | None]],
                 self.get_value(RecipeParser.append_to_path(path, "/requirements"), default=[], sub_vars=True),
             )
             dep_map[package] = []
@@ -112,6 +112,14 @@ class RecipeParserDeps(RecipeParser):
                     continue
 
                 for i, dep in enumerate(deps):
+                    # Sanitize and ignore empty data. In theory, recipes shouldn't contain `Null`s or empty strings in
+                    # their dependency lists, but we will guard against it out of an abundance of caution.
+                    if dep is None:
+                        continue
+                    dep = dep.strip()
+                    if not dep:
+                        continue
+
                     # NOTE: `get_dependency_paths()` uses the same approach for calculating dependency paths.
                     dep_path = RecipeParser.append_to_path(path, f"/requirements/{section_str}/{i}")
                     dep_map[package].append(

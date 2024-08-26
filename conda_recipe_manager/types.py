@@ -35,9 +35,22 @@ SchemaType = dict[str, SchemaDetails]
 H = TypeVar("H", bound=Hashable)
 
 
-# All sentinel values used in this module should be constructed with this class, for typing purposes.
 class SentinelType:
-    pass
+    """
+    A single sentinel class to be used in this project, as an alternative to `None` when `None` cannot be used.
+    It is defined in a way such that SentinelType instances survive pickling and allocations in different memory
+    spaces.
+    """
+
+    def __eq__(self, o: object) -> bool:
+        """
+        Provides a pickle/thread-safe way to compare objects to the Sentinel Type. All sentinels are equal by simply
+        being sentinel objects.
+        :param o: The object to compare against.
+        :returns: True if the object is a SentinelType object.
+        """
+        # There is an implicit `isinstance(self, SentinelType) and ...` to this logic
+        return isinstance(o, SentinelType)
 
 
 class MessageCategory(StrEnum):
