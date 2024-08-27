@@ -14,12 +14,13 @@ from typing import Final
 import click
 
 from conda_recipe_manager.commands.utils.print import print_err
+from conda_recipe_manager.commands.utils.types import ExitCode
 from conda_recipe_manager.grapher.recipe_graph import PackageStats, RecipeGraph
 from conda_recipe_manager.grapher.recipe_graph_from_disk import RecipeGraphFromDisk
 from conda_recipe_manager.grapher.types import GraphDirection, GraphType, PackageStatsEncoder
 
 
-@click.command(short_help="")
+@click.command(short_help="Interactive CLI for examining recipe dependency graphs.")
 @click.argument("path", type=click.Path(exists=True, path_type=Path, file_okay=False))  # type: ignore[misc]
 def graph(path: Path) -> None:
     """
@@ -34,8 +35,7 @@ def graph(path: Path) -> None:
     recipe_graph: Final[RecipeGraph] = RecipeGraphFromDisk(path)
     if not recipe_graph:
         print_err(f"The path provided does not contain any recipe files: {path}")
-        # TODO use enum scheme
-        sys.exit(1)
+        sys.exit(ExitCode.CLICK_USAGE)
 
     total_time: Final[float] = time.time() - start_time
     package_stats: Final[PackageStats] = recipe_graph.get_package_stats()
@@ -105,3 +105,5 @@ def graph(path: Path) -> None:
                 break
             case _:
                 print("Invalid command.")
+
+    sys.exit(ExitCode.SUCCESS)
