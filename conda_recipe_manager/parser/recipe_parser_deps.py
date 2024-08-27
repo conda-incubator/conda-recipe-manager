@@ -102,7 +102,7 @@ class RecipeParserDeps(RecipeParser):
 
             requirements = cast(
                 dict[str, list[str | None]],
-                self.get_value(RecipeParser.append_to_path(path, "/requirements"), default=[], sub_vars=True),
+                self.get_value(RecipeParser.append_to_path(path, "/requirements"), default={}, sub_vars=True),
             )
             dep_map[package] = []
             for section_str, deps in requirements.items():
