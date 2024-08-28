@@ -34,6 +34,9 @@ SchemaType = dict[str, SchemaDetails]
 # Generic, hashable type
 H = TypeVar("H", bound=Hashable)
 
+# Bootstraps global singleton used by `SentinelType`
+_schema_type_singleton: SentinelType
+
 
 class SentinelType:
     """
@@ -42,15 +45,19 @@ class SentinelType:
     spaces.
     """
 
-    def __eq__(self, o: object) -> bool:
+    def __new__(cls) -> SentinelType:
         """
-        Provides a pickle/thread-safe way to compare objects to the Sentinel Type. All sentinels are equal by simply
-        being sentinel objects.
-        :param o: The object to compare against.
-        :returns: True if the object is a SentinelType object.
+        Constructs a global singleton SentinelType instance, once.
+
+        :returns: The SentinelType instance
         """
-        # There is an implicit `isinstance(self, SentinelType) and ...` to this logic
-        return isinstance(o, SentinelType)
+        # Credit to @dholth for suggesting this approach in PR #105.
+        global _schema_type_singleton
+        try:
+            return _schema_type_singleton
+        except NameError:
+            _schema_type_singleton = super().__new__(cls)
+            return _schema_type_singleton
 
 
 class MessageCategory(StrEnum):
