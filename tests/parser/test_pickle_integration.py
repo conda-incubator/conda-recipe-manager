@@ -14,7 +14,15 @@ from conda_recipe_manager.parser.recipe_parser_convert import RecipeParserConver
 from conda_recipe_manager.parser.recipe_parser_deps import RecipeParserDeps
 from conda_recipe_manager.parser.selector_parser import SelectorParser
 from conda_recipe_manager.parser.types import SchemaVersion
+from conda_recipe_manager.types import SentinelType
 from tests.file_loading import TEST_FILES_PATH, load_file
+
+
+def test_pickle_integration_sentinel_type() -> None:
+    """
+    Verifies that the `SentinelType` is pickle-able. All `SentinelType` instances act as a second `None`-type.
+    """
+    assert pickle.loads(pickle.dumps(SentinelType())) == SentinelType()  # type: ignore[misc]
 
 
 @pytest.mark.parametrize(
