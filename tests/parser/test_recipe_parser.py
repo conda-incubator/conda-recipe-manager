@@ -8,6 +8,7 @@ import pytest
 
 from conda_recipe_manager.parser.enums import SelectorConflictMode
 from conda_recipe_manager.parser.exceptions import JsonPatchValidationException
+from conda_recipe_manager.parser.recipe_parser import RecipeParser
 from tests.constants import SIMPLE_DESCRIPTION
 from tests.file_loading import TEST_FILES_PATH, load_file, load_recipe
 
@@ -27,7 +28,7 @@ def test_set_variable(file: str) -> None:
 
     :param file: File to test against
     """
-    parser = load_recipe(file)
+    parser = load_recipe(file, RecipeParser)
     parser.set_variable("name", "foobar")
     parser.set_variable("zz_non_alpha_first", 24)
     # Ensure a missing variable gets added
@@ -57,7 +58,7 @@ def test_del_variable(file: str) -> None:
 
     :param file: File to test against
     """
-    parser = load_recipe(file)
+    parser = load_recipe(file, RecipeParser)
     parser.del_variable("name")
     assert parser.is_modified()
     # Ensure a missing variable doesn't crash a delete operation
@@ -74,7 +75,7 @@ def test_add_selector() -> None:
     """
     Tests adding a selector to a recipe
     """
-    parser = load_recipe("simple-recipe.yaml")
+    parser = load_recipe("simple-recipe.yaml", RecipeParser)
     # Test that selector validation is working
     with pytest.raises(KeyError):
         parser.add_selector("/package/path/to/fake/value", "[unix]")
@@ -126,7 +127,7 @@ def test_remove_selector() -> None:
     """
     Tests removing a selector to a recipe
     """
-    parser = load_recipe("simple-recipe.yaml")
+    parser = load_recipe("simple-recipe.yaml", RecipeParser)
     # Test that selector validation is working
     with pytest.raises(KeyError):
         parser.remove_selector("/package/path/to/fake/value")
@@ -176,7 +177,7 @@ def test_remove_selector() -> None:
     ],
 )
 def test_add_comment(file: str, ops: list[tuple[str, str]], expected: str) -> None:
-    parser = load_recipe(file)
+    parser = load_recipe(file, RecipeParser)
     for path, comment in ops:
         parser.add_comment(path, comment)
     assert parser.is_modified()
@@ -201,7 +202,7 @@ def test_add_comment_raises(file: str, path: str, comment: str, exception: BaseE
     :param comment: Comment to add
     :param exception: Exception expected to be raised
     """
-    parser = load_recipe(file)
+    parser = load_recipe(file, RecipeParser)
     with pytest.raises(exception):  # type: ignore
         parser.add_comment(path, comment)
 
@@ -214,7 +215,7 @@ def test_patch_schema_validation() -> None:
     Tests edge cases that should trigger an exception on JSON patch schema validation. Valid schemas are inherently
     tested in the other patching tests.
     """
-    parser = load_recipe("simple-recipe.yaml")
+    parser = load_recipe("simple-recipe.yaml", RecipeParser)
     # Invalid enum/unknown op
     with pytest.raises(JsonPatchValidationException):
         parser.patch(
@@ -304,7 +305,7 @@ def test_patch_path_invalid() -> None:
     """
     Tests if `patch` returns false on all ops when the path is not found. Also checks if the tree has been modified.
     """
-    parser = load_recipe("simple-recipe.yaml")
+    parser = load_recipe("simple-recipe.yaml", RecipeParser)
 
     # Passing an empty path fails at the JSON schema validation layer, so it applies to all patch functions.
     with pytest.raises(JsonPatchValidationException):
@@ -550,7 +551,7 @@ def test_patch_test() -> None:
     Tests the `test` patch op. The `test` op may be useful for other test assertions, so it is tested before the other
     patch operations.
     """
-    parser = load_recipe("simple-recipe.yaml")
+    parser = load_recipe("simple-recipe.yaml", RecipeParser)
 
     # Test that values match, as expected
     assert parser.patch(
@@ -650,7 +651,7 @@ def test_patch_add() -> None:
     """
     Tests the `add` patch op.
     """
-    parser = load_recipe("simple-recipe.yaml")
+    parser = load_recipe("simple-recipe.yaml", RecipeParser)
 
     # As per the RFC, `add` will not construct multiple-levels of non-existing structures. The containing
     # object(s)/list(s) must exist.
@@ -773,7 +774,7 @@ def test_patch_remove() -> None:
     """
     Tests the `remove` patch op.
     """
-    parser = load_recipe("simple-recipe.yaml")
+    parser = load_recipe("simple-recipe.yaml", RecipeParser)
 
     # Remove primitive values
     assert parser.patch(
@@ -837,7 +838,7 @@ def test_patch_replace() -> None:
     """
     Tests the `replace` patch op.
     """
-    parser = load_recipe("simple-recipe.yaml")
+    parser = load_recipe("simple-recipe.yaml", RecipeParser)
     # Patch an integer
     assert parser.patch(
         {
@@ -935,7 +936,7 @@ def test_patch_move() -> None:
     """
     Tests the `move` patch op.
     """
-    parser = load_recipe("simple-recipe.yaml")
+    parser = load_recipe("simple-recipe.yaml", RecipeParser)
     # No-op moves should not corrupt our modification state.
     assert parser.patch(
         {
@@ -1010,7 +1011,7 @@ def test_patch_copy() -> None:
     """
     Tests the `copy` patch op.
     """
-    parser = load_recipe("simple-recipe.yaml")
+    parser = load_recipe("simple-recipe.yaml", RecipeParser)
 
     # Simple copy
     assert parser.patch(
@@ -1067,7 +1068,7 @@ def test_search_and_patch() -> None:
     """
     Tests searching for values and then patching them
     """
-    parser = load_recipe("simple-recipe.yaml")
+    parser = load_recipe("simple-recipe.yaml", RecipeParser)
     assert parser.search_and_patch(r"py.*", {"op": "replace", "value": "conda"}, True)
     assert parser.render() == load_file(f"{TEST_FILES_PATH}/simple-recipe_test_search_and_patch.yaml")
     assert parser.is_modified()
@@ -1077,7 +1078,7 @@ def test_diff() -> None:
     """
     Tests diffing output function
     """
-    parser = load_recipe("simple-recipe.yaml")
+    parser = load_recipe("simple-recipe.yaml", RecipeParser)
     # Ensure a lack of a diff works
     assert parser.diff() == ""
 

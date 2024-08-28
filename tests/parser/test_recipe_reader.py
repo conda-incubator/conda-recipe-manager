@@ -76,7 +76,7 @@ def test_str(file: str, out_file: str) -> None:
     :param file: Recipe file to test with
     :param out_file: Output string to match
     """
-    parser = load_recipe(file)
+    parser = load_recipe(file, RecipeReader)
     assert str(parser) == load_file(f"{TEST_FILES_PATH}/{out_file}")
     # Regression test: Run a function a second time to ensure that `SelectorInfo::__str__()` doesn't accidentally purge
     # the underlying stack when the string is being rendered.
@@ -99,9 +99,9 @@ def test_eq(file: str, other_file: str) -> None:
     :param file: Recipe file to test with
     :param other_file: "Other" recipe file to check against
     """
-    parser0 = load_recipe(file)
-    parser1 = load_recipe(file)
-    parser2 = load_recipe(other_file)
+    parser0 = load_recipe(file, RecipeReader)
+    parser1 = load_recipe(file, RecipeReader)
+    parser2 = load_recipe(other_file, RecipeReader)
     assert parser0 == parser1
     assert parser0 != parser2
     assert not parser0.is_modified()
@@ -294,7 +294,7 @@ def test_render_to_object(file: str, substitute: bool, expected: JsonType) -> No
     :param substitute: True to run the function with JINJA substitutions on, False for off
     :param expected: Expected value to return
     """
-    parser = load_recipe(file)
+    parser = load_recipe(file, RecipeReader)
     assert parser.render_to_object(substitute) == expected
 
 
@@ -302,7 +302,7 @@ def test_render_to_object_multi_output() -> None:
     """
     Tests rendering a recipe to an object format.
     """
-    parser = load_recipe("multi-output.yaml")
+    parser = load_recipe("multi-output.yaml", RecipeReader)
     assert parser.render_to_object() == {
         "outputs": [
             {
@@ -423,7 +423,7 @@ def test_list_value_paths(file: str, expected: list[str]) -> None:
     :param file: Recipe file to test with
     :param expected: Expected result
     """
-    parser = load_recipe(file)
+    parser = load_recipe(file, RecipeReader)
     assert parser.list_value_paths() == expected
 
 
@@ -471,7 +471,7 @@ def test_contains_value(file: str, path: str, expected: bool) -> None:
     :param path: Target input path
     :param expected: Expected result of the test
     """
-    parser = load_recipe(file)
+    parser = load_recipe(file, RecipeReader)
     assert parser.contains_value(path) == expected
     assert not parser.is_modified()
 
@@ -710,7 +710,7 @@ def test_get_value(file: str, path: str, sub_vars: bool, expected: JsonType) -> 
     :param sub_vars: True to substitute JINJA variables. False otherwise.
     :param expected: Expected result of the test
     """
-    parser = load_recipe(file)
+    parser = load_recipe(file, RecipeReader)
     assert parser.get_value(path, sub_vars=sub_vars) == expected
     assert not parser.is_modified()
 
@@ -722,7 +722,7 @@ def test_get_value_not_found(file: str) -> None:
 
     :param file: File to work against
     """
-    parser = load_recipe(file)
+    parser = load_recipe(file, RecipeReader)
     # Path not found cases
     with pytest.raises(KeyError):
         parser.get_value("/invalid/fake/path")
@@ -779,7 +779,7 @@ def test_find_value(file: str, value: Primitives, expected: list[str]) -> None:
     :param value: Target value
     :param expected: Expected result of the test
     """
-    parser = load_recipe(file)
+    parser = load_recipe(file, RecipeReader)
     assert parser.find_value(value) == expected
     assert not parser.is_modified()
 
@@ -802,7 +802,7 @@ def test_find_value_raises(file: str, value: Primitives) -> None:
     :param file: File to work against
     :param value: Target value
     """
-    parser = load_recipe(file)
+    parser = load_recipe(file, RecipeReader)
     with pytest.raises(ValueError):
         parser.find_value(value)
     assert not parser.is_modified()
@@ -827,7 +827,7 @@ def test_is_multi_output(file: str, expected: bool) -> None:
     :param file: File to test against
     :param expected: Expected output
     """
-    assert load_recipe(file).is_multi_output() == expected
+    assert load_recipe(file, RecipeReader).is_multi_output() == expected
 
 
 @pytest.mark.parametrize(
@@ -848,7 +848,7 @@ def test_get_package_paths(file: str, expected: list[str]) -> None:
     :param file: File to test against
     :param expected: Expected output
     """
-    assert load_recipe(file).get_package_paths() == expected
+    assert load_recipe(file, RecipeReader).get_package_paths() == expected
 
 
 @pytest.mark.parametrize(
@@ -965,7 +965,7 @@ def test_get_dependency_paths(file: str, expected: list[str]) -> None:
     :param file: File to test against
     :param expected: Expected output
     """
-    assert load_recipe(file).get_dependency_paths() == expected
+    assert load_recipe(file, RecipeReader).get_dependency_paths() == expected
 
 
 ## Variables ##
@@ -1013,7 +1013,7 @@ def test_list_variable(file: str, expected: list[str]) -> None:
     :param file: File to test against
     :param expected: Expected output
     """
-    parser = load_recipe(file)
+    parser = load_recipe(file, RecipeReader)
     assert parser.list_variables() == expected
     assert not parser.is_modified()
 
@@ -1047,7 +1047,7 @@ def test_contains_variable(file: str, var: str, expected: bool) -> None:
     :param var: Target JINJA variable
     :param expected: Expected output
     """
-    parser = load_recipe(file)
+    parser = load_recipe(file, RecipeReader)
     assert parser.contains_variable(var) == expected
     assert not parser.is_modified()
 
@@ -1071,7 +1071,7 @@ def test_get_variable(file: str, var: str, expected: JsonType) -> None:
     :param var: Target JINJA variable
     :param expected: Expected output
     """
-    parser = load_recipe(file)
+    parser = load_recipe(file, RecipeReader)
     assert parser.get_variable(var) == expected
     assert not parser.is_modified()
 
@@ -1089,7 +1089,7 @@ def test_get_variable_dne(file: str) -> None:
 
     :param file: File to test against
     """
-    parser = load_recipe(file)
+    parser = load_recipe(file, RecipeReader)
     with pytest.raises(KeyError):
         parser.get_variable("fake_var")
     assert parser.get_variable("fake_var", 43) == 43
@@ -1117,7 +1117,7 @@ def test_get_variable_references(file: str, var: str, expected: list[str]) -> No
     :param var: Target JINJA variable
     :param expected: Expected output
     """
-    parser = load_recipe(file)
+    parser = load_recipe(file, RecipeReader)
     assert parser.get_variable_references(var) == expected
     assert not parser.is_modified()
 
@@ -1129,7 +1129,7 @@ def test_list_selectors() -> None:
     """
     Validates the list of selectors found
     """
-    parser = load_recipe("simple-recipe.yaml")
+    parser = load_recipe("simple-recipe.yaml", RecipeReader)
     assert parser.list_selectors() == ["[unix]", "[py<37]", "[unix and win]"]
     assert not parser.is_modified()
 
@@ -1138,7 +1138,7 @@ def test_contains_selectors() -> None:
     """
     Validates checking if a selector exists in a recipe
     """
-    parser = load_recipe("simple-recipe.yaml")
+    parser = load_recipe("simple-recipe.yaml", RecipeReader)
     assert parser.contains_selector("[py<37]")
     assert parser.contains_selector("[unix]")
     assert not parser.contains_selector("[fake selector]")
@@ -1149,7 +1149,7 @@ def test_get_selector_paths() -> None:
     """
     Tests the paths returned from fetching a selector
     """
-    parser = load_recipe("simple-recipe.yaml")
+    parser = load_recipe("simple-recipe.yaml", RecipeReader)
     assert parser.get_selector_paths("[py<37]") == ["/build/skip"]
     assert parser.get_selector_paths("[unix]") == [
         "/package/name",
@@ -1180,7 +1180,7 @@ def test_contains_selector_at_path(file: str, path: str, expected: bool) -> None
     :param path: Path to check
     :param expected: Expected value
     """
-    assert load_recipe(file).contains_selector_at_path(path) == expected
+    assert load_recipe(file, RecipeReader).contains_selector_at_path(path) == expected
 
 
 @pytest.mark.parametrize(
@@ -1200,7 +1200,7 @@ def test_get_selector_at_path_exists(file: str, path: str, expected: str) -> Non
     :param path: Path to check
     :param expected: Expected value
     """
-    assert load_recipe(file).get_selector_at_path(path) == expected
+    assert load_recipe(file, RecipeReader).get_selector_at_path(path) == expected
 
 
 def test_get_selector_at_path_dne() -> None:
@@ -1208,7 +1208,7 @@ def test_get_selector_at_path_dne() -> None:
     Tests edge cases where `get_selector_at_path()` should fail correctly OR
     handles non-existent selectors gracefully
     """
-    parser = load_recipe("simple-recipe.yaml")
+    parser = load_recipe("simple-recipe.yaml", RecipeReader)
     # Path does not exist
     with pytest.raises(KeyError):
         parser.get_selector_at_path("/fake/path")
@@ -1255,7 +1255,7 @@ def test_get_comments_table(file: str, expected: dict[str, str]) -> None:
     :param file: File to run against
     :param expected: Expected value
     """
-    parser = load_recipe(file)
+    parser = load_recipe(file, RecipeReader)
     assert parser.get_comments_table() == expected
 
 
@@ -1263,7 +1263,7 @@ def test_search() -> None:
     """
     Tests searching for values
     """
-    parser = load_recipe("simple-recipe.yaml")
+    parser = load_recipe("simple-recipe.yaml", RecipeReader)
     assert parser.search(r"fake") == ["/requirements/host/1"]
     assert parser.search(r"^0$") == ["/build/number"]
     assert parser.search(r"true") == ["/build/skip", "/build/is_true"]
@@ -1286,5 +1286,5 @@ def test_calc_sha256(file: str, expected: str) -> None:
     """
     Tests hashing a recipe parser's state with SHA-256
     """
-    parser = load_recipe(file)
+    parser = load_recipe(file, RecipeReader)
     assert parser.calc_sha256() == expected
