@@ -20,6 +20,7 @@ from conda_recipe_manager.parser.platform_types import (
     get_platforms_by_arch,
     get_platforms_by_os,
 )
+from conda_recipe_manager.parser.selector_query import SelectorQuery
 
 # A selector is comprised of known operators and special types, or (in V0 recipes) arbitrary Python strings
 SelectorValue = LogicOp | PlatformQualifiers | str
@@ -179,6 +180,8 @@ class SelectorParser(IsModifiable):
     def get_selected_platforms(self) -> set[Platform]:
         """
         Returns the set of platforms selected by this selector
+
+        :returns: Set of platforms selected for by the target selector.
         """
 
         # Recursive helper function that performs a post-order traversal
@@ -206,3 +209,11 @@ class SelectorParser(IsModifiable):
                     return set()
 
         return _eval_node(self._root)
+
+    def does_selector_apply(self, query: SelectorQuery) -> bool:
+        """
+        TODO
+
+        :returns: True if the selector applies to the current situation. False otherwise.
+        """
+        return False
