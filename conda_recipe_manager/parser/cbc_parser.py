@@ -27,17 +27,19 @@ _CBCTable = dict[str, list[_CBCEntry]]
 # TODO RecipeReader
 class CBCParser(RecipeParser):
     """
+    Parses a Conda Build Configuration (CBC) file and provides querying capabilities. Often these files are named
+    `conda_build_configuration.yaml` or `cbc.yaml`
+
     This work is based off of the `RecipeParser` class. The CBC file format happens to be similar enough to
     the recipe format (with commented selectors)
-
-    TODO: Find out what/if there is an equivalent in the V1 recipe format.
     """
+    # TODO: Find out what/if there is an equivalent in the V1 recipe format.
 
     def __init__(self, content: str):
         """
-        TODO
+        Constructs a CBC Parser instance from the contents of a CBC file.
 
-        :param content: conda-build formatted recipe file, as a single text string.
+        :param content: conda-build formatted configuration file, as a single text string.
         """
         super().__init__(content)
         self._cbc_vars_tbl: _CBCTable = {}
@@ -72,19 +74,31 @@ class CBCParser(RecipeParser):
 
     def __contains__(self, key: object) -> bool:
         """
-        TODO
+        Indicates if a variable is found in a CBC file.
+
+        :param key: Target variable name to check for.
+        :returns: True if the variable exists in this CBC file. False otherwise.
         """
         if not isinstance(key, str):
             return False
         return key in self._cbc_vars_tbl
 
     def list_cbc_variables(self) -> list[str]:
-        return []
+        """
+        Get a list of all the available CBC variable names.
+
+        :returns: A list containing all the variables defined in the CBC file.
+        """
+        # TODO filter-out zip-keys and other special cases
+        return list(self._cbc_vars_tbl.keys())
 
     def get_cbc_variable_value(self, variable: str, query: SelectorQuery, default: Primitives | SentinelType = RecipeParser._sentinel) -> Primitives:
         """
-        TODO
+        Determines which value of a CBC variable is applicable to the current environment.
 
+        :param variable: Target variable name.
+        :param query: Query that represents the state of the target build environment.
+        :param default: (Optional) Value to return if no variable could be found or no value could be determined.
         :raises KeyError: If the key does not exist and no default value is provided.
         :raises ValueError: If the selector query does not match any case and no default value is provided.
         :returns: Value of the variable as indicated by the selector options provided.
@@ -92,20 +106,17 @@ class CBCParser(RecipeParser):
         if variable not in self:
             if default == RecipeParser._sentinel:
                 raise KeyError(f"CBC variable not found: {variable}")
-            else:
-                return default
+            return default
 
         cbc_entries: Final[list[_CBCEntry]] = self._cbc_vars_tbl[variable]
         if len(cbc_entries) == 0 and cbc_entries[0].selector is None:
             return variable
 
         for entry in cbc_entries:
-            if entry.selector is None:
-                return entry.value
-            if entry.selector.does_selector_apply(query):
+            if entry.selector is None or entry.selector.does_selector_apply(query):
                 return entry.value
 
         # No applicable entries have been found to match any selector variant.
         if default == RecipeParser._sentinel:
-            raise ValueError(f"CBC variable does not have a value for the provided selector: {}")
-        return None
+            raise ValueError(f"CBC variable does not have a value for the provided selector query: {variable}")
+        return default
