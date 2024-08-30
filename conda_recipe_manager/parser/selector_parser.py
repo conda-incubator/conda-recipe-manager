@@ -212,8 +212,16 @@ class SelectorParser(IsModifiable):
 
     def does_selector_apply(self, query: SelectorQuery) -> bool:
         """
-        TODO
+        Determines if this selector applies to the current target environment.
 
+        :param query: Target environment constraints.
         :returns: True if the selector applies to the current situation. False otherwise.
         """
-        return False
+        # TODO support more than platforms
+
+        platform_set: Final[set[Platform]] = self.get_selected_platforms()
+        if query.platform is not None:
+            return query.platform in platform_set
+
+        # No constraints? No problem!
+        return True

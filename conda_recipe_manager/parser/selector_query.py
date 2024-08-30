@@ -8,6 +8,4 @@ class SelectorQuery(NamedTuple):
     TODO
     """
 
-    arch: Optional[Arch] = None
-    os: Optional[OperatingSystem] = None
     platform: Optional[Platform] = None
