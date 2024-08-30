@@ -8,8 +8,9 @@ import pytest
 from conda.models.match_spec import MatchSpec
 
 from conda_recipe_manager.parser.dependency import Dependency, DependencyMap, DependencySection
+from conda_recipe_manager.parser.recipe_parser_deps import RecipeParserDeps
 from conda_recipe_manager.parser.selector_parser import SchemaVersion, SelectorParser
-from tests.file_loading import load_recipe_deps
+from tests.file_loading import load_recipe
 
 
 @pytest.mark.parametrize(
@@ -46,7 +47,7 @@ def test_get_package_names_to_path(file: str, expected: dict[str, str]) -> None:
     :param file: File to test against
     :param expected: Expected output
     """
-    parser = load_recipe_deps(file)
+    parser = load_recipe(file, RecipeParserDeps)
     assert parser.get_package_names_to_path() == expected
 
 
@@ -271,5 +272,5 @@ def test_get_all_dependencies(file: str, expected: DependencyMap) -> None:
     :param file: File to test against
     :param expected: Expected output
     """
-    parser = load_recipe_deps(file)
+    parser = load_recipe(file, RecipeParserDeps)
     assert parser.get_all_dependencies() == expected
