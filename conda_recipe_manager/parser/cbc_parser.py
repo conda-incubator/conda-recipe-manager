@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from typing import Final, NamedTuple, Optional, cast
 
-from conda_recipe_manager.parser.recipe_parser import RecipeParser
+from conda_recipe_manager.parser.recipe_reader import RecipeReader
 from conda_recipe_manager.parser.selector_parser import SelectorParser
 from conda_recipe_manager.parser.selector_query import SelectorQuery
 from conda_recipe_manager.parser.types import SchemaVersion
@@ -17,22 +17,24 @@ class _CBCEntry(NamedTuple):
     """
     Internal representation of a variable's value in a CBC file.
     """
+
     value: Primitives
     selector: Optional[SelectorParser]
+
 
 # Internal variable table
 _CBCTable = dict[str, list[_CBCEntry]]
 
 
-# TODO RecipeReader
-class CBCParser(RecipeParser):
+class CBCParser(RecipeReader):
     """
     Parses a Conda Build Configuration (CBC) file and provides querying capabilities. Often these files are named
     `conda_build_configuration.yaml` or `cbc.yaml`
 
-    This work is based off of the `RecipeParser` class. The CBC file format happens to be similar enough to
+    This work is based off of the `RecipeReader` class. The CBC file format happens to be similar enough to
     the recipe format (with commented selectors)
     """
+
     # TODO: Find out what/if there is an equivalent in the V1 recipe format.
 
     def __init__(self, content: str):
@@ -60,7 +62,7 @@ class CBCParser(RecipeParser):
                 continue
 
             for i, value in enumerate(value_list):
-                path = RecipeParser.append_to_path(f"/{variable}/{i}")
+                path = f"/{variable}/{i}"
                 # TODO add V1 support for CBC files? Is there a V1 CBC format?
                 entry = _CBCEntry(
                     value=value,
@@ -92,7 +94,9 @@ class CBCParser(RecipeParser):
         # TODO filter-out zip-keys and other special cases
         return list(self._cbc_vars_tbl.keys())
 
-    def get_cbc_variable_value(self, variable: str, query: SelectorQuery, default: Primitives | SentinelType = RecipeParser._sentinel) -> Primitives:
+    def get_cbc_variable_value(
+        self, variable: str, query: SelectorQuery, default: Primitives | SentinelType = RecipeReader._sentinel
+    ) -> Primitives:
         """
         Determines which value of a CBC variable is applicable to the current environment.
 
@@ -104,7 +108,7 @@ class CBCParser(RecipeParser):
         :returns: Value of the variable as indicated by the selector options provided.
         """
         if variable not in self:
-            if default == RecipeParser._sentinel:
+            if default == RecipeReader._sentinel:
                 raise KeyError(f"CBC variable not found: {variable}")
             return default
 
@@ -117,6 +121,6 @@ class CBCParser(RecipeParser):
                 return entry.value
 
         # No applicable entries have been found to match any selector variant.
-        if default == RecipeParser._sentinel:
+        if default == RecipeReader._sentinel:
             raise ValueError(f"CBC variable does not have a value for the provided selector query: {variable}")
         return default
