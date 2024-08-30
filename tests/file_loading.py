@@ -5,15 +5,17 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Final
+from typing import Final, Type, TypeVar
 
 from conda_recipe_manager.grapher.recipe_graph import RecipeGraph
-from conda_recipe_manager.parser.recipe_parser import RecipeParser
-from conda_recipe_manager.parser.recipe_parser_convert import RecipeParserConvert
 from conda_recipe_manager.parser.recipe_parser_deps import RecipeParserDeps
+from conda_recipe_manager.parser.recipe_reader import RecipeReader
 
 # Path to supplementary files used in test cases
 TEST_FILES_PATH: Final[Path] = Path(__file__).parent / "test_aux_files"
+
+# Generic Type for recipe-parsing classes
+R = TypeVar("R", bound=RecipeReader)
 
 
 def load_file(file: Path | str) -> str:
@@ -26,7 +28,7 @@ def load_file(file: Path | str) -> str:
     return Path(file).read_text(encoding="utf-8")
 
 
-def load_recipe(file_name: str) -> RecipeParser:
+def load_recipe(file_name: str, recipe_parser: Type[R]) -> R:
     """
     Convenience function that simplifies initializing a recipe parser.
 
@@ -34,29 +36,7 @@ def load_recipe(file_name: str) -> RecipeParser:
     :returns: RecipeParser instance, based on the file
     """
     recipe = load_file(TEST_FILES_PATH / file_name)
-    return RecipeParser(recipe)
-
-
-def load_recipe_convert(file_name: str) -> RecipeParserConvert:
-    """
-    Convenience function that simplifies initializing a recipe parser.
-
-    :param file_name: File name of the test recipe to load
-    :returns: RecipeParserConvert instance, based on the file
-    """
-    recipe = load_file(TEST_FILES_PATH / file_name)
-    return RecipeParserConvert(recipe)
-
-
-def load_recipe_deps(file_name: str) -> RecipeParserDeps:
-    """
-    Convenience function that simplifies initializing a recipe parser.
-
-    :param file_name: File name of the test recipe to load
-    :returns: RecipeParserDeps instance, based on the file
-    """
-    recipe = load_file(TEST_FILES_PATH / file_name)
-    return RecipeParserDeps(recipe)
+    return recipe_parser(recipe)
 
 
 def load_recipe_graph(recipes: list[str]) -> RecipeGraph:

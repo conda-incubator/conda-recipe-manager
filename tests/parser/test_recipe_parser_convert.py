@@ -8,7 +8,7 @@ import pytest
 
 from conda_recipe_manager.parser.recipe_parser_convert import RecipeParserConvert
 from conda_recipe_manager.types import MessageCategory
-from tests.file_loading import TEST_FILES_PATH, load_file, load_recipe_convert
+from tests.file_loading import TEST_FILES_PATH, load_file, load_recipe
 
 
 @pytest.mark.parametrize(
@@ -179,7 +179,7 @@ def test_render_to_v1_recipe_format(file_base: str, errors: list[str], warnings:
 
     :param file_base: Base file name for both the input and the expected out
     """
-    parser = load_recipe_convert(file_base)
+    parser = load_recipe(file_base, RecipeParserConvert)
     result, tbl, _ = parser.render_to_v1_recipe_format()
     assert result == load_file(f"{TEST_FILES_PATH}/v1_format/v1_{file_base}")
     assert tbl.get_messages(MessageCategory.ERROR) == errors
