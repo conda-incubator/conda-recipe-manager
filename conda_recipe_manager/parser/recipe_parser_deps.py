@@ -1,5 +1,5 @@
 """
-:Description: Provides a subclass of RecipeParser that adds advanced dependency management tools.
+:Description: Provides a subclass of RecipeReader that adds advanced dependency management tools.
 """
 
 from __future__ import annotations
@@ -13,14 +13,14 @@ from conda_recipe_manager.parser.dependency import (
     dependency_data_from_string,
     str_to_dependency_section,
 )
-from conda_recipe_manager.parser.recipe_parser import RecipeParser
+from conda_recipe_manager.parser.recipe_reader import RecipeReader
 from conda_recipe_manager.parser.selector_parser import SelectorParser
 from conda_recipe_manager.parser.types import SchemaVersion
 
 
-class RecipeParserDeps(RecipeParser):
+class RecipeParserDeps(RecipeReader):
     """
-    Extension of the base RecipeParser class to enables advanced dependency management abilities. The base RecipeParser
+    Extension of the base RecipeReader class to enables advanced dependency management abilities. The base RecipeReader
     class is so large, that this has been broken-out for maintenance purposes.
     """
 
@@ -73,7 +73,7 @@ class RecipeParserDeps(RecipeParser):
                 if path == ROOT_NODE_VALUE:
                     name = cast(str, self.get_value(root_name_path, sub_vars=True))
                 else:
-                    name = cast(str, self.get_value(RecipeParser.append_to_path(path, name_path), sub_vars=True))
+                    name = cast(str, self.get_value(RecipeReader.append_to_path(path, name_path), sub_vars=True))
             except KeyError as e:
                 raise KeyError(f"Could not find a package name associated with path: {path}") from e
 
@@ -102,7 +102,7 @@ class RecipeParserDeps(RecipeParser):
 
             requirements = cast(
                 dict[str, list[str | None]],
-                self.get_value(RecipeParser.append_to_path(path, "/requirements"), default={}, sub_vars=True),
+                self.get_value(RecipeReader.append_to_path(path, "/requirements"), default={}, sub_vars=True),
             )
             dep_map[package] = []
             for section_str, deps in requirements.items():
@@ -121,7 +121,7 @@ class RecipeParserDeps(RecipeParser):
                         continue
 
                     # NOTE: `get_dependency_paths()` uses the same approach for calculating dependency paths.
-                    dep_path = RecipeParser.append_to_path(path, f"/requirements/{section_str}/{i}")
+                    dep_path = RecipeReader.append_to_path(path, f"/requirements/{section_str}/{i}")
                     dep_map[package].append(
                         Dependency(
                             required_by=package,
