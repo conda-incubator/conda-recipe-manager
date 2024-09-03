@@ -101,12 +101,12 @@ class RecipeGraph:
                     match dep.type:
                         # Build graph
                         case DependencySection.BUILD | DependencySection.HOST:
-                            self._build_graph.add_edge(package_name, dep.match_spec.name)  # type: ignore[misc]
+                            self._build_graph.add_edge(package_name, dep.data.name)  # type: ignore[misc]
 
                         # Test graph
                         # TODO does this include run constraints?
                         case DependencySection.RUN | DependencySection.TESTS:
-                            self._test_graph.add_edge(package_name, dep.match_spec.name)  # type: ignore[misc]
+                            self._test_graph.add_edge(package_name, dep.data.name)  # type: ignore[misc]
 
     def __bool__(self) -> bool:
         """
