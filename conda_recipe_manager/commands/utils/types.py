@@ -19,6 +19,8 @@ class ExitCode(IntEnum):
     CLICK_ERROR = 1  # Controlled by the `click` library
     CLICK_USAGE = 2  # Controlled by the `click` library
     NO_FILES_FOUND = 3
+    JSON_ERROR = 4
+    IO_ERROR = 5
     # In bulk operation mode, this indicates that the % success threshold was not met
     MISSED_SUCCESS_THRESHOLD = 42
     TIMEOUT = 43
