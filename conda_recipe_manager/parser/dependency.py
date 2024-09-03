@@ -9,6 +9,7 @@ from typing import NamedTuple, Optional
 
 from conda.models.match_spec import MatchSpec
 
+from conda_recipe_manager.parser._types import Regex
 from conda_recipe_manager.parser.selector_parser import SelectorParser
 from conda_recipe_manager.parser.types import SchemaVersion
 
@@ -97,6 +98,49 @@ def str_to_dependency_section(s: str) -> Optional[DependencySection]:
             return None
 
 
+class DependencyVariable:
+    """
+    Represents a dependency that contains a JINJA variable that is unable to be resolved by the recipe's variable table.
+    """
+
+    def __init__(self, s: str):
+        """
+        Constructs a DependencyVariable instance.
+
+        :param s: String to initialize the instance with.
+        """
+        # Using `name` allows this class to be used trivially with MatchSpec without type guards.
+        # TODO normalize common JINJA functions for quote usage
+        self.name = s
+
+    def __eq__(self, o: object) -> bool:
+        """
+        Checks to see if two objects are equivalent.
+
+        :param o: Other instance to check.
+        :returns: True if two DependencyVariable instances are equivalent. False otherwise.
+        """
+        if not isinstance(o, DependencyVariable):
+            return False
+        return self.name == o.name
+
+
+# Type alias for types allowed in a Dependency's `data` field.
+DependencyData = MatchSpec | DependencyVariable
+
+
+def dependency_data_from_string(s: str) -> DependencyData:
+    """
+    Constructs a DataDependency object from a dependency string in a recipe file.
+
+    :param s: String to process.
+    :returns: A DataDependency instance.
+    """
+    if Regex.JINJA_V1_SUB.search(s):
+        return DependencyVariable(s)
+    return MatchSpec(s)
+
+
 class Dependency(NamedTuple):
     """
     Structure that contains metadata about a dependency found in the recipe. This is immutable by design.
@@ -108,8 +152,8 @@ class Dependency(NamedTuple):
     path: str
     # Identifies what kind of dependency this is
     type: DependencySection
-    # Parses the dependency's name and version constraints
-    match_spec: MatchSpec
+    # Parsed dependency. Identifies a name and version constraints
+    data: DependencyData
     # The selector applied to this dependency, if applicable
     selector: Optional[SelectorParser] = None
 

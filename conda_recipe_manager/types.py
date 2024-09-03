@@ -34,10 +34,30 @@ SchemaType = dict[str, SchemaDetails]
 # Generic, hashable type
 H = TypeVar("H", bound=Hashable)
 
+# Bootstraps global singleton used by `SentinelType`
+_schema_type_singleton: SentinelType
 
-# All sentinel values used in this module should be constructed with this class, for typing purposes.
+
 class SentinelType:
-    pass
+    """
+    A single sentinel class to be used in this project, as an alternative to `None` when `None` cannot be used.
+    It is defined in a way such that SentinelType instances survive pickling and allocations in different memory
+    spaces.
+    """
+
+    def __new__(cls) -> SentinelType:
+        """
+        Constructs a global singleton SentinelType instance, once.
+
+        :returns: The SentinelType instance
+        """
+        # Credit to @dholth for suggesting this approach in PR #105.
+        global _schema_type_singleton
+        try:
+            return _schema_type_singleton
+        except NameError:
+            _schema_type_singleton = super().__new__(cls)
+            return _schema_type_singleton
 
 
 class MessageCategory(StrEnum):

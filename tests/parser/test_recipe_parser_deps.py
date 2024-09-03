@@ -7,7 +7,7 @@ from __future__ import annotations
 import pytest
 from conda.models.match_spec import MatchSpec
 
-from conda_recipe_manager.parser.dependency import Dependency, DependencyMap, DependencySection
+from conda_recipe_manager.parser.dependency import Dependency, DependencyMap, DependencySection, DependencyVariable
 from conda_recipe_manager.parser.recipe_parser_deps import RecipeParserDeps
 from conda_recipe_manager.parser.selector_parser import SchemaVersion, SelectorParser
 from tests.file_loading import load_recipe
@@ -37,6 +37,10 @@ from tests.file_loading import load_recipe
                 "libgoogle-cloud-all-devel": "/outputs/1",
                 "google-cloud-cpp": "/outputs/2",
             },
+        ),
+        (
+            "libprotobuf.yaml",
+            {"libprotobuf-suite": "/", "libprotobuf": "/outputs/0", "libprotobuf-static": "/outputs/1"},
         ),
     ],
 )
@@ -259,6 +263,256 @@ def test_get_package_names_to_path(file: str, expected: dict[str, str]) -> None:
                     Dependency("ld64", "/requirements/host/1", DependencySection.HOST, MatchSpec("zlib"), None),
                     Dependency(
                         "ld64", "/requirements/host/2", DependencySection.HOST, MatchSpec("llvm-lto-tapi"), None
+                    ),
+                ],
+            },
+        ),
+        # Regression Test: The parser previously crashed when trying to substitute `{{ compiler('c' ) }}`
+        (
+            "libprotobuf.yaml",
+            {
+                "libprotobuf": [
+                    Dependency(
+                        "libprotobuf",
+                        "/outputs/0/requirements/build/0",
+                        DependencySection.BUILD,
+                        DependencyVariable("${{ compiler('c') }}"),
+                        selector=None,
+                    ),
+                    Dependency(
+                        "libprotobuf",
+                        "/outputs/0/requirements/build/1",
+                        DependencySection.BUILD,
+                        DependencyVariable("${{ compiler('cxx') }}"),
+                        selector=None,
+                    ),
+                    Dependency(
+                        "libprotobuf",
+                        "/outputs/0/requirements/build/2",
+                        DependencySection.BUILD,
+                        MatchSpec("cmake"),
+                        SelectorParser("[win]", SchemaVersion.V0),
+                    ),
+                    Dependency(
+                        "libprotobuf",
+                        "/outputs/0/requirements/build/3",
+                        DependencySection.BUILD,
+                        MatchSpec("ninja"),
+                        SelectorParser("[win]", SchemaVersion.V0),
+                    ),
+                    Dependency(
+                        "libprotobuf",
+                        "/outputs/0/requirements/build/4",
+                        DependencySection.BUILD,
+                        MatchSpec("autoconf"),
+                        SelectorParser("[not win]", SchemaVersion.V0),
+                    ),
+                    Dependency(
+                        "libprotobuf",
+                        "/outputs/0/requirements/build/5",
+                        DependencySection.BUILD,
+                        MatchSpec("automake"),
+                        SelectorParser("[not win]", SchemaVersion.V0),
+                    ),
+                    Dependency(
+                        "libprotobuf",
+                        "/outputs/0/requirements/build/6",
+                        DependencySection.BUILD,
+                        MatchSpec("libtool"),
+                        SelectorParser("[not win]", SchemaVersion.V0),
+                    ),
+                    Dependency(
+                        "libprotobuf",
+                        "/outputs/0/requirements/build/7",
+                        DependencySection.BUILD,
+                        MatchSpec("pkg-config"),
+                        SelectorParser("[not win]", SchemaVersion.V0),
+                    ),
+                    Dependency(
+                        "libprotobuf",
+                        "/outputs/0/requirements/build/8",
+                        DependencySection.BUILD,
+                        MatchSpec("unzip"),
+                        SelectorParser("[not win]", SchemaVersion.V0),
+                    ),
+                    Dependency(
+                        "libprotobuf",
+                        "/outputs/0/requirements/build/9",
+                        DependencySection.BUILD,
+                        MatchSpec("make"),
+                        SelectorParser("[not win]", SchemaVersion.V0),
+                    ),
+                    Dependency(
+                        "libprotobuf",
+                        "/outputs/0/requirements/build/10",
+                        DependencySection.BUILD,
+                        MatchSpec("sed"),
+                        SelectorParser("[osx and arm64]", SchemaVersion.V0),
+                    ),
+                    Dependency(
+                        "libprotobuf",
+                        "/outputs/0/requirements/host/0",
+                        DependencySection.HOST,
+                        MatchSpec("zlib"),
+                        selector=None,
+                    ),
+                    Dependency(
+                        "libprotobuf",
+                        "/outputs/0/requirements/run/0",
+                        DependencySection.RUN,
+                        MatchSpec("zlib"),
+                        selector=None,
+                    ),
+                    Dependency(
+                        "libprotobuf",
+                        "/requirements/build/0",
+                        DependencySection.BUILD,
+                        MatchSpec("patch"),
+                        SelectorParser("[linux]", SchemaVersion.V0),
+                    ),
+                    Dependency(
+                        "libprotobuf",
+                        "/requirements/build/1",
+                        DependencySection.BUILD,
+                        MatchSpec("sed"),
+                        SelectorParser("[osx and arm64]", SchemaVersion.V0),
+                    ),
+                ],
+                "libprotobuf-static": [
+                    Dependency(
+                        "libprotobuf-static",
+                        "/outputs/1/requirements/build/0",
+                        DependencySection.BUILD,
+                        DependencyVariable("${{ compiler('c') }}"),
+                        selector=None,
+                    ),
+                    Dependency(
+                        "libprotobuf-static",
+                        "/outputs/1/requirements/build/1",
+                        DependencySection.BUILD,
+                        DependencyVariable("${{ compiler('cxx') }}"),
+                        selector=None,
+                    ),
+                    Dependency(
+                        "libprotobuf-static",
+                        "/outputs/1/requirements/build/2",
+                        DependencySection.BUILD,
+                        MatchSpec("cmake"),
+                        SelectorParser("win", SchemaVersion.V0),
+                    ),
+                    Dependency(
+                        "libprotobuf-static",
+                        "/outputs/1/requirements/build/3",
+                        DependencySection.BUILD,
+                        MatchSpec("ninja"),
+                        SelectorParser("win", SchemaVersion.V0),
+                    ),
+                    Dependency(
+                        "libprotobuf-static",
+                        "/outputs/1/requirements/build/4",
+                        DependencySection.BUILD,
+                        MatchSpec("autoconf"),
+                        SelectorParser("[not win]", SchemaVersion.V0),
+                    ),
+                    Dependency(
+                        "libprotobuf-static",
+                        "/outputs/1/requirements/build/5",
+                        DependencySection.BUILD,
+                        MatchSpec("automake"),
+                        SelectorParser("[not win]", SchemaVersion.V0),
+                    ),
+                    Dependency(
+                        "libprotobuf-static",
+                        "/outputs/1/requirements/build/6",
+                        DependencySection.BUILD,
+                        MatchSpec("libtool"),
+                        SelectorParser("[not win]", SchemaVersion.V0),
+                    ),
+                    Dependency(
+                        "libprotobuf-static",
+                        "/outputs/1/requirements/build/7",
+                        DependencySection.BUILD,
+                        MatchSpec("pkg-config"),
+                        SelectorParser("[not win]", SchemaVersion.V0),
+                    ),
+                    Dependency(
+                        "libprotobuf-static",
+                        "/outputs/1/requirements/build/8",
+                        DependencySection.BUILD,
+                        MatchSpec("unzip"),
+                        SelectorParser("[not win]", SchemaVersion.V0),
+                    ),
+                    Dependency(
+                        "libprotobuf-static",
+                        "/outputs/1/requirements/build/9",
+                        DependencySection.BUILD,
+                        MatchSpec("make"),
+                        SelectorParser("[not win]", SchemaVersion.V0),
+                    ),
+                    Dependency(
+                        "libprotobuf-static",
+                        "/outputs/1/requirements/host/0",
+                        DependencySection.HOST,
+                        MatchSpec("zlib"),
+                        SelectorParser("[not win]", SchemaVersion.V0),
+                    ),
+                    Dependency(
+                        "libprotobuf-static",
+                        "/outputs/1/requirements/host/1",
+                        DependencySection.HOST,
+                        DependencyVariable("${{ pin_subpackage('libprotobuf', exact=True) }}"),
+                        SelectorParser("[not win]", SchemaVersion.V0),
+                    ),
+                    Dependency(
+                        "libprotobuf-static",
+                        "/outputs/1/requirements/run/0",
+                        DependencySection.RUN,
+                        MatchSpec("zlib"),
+                        SelectorParser("[not win]", SchemaVersion.V0),
+                    ),
+                    Dependency(
+                        "libprotobuf-static",
+                        "/outputs/1/requirements/run/1",
+                        DependencySection.RUN,
+                        DependencyVariable("${{ pin_subpackage('libprotobuf', exact=True) }}"),
+                        SelectorParser("[not win]", SchemaVersion.V0),
+                    ),
+                    Dependency(
+                        "libprotobuf-static",
+                        "/outputs/1/requirements/run_constrained/0",
+                        DependencySection.RUN_CONSTRAINTS,
+                        MatchSpec("libprotobuf[version='<0a0']"),
+                        SelectorParser("[win]", SchemaVersion.V0),
+                    ),
+                    Dependency(
+                        "libprotobuf-static",
+                        "/requirements/build/0",
+                        DependencySection.BUILD,
+                        MatchSpec("patch"),
+                        SelectorParser("[linux]", SchemaVersion.V0),
+                    ),
+                    Dependency(
+                        "libprotobuf-static",
+                        "/requirements/build/1",
+                        DependencySection.BUILD,
+                        MatchSpec("sed"),
+                        SelectorParser("[osx and arm64]", SchemaVersion.V0),
+                    ),
+                ],
+                "libprotobuf-suite": [
+                    Dependency(
+                        "libprotobuf-suite",
+                        "/requirements/build/0",
+                        DependencySection.BUILD,
+                        MatchSpec("patch"),
+                        SelectorParser("[linux]", SchemaVersion.V0),
+                    ),
+                    Dependency(
+                        "libprotobuf-suite",
+                        "/requirements/build/1",
+                        DependencySection.BUILD,
+                        MatchSpec("sed"),
+                        SelectorParser("[osx and arm64]", SchemaVersion.V0),
                     ),
                 ],
             },

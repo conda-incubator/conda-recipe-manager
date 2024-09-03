@@ -6,10 +6,13 @@ from __future__ import annotations
 
 from typing import Final, Optional, cast
 
-from conda.models.match_spec import MatchSpec
-
 from conda_recipe_manager.parser._types import ROOT_NODE_VALUE
-from conda_recipe_manager.parser.dependency import Dependency, DependencyMap, str_to_dependency_section
+from conda_recipe_manager.parser.dependency import (
+    Dependency,
+    DependencyMap,
+    dependency_data_from_string,
+    str_to_dependency_section,
+)
 from conda_recipe_manager.parser.recipe_reader import RecipeReader
 from conda_recipe_manager.parser.selector_parser import SelectorParser
 from conda_recipe_manager.parser.types import SchemaVersion
@@ -34,7 +37,7 @@ class RecipeParserDeps(RecipeReader):
                 continue
             # Change the "required_by" package name to the current package, not the root package name.
             dep_map[package].extend(
-                [Dependency(package, d.path, d.type, d.match_spec, d.selector) for d in root_dependencies]
+                [Dependency(package, d.path, d.type, d.data, d.selector) for d in root_dependencies]
             )
 
     def _fetch_optional_selector(self, path: str) -> Optional[SelectorParser]:
@@ -98,8 +101,8 @@ class RecipeParserDeps(RecipeReader):
                 root_package = package
 
             requirements = cast(
-                dict[str, list[str]],
-                self.get_value(RecipeReader.append_to_path(path, "/requirements"), default=[], sub_vars=True),
+                dict[str, list[str | None]],
+                self.get_value(RecipeReader.append_to_path(path, "/requirements"), default={}, sub_vars=True),
             )
             dep_map[package] = []
             for section_str, deps in requirements.items():
@@ -109,6 +112,14 @@ class RecipeParserDeps(RecipeReader):
                     continue
 
                 for i, dep in enumerate(deps):
+                    # Sanitize and ignore empty data. In theory, recipes shouldn't contain `Null`s or empty strings in
+                    # their dependency lists, but we will guard against it out of an abundance of caution.
+                    if dep is None:
+                        continue
+                    dep = dep.strip()
+                    if not dep:
+                        continue
+
                     # NOTE: `get_dependency_paths()` uses the same approach for calculating dependency paths.
                     dep_path = RecipeReader.append_to_path(path, f"/requirements/{section_str}/{i}")
                     dep_map[package].append(
@@ -116,7 +127,7 @@ class RecipeParserDeps(RecipeReader):
                             required_by=package,
                             path=dep_path,
                             type=section,
-                            match_spec=MatchSpec(dep),
+                            data=dependency_data_from_string(dep),
                             selector=self._fetch_optional_selector(dep_path),
                         )
                     )
