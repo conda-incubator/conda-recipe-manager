@@ -22,8 +22,11 @@ class _CBCEntry(NamedTuple):
     selector: Optional[SelectorParser]
 
 
-# Internal variable table
-_CBCTable = dict[str, list[_CBCEntry]]
+# Internal variable table type
+_CbcTable = dict[str, list[_CBCEntry]]
+
+# Type that attempts to represent the contents of a CBC file
+_CbcType = dict[str, list[Primitives] | dict[str, dict[str, str]]]
 
 
 class CBCParser(RecipeReader):
@@ -44,7 +47,7 @@ class CBCParser(RecipeReader):
         :param content: conda-build formatted configuration file, as a single text string.
         """
         super().__init__(content)
-        self._cbc_vars_tbl: _CBCTable = {}
+        self._cbc_vars_tbl: _CbcTable = {}
 
         # TODO Handle special cases:
         #   - pin_run_as_build
@@ -56,17 +59,22 @@ class CBCParser(RecipeReader):
         # From Charles: "Compared to meta.yaml, no jinja is allowed in the cbc. Also I believe only the base subset of
         #                selectors is available (so py>=38 and py<=310 wouldn't work). To be confirmed though."
 
-        parsed_contents: Final[dict[str, list[Primitives]]] = cast(dict[str, list[Primitives]], self.get_value("/"))
+        parsed_contents: Final[_CbcType] = cast(_CbcType, self.get_value("/"))
         for variable, value_list in parsed_contents.items():
-            if not isinstance(value, list):
+            if not isinstance(value_list, list):
                 continue
 
             for i, value in enumerate(value_list):
                 path = f"/{variable}/{i}"
                 # TODO add V1 support for CBC files? Is there a V1 CBC format?
+                selector = None
+                try:
+                    selector = SelectorParser(self.get_selector_at_path(path), SchemaVersion.V0)
+                except KeyError:
+                    pass
                 entry = _CBCEntry(
                     value=value,
-                    selector=SelectorParser(self.get_selector_at_path(path, None), SchemaVersion.V0),
+                    selector=selector,
                 )
                 # TODO detect duplicates
                 if variable not in self._cbc_vars_tbl:
@@ -108,7 +116,7 @@ class CBCParser(RecipeReader):
         :returns: Value of the variable as indicated by the selector options provided.
         """
         if variable not in self:
-            if default == RecipeReader._sentinel:
+            if isinstance(default, SentinelType):
                 raise KeyError(f"CBC variable not found: {variable}")
             return default
 
@@ -121,6 +129,6 @@ class CBCParser(RecipeReader):
                 return entry.value
 
         # No applicable entries have been found to match any selector variant.
-        if default == RecipeReader._sentinel:
+        if isinstance(default, SentinelType):
             raise ValueError(f"CBC variable does not have a value for the provided selector query: {variable}")
         return default
