@@ -6,30 +6,28 @@ from __future__ import annotations
 
 import json
 import sys
+import click
+
 from pathlib import Path
 from typing import cast
 
-import click
-
-from conda_recipe_manager.types import JsonType
 from conda_recipe_manager.commands.utils.print import print_err
 from conda_recipe_manager.commands.utils.types import ExitCode
 from conda_recipe_manager.parser.exceptions import JsonPatchValidationException
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
+from conda_recipe_manager.types import JsonType
 
 
-@click.argument("recipe_file_path", type=click.Path(exists=True, path_type=Path))  # type: ignore[misc]
-@click.argument("json_patch_file_path", type=click.Path(exists=True, path_type=Path))  # type: ignore[misc]
-@click.command(short_help="Add JSON blobs to recipe files.")
-def patch(json_patch_file_path: Path, recipe_file_path: Path) -> None:
+def pre_patch_validate(json_patch_file_path: Path, recipe_file_path: Path) -> tuple[JsonType, RecipeParser]:
     """
-    Add JSON blobs to recipe files.
+    Confirm that the json patch file and recipe file can be read and that the recipe parser object is created.
     """
     try:
         contents_json = cast(JsonType, json.loads(json_patch_file_path.read_text()))
     except json.JSONDecodeError:
         print(f"Non-JSON file provided: {json_patch_file_path}")
         sys.exit(ExitCode.JSON_ERROR)
+
     try:
         contents_recipe = recipe_file_path.read_text()
     except IOError:
@@ -41,6 +39,18 @@ def patch(json_patch_file_path: Path, recipe_file_path: Path) -> None:
     except Exception:
         print_err("An error occurred while parsing the recipe file contents.")
         sys.exit(ExitCode.PARSE_EXCEPTION)
+    
+    return contents_json, recipe_parser
+
+
+@click.argument("recipe_file_path", type=click.Path(exists=True, path_type=Path))  # type: ignore[misc]
+@click.argument("json_patch_file_path", type=click.Path(exists=True, path_type=Path))  # type: ignore[misc]
+@click.command(short_help="Add JSON blobs to recipe files.")
+def patch(json_patch_file_path: Path, recipe_file_path: Path) -> None:
+    """
+    Patch JSON blobs to recipe files.
+    """
+    contents_json, recipe_parser = pre_patch_validate(json_patch_file_path, recipe_file_path)
 
     if not isinstance(contents_json, list):
         contents_json = list(contents_json)
