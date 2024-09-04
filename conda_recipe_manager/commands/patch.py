@@ -6,24 +6,26 @@ from __future__ import annotations
 
 import json
 import sys
-import click
-
 from pathlib import Path
 from typing import cast
+
+import click
 
 from conda_recipe_manager.commands.utils.print import print_err
 from conda_recipe_manager.commands.utils.types import ExitCode
 from conda_recipe_manager.parser.exceptions import JsonPatchValidationException
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
-from conda_recipe_manager.types import JsonType
+from conda_recipe_manager.types import JsonPatchType
 
 
-def pre_patch_validate(json_patch_file_path: Path, recipe_file_path: Path) -> tuple[JsonType, RecipeParser]:
+def _pre_patch_validate(
+    json_patch_file_path: Path, recipe_file_path: Path
+) -> tuple[JsonPatchType | list[JsonPatchType], RecipeParser]:
     """
     Confirm that the json patch file and recipe file can be read and that the recipe parser object is created.
     """
     try:
-        contents_json = cast(JsonType, json.loads(json_patch_file_path.read_text()))
+        contents_json = cast(JsonPatchType | list[JsonPatchType], json.loads(json_patch_file_path.read_text()))
     except json.JSONDecodeError:
         print(f"Non-JSON file provided: {json_patch_file_path}")
         sys.exit(ExitCode.JSON_ERROR)
@@ -36,10 +38,10 @@ def pre_patch_validate(json_patch_file_path: Path, recipe_file_path: Path) -> tu
 
     try:
         recipe_parser = RecipeParser(contents_recipe)
-    except Exception:
+    except Exception:  # pylint: disable=broad-except
         print_err("An error occurred while parsing the recipe file contents.")
         sys.exit(ExitCode.PARSE_EXCEPTION)
-    
+
     return contents_json, recipe_parser
 
 
@@ -50,10 +52,10 @@ def patch(json_patch_file_path: Path, recipe_file_path: Path) -> None:
     """
     Patch JSON blobs to recipe files.
     """
-    contents_json, recipe_parser = pre_patch_validate(json_patch_file_path, recipe_file_path)
+    contents_json, recipe_parser = _pre_patch_validate(json_patch_file_path, recipe_file_path)
 
     if not isinstance(contents_json, list):
-        contents_json = list(contents_json)
+        contents_json = cast(list[JsonPatchType], list(contents_json))
 
     error_code = ExitCode.SUCCESS
     try:
