@@ -121,8 +121,10 @@ class CbcParser(RecipeReader):
             return default
 
         cbc_entries: Final[list[_CBCEntry]] = self._cbc_vars_tbl[variable]
-        if len(cbc_entries) == 0 and cbc_entries[0].selector is None:
-            return variable
+
+        # Short-circuit on trivial case: one value, no selector
+        if len(cbc_entries) == 1 and cbc_entries[0].selector is None:
+            return cbc_entries[0].value
 
         for entry in cbc_entries:
             if entry.selector is None or entry.selector.does_selector_apply(query):
