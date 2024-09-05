@@ -138,7 +138,6 @@ def test_contains(file: str, variable: str, expected: bool) -> None:
                 "xz",
                 "channel_targets",
                 "cdt_name",
-                "zip_keys",
                 "zstd",
             ],
         )

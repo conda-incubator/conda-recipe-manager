@@ -64,6 +64,10 @@ class CbcParser(RecipeReader):
             if not isinstance(value_list, list):
                 continue
 
+            # TODO track and calculate zip-key values
+            if variable == "zip_keys":
+                continue
+
             for i, value in enumerate(value_list):
                 path = f"/{variable}/{i}"
                 # TODO add V1 support for CBC files? Is there a V1 CBC format?
@@ -99,7 +103,6 @@ class CbcParser(RecipeReader):
 
         :returns: A list containing all the variables defined in the CBC file.
         """
-        # TODO filter-out zip-keys and other special cases
         return list(self._cbc_vars_tbl.keys())
 
     def get_cbc_variable_value(
