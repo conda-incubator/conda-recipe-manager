@@ -29,7 +29,7 @@ _CbcTable = dict[str, list[_CBCEntry]]
 _CbcType = dict[str, list[Primitives] | dict[str, dict[str, str]]]
 
 
-class CBCParser(RecipeReader):
+class CbcParser(RecipeReader):
     """
     Parses a Conda Build Configuration (CBC) file and provides querying capabilities. Often these files are named
     `conda_build_configuration.yaml` or `cbc.yaml`
