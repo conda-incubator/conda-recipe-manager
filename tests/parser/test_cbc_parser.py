@@ -32,6 +32,7 @@ def test_eq(file0: str, file1: str, expected: bool) -> None:
         ("anaconda_cbc_01.yaml", "expat", True),
         ("anaconda_cbc_01.yaml", "ExPat", False),
         ("anaconda_cbc_01.yaml", "zstd", True),
+        ("anaconda_cbc_01.yaml", 42, False),
     ],
 )
 def test_contains(file: str, variable: str, expected: bool) -> None:
