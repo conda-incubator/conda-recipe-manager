@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Final, Type, TypeVar
 
 from conda_recipe_manager.grapher.recipe_graph import RecipeGraph
+from conda_recipe_manager.parser.cbc_parser import CbcParser
 from conda_recipe_manager.parser.recipe_parser_deps import RecipeParserDeps
 from conda_recipe_manager.parser.recipe_reader import RecipeReader
 
@@ -35,7 +36,7 @@ def load_recipe(file_name: str, recipe_parser: Type[R]) -> R:
     :param file_name: File name of the test recipe to load
     :returns: RecipeParser instance, based on the file
     """
-    recipe = load_file(TEST_FILES_PATH / file_name)
+    recipe: Final[str] = load_file(TEST_FILES_PATH / file_name)
     return recipe_parser(recipe)
 
 
@@ -57,3 +58,14 @@ def load_recipe_graph(recipes: list[str]) -> RecipeGraph:
             failed.add(path)
 
     return RecipeGraph(tbl, failed)
+
+
+def load_cbc(file_name: str) -> CbcParser:
+    """
+    Convenience function that simplifies initializing a CBC parser.
+
+    :param file_name: File name of the test CBC file to load
+    :returns: RecipeParser instance, based on the file
+    """
+    cbc: Final[str] = load_file(TEST_FILES_PATH / "cbc_files" / file_name)
+    return CbcParser(cbc)
