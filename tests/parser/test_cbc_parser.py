@@ -19,6 +19,10 @@ from tests.file_loading import load_cbc
 def test_eq(file0: str, file1: str, expected: bool) -> None:
     """
     Ensures that two CBC Parsers can be checked for equality.
+
+    :param file0: File to initialize the LHS-parser in the expression
+    :param file1: File to initialize the RHS-parser in the expression
+    :param expected: Expected result of the test
     """
     assert (load_cbc(file0) == load_cbc(file1)) == expected
 
@@ -38,6 +42,10 @@ def test_eq(file0: str, file1: str, expected: bool) -> None:
 def test_contains(file: str, variable: str, expected: bool) -> None:
     """
     Ensures that the `in` operator can be used to determine if a variable is defined in a CBC file.
+
+    :param file: File to test against
+    :param variable: Target variable name
+    :param expected: Expected result of the test
     """
     parser = load_cbc(file)
     assert (variable in parser) == expected
@@ -146,6 +154,9 @@ def test_contains(file: str, variable: str, expected: bool) -> None:
 def test_list_cbc_variables(file: str, expected: list[str]) -> None:
     """
     Validates fetching all variables defined in a CBC parser instance.
+
+    :param file: File to test against
+    :param expected: Expected result of the test
     """
     parser = load_cbc(file)
     assert parser.list_cbc_variables() == expected
@@ -165,6 +176,11 @@ def test_list_cbc_variables(file: str, expected: list[str]) -> None:
 def test_get_cbc_variable_value(file: str, variable: str, query: SelectorQuery, expected: Primitives) -> None:
     """
     Validates fetching the value of a CBC variable without specifying a default value.
+
+    :param file: File to test against
+    :param variable: Target variable name
+    :param query: Target selector query
+    :param expected: Expected result of the test
     """
     parser = load_cbc(file)
     assert parser.get_cbc_variable_value(variable, query) == expected
@@ -181,6 +197,11 @@ def test_get_cbc_variable_raises(file: str, variable: str, query: SelectorQuery,
     """
     Validates that an error is thrown when a variable does not exist in a CBC file or is not found for the provided
     selector.
+
+    :param file: File to test against
+    :param variable: Target variable name
+    :param query: Target selector query
+    :param exception: Exception expected to be raised
     """
     parser = load_cbc(file)
     with pytest.raises(exception):  # type: ignore
@@ -202,6 +223,12 @@ def test_get_cbc_variable_value_with_default(
 ) -> None:
     """
     Validates fetching the value of a CBC variable when specifying a default value.
+
+    :param file: File to test against
+    :param variable: Target variable name
+    :param query: Target selector query
+    :param default: Default value to use if the value could not be found
+    :param expected: Expected result of the test
     """
     parser = load_cbc(file)
     assert parser.get_cbc_variable_value(variable, query, default) == expected

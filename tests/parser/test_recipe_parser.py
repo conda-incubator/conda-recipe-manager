@@ -177,6 +177,13 @@ def test_remove_selector() -> None:
     ],
 )
 def test_add_comment(file: str, ops: list[tuple[str, str]], expected: str) -> None:
+    """
+    Validates adding a comment to the target recipe.
+
+    :param file: File to test against
+    :param ops: List of comment operations to perform in this test
+    :param expected: Expected result of the test
+    """
     parser = load_recipe(file, RecipeParser)
     for path, comment in ops:
         parser.add_comment(path, comment)
