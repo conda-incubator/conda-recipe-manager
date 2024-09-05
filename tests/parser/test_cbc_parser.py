@@ -171,18 +171,20 @@ def test_get_cbc_variable_value(file: str, variable: str, query: SelectorQuery, 
 
 
 @pytest.mark.parametrize(
-    "file",
+    "file,variable,query,exception",
     [
-        "anaconda_cbc_01.yaml",
+        ("anaconda_cbc_01.yaml", "The Limit Does Not Exist", SelectorQuery(), KeyError),
+        ("anaconda_cbc_01.yaml", "macos_machine", SelectorQuery(platform=Platform.WIN_64), ValueError),
     ],
 )
-def test_get_cbc_variable_raises(file: str) -> None:
+def test_get_cbc_variable_raises(file: str, variable: str, query: SelectorQuery, exception: Exception) -> None:
     """
-    Validates that an error is thrown when a variable does not exist in a CBC file.
+    Validates that an error is thrown when a variable does not exist in a CBC file or is not found for the provided
+    selector.
     """
     parser = load_cbc(file)
-    with pytest.raises(KeyError):
-        parser.get_cbc_variable_value("The Limit Does Not Exist", SelectorQuery())
+    with pytest.raises(exception):  # type: ignore
+        parser.get_cbc_variable_value(variable, query)
 
 
 @pytest.mark.parametrize(
@@ -191,6 +193,8 @@ def test_get_cbc_variable_raises(file: str) -> None:
         ("anaconda_cbc_01.yaml", "DNE", SelectorQuery(), None, None),
         ("anaconda_cbc_01.yaml", "DNE", SelectorQuery(), 42, 42),
         ("anaconda_cbc_01.yaml", "zstd", SelectorQuery(), 42, "1.5.2"),
+        # Returns a default value when the query parameters are not a match
+        ("anaconda_cbc_01.yaml", "macos_machine", SelectorQuery(platform=Platform.WIN_64), "not_a_mac", "not_a_mac"),
     ],
 )
 def test_get_cbc_variable_value_with_default(
