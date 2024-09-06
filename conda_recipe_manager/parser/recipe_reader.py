@@ -44,7 +44,7 @@ from conda_recipe_manager.types import PRIMITIVES_TUPLE, JsonType, Primitives, S
 try:
     from yaml import CSafeLoader as SafeLoader
 except ImportError:
-    from yaml import SafeLoader
+    from yaml import SafeLoader  # type: ignore[assignment]
 
 
 class RecipeReader(IsModifiable):
