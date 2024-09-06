@@ -15,7 +15,7 @@ from conda_recipe_manager.parser.recipe_parser_deps import RecipeParserDeps
 from conda_recipe_manager.parser.selector_parser import SelectorParser
 from conda_recipe_manager.parser.types import SchemaVersion
 from conda_recipe_manager.types import SentinelType
-from tests.file_loading import TEST_FILES_PATH, load_file
+from tests.file_loading import load_file
 
 
 def test_pickle_integration_sentinel_type() -> None:
@@ -54,7 +54,7 @@ def test_pickle_integration_recipe_parsers(file: str, constructor: Callable[[str
     More details about this problem can be found in this PR:
       https://github.com/conda-incubator/conda-recipe-manager/pull/105
     """
-    file_text = load_file(TEST_FILES_PATH / file)
+    file_text = load_file(file)
     parser = constructor(file_text)
     assert pickle.loads(pickle.dumps(parser)).render() == parser.render()  # type: ignore[misc]
 

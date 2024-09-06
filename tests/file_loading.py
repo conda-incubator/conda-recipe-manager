@@ -20,12 +20,13 @@ R = TypeVar("R", bound=RecipeReader)
 
 def load_file(file: Path | str) -> str:
     """
-    Loads a file into a single string
+    Loads a file into a single string. Assumes the file is under the `TEST_FILES_PATH` directory, which is the standard
+    location for all testing files.
 
-    :param file: Filename of the file to read
+    :param file: Filename/relative path of the file to read
     :returns: Text from the file
     """
-    return Path(file).read_text(encoding="utf-8")
+    return Path(TEST_FILES_PATH / file).read_text(encoding="utf-8")
 
 
 def load_recipe(file_name: str, recipe_parser: Type[R]) -> R:
@@ -35,7 +36,7 @@ def load_recipe(file_name: str, recipe_parser: Type[R]) -> R:
     :param file_name: File name of the test recipe to load
     :returns: RecipeParser instance, based on the file
     """
-    recipe = load_file(TEST_FILES_PATH / file_name)
+    recipe = load_file(file_name)
     return recipe_parser(recipe)
 
 
@@ -50,10 +51,9 @@ def load_recipe_graph(recipes: list[str]) -> RecipeGraph:
     failed: set[str] = set()
     for recipe in recipes:
         try:
-            path = f"{TEST_FILES_PATH}/{recipe}"
-            parser = RecipeParserDeps(load_file(path))
+            parser = RecipeParserDeps(load_file(recipe))
             tbl[parser.calc_sha256()] = parser
         except Exception:  # pylint: disable=broad-exception-caught
-            failed.add(path)
+            failed.add(recipe)
 
     return RecipeGraph(tbl, failed)
