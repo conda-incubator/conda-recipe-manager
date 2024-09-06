@@ -8,7 +8,7 @@ import pytest
 
 from conda_recipe_manager.parser.recipe_parser_convert import RecipeParserConvert
 from conda_recipe_manager.types import MessageCategory
-from tests.file_loading import TEST_FILES_PATH, load_file, load_recipe
+from tests.file_loading import load_file, load_recipe
 
 
 @pytest.mark.parametrize(
@@ -34,9 +34,7 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
     :param input_file: Test input recipe file name
     :param expected_file: Name of the file containing the expected output of a test instance
     """
-    assert RecipeParserConvert.pre_process_recipe_text(load_file(f"{TEST_FILES_PATH}/{input_file}")) == load_file(
-        f"{TEST_FILES_PATH}/{expected_file}"
-    )
+    assert RecipeParserConvert.pre_process_recipe_text(load_file(input_file)) == load_file(expected_file)
 
 
 @pytest.mark.parametrize(
@@ -181,7 +179,7 @@ def test_render_to_v1_recipe_format(file_base: str, errors: list[str], warnings:
     """
     parser = load_recipe(file_base, RecipeParserConvert)
     result, tbl, _ = parser.render_to_v1_recipe_format()
-    assert result == load_file(f"{TEST_FILES_PATH}/v1_format/v1_{file_base}")
+    assert result == load_file(f"v1_format/v1_{file_base}")
     assert tbl.get_messages(MessageCategory.ERROR) == errors
     assert tbl.get_messages(MessageCategory.WARNING) == warnings
     # Ensure that the original file was untouched

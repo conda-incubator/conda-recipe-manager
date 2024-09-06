@@ -10,7 +10,7 @@ from conda_recipe_manager.parser.enums import SelectorConflictMode
 from conda_recipe_manager.parser.exceptions import JsonPatchValidationException
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
 from tests.constants import SIMPLE_DESCRIPTION
-from tests.file_loading import TEST_FILES_PATH, load_file, load_recipe
+from tests.file_loading import load_file, load_recipe
 
 ## JINJA Variables ##
 
@@ -119,7 +119,7 @@ def test_add_selector() -> None:
         "/multi_level/list_2/1",
     ]
 
-    assert parser.render() == load_file(f"{TEST_FILES_PATH}/simple-recipe_test_add_selector.yaml")
+    assert parser.render() == load_file("simple-recipe_test_add_selector.yaml")
     assert parser.is_modified()
 
 
@@ -153,7 +153,7 @@ def test_remove_selector() -> None:
     assert parser.remove_selector("/requirements/empty_field2") == "[unix and win]"
     assert not parser.get_selector_paths("[unix and win]")
 
-    assert parser.render() == load_file(f"{TEST_FILES_PATH}/simple-recipe_test_remove_selector.yaml")
+    assert parser.render() == load_file("simple-recipe_test_remove_selector.yaml")
     assert parser.is_modified()
 
 
@@ -188,7 +188,7 @@ def test_add_comment(file: str, ops: list[tuple[str, str]], expected: str) -> No
     for path, comment in ops:
         parser.add_comment(path, comment)
     assert parser.is_modified()
-    assert parser.render() == load_file(f"{TEST_FILES_PATH}/{expected}")
+    assert parser.render() == load_file(expected)
 
 
 @pytest.mark.parametrize(
@@ -774,7 +774,7 @@ def test_patch_add() -> None:
 
     # Sanity check: validate all modifications
     assert parser.is_modified()
-    assert parser.render() == load_file(f"{TEST_FILES_PATH}/simple-recipe_test_patch_add.yaml")
+    assert parser.render() == load_file("simple-recipe_test_patch_add.yaml")
 
 
 def test_patch_remove() -> None:
@@ -838,7 +838,7 @@ def test_patch_remove() -> None:
 
     # Sanity check: validate all modifications
     assert parser.is_modified()
-    assert parser.render() == load_file(f"{TEST_FILES_PATH}/simple-recipe_test_patch_remove.yaml")
+    assert parser.render() == load_file("simple-recipe_test_patch_remove.yaml")
 
 
 def test_patch_replace() -> None:
@@ -936,7 +936,7 @@ def test_patch_replace() -> None:
     # Sanity check: validate all modifications
     assert parser.is_modified()
     # NOTE: That patches, as of writing, cannot preserve selectors
-    assert parser.render() == load_file(f"{TEST_FILES_PATH}/simple-recipe_test_patch_replace.yaml")
+    assert parser.render() == load_file("simple-recipe_test_patch_replace.yaml")
 
 
 def test_patch_move() -> None:
@@ -961,7 +961,7 @@ def test_patch_move() -> None:
         }
     )
     assert not parser.is_modified()
-    assert parser.render() == load_file(f"{TEST_FILES_PATH}/simple-recipe.yaml")
+    assert parser.render() == load_file("simple-recipe.yaml")
 
     # Simple move
     assert parser.patch(
@@ -1011,7 +1011,7 @@ def test_patch_move() -> None:
     # Sanity check: validate all modifications
     assert parser.is_modified()
     # NOTE: That patches, as of writing, cannot preserve selectors
-    assert parser.render() == load_file(f"{TEST_FILES_PATH}/simple-recipe_test_patch_move.yaml")
+    assert parser.render() == load_file("simple-recipe_test_patch_move.yaml")
 
 
 def test_patch_copy() -> None:
@@ -1068,7 +1068,7 @@ def test_patch_copy() -> None:
     # Sanity check: validate all modifications
     assert parser.is_modified()
     # NOTE: That patches, as of writing, cannot preserve selectors
-    assert parser.render() == load_file(f"{TEST_FILES_PATH}/simple-recipe_test_patch_copy.yaml")
+    assert parser.render() == load_file("simple-recipe_test_patch_copy.yaml")
 
 
 def test_search_and_patch() -> None:
@@ -1077,7 +1077,7 @@ def test_search_and_patch() -> None:
     """
     parser = load_recipe("simple-recipe.yaml", RecipeParser)
     assert parser.search_and_patch(r"py.*", {"op": "replace", "value": "conda"}, True)
-    assert parser.render() == load_file(f"{TEST_FILES_PATH}/simple-recipe_test_search_and_patch.yaml")
+    assert parser.render() == load_file("simple-recipe_test_search_and_patch.yaml")
     assert parser.is_modified()
 
 

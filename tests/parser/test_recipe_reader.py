@@ -12,7 +12,7 @@ from conda_recipe_manager.parser.enums import SchemaVersion
 from conda_recipe_manager.parser.recipe_parser import RecipeReader
 from conda_recipe_manager.types import JsonType, Primitives
 from tests.constants import SIMPLE_DESCRIPTION
-from tests.file_loading import TEST_FILES_PATH, load_file, load_recipe
+from tests.file_loading import load_file, load_recipe
 
 # Multiline string used to validate interpretation of the various multiline variations YAML allows
 QUICK_FOX_PIPE: Final[str] = "The quick brown\n{{fox}}\n\njumped over the lazy dog\n"
@@ -47,7 +47,7 @@ def test_construction(file: str, schema_version: SchemaVersion) -> None:
     :param file: Recipe file to test with
     :param schema_version: Schema version to match
     """
-    types_toml = load_file(f"{TEST_FILES_PATH}/{file}")
+    types_toml = load_file(file)
     parser = RecipeReader(types_toml)
     assert parser._init_content == types_toml  # pylint: disable=protected-access
     assert parser._vars_tbl == {  # pylint: disable=protected-access
@@ -77,10 +77,10 @@ def test_str(file: str, out_file: str) -> None:
     :param out_file: Output string to match
     """
     parser = load_recipe(file, RecipeReader)
-    assert str(parser) == load_file(f"{TEST_FILES_PATH}/{out_file}")
+    assert str(parser) == load_file(out_file)
     # Regression test: Run a function a second time to ensure that `SelectorInfo::__str__()` doesn't accidentally purge
     # the underlying stack when the string is being rendered.
-    assert str(parser) == load_file(f"{TEST_FILES_PATH}/{out_file}")
+    assert str(parser) == load_file(out_file)
     assert not parser.is_modified()
 
 
@@ -113,7 +113,7 @@ def test_loading_obj_in_list() -> None:
     """
     Regression test: at one point, the parser would crash loading this file, containing an object in a list.
     """
-    replace = load_file(f"{TEST_FILES_PATH}/simple-recipe_test_patch_replace.yaml")
+    replace = load_file("simple-recipe_test_patch_replace.yaml")
     parser = RecipeReader(replace)
     assert parser.render() == replace
 
@@ -148,7 +148,7 @@ def test_round_trip(file: str) -> None:
     Test "eating our own dog food"/round-tripping the parser: Take a recipe, construct a parser, re-render and
     ensure the output matches the input.
     """
-    expected: Final[str] = load_file(f"{TEST_FILES_PATH}/{file}")
+    expected: Final[str] = load_file(file)
     parser = RecipeReader(expected)
     assert parser.render() == expected
 

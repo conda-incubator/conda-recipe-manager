@@ -42,4 +42,4 @@ def test_convert_single_file() -> None:
     # This recipe has warnings
     assert result.exit_code == 100
     # `crm convert` prints an additional newline
-    assert result.stdout == load_file(f"{TEST_FILES_PATH}/v1_format/v1_simple-recipe.yaml") + "\n"
+    assert result.stdout == load_file("v1_format/v1_simple-recipe.yaml") + "\n"
