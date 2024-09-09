@@ -40,6 +40,12 @@ from conda_recipe_manager.parser.enums import SchemaVersion
 from conda_recipe_manager.parser.types import TAB_AS_SPACES, TAB_SPACE_COUNT, MultilineVariant
 from conda_recipe_manager.types import PRIMITIVES_TUPLE, JsonType, Primitives, SentinelType
 
+# Import guard: Fallback to `SafeLoader` if `CSafeLoader` isn't available
+try:
+    from yaml import CSafeLoader as SafeLoader
+except ImportError:
+    from yaml import SafeLoader  # type: ignore[assignment]
+
 
 class RecipeReader(IsModifiable):
     """
@@ -97,10 +103,10 @@ class RecipeReader(IsModifiable):
         # then we fall back to performing JINJA substitutions.
         try:
             try:
-                output = cast(JsonType, yaml.safe_load(s))
+                output = yaml.load(s, Loader=SafeLoader)
                 _v1_sub_jinja()
             except yaml.scanner.ScannerError:
-                output = cast(JsonType, yaml.safe_load(quote_special_strings(s)))
+                output = cast(JsonType, yaml.load(quote_special_strings(s), Loader=SafeLoader))
                 _v1_sub_jinja()
         except Exception:  # pylint: disable=broad-exception-caught
             # If a construction exception is thrown, attempt to re-parse by replacing Jinja macros (substrings in
@@ -110,7 +116,7 @@ class RecipeReader(IsModifiable):
             sub_list: list[str] = Regex.JINJA_V0_SUB.findall(s)
             s = Regex.JINJA_V0_SUB.sub(RECIPE_MANAGER_SUB_MARKER, s)
             output = RecipeReader._parse_yaml_recursive_sub(
-                cast(JsonType, yaml.safe_load(s)), lambda d: substitute_markers(d, sub_list)
+                cast(JsonType, yaml.load(s, Loader=SafeLoader)), lambda d: substitute_markers(d, sub_list)
             )
             # Because we leverage PyYaml to parse the data structures, we need to perform a second pass to perform
             # variable substitutions.
@@ -259,7 +265,7 @@ class RecipeReader(IsModifiable):
             #   - Ensures the returned value is YAML-parsable
             elif self._schema_version == SchemaVersion.V0:
                 s = f"${s}"
-        return cast(JsonType, yaml.safe_load(s))
+        return cast(JsonType, yaml.load(s, Loader=SafeLoader))
 
     def _init_vars_tbl(self) -> None:
         """
@@ -652,7 +658,7 @@ class RecipeReader(IsModifiable):
                 if replace_variables:
                     value = self._render_jinja_vars(value)
                 elif child.multiline_variant != MultilineVariant.NONE:
-                    value = cast(str, yaml.safe_load(value))
+                    value = cast(str, yaml.load(value, Loader=SafeLoader))
 
             # Empty keys are interpreted to point to `None`
             if child.is_empty_key():
@@ -769,7 +775,7 @@ class RecipeReader(IsModifiable):
                 )
                 if sub_vars:
                     return self._render_jinja_vars(multiline_str)
-                return cast(JsonType, yaml.safe_load(multiline_str))
+                return cast(JsonType, yaml.load(multiline_str, Loader=SafeLoader))
             return_value = cast(Primitives, node.children[0].value)
         # Leaf nodes can return their value directly
         elif node.is_leaf():
