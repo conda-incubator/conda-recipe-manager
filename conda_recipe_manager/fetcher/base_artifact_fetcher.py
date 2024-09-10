@@ -15,7 +15,7 @@ _ARTIFACT_FETCHER_FILE_ID: Final[str] = "crm_artifact_fetcher"
 
 class FetchError(Exception):
     """
-    General exception thrown when there is a failure to fetch an artifact.
+    General exception to be thrown when there is a failure to fetch an artifact.
     """
 
     pass
@@ -24,7 +24,7 @@ class FetchError(Exception):
 class BaseArtifactFetcher(metaclass=ABCMeta):
     """
     Base class for all `ArtifactFetcher` classes. An `ArtifactFetcher` provides a standard set of tools to retrieve
-    build
+    bundles of source code.
     """
 
     def __init__(self, name: str) -> None:
@@ -41,7 +41,7 @@ class BaseArtifactFetcher(metaclass=ABCMeta):
     @abstractmethod
     def fetch(self) -> None:
         """
-        TODO
+        Retrieves the build artifact and source code and dumps it to a secure temporary location.
 
         :raises FetchError: When the target artifact fails to be acquired.
         """
@@ -50,6 +50,6 @@ class BaseArtifactFetcher(metaclass=ABCMeta):
     @abstractmethod
     def get_path_to_source_code(self) -> Path:
         """
-        TODO
+        Returns the directory containing the artifact's bundled source code.
         """
         pass

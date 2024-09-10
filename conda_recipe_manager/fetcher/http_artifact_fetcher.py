@@ -7,6 +7,8 @@ from __future__ import annotations
 from enum import Enum, auto
 from pathlib import Path
 
+import requests
+
 from conda_recipe_manager.fetcher.artifact_fetcher import BaseArtifactFetcher
 
 
@@ -43,6 +45,12 @@ class HttpArtifactFetcher(BaseArtifactFetcher):
         TODO
         """
         self._extract()
+
+    def get_path_to_source_code(self) -> Path:
+        """
+        Returns the directory containing the artifact's bundled source code.
+        """
+        return Path()
 
     def get_sha256(self) -> str:
         """
