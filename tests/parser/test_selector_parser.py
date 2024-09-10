@@ -9,6 +9,7 @@ import pytest
 from conda_recipe_manager.parser.enums import SchemaVersion
 from conda_recipe_manager.parser.platform_types import Platform
 from conda_recipe_manager.parser.selector_parser import SelectorParser
+from conda_recipe_manager.parser.selector_query import SelectorQuery
 
 
 @pytest.mark.parametrize(
@@ -142,7 +143,7 @@ def test_selector_eq(selector0: SelectorParser, selector1: object, expected: boo
 )
 def test_get_selected_platforms(selector: str, schema: SchemaVersion, expected: set[Platform]) -> None:
     """
-    Tests the construction of a selector parse tree by comparing the debug string representation of the tree.
+    Validates the set of platforms returned that apply to a selector.
 
     :param selector: Selector string to parse
     :param schema: Target schema version
@@ -151,3 +152,28 @@ def test_get_selected_platforms(selector: str, schema: SchemaVersion, expected: 
     parser = SelectorParser(selector, schema)
     assert parser.get_selected_platforms() == expected
     assert not parser.is_modified()
+
+
+@pytest.mark.parametrize(
+    "selector,schema,query,expected",
+    [
+        ("", SchemaVersion.V0, SelectorQuery(), True),
+        ("[osx]", SchemaVersion.V0, SelectorQuery(platform=Platform.OSX_64), True),
+        ("[osx]", SchemaVersion.V0, SelectorQuery(platform=Platform.WIN_64), False),
+        ("[not osx]", SchemaVersion.V0, SelectorQuery(platform=Platform.WIN_64), True),
+        ("[not osx]", SchemaVersion.V0, SelectorQuery(platform=Platform.OSX_64), False),
+        ("[osx and not unix]", SchemaVersion.V0, SelectorQuery(platform=Platform.LINUX_PPC_64), False),
+        ("[osx or not unix]", SchemaVersion.V0, SelectorQuery(platform=Platform.WIN_ARM_64), True),
+    ],
+)
+def test_does_selector_apply(selector: str, schema: SchemaVersion, query: SelectorQuery, expected: bool) -> None:
+    """
+    Validates the question: does a selector apply to the current environment query?
+
+    :param selector: Selector string to parse
+    :param schema: Target schema version
+    :param query: Target selector query
+    :param expected: Expected value to return
+    """
+    parser = SelectorParser(selector, schema)
+    assert parser.does_selector_apply(query) == expected
