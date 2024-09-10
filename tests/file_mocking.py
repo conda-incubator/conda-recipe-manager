@@ -74,7 +74,7 @@ class MockWriter:
     def setup_file_mockers(mocked_data: str) -> tuple[MockOpener, MockWriter]:
         """
         Convenience function that sets up a mocked file opener and a `MockWriter` instance to be used for testing that
-        a function writes the expected `mocked_data` to a file.
+        writes the expected `mocked_data` to a file.
 
         :param mocked_data: Data that should be contained in the file that is being written to.
         :returns: The mock opener and mock writer instances configured to emulate a file that should contain
