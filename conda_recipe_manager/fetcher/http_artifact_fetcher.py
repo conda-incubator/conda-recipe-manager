@@ -13,7 +13,8 @@ from typing import Final
 
 import requests
 
-from conda_recipe_manager.fetcher.base_artifact_fetcher import BaseArtifactFetcher, FetchError, FetchRequiredError
+from conda_recipe_manager.fetcher.base_artifact_fetcher import BaseArtifactFetcher
+from conda_recipe_manager.fetcher.exceptions import FetchError, FetchRequiredError
 from conda_recipe_manager.types import HASH_BUFFER_SIZE
 
 

@@ -1,5 +1,5 @@
 """
-:Description: TODO
+:Description: Provides a base class that all Artifact Fetcher are derived from.
 """
 
 from __future__ import annotations
@@ -11,46 +11,6 @@ from typing import Final
 
 # Identifying string used to flag temp files and directories created by this module.
 _ARTIFACT_FETCHER_FILE_ID: Final[str] = "crm_artifact_fetcher"
-
-
-class ArtifactFetcherException(Exception):
-    """
-    Base exception for all other artifact fetching exceptions. Should not be raised directly.
-    """
-
-    pass
-
-
-class FetchError(ArtifactFetcherException):
-    """
-    General exception to be thrown when there is a failure to fetch an artifact.
-    """
-
-    def __init__(self, message: str):
-        """
-        Constructs a FetchError Exception.
-
-        :param message: String description of the issue encountered.
-        """
-        self.message = message if len(message) else "An unknown error occurred while trying to fetch an artifact."
-        super().__init__(self.message)
-
-
-class FetchRequiredError(ArtifactFetcherException):
-    """
-    This operation could not be performed because a call to `fetch()` has not yet succeeded.
-    """
-
-    def __init__(self, message: str):
-        """
-        Constructs a FetchRequiredError Exception.
-
-        :param message: String description of the issue encountered.
-        """
-        self.message = (
-            message if len(message) else "An operation could not be completed as the artifact has not been fetched."
-        )
-        super().__init__(self.message)
 
 
 class BaseArtifactFetcher(metaclass=ABCMeta):
