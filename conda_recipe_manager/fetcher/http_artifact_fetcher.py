@@ -10,6 +10,7 @@ import zipfile
 from enum import Enum, auto
 from pathlib import Path
 from typing import Final, Iterator, cast
+from urllib.parse import urlparse
 
 import requests
 
@@ -38,23 +39,25 @@ class HttpArtifactFetcher(BaseArtifactFetcher):
     Artifact Fetcher capable of downloading a software archive from a remote HTTP/HTTPS source.
     """
 
-    def __init__(self, name: str, archive_url: str | Path):
+    def __init__(self, name: str, archive_url: str):
         """
         Constructs an `HttpArtifactFetcher` instance.
 
         :param name: Identifies the artifact. Ideally, this is the package name. In multi-sourced/mirrored scenarios,
             this might be the package name combined with some identifying information.
-        :param archive_url:
+        :param archive_url: URL that points to the target software archive.
         """
         super().__init__(name)
-        self._archive_url = Path(archive_url)
+        self._archive_url = archive_url
         self._archive_type = ArtifactArchiveType.UNKNOWN
 
-        # Reliable, multi-extension removal approach derived from this post:
+        # Use `urlparse` to extract the file path containing the archive. Then we use a reliable, multi-extension
+        # removal approach derived from this StackOverflow discussion:
         #  https://stackoverflow.com/questions/3548673/how-can-i-replace-or-strip-an-extension-from-a-filename-in-python
-        archive_name_no_ext: Final[str] = str(self._archive_url).removesuffix("".join(self._archive_url.suffixes))
+        url_path = Path(urlparse(self._archive_url).path)
+        archive_name_no_ext: Final[str] = str(self._archive_url).removesuffix("".join(url_path.suffixes))
 
-        self._archive_path: Final[Path] = self._temp_dir_path / self._archive_url.name
+        self._archive_path: Final[Path] = self._temp_dir_path / url_path.name
         self._uncompressed_archive_path: Final[Path] = self._temp_dir_path / archive_name_no_ext
 
     def _fetch_guard(self, msg: str) -> None:
