@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import tarfile
 import zipfile
 from enum import Enum, auto
@@ -12,6 +13,7 @@ from typing import Final
 
 import requests
 
+from conda_recipe_manager.types import HASH_BUFFER_SIZE
 from conda_recipe_manager.fetcher.base_artifact_fetcher import BaseArtifactFetcher, FetchError, FetchRequiredError
 
 
@@ -125,14 +127,21 @@ class HttpArtifactFetcher(BaseArtifactFetcher):
 
     def get_archive_sha256(self) -> str:
         """
-        TODO
+        Calculates a SHA-256 hash on the downloaded software archive.
 
         :raises FetchRequiredError: If `fetch()` has not been successfully invoked.
         """
         self._fetch_guard("Archive has not been downloaded, so the file can't be hashed.")
 
-        # TODO this does not appear to apply to git-based repos
-        return ""
+        # TODO generalize this buffering as a utility. `recipe_reader.py` could use this.
+        sha256 = hashlib.sha256()
+        with open(self._archive_path, "rb") as fptr:
+            while True:
+                buff = fptr.read(HASH_BUFFER_SIZE)
+                if not buff:
+                    break
+                sha256.update(buff)
+        return sha256.hexdigest()
 
     def get_archive_type(self) -> ArtifactArchiveType:
         """
