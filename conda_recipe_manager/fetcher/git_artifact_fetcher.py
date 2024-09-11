@@ -10,6 +10,9 @@ from conda_recipe_manager.fetcher.base_artifact_fetcher import BaseArtifactFetch
 
 
 class GitArtifactFetcher(BaseArtifactFetcher):
+    """
+    Artifact Fetcher capable of cloning a remote git repository.
+    """
 
     def __init__(self, name: str, git_url: str):
         """
@@ -19,7 +22,7 @@ class GitArtifactFetcher(BaseArtifactFetcher):
         super().__init__(name)
         self._git_url = git_url
 
-    def _clone() -> None:
+    def _clone(self) -> None:
         """
         TODO
         """

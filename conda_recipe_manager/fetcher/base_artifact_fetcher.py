@@ -30,7 +30,10 @@ class BaseArtifactFetcher(metaclass=ABCMeta):
             this might be the package name combined with some identifying information.
         """
         self._name = name
-        self._temp_dir: Final[TemporaryDirectory] = TemporaryDirectory(prefix=_ARTIFACT_FETCHER_FILE_ID, suffix=name)
+        # NOTE: There is an open issue about this pylint edge case: https://github.com/pylint-dev/pylint/issues/7658
+        self._temp_dir: Final[TemporaryDirectory] = TemporaryDirectory(  # pylint: disable=consider-using-with
+            prefix=_ARTIFACT_FETCHER_FILE_ID, suffix=name
+        )
         self._temp_dir_path: Final[Path] = Path(self._temp_dir.name)
         # Flag to track if `fetch()` has been called successfully once.
         self._successfully_fetched = False

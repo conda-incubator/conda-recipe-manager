@@ -17,6 +17,9 @@ from conda_recipe_manager.fetcher.base_artifact_fetcher import BaseArtifactFetch
 from conda_recipe_manager.fetcher.exceptions import FetchError, FetchRequiredError
 from conda_recipe_manager.types import HASH_BUFFER_SIZE
 
+# Default download timeout for artifacts
+_DOWNLOAD_TIMEOUT: Final[int] = 5 * 60  # 5 minutes
+
 
 class ArtifactArchiveType(Enum):
     """
@@ -75,17 +78,17 @@ class HttpArtifactFetcher(BaseArtifactFetcher):
             match self._archive_path:
                 case path if tarfile.is_tarfile(path):
                     self._archive_type = ArtifactArchiveType.TARBALL
-                    tar_file = tarfile.TarFile(self._archive_path)
-                    # The `filter="data"` parameter guards against "the most dangerous security issues"
-                    tar_file.extractall(path=self._uncompressed_archive_path, filter="data")
+                    with tarfile.TarFile(self._archive_path) as tar_file:
+                        # The `filter="data"` parameter guards against "the most dangerous security issues"
+                        tar_file.extractall(path=self._uncompressed_archive_path, filter="data")
                 case path if zipfile.is_zipfile(path):
                     self._archive_type = ArtifactArchiveType.ZIP
-                    zip_file = zipfile.ZipFile(self._archive_path)
-                    # TODO improve security checks
-                    zip_file.extractall(path=self._uncompressed_archive_path)
+                    with zipfile.ZipFile(self._archive_path) as zip_file:
+                        # TODO improve security checks
+                        zip_file.extractall(path=self._uncompressed_archive_path)
                 # TODO 7-zip support
                 case _:
-                    raise FetchError("The archive type could not be identified.") from e
+                    raise FetchError("The archive type could not be identified.")
         except (tarfile.TarError, zipfile.BadZipFile, ValueError) as e:
             raise FetchError("An extraction error occurred while extracting the archive.") from e
         except IOError as e:
@@ -99,7 +102,7 @@ class HttpArtifactFetcher(BaseArtifactFetcher):
         """
         # Buffered download approach
         try:
-            response = requests.get(self._archive_url, stream=True)
+            response = requests.get(self._archive_url, stream=True, timeout=_DOWNLOAD_TIMEOUT)
             with open(self._archive_path, "wb") as archive:
                 for chunk in response.iter_content(chunk_size=1024):
                     if not chunk:
