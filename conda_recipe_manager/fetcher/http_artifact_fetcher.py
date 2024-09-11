@@ -4,7 +4,6 @@
 
 from __future__ import annotations
 
-import hashlib
 import tarfile
 import zipfile
 from enum import Enum, auto
@@ -16,7 +15,7 @@ import requests
 
 from conda_recipe_manager.fetcher.base_artifact_fetcher import BaseArtifactFetcher
 from conda_recipe_manager.fetcher.exceptions import FetchError, FetchRequiredError
-from conda_recipe_manager.types import HASH_BUFFER_SIZE
+from conda_recipe_manager.utils.cryptography.hashing import hash_file
 
 # Default download timeout for artifacts
 _DOWNLOAD_TIMEOUT: Final[int] = 5 * 60  # 5 minutes
@@ -143,15 +142,7 @@ class HttpArtifactFetcher(BaseArtifactFetcher):
         """
         self._fetch_guard("Archive has not been downloaded, so the file can't be hashed.")
 
-        # TODO generalize this buffering as a utility. `recipe_reader.py` could use this.
-        sha256 = hashlib.sha256()
-        with open(self._archive_path, "rb") as fptr:
-            while True:
-                buff = fptr.read(HASH_BUFFER_SIZE)
-                if not buff:
-                    break
-                sha256.update(buff)
-        return sha256.hexdigest()
+        return hash_file(self._archive_path, "sha256")
 
     def get_archive_type(self) -> ArtifactArchiveType:
         """

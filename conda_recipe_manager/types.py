@@ -33,8 +33,6 @@ SchemaType = dict[str, SchemaDetails]
 
 # Generic, hashable type
 H = TypeVar("H", bound=Hashable)
-# Common buffer size to use for hashing
-HASH_BUFFER_SIZE: Final[int] = 65536  # 64KiB
 
 # Bootstraps global singleton used by `SentinelType`
 _schema_type_singleton: SentinelType
