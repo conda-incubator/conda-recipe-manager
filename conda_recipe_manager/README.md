@@ -13,6 +13,10 @@ Some of these CLIs are very demo-focused and others provide significant value, l
 All commands defined are subcommands of the `conda-recipe-manager` command. The top-level command has also been
 abbreviated to `crm` for your typing convenience.
 
+### `fetcher` (WIP)
+This module provides tools for fetching and normalizing remote resources. Files that are downloaded are done so using
+secure temporary directories.
+
 ### `grapher` (WIP)
 This module provides tools that are capable of plotting and understanding how recipe dependencies are related to each
 other.
