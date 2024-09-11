@@ -13,8 +13,8 @@ from typing import Final
 
 import requests
 
-from conda_recipe_manager.types import HASH_BUFFER_SIZE
 from conda_recipe_manager.fetcher.base_artifact_fetcher import BaseArtifactFetcher, FetchError, FetchRequiredError
+from conda_recipe_manager.types import HASH_BUFFER_SIZE
 
 
 class ArtifactArchiveType(Enum):
@@ -42,7 +42,6 @@ class HttpArtifactFetcher(BaseArtifactFetcher):
             this might be the package name combined with some identifying information.
         :param archive_url:
         """
-        # TODO derive the name based on the package
         super().__init__(name)
         self._archive_url = Path(archive_url)
         self._archive_type = ArtifactArchiveType.UNKNOWN
@@ -93,7 +92,7 @@ class HttpArtifactFetcher(BaseArtifactFetcher):
 
     def fetch(self) -> None:
         """
-        TODO
+        Retrieves a software archive from a remote HTTP/HTTPS host and stores the files in a secure temporary directory.
 
         :raises FetchError: If an issue occurred while downloading or extracting the archive.
         """
