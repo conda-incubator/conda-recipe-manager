@@ -51,14 +51,16 @@ class HttpArtifactFetcher(BaseArtifactFetcher):
         self._archive_url = archive_url
         self._archive_type = ArtifactArchiveType.UNKNOWN
 
-        # Use `urlparse` to extract the file path containing the archive. Then we use a reliable, multi-extension
-        # removal approach derived from this StackOverflow discussion:
-        #  https://stackoverflow.com/questions/3548673/how-can-i-replace-or-strip-an-extension-from-a-filename-in-python
-        url_path = Path(urlparse(self._archive_url).path)
-        archive_name_no_ext: Final[str] = str(self._archive_url).removesuffix("".join(url_path.suffixes))
+        # We use `urlparse` to extract the file path containing the archive. This can be used to get the archive's file
+        # name. Many of the archive files we deal with contain the version number with period markings. We also work
+        # with archives with many different file extensions. To avoid the many pitfalls here of trying to calculate the
+        # "true basename" of the file, we just pre-pend `extracted_` to indicate this is the folder containing the
+        # extracted archive.
+        archive_file_name: Final[str] = Path(urlparse(self._archive_url).path).name
+        extracted_dir_name: Final[str] = f"extracted_{archive_file_name}"
 
-        self._archive_path: Final[Path] = self._temp_dir_path / url_path.name
-        self._uncompressed_archive_path: Final[Path] = self._temp_dir_path / archive_name_no_ext
+        self._archive_path: Final[Path] = self._temp_dir_path / archive_file_name
+        self._uncompressed_archive_path: Final[Path] = self._temp_dir_path / extracted_dir_name
 
     def _fetch_guard(self, msg: str) -> None:
         """
@@ -81,7 +83,7 @@ class HttpArtifactFetcher(BaseArtifactFetcher):
             match self._archive_path:
                 case path if tarfile.is_tarfile(path):
                     self._archive_type = ArtifactArchiveType.TARBALL
-                    with tarfile.TarFile(self._archive_path) as tar_file:
+                    with tarfile.open(self._archive_path, mode="r") as tar_file:
                         # The `filter="data"` parameter guards against "the most dangerous security issues"
                         tar_file.extractall(path=self._uncompressed_archive_path, filter="data")
                 case path if zipfile.is_zipfile(path):
@@ -124,6 +126,8 @@ class HttpArtifactFetcher(BaseArtifactFetcher):
     def get_path_to_source_code(self) -> Path:
         """
         Returns the directory containing the artifact's bundled source code.
+        NOTE: If the target archive compresses top-level folder that contains the source code, this path will point to a
+        directory containing that uncompressed top-level folder.
 
         :raises FetchRequiredError: If `fetch()` has not been successfully invoked.
         """
