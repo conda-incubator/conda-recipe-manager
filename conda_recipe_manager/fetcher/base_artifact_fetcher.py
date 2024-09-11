@@ -31,7 +31,7 @@ class BaseArtifactFetcher(metaclass=ABCMeta):
         """
         self._name = name
         # NOTE: There is an open issue about this pylint edge case: https://github.com/pylint-dev/pylint/issues/7658
-        self._temp_dir: Final[TemporaryDirectory] = TemporaryDirectory(  # pylint: disable=consider-using-with
+        self._temp_dir: Final[TemporaryDirectory[str]] = TemporaryDirectory(  # pylint: disable=consider-using-with
             prefix=_ARTIFACT_FETCHER_FILE_ID, suffix=name
         )
         self._temp_dir_path: Final[Path] = Path(self._temp_dir.name)

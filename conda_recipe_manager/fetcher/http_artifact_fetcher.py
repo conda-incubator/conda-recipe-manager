@@ -9,7 +9,7 @@ import tarfile
 import zipfile
 from enum import Enum, auto
 from pathlib import Path
-from typing import Final
+from typing import Final, Iterator, cast
 
 import requests
 
@@ -102,13 +102,13 @@ class HttpArtifactFetcher(BaseArtifactFetcher):
         """
         # Buffered download approach
         try:
-            response = requests.get(self._archive_url, stream=True, timeout=_DOWNLOAD_TIMEOUT)
+            response = requests.get(str(self._archive_url), stream=True, timeout=_DOWNLOAD_TIMEOUT)
             with open(self._archive_path, "wb") as archive:
-                for chunk in response.iter_content(chunk_size=1024):
+                for chunk in cast(Iterator[bytes], response.iter_content(chunk_size=1024)):
                     if not chunk:
                         break
                     archive.write(chunk)
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.RequestException as e:  # type: ignore[misc]
             raise FetchError("An HTTP error occurred while fetching the archive.") from e
         except IOError as e:
             raise FetchError("A file system error occurred while fetching the archive.") from e
