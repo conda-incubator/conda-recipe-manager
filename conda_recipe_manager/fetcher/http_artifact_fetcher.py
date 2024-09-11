@@ -43,7 +43,7 @@ class HttpArtifactFetcher(BaseArtifactFetcher):
         # TODO derive the name based on the package
         super().__init__(name)
         self._archive_url = Path(archive_url)
-        self._artifact_type = ArtifactArchiveType.UNKNOWN
+        self._archive_type = ArtifactArchiveType.UNKNOWN
 
         # Reliable, multi-extension removal approach derived from this post:
         #  https://stackoverflow.com/questions/3548673/how-can-i-replace-or-strip-an-extension-from-a-filename-in-python
@@ -70,10 +70,24 @@ class HttpArtifactFetcher(BaseArtifactFetcher):
         :raises FetchError: If an issue occurred while extracting the archive.
         """
         try:
-            pass  # TODO complete
+            match self._archive_path:
+                case path if tarfile.is_tarfile(path):
+                    self._archive_type = ArtifactArchiveType.TARBALL
+                    tar_file = tarfile.TarFile(self._archive_path)
+                    # The `filter="data"` parameter guards against "the most dangerous security issues"
+                    tar_file.extractall(path=self._uncompressed_archive_path, filter="data")
+                case path if zipfile.is_zipfile(path):
+                    self._archive_type = ArtifactArchiveType.ZIP
+                    zip_file = zipfile.ZipFile(self._archive_path)
+                    # TODO improve security checks
+                    zip_file.extractall(path=self._uncompressed_archive_path)
+                # TODO 7-zip support
+                case _:
+                    raise FetchError("The archive type could not be identified.") from e
+        except (tarfile.TarError, zipfile.BadZipFile, ValueError) as e:
+            raise FetchError("An extraction error occurred while extracting the archive.") from e
         except IOError as e:
             raise FetchError("A file system error occurred while extracting the archive.") from e
-        return Path()
 
     def fetch(self) -> None:
         """
@@ -129,4 +143,4 @@ class HttpArtifactFetcher(BaseArtifactFetcher):
         """
         self._fetch_guard("Archive has not been downloaded, so the type can't be determined.")
 
-        return self._artifact_type
+        return self._archive_type
