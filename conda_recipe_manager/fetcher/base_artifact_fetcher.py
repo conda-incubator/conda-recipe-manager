@@ -47,7 +47,6 @@ class BaseArtifactFetcher(metaclass=ABCMeta):
 
         :raises FetchError: When the target artifact fails to be acquired.
         """
-        pass
 
     @abstractmethod
     def get_path_to_source_code(self) -> Path:
@@ -56,4 +55,3 @@ class BaseArtifactFetcher(metaclass=ABCMeta):
 
         :raises FetchRequiredError: If a call to `fetch()` is required before using this function.
         """
-        pass

@@ -10,8 +10,6 @@ class FetcherException(Exception):
     Base exception for all other artifact fetching exceptions. Should not be raised directly.
     """
 
-    pass
-
 
 class FetchError(FetcherException):
     """
