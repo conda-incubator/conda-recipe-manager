@@ -7,6 +7,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Iterable
 
+import requests
+
 from conda_recipe_manager.types import JsonType, SentinelType
 from tests.file_loading import TEST_FILES_PATH, load_file, load_json_file
 
@@ -116,6 +118,9 @@ class MockHttpStreamResponse(MockHttpResponse):
 
         # Mock `iter_content()` by passing the buck to `read()`
         def _mock_iter_content(chunk_size: int) -> Iterable[bytes]:
+            # Simulate an exception if a non-200 error code is provided
+            if self.status_code // 100 != 2:
+                raise requests.exceptions.ConnectionError("Simulated failure!")
             yield self._file_obj.read(chunk_size)
 
         self.iter_content = _mock_iter_content
@@ -124,4 +129,6 @@ class MockHttpStreamResponse(MockHttpResponse):
         """
         Destructor for the HTTP mocker. Cleans up file pointer to test file.
         """
-        self._file_obj.close()
+        # `_file_obj` may not exist if `open()` threw an exception.
+        if hasattr(self, "_file_obj"):
+            self._file_obj.close()

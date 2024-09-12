@@ -11,10 +11,10 @@ from unittest.mock import patch
 
 import pytest
 
-from conda_recipe_manager.fetcher.exceptions import FetchRequiredError
+from conda_recipe_manager.fetcher.exceptions import FetchError, FetchRequiredError
 from conda_recipe_manager.fetcher.http_artifact_fetcher import HttpArtifactFetcher
 from tests.file_loading import TEST_FILES_PATH
-from tests.http_mocking import MockHttpResponse, MockHttpStreamResponse
+from tests.http_mocking import MockHttpStreamResponse
 
 
 class MockUrl:
@@ -28,7 +28,8 @@ class MockUrl:
     DUMMY_PROJECT_0_TAR_URL: Final[str] = f"{URL_BASE}dummy_project_01.tar.gz"
     DUMMY_PROJECT_0_ZIP_URL: Final[str] = f"{URL_BASE}dummy_project_01.zip"
 
-    HTTP_500: Final[str] = "https://forever.internal.error.com/"
+    # Failed URL
+    HTTP_500: Final[str] = f"{URL_BASE}dummy_failure.zip"
 
 
 @pytest.fixture(
@@ -53,10 +54,10 @@ def fixture_http_fetcher_failure() -> HttpArtifactFetcher:
     Single-instance `HttpArtifactFetcher` test fixture. This can be used for error cases that don't need multiple tests
     to be run or need to simulate a failed HTTP request.
     """
-    return HttpArtifactFetcher("dne", MockUrl.HTTP_500)
+    return HttpArtifactFetcher("dummy_project_failure", MockUrl.HTTP_500)
 
 
-def mock_requests_get(*args: tuple[str], **_: dict[str, str | int]) -> MockHttpResponse:
+def mock_requests_get(*args: tuple[str], **_: dict[str, str | int]) -> MockHttpStreamResponse:
     """
     Mocking function for HTTP requests made in this test file.
 
@@ -66,13 +67,14 @@ def mock_requests_get(*args: tuple[str], **_: dict[str, str | int]) -> MockHttpR
     endpoint = cast(str, args[0])
     match endpoint:
         case MockUrl.DUMMY_PROJECT_0_TAR_URL:
-            return MockHttpStreamResponse(200, file="archive_files/dummy_project_01.tar.gz")
+            return MockHttpStreamResponse(200, "archive_files/dummy_project_01.tar.gz")
         case MockUrl.DUMMY_PROJECT_0_ZIP_URL:
-            return MockHttpStreamResponse(200, file="archive_files/dummy_project_01.zip")
+            return MockHttpStreamResponse(200, "archive_files/dummy_project_01.zip")
         case MockUrl.HTTP_500:
-            return MockHttpResponse(500)
+            return MockHttpStreamResponse(500, "archive_files/dummy_project_01.tar.gz")
         case _:
-            return MockHttpResponse(404)
+            # TODO fix: pyfakefs does include `/dev/null` by default, but this actually points to `<temp_dir>/dev/null`
+            return MockHttpStreamResponse(404, "/dev/null")
 
 
 def test_fetch(fs: pytest.Function, http_fetcher: HttpArtifactFetcher) -> None:
@@ -97,6 +99,39 @@ def test_fetch(fs: pytest.Function, http_fetcher: HttpArtifactFetcher) -> None:
     assert Path(temp_dir_path / file_name).exists()
     assert Path(temp_dir_path / f"extracted_{file_name}/homer.py").exists()
     assert Path(temp_dir_path / f"extracted_{file_name}/README.md").exists()
+
+
+def test_fetch_file_io_failure(
+    fs: pytest.Function, http_fetcher_failure: HttpArtifactFetcher  # pylint: disable=unused-argument
+) -> None:
+    """
+    Tests that a file I/O error raises the correct exception.
+
+    :param fs: pyfakefs fixture used to replace the file system
+    :param http_fetcher_failure: HttpArtifactFetcher test fixture
+    """
+    # NOTE: We deliberately don't add the test file to the fake file system to force a file error.
+    with pytest.raises(FetchError) as e:
+        with patch("requests.get", new=mock_requests_get):
+            http_fetcher_failure.fetch()
+
+    assert str(e.value) == "A file system error occurred while fetching the archive."
+
+
+def test_fetch_http_failure(fs: pytest.Function, http_fetcher_failure: HttpArtifactFetcher) -> None:
+    """
+    Tests that an HTTP error raises the correct exception.
+
+    :param fs: pyfakefs fixture used to replace the file system
+    :param http_fetcher_failure: HttpArtifactFetcher test fixture
+    """
+    fs.add_real_directory(TEST_FILES_PATH)  # type: ignore[attr-defined]
+
+    with pytest.raises(FetchError) as e:
+        with patch("requests.get", new=mock_requests_get):
+            http_fetcher_failure.fetch()
+
+    assert str(e.value) == "An HTTP error occurred while fetching the archive."
 
 
 def test_get_path_to_source_code_raises_no_fetch(
