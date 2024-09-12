@@ -4,13 +4,15 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
-from typing import Final, Type, TypeVar
+from typing import Final, Type, TypeVar, cast
 
 from conda_recipe_manager.grapher.recipe_graph import RecipeGraph
 from conda_recipe_manager.parser.cbc_parser import CbcParser
 from conda_recipe_manager.parser.recipe_parser_deps import RecipeParserDeps
 from conda_recipe_manager.parser.recipe_reader import RecipeReader
+from conda_recipe_manager.types import JsonType
 
 # Path to supplementary files used in test cases
 TEST_FILES_PATH: Final[Path] = Path(__file__).parent / "test_aux_files"
@@ -30,7 +32,7 @@ def load_file(file: Path | str) -> str:
     return Path(TEST_FILES_PATH / file).read_text(encoding="utf-8")
 
 
-def load_recipe(file_name: str, recipe_parser: Type[R]) -> R:
+def load_recipe(file_name: Path | str, recipe_parser: Type[R]) -> R:
     """
     Convenience function that simplifies initializing a recipe parser.
 
@@ -60,7 +62,7 @@ def load_recipe_graph(recipes: list[str]) -> RecipeGraph:
     return RecipeGraph(tbl, failed)
 
 
-def load_cbc(file_name: str) -> CbcParser:
+def load_cbc(file_name: Path | str) -> CbcParser:
     """
     Convenience function that simplifies initializing a CBC parser.
 
@@ -69,3 +71,13 @@ def load_cbc(file_name: str) -> CbcParser:
     """
     cbc: Final[str] = load_file(TEST_FILES_PATH / "cbc_files" / file_name)
     return CbcParser(cbc)
+
+
+def load_json_file(file: Path | str) -> JsonType:
+    """
+    Loads JSON from a test file.
+
+    :param file_name: File name of the JSON file to load
+    :returns: Parsed JSON read from the file
+    """
+    return cast(JsonType, json.loads(load_file(file)))
