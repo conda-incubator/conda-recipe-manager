@@ -44,6 +44,7 @@ test:
     - pip
     - pytest
     - pytest-xdist
+    - pyfakefs
   commands:
     - pip check
     - python -m pytest -n auto tests/
