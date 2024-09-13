@@ -29,6 +29,7 @@ requirements:
     - pyyaml
     - jsonschema
     - requests
+    - gitpython
     - networkx
     - matplotlib
     - pygraphviz
