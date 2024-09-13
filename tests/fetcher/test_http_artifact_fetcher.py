@@ -189,6 +189,31 @@ def test_get_path_to_source_code_raises_no_fetch(
         http_fetcher_failure.get_path_to_source_code()
 
 
+@pytest.mark.parametrize(
+    "http_fixture,expected_hash",
+    [
+        ("http_fetcher_p0_tar", "e594f5bc141acabe4b0298d05234e80195116667edad3d6a9cd610cab36bc4e1"),
+        ("http_fetcher_p0_zip", "7afeff0da0fdd9df4fb14d6b77bbc297e23bb1451dad4530a7241eaf95363067"),
+    ],
+)
+def test_get_archive_sha256(http_fixture: str, expected_hash: str, request: pytest.FixtureRequest) -> None:
+    """
+    Tests fetching and extracting a software archive.
+
+    :param http_fixture: Name of the target `HttpArtifactFetcher` test fixture
+    :param expected_hash: Expected hash of the archive file
+    :param request: Pytest fixture request object.
+    """
+    # Make the test directory accessible to the HTTP mocker
+    request.getfixturevalue("fs").add_real_directory(TEST_FILES_PATH / "archive_files")  # type: ignore[misc]
+
+    http_fetcher = cast(HttpArtifactFetcher, request.getfixturevalue(http_fixture))
+    with patch("requests.get", new=mock_requests_get):
+        http_fetcher.fetch()
+
+    assert http_fetcher.get_archive_sha256() == expected_hash
+
+
 def test_get_archive_sha256_raises_no_fetch(
     fs: pytest.Function, http_fetcher_failure: HttpArtifactFetcher  # pylint: disable=unused-argument
 ) -> None:
