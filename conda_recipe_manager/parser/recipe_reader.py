@@ -39,6 +39,7 @@ from conda_recipe_manager.parser.dependency import DependencySection, dependency
 from conda_recipe_manager.parser.enums import SchemaVersion
 from conda_recipe_manager.parser.types import TAB_AS_SPACES, TAB_SPACE_COUNT, MultilineVariant
 from conda_recipe_manager.types import PRIMITIVES_TUPLE, JsonType, Primitives, SentinelType
+from conda_recipe_manager.utils.cryptography.hashing import hash_str
 
 # Import guard: Fallback to `SafeLoader` if `CSafeLoader` isn't available
 try:
@@ -1130,6 +1131,4 @@ class RecipeReader(IsModifiable):
 
         :returns: SHA-256 hash of the current recipe state.
         """
-        # NOTE: If we need to hash larger recipes, we may want to consider a buffered
-        #       approach: https://stackoverflow.com/questions/22058048/hashing-a-file-in-python
-        return hashlib.sha256(self.render().encode()).hexdigest()
+        return hash_str(self.render(), hashlib.sha256)

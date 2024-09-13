@@ -1,5 +1,5 @@
 {% set name = "conda-recipe-manager" %}
-{% set version = "0.2.0" %}
+{% set version = "0.2.1" %}
 
 package:
   name: {{ name|lower }}
@@ -44,6 +44,7 @@ test:
     - pip
     - pytest
     - pytest-xdist
+    - pyfakefs
   commands:
     - pip check
     - python -m pytest -n auto tests/
