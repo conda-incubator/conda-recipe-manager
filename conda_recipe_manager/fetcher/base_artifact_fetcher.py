@@ -19,7 +19,7 @@ class BaseArtifactFetcher(metaclass=ABCMeta):
     bundles of source code.
 
     Files retrieved from any artifact fetcher are stored in a secure temporary directory. That directory is deleted
-    when the Artifact Fetcher instances falls out of scope.
+    when the Artifact Fetcher instance falls out of scope.
     """
 
     def __init__(self, name: str) -> None:
