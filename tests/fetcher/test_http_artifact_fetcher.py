@@ -12,7 +12,7 @@ from unittest.mock import patch
 import pytest
 
 from conda_recipe_manager.fetcher.exceptions import FetchError, FetchRequiredError
-from conda_recipe_manager.fetcher.http_artifact_fetcher import HttpArtifactFetcher
+from conda_recipe_manager.fetcher.http_artifact_fetcher import ArtifactArchiveType, HttpArtifactFetcher
 from tests.file_loading import TEST_FILES_PATH
 from tests.http_mocking import MockHttpStreamResponse
 
@@ -158,7 +158,7 @@ def test_fetch_http_failure(fs: pytest.Function, http_fetcher_failure: HttpArtif
 )
 def test_get_path_to_source_code(http_fixture: str, expected_src: str, request: pytest.FixtureRequest) -> None:
     """
-    Tests fetching and extracting a software archive.
+    Tests getting the path to the extracted source code.
 
     :param http_fixture: Name of the target `HttpArtifactFetcher` test fixture
     :param expected_src: Expected name of the extracted source directory
@@ -198,7 +198,7 @@ def test_get_path_to_source_code_raises_no_fetch(
 )
 def test_get_archive_sha256(http_fixture: str, expected_hash: str, request: pytest.FixtureRequest) -> None:
     """
-    Tests fetching and extracting a software archive.
+    Tests calculating the SHA-256 hash of the downloaded archive file.
 
     :param http_fixture: Name of the target `HttpArtifactFetcher` test fixture
     :param expected_hash: Expected hash of the archive file
@@ -225,6 +225,33 @@ def test_get_archive_sha256_raises_no_fetch(
     """
     with pytest.raises(FetchRequiredError):
         http_fetcher_failure.get_archive_sha256()
+
+
+@pytest.mark.parametrize(
+    "http_fixture,expected_type",
+    [
+        ("http_fetcher_p0_tar", ArtifactArchiveType.TARBALL),
+        ("http_fetcher_p0_zip", ArtifactArchiveType.ZIP),
+    ],
+)
+def test_get_archive_type(
+    http_fixture: str, expected_type: ArtifactArchiveType, request: pytest.FixtureRequest
+) -> None:
+    """
+    Tests getting the archive type of the downloaded archive file.
+
+    :param http_fixture: Name of the target `HttpArtifactFetcher` test fixture
+    :param expected_type: Expected type of the archive file
+    :param request: Pytest fixture request object.
+    """
+    # Make the test directory accessible to the HTTP mocker
+    request.getfixturevalue("fs").add_real_directory(TEST_FILES_PATH / "archive_files")  # type: ignore[misc]
+
+    http_fetcher = cast(HttpArtifactFetcher, request.getfixturevalue(http_fixture))
+    with patch("requests.get", new=mock_requests_get):
+        http_fetcher.fetch()
+
+    assert http_fetcher.get_archive_type() == expected_type
 
 
 def test_get_archive_type_raises_no_fetch(
