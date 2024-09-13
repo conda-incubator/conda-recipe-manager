@@ -94,8 +94,10 @@ def test_fetch(
     """
     Tests fetching and extracting a software archive.
 
-    :param fs: pyfakefs fixture used to replace the file system
-    :param http_fetcher: HttpArtifactFetcher test fixture
+    :param http_fixture: Name of the target `HttpArtifactFetcher` test fixture
+    :param expected_archive: Expected name of the archive file that is being retrieved
+    :param expected_files: Expected files to be in the extracted archive
+    :param request: Pytest fixture request object.
     """
     # Make the test directory accessible to the HTTP mocker
     request.getfixturevalue("fs").add_real_directory(TEST_FILES_PATH / "archive_files")  # type: ignore[misc]
@@ -145,6 +147,33 @@ def test_fetch_http_failure(fs: pytest.Function, http_fetcher_failure: HttpArtif
             http_fetcher_failure.fetch()
 
     assert str(e.value) == "An HTTP error occurred while fetching the archive."
+
+
+@pytest.mark.parametrize(
+    "http_fixture,expected_src",
+    [
+        ("http_fetcher_p0_tar", "extracted_dummy_project_01.tar.gz"),
+        ("http_fetcher_p0_zip", "extracted_dummy_project_01.zip"),
+    ],
+)
+def test_get_path_to_source_code(http_fixture: str, expected_src: str, request: pytest.FixtureRequest) -> None:
+    """
+    Tests fetching and extracting a software archive.
+
+    :param http_fixture: Name of the target `HttpArtifactFetcher` test fixture
+    :param expected_src: Expected name of the extracted source directory
+    :param request: Pytest fixture request object.
+    """
+    # Make the test directory accessible to the HTTP mocker
+    request.getfixturevalue("fs").add_real_directory(TEST_FILES_PATH / "archive_files")  # type: ignore[misc]
+
+    http_fetcher = cast(HttpArtifactFetcher, request.getfixturevalue(http_fixture))
+    with patch("requests.get", new=mock_requests_get):
+        http_fetcher.fetch()
+
+    src_path: Final[Path] = http_fetcher.get_path_to_source_code()
+    assert str(src_path).endswith(expected_src)
+    assert src_path.exists()
 
 
 def test_get_path_to_source_code_raises_no_fetch(
