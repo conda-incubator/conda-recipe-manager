@@ -32,20 +32,24 @@ class MockUrl:
     HTTP_500: Final[str] = f"{URL_BASE}dummy_failure.zip"
 
 
-@pytest.fixture(
-    name="http_fetcher",
-    params=[
-        ("dummy_project_tar", MockUrl.DUMMY_PROJECT_0_TAR_URL),
-        ("dummy_project_zip", MockUrl.DUMMY_PROJECT_0_ZIP_URL),
-    ],
-)
-def fixture_http_fetcher(request: pytest.FixtureRequest) -> HttpArtifactFetcher:
+@pytest.fixture(name="http_fetcher_p0_tar")
+def fixture_http_fetcher_p0_tar() -> HttpArtifactFetcher:
     """
-    Parameterized `HttpArtifactFetcher` test fixture.
+    `HttpArtifactFetcher` test fixture for a simple tar'd project.
 
     :param request: Contains parameters to pass to the constructor.
     """
-    return HttpArtifactFetcher(request.param[0], request.param[1])  # type: ignore[misc]
+    return HttpArtifactFetcher("dummy_project_tar", MockUrl.DUMMY_PROJECT_0_TAR_URL)
+
+
+@pytest.fixture(name="http_fetcher_p0_zip")
+def fixture_http_fetcher_p0_zip() -> HttpArtifactFetcher:
+    """
+    `HttpArtifactFetcher` test fixture for a simple zipped project.
+
+    :param request: Contains parameters to pass to the constructor.
+    """
+    return HttpArtifactFetcher("dummy_project_zip", MockUrl.DUMMY_PROJECT_0_ZIP_URL)
 
 
 @pytest.fixture(name="http_fetcher_failure")
@@ -77,7 +81,16 @@ def mock_requests_get(*args: tuple[str], **_: dict[str, str | int]) -> MockHttpS
             return MockHttpStreamResponse(404, "/dev/null")
 
 
-def test_fetch(fs: pytest.Function, http_fetcher: HttpArtifactFetcher) -> None:
+@pytest.mark.parametrize(
+    "http_fixture,expected_archive,expected_files",
+    [
+        ("http_fetcher_p0_tar", "dummy_project_01.tar.gz", ["homer.py", "README.md"]),
+        ("http_fetcher_p0_zip", "dummy_project_01.zip", ["homer.py", "README.md"]),
+    ],
+)
+def test_fetch(
+    http_fixture: str, expected_archive: str, expected_files: list[str], request: pytest.FixtureRequest
+) -> None:
     """
     Tests fetching and extracting a software archive.
 
@@ -85,8 +98,9 @@ def test_fetch(fs: pytest.Function, http_fetcher: HttpArtifactFetcher) -> None:
     :param http_fetcher: HttpArtifactFetcher test fixture
     """
     # Make the test directory accessible to the HTTP mocker
-    fs.add_real_directory(TEST_FILES_PATH)  # type: ignore[attr-defined]
+    request.getfixturevalue("fs").add_real_directory(TEST_FILES_PATH / "archive_files")  # type: ignore[misc]
 
+    http_fetcher = cast(HttpArtifactFetcher, request.getfixturevalue(http_fixture))
     with patch("requests.get", new=mock_requests_get):
         http_fetcher.fetch()
 
@@ -95,10 +109,9 @@ def test_fetch(fs: pytest.Function, http_fetcher: HttpArtifactFetcher) -> None:
     temp_dir_path: Final[Path] = http_fetcher._temp_dir_path  # pylint: disable=protected-access
     assert temp_dir_path.exists()
 
-    file_name: Final[str] = http_fetcher._archive_url.replace(MockUrl.URL_BASE, "")  # pylint: disable=protected-access
-    assert Path(temp_dir_path / file_name).exists()
-    assert Path(temp_dir_path / f"extracted_{file_name}/homer.py").exists()
-    assert Path(temp_dir_path / f"extracted_{file_name}/README.md").exists()
+    assert Path(temp_dir_path / expected_archive).exists()
+    for expected_file in expected_files:
+        assert Path(temp_dir_path / f"extracted_{expected_archive}/{expected_file}").exists()
 
 
 def test_fetch_file_io_failure(
@@ -125,7 +138,7 @@ def test_fetch_http_failure(fs: pytest.Function, http_fetcher_failure: HttpArtif
     :param fs: pyfakefs fixture used to replace the file system
     :param http_fetcher_failure: HttpArtifactFetcher test fixture
     """
-    fs.add_real_directory(TEST_FILES_PATH)  # type: ignore[attr-defined]
+    fs.add_real_directory(TEST_FILES_PATH / "archive_files")  # type: ignore[attr-defined]
 
     with pytest.raises(FetchError) as e:
         with patch("requests.get", new=mock_requests_get):
