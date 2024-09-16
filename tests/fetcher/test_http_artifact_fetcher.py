@@ -32,8 +32,8 @@ class MockUrl:
     HTTP_500: Final[str] = f"{URL_BASE}dummy_failure.zip"
 
 
-@pytest.fixture(name="http_fetcher_p0_tar")
-def fixture_http_fetcher_p0_tar() -> HttpArtifactFetcher:
+@pytest.fixture(name="http_fetcher_p01_tar")
+def fixture_http_fetcher_p01_tar() -> HttpArtifactFetcher:
     """
     `HttpArtifactFetcher` test fixture for a simple tar'd project.
 
@@ -42,8 +42,8 @@ def fixture_http_fetcher_p0_tar() -> HttpArtifactFetcher:
     return HttpArtifactFetcher("dummy_project_tar", MockUrl.DUMMY_PROJECT_01_TAR_URL)
 
 
-@pytest.fixture(name="http_fetcher_p0_zip")
-def fixture_http_fetcher_p0_zip() -> HttpArtifactFetcher:
+@pytest.fixture(name="http_fetcher_p01_zip")
+def fixture_http_fetcher_p01_zip() -> HttpArtifactFetcher:
     """
     `HttpArtifactFetcher` test fixture for a simple zipped project.
 
@@ -84,8 +84,8 @@ def mock_requests_get(*args: tuple[str], **_: dict[str, str | int]) -> MockHttpS
 @pytest.mark.parametrize(
     "http_fixture,expected_archive,expected_files",
     [
-        ("http_fetcher_p0_tar", "dummy_project_01.tar.gz", ["homer.py", "README.md"]),
-        ("http_fetcher_p0_zip", "dummy_project_01.zip", ["homer.py", "README.md"]),
+        ("http_fetcher_p01_tar", "dummy_project_01.tar.gz", ["homer.py", "README.md"]),
+        ("http_fetcher_p01_zip", "dummy_project_01.zip", ["homer.py", "README.md"]),
     ],
 )
 def test_fetch(
@@ -152,8 +152,8 @@ def test_fetch_http_failure(fs: pytest.Function, http_fetcher_failure: HttpArtif
 @pytest.mark.parametrize(
     "http_fixture,expected_src",
     [
-        ("http_fetcher_p0_tar", "extracted_dummy_project_01.tar.gz"),
-        ("http_fetcher_p0_zip", "extracted_dummy_project_01.zip"),
+        ("http_fetcher_p01_tar", "extracted_dummy_project_01.tar.gz"),
+        ("http_fetcher_p01_zip", "extracted_dummy_project_01.zip"),
     ],
 )
 def test_get_path_to_source_code(http_fixture: str, expected_src: str, request: pytest.FixtureRequest) -> None:
@@ -192,8 +192,8 @@ def test_get_path_to_source_code_raises_no_fetch(
 @pytest.mark.parametrize(
     "http_fixture,expected_hash",
     [
-        ("http_fetcher_p0_tar", "e594f5bc141acabe4b0298d05234e80195116667edad3d6a9cd610cab36bc4e1"),
-        ("http_fetcher_p0_zip", "7afeff0da0fdd9df4fb14d6b77bbc297e23bb1451dad4530a7241eaf95363067"),
+        ("http_fetcher_p01_tar", "e594f5bc141acabe4b0298d05234e80195116667edad3d6a9cd610cab36bc4e1"),
+        ("http_fetcher_p01_zip", "7afeff0da0fdd9df4fb14d6b77bbc297e23bb1451dad4530a7241eaf95363067"),
     ],
 )
 def test_get_archive_sha256(http_fixture: str, expected_hash: str, request: pytest.FixtureRequest) -> None:
@@ -230,8 +230,8 @@ def test_get_archive_sha256_raises_no_fetch(
 @pytest.mark.parametrize(
     "http_fixture,expected_type",
     [
-        ("http_fetcher_p0_tar", ArtifactArchiveType.TARBALL),
-        ("http_fetcher_p0_zip", ArtifactArchiveType.ZIP),
+        ("http_fetcher_p01_tar", ArtifactArchiveType.TARBALL),
+        ("http_fetcher_p01_zip", ArtifactArchiveType.ZIP),
     ],
 )
 def test_get_archive_type(
