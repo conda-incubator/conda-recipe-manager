@@ -69,3 +69,9 @@ class BaseArtifactFetcher(metaclass=ABCMeta):
 
         :raises FetchRequiredError: If a call to `fetch()` is required before using this function.
         """
+
+    def apply_patches(self) -> None:
+        """
+        TODO Flush this mechanism out. It looks like the same mechanism is used for http and git sources(?)
+        """
+        pass
