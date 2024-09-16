@@ -36,20 +36,16 @@ class MockUrl:
 def fixture_http_fetcher_p01_tar() -> HttpArtifactFetcher:
     """
     `HttpArtifactFetcher` test fixture for a simple tar'd project.
-
-    :param request: Contains parameters to pass to the constructor.
     """
-    return HttpArtifactFetcher("dummy_project_tar", MockUrl.DUMMY_PROJECT_01_TAR_URL)
+    return HttpArtifactFetcher("dummy_project_01_tar", MockUrl.DUMMY_PROJECT_01_TAR_URL)
 
 
 @pytest.fixture(name="http_fetcher_p01_zip")
 def fixture_http_fetcher_p01_zip() -> HttpArtifactFetcher:
     """
     `HttpArtifactFetcher` test fixture for a simple zipped project.
-
-    :param request: Contains parameters to pass to the constructor.
     """
-    return HttpArtifactFetcher("dummy_project_zip", MockUrl.DUMMY_PROJECT_01_ZIP_URL)
+    return HttpArtifactFetcher("dummy_project_01_zip", MockUrl.DUMMY_PROJECT_01_ZIP_URL)
 
 
 @pytest.fixture(name="http_fetcher_failure")
