@@ -25,8 +25,8 @@ class MockUrl:
     # URL base to use for "working" endpoints. Allows for easy comparisons in tests.
     URL_BASE: Final[str] = "https://this-is-a-test.anaconda.com/foo/bar/baz/"
 
-    DUMMY_PROJECT_0_TAR_URL: Final[str] = f"{URL_BASE}dummy_project_01.tar.gz"
-    DUMMY_PROJECT_0_ZIP_URL: Final[str] = f"{URL_BASE}dummy_project_01.zip"
+    DUMMY_PROJECT_01_TAR_URL: Final[str] = f"{URL_BASE}dummy_project_01.tar.gz"
+    DUMMY_PROJECT_01_ZIP_URL: Final[str] = f"{URL_BASE}dummy_project_01.zip"
 
     # Failed URL
     HTTP_500: Final[str] = f"{URL_BASE}dummy_failure.zip"
@@ -39,7 +39,7 @@ def fixture_http_fetcher_p0_tar() -> HttpArtifactFetcher:
 
     :param request: Contains parameters to pass to the constructor.
     """
-    return HttpArtifactFetcher("dummy_project_tar", MockUrl.DUMMY_PROJECT_0_TAR_URL)
+    return HttpArtifactFetcher("dummy_project_tar", MockUrl.DUMMY_PROJECT_01_TAR_URL)
 
 
 @pytest.fixture(name="http_fetcher_p0_zip")
@@ -49,7 +49,7 @@ def fixture_http_fetcher_p0_zip() -> HttpArtifactFetcher:
 
     :param request: Contains parameters to pass to the constructor.
     """
-    return HttpArtifactFetcher("dummy_project_zip", MockUrl.DUMMY_PROJECT_0_ZIP_URL)
+    return HttpArtifactFetcher("dummy_project_zip", MockUrl.DUMMY_PROJECT_01_ZIP_URL)
 
 
 @pytest.fixture(name="http_fetcher_failure")
@@ -70,9 +70,9 @@ def mock_requests_get(*args: tuple[str], **_: dict[str, str | int]) -> MockHttpS
     """
     endpoint = cast(str, args[0])
     match endpoint:
-        case MockUrl.DUMMY_PROJECT_0_TAR_URL:
+        case MockUrl.DUMMY_PROJECT_01_TAR_URL:
             return MockHttpStreamResponse(200, "archive_files/dummy_project_01.tar.gz")
-        case MockUrl.DUMMY_PROJECT_0_ZIP_URL:
+        case MockUrl.DUMMY_PROJECT_01_ZIP_URL:
             return MockHttpStreamResponse(200, "archive_files/dummy_project_01.zip")
         case MockUrl.HTTP_500:
             return MockHttpStreamResponse(500, "archive_files/dummy_project_01.tar.gz")
