@@ -40,6 +40,7 @@ from conda_recipe_manager.parser.enums import SchemaVersion
 from conda_recipe_manager.parser.types import TAB_AS_SPACES, TAB_SPACE_COUNT, MultilineVariant
 from conda_recipe_manager.types import PRIMITIVES_TUPLE, JsonType, Primitives, SentinelType
 from conda_recipe_manager.utils.cryptography.hashing import hash_str
+from conda_recipe_manager.utils.typing import optional_str
 
 # Import guard: Fallback to `SafeLoader` if `CSafeLoader` isn't available
 try:
@@ -842,14 +843,9 @@ class RecipeReader(IsModifiable):
             returned instead.
         """
 
-        def _optional_str(val: JsonType) -> Optional[str]:
-            if val is None:
-                return None
-            return str(val)
-
         if self._schema_version == SchemaVersion.V1 and self.is_multi_output():
-            return _optional_str(self.get_value("/recipe/name", sub_vars=True, default=None))
-        return _optional_str(self.get_value("/package/name", sub_vars=True, default=None))
+            return optional_str(self.get_value("/recipe/name", sub_vars=True, default=None))
+        return optional_str(self.get_value("/package/name", sub_vars=True, default=None))
 
     ## General Convenience Functions ##
 
