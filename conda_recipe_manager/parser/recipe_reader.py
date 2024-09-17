@@ -830,6 +830,26 @@ class RecipeReader(IsModifiable):
 
         return paths
 
+    def get_recipe_name(self) -> Optional[str]:
+        """
+        Convenience function that retrieves the "name" of a recipe file. This can be used as an identifier, but it
+        is not guaranteed to be unique. In V0 recipes and single-output V1 recipes, this is known as the "package name".
+
+        In V1 recipe files, the name must be included to pass the schema check that should be enforced by any build
+        system.
+
+        :returns: The name associated with the recipe file. In the unlikely event that no name is found, `None` is
+            returned instead.
+        """
+        def _optional_str(val: JsonType) -> Optional[str]:
+            if val is None:
+                return None
+            return str(val)
+
+        if self._schema_version == SchemaVersion.V1 and self.is_multi_output():
+            return _optional_str(self.get_value("/recipe/name", sub_vars=True, default=None))
+        return _optional_str(self.get_value("/package/name", sub_vars=True, default=None))
+
     ## General Convenience Functions ##
 
     def is_multi_output(self) -> bool:
