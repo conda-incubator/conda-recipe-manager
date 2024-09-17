@@ -841,6 +841,7 @@ class RecipeReader(IsModifiable):
         :returns: The name associated with the recipe file. In the unlikely event that no name is found, `None` is
             returned instead.
         """
+
         def _optional_str(val: JsonType) -> Optional[str]:
             if val is None:
                 return None
