@@ -26,6 +26,8 @@ def from_recipe(recipe: RecipeReader) -> list[BaseArtifactFetcher]:
     if not isinstance(parsed_sources, list):
         parsed_sources = [parsed_sources]
 
+    # TODO Use `sub_vars` on `get_value()`
+    # TODO Handle selector evaluation
     for _ in parsed_sources:
         pass
     return sources

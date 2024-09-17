@@ -14,7 +14,7 @@ from urllib.parse import urlparse
 import requests
 
 from conda_recipe_manager.fetcher.base_artifact_fetcher import BaseArtifactFetcher
-from conda_recipe_manager.fetcher.exceptions import FetchError, FetchRequiredError
+from conda_recipe_manager.fetcher.exceptions import FetchError
 from conda_recipe_manager.utils.cryptography.hashing import hash_file
 
 # Default download timeout for artifacts
@@ -60,17 +60,6 @@ class HttpArtifactFetcher(BaseArtifactFetcher):
 
         self._archive_path: Final[Path] = self._temp_dir_path / archive_file_name
         self._uncompressed_archive_path: Final[Path] = self._temp_dir_path / extracted_dir_name
-
-    def _fetch_guard(self, msg: str) -> None:
-        """
-        Convenience function that prevents executing functions that require the archive to be downloaded.
-
-        :param msg: Message to attach to the exception.
-        :raises FetchRequiredError: If `fetch()` has not been successfully invoked.
-        """
-        if self._successfully_fetched:
-            return
-        raise FetchRequiredError(msg)
 
     def _extract(self) -> None:
         """

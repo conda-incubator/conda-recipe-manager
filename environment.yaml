@@ -25,6 +25,7 @@ dependencies:
   - types-jsonschema
   - requests
   - types-requests
+  - gitpython
   - networkx
   - matplotlib
   - pygraphviz

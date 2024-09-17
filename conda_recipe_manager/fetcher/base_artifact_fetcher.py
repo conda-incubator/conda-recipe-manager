@@ -9,6 +9,8 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Final
 
+from conda_recipe_manager.fetcher.exceptions import FetchRequiredError
+
 # Identifying string used to flag temp files and directories created by this module.
 _ARTIFACT_FETCHER_FILE_ID: Final[str] = "crm_artifact_fetcher"
 
@@ -38,6 +40,18 @@ class BaseArtifactFetcher(metaclass=ABCMeta):
         # Flag to track if `fetch()` has been called successfully once.
         self._successfully_fetched = False
 
+    def _fetch_guard(self, msg: str) -> None:
+        """
+        Convenience function that prevents executing functions that require the code to be downloaded or stored to the
+        temporary directory.
+
+        :param msg: Message to attach to the exception.
+        :raises FetchRequiredError: If `fetch()` has not been successfully invoked.
+        """
+        if self._successfully_fetched:
+            return
+        raise FetchRequiredError(msg)
+
     @abstractmethod
     def fetch(self) -> None:
         """
@@ -55,3 +69,9 @@ class BaseArtifactFetcher(metaclass=ABCMeta):
 
         :raises FetchRequiredError: If a call to `fetch()` is required before using this function.
         """
+
+    def apply_patches(self) -> None:
+        """
+        TODO Flush this mechanism out. It looks like the same mechanism is used for http and git sources(?)
+        """
+        pass
