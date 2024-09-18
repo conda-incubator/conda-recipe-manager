@@ -23,6 +23,7 @@ def _render_git_key(recipe: RecipeReader, key: str) -> str:
 
     :param recipe: Parser instance for the target recipe
     :param key: V0 Name for the target git source key
+    :raises FetchUnsupportedError: If an unrecognized key has been provided.
     :returns: The equivalent key for the recipe's schema.
     """
     match recipe.get_schema_version():
@@ -38,8 +39,10 @@ def _render_git_key(recipe: RecipeReader, key: str) -> str:
                     return "tag"
                 case "git_rev":
                     return "rev"
-                case _:  # If this case happens, a developer made a typo.
-                    return ""
+                # If this case happens, a developer made a typo. Therefore it should ignore the `ignore_unsupported`
+                # flag in the hopes of being caught early by a unit test.
+                case _:
+                    raise FetchUnsupportedError(f"The following key is not supported for git sources: {key}")
 
 
 def from_recipe(recipe: RecipeReader, ignore_unsupported: bool = False) -> list[BaseArtifactFetcher]:
