@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 import pytest
+from pyfakefs.fake_filesystem import FakeFilesystem
 
 from conda_recipe_manager.fetcher.exceptions import FetchRequiredError
 from conda_recipe_manager.fetcher.git_artifact_fetcher import GitArtifactFetcher
@@ -28,7 +29,8 @@ def fixture_git_fetcher_failure() -> GitArtifactFetcher:
 
 
 def test_get_path_to_source_code_raises_no_fetch(
-    fs: pytest.Function, git_fetcher_failure: GitArtifactFetcher  # pylint: disable=unused-argument
+    fs: FakeFilesystem,  # pylint: disable=unused-argument
+    git_fetcher_failure: GitArtifactFetcher,
 ) -> None:
     """
     Ensures `get_path_to_source_code()` throws if `fetch()` has not been called.
