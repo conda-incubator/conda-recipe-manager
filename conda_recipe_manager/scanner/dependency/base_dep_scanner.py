@@ -14,7 +14,6 @@ class Dependency(NamedTuple):
     """
 
     name: str
-    alias: Optional[str]
 
 
 class BaseDependencyScanner(metaclass=ABCMeta):

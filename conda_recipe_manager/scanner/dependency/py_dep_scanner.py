@@ -19,12 +19,12 @@ class PythonDependencyScanner(BaseDependencyScanner):
     TODO
     """
 
-    def __init__(self, src_dir: Path):
+    def __init__(self, src_dir: Path | str):
         """
         TODO
         """
         super().__init__()
-        self._src_dir: Final[Path] = src_dir
+        self._src_dir: Final[Path] = Path(src_dir)
 
     def _scan_one_file(self, file: Path) -> set[Dependency]:
         """
@@ -39,15 +39,18 @@ class PythonDependencyScanner(BaseDependencyScanner):
             if not isinstance(node, (ast.Import, ast.ImportFrom)):
                 continue
 
-            # TODO sanitize name. Only care about top-level
-            print(f"TODO rm: {n.name}")
-            # Filter-out anything in the standard Python library.
-            if n.name in sys.stdlib_module_names:
+            module_name = ""
+            if isinstance(node, ast.Import):
+                module_name = node.names[0].name.split(".")[0]
+            else:
+                module_name = node.module.split(".")[0]
+
+            # TODO filter local module names
+            # TODO filter relative imports
+            if not module_name or module_name in sys.stdlib_module_names:
                 continue
 
-            for n in node.names:
-                # TODO list of modules is unhashable
-                deps.add(Dependency(n.name, n.asname))
+            deps.add(Dependency(module_name))
 
         return deps
 
@@ -60,7 +63,7 @@ class PythonDependencyScanner(BaseDependencyScanner):
         for file in self._src_dir.rglob("*.py"):
             try:
                 all_imports |= self._scan_one_file(file)
-            except Exception:  # pylint: disable=broad-exception
+            except Exception as e:  # pylint: disable=broad-exception
                 # TODO log?
                 continue
 
