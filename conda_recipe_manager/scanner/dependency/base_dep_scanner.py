@@ -5,13 +5,16 @@
 from __future__ import annotations
 
 from abc import ABCMeta, abstractmethod
-from typing import NamedTuple
+from typing import NamedTuple, Optional
 
 
 class Dependency(NamedTuple):
     """
     TODO
     """
+
+    name: str
+    alias: Optional[str]
 
 
 class BaseDependencyScanner(metaclass=ABCMeta):
@@ -26,7 +29,7 @@ class BaseDependencyScanner(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def scan(self) -> list[Dependency]:
+    def scan(self) -> set[Dependency]:
         """
         TODO
         """
