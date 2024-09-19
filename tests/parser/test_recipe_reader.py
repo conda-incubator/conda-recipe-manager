@@ -584,13 +584,21 @@ def test_contains_value(file: str, path: str, expected: bool) -> None:
         ("simple-recipe_multiline_strings.yaml", "/about/description4", True, QUICK_FOX_SUB_CARROT_PLUS),
         ("simple-recipe_multiline_strings.yaml", "/about/description5", True, QUICK_FOX_SUB_CARROT_MINUS),
         ## types-toml.yaml ##
-        # TODO False case and whole source object w/ sub
         # Regression: `{ name[0] }` could not be evaluated.
         (
             "types-toml.yaml",
             "/source/url",
             True,
             "https://pypi.io/packages/source/t/types-toml/types-toml-0.10.8.6.tar.gz",
+        ),
+        (
+            "types-toml.yaml",
+            "/source",
+            True,
+            {
+                "url": "https://pypi.io/packages/source/t/types-toml/types-toml-0.10.8.6.tar.gz",
+                "sha256": "6d3ac79e36c9ee593c5d4fb33a50cca0e3adceb6ef5cff8b8e5aef67b4c4aaf2",
+            },
         ),
         ## v1_simple-recipe.yaml ##
         ("v1_format/v1_simple-recipe.yaml", "/build/number", False, 0),
@@ -689,6 +697,23 @@ def test_contains_value(file: str, path: str, expected: bool) -> None:
                 "This types-toml is silly",
                 "last",
             ],
+        ),
+        ## v1_types-toml.yaml ##
+        # Regression: `{ name[0] }` could not be evaluated.
+        (
+            "v1_format/v1_types-toml.yaml",
+            "/source/url",
+            True,
+            "https://pypi.io/packages/source/t/types-toml/types-toml-0.10.8.6.tar.gz",
+        ),
+        (
+            "v1_format/v1_types-toml.yaml",
+            "/source",
+            True,
+            {
+                "url": "https://pypi.io/packages/source/t/types-toml/types-toml-0.10.8.6.tar.gz",
+                "sha256": "6d3ac79e36c9ee593c5d4fb33a50cca0e3adceb6ef5cff8b8e5aef67b4c4aaf2",
+            },
         ),
         ## multi-output.yaml ##
         ("multi-output.yaml", "/outputs/0/build/run_exports/0", False, "bar"),
