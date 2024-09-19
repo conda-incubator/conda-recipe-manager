@@ -224,7 +224,7 @@ class RecipeReader(IsModifiable):
 
     def _set_on_schema_version(self) -> tuple[int, re.Pattern[str]]:
         """
-        Helper function for `_render_jinja_vars()` that initialize `schema_version`-specific substitution details.
+        Helper function for `_render_jinja_vars()` that initializes `schema_version`-specific substitution details.
 
         :returns: The starting index and the regex pattern used to substitute V0 or V1 JINJA variables.
         """
