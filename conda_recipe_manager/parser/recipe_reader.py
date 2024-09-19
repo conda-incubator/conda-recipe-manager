@@ -293,7 +293,7 @@ class RecipeReader(IsModifiable):
                     # From our research, it looks string indexing on JINJA variables is almost exclusively used to get
                     # the first character in a string. If the index is out of bounds, we will default to the variable's
                     # value as a fall-back.
-                    if 0 <= idx < len(key):
+                    if 0 <= idx < len(value):
                         value = value[idx]
                 s = s.replace(match, value)
             # $-Escaping the unresolved variable does a few things:
