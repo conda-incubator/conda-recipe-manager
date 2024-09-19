@@ -290,7 +290,7 @@ class RecipeReader(IsModifiable):
                     value = value.upper()
                 if idx_match:
                     idx = int(cast(str, idx_match.group(2)))
-                    # From our research, it looks string indexing on JINJA variables is almost exclusively used to get
+                    # From our research, it looks like string indexing on JINJA variables is almost exclusively used to get
                     # the first character in a string. If the index is out of bounds, we will default to the variable's
                     # value as a fall-back.
                     if 0 <= idx < len(value):
