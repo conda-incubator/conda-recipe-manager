@@ -600,6 +600,28 @@ def test_contains_value(file: str, path: str, expected: bool) -> None:
                 "sha256": "6d3ac79e36c9ee593c5d4fb33a50cca0e3adceb6ef5cff8b8e5aef67b4c4aaf2",
             },
         ),
+        ## sub_vars.yaml ##
+        (
+            "sub_vars.yaml",
+            "/package/name",
+            True,
+            "types-toml",
+        ),
+        (
+            "sub_vars.yaml",
+            "/source/url",
+            True,
+            "https://pypi.io/packages/source/t/TYPES-TOML/types-toml-6.tar.gz",
+        ),
+        (
+            "sub_vars.yaml",
+            "/source",
+            True,
+            {
+                "url": "https://pypi.io/packages/source/t/TYPES-TOML/types-toml-6.tar.gz",
+                "sha256": "6d3ac79e36c9ee593c5d4fb33a50cca0e3adceb6ef5cff8b8e5aef67b4c4aaf2",
+            },
+        ),
         ## v1_simple-recipe.yaml ##
         ("v1_format/v1_simple-recipe.yaml", "/build/number", False, 0),
         ("v1_format/v1_simple-recipe.yaml", "/build/number/", False, 0),
@@ -712,6 +734,28 @@ def test_contains_value(file: str, path: str, expected: bool) -> None:
             True,
             {
                 "url": "https://pypi.io/packages/source/t/types-toml/types-toml-0.10.8.6.tar.gz",
+                "sha256": "6d3ac79e36c9ee593c5d4fb33a50cca0e3adceb6ef5cff8b8e5aef67b4c4aaf2",
+            },
+        ),
+        ## v1_sub_vars.yaml ##
+        (
+            "v1_format/v1_sub_vars.yaml",
+            "/package/name",
+            True,
+            "types-toml",
+        ),
+        (
+            "v1_format/v1_sub_vars.yaml",
+            "/source/url",
+            True,
+            "https://pypi.io/packages/source/t/TYPES-TOML/types-toml-6.tar.gz",
+        ),
+        (
+            "v1_format/v1_sub_vars.yaml",
+            "/source",
+            True,
+            {
+                "url": "https://pypi.io/packages/source/t/TYPES-TOML/types-toml-6.tar.gz",
                 "sha256": "6d3ac79e36c9ee593c5d4fb33a50cca0e3adceb6ef5cff8b8e5aef67b4c4aaf2",
             },
         ),
