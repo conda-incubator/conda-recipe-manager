@@ -92,23 +92,22 @@ class RecipeReader(IsModifiable):
         """
         output: JsonType = None
 
-        # V1 recipes use $-escaped JINJA substitutions that will not throw parse exceptions. If variable substitution
-        # is requested, we will need to handle that directly.
-        def _v1_sub_jinja() -> None:
-            if parser is not None and parser.get_schema_version() == SchemaVersion.V1:
-                output = RecipeReader._parse_yaml_recursive_sub(
-                    output, parser._render_jinja_vars  # pylint: disable=protected-access
-                )
+        # Convenience function to substitute variables. Given the re-try mechanism on YAML parsing, we have to attempt
+        # to perform substitutions a few times. Substitutions may occur as the entire strings or parts in a string.
+        def _sub_jinja(out: JsonType) -> JsonType:
+            if parser is None:
+                return out
+            return RecipeReader._parse_yaml_recursive_sub(
+                out, parser._render_jinja_vars  # pylint: disable=protected-access
+            )
 
         # Our first attempt handles special string cases that require quotes that the YAML parser drops. If that fails,
         # then we fall back to performing JINJA substitutions.
         try:
             try:
-                output = yaml.load(s, Loader=SafeLoader)
-                _v1_sub_jinja()
+                output = _sub_jinja(cast(JsonType, yaml.load(s, Loader=SafeLoader)))
             except yaml.scanner.ScannerError:
-                output = cast(JsonType, yaml.load(quote_special_strings(s), Loader=SafeLoader))
-                _v1_sub_jinja()
+                output = _sub_jinja(cast(JsonType, yaml.load(quote_special_strings(s), Loader=SafeLoader)))
         except Exception:  # pylint: disable=broad-exception-caught
             # If a construction exception is thrown, attempt to re-parse by replacing Jinja macros (substrings in
             # `{{}}`) with friendly string substitution markers, then re-inject the substitutions back in. We classify
@@ -116,15 +115,13 @@ class RecipeReader(IsModifiable):
             # substitution.
             sub_list: list[str] = Regex.JINJA_V0_SUB.findall(s)
             s = Regex.JINJA_V0_SUB.sub(RECIPE_MANAGER_SUB_MARKER, s)
-            output = RecipeReader._parse_yaml_recursive_sub(
-                cast(JsonType, yaml.load(s, Loader=SafeLoader)), lambda d: substitute_markers(d, sub_list)
-            )
             # Because we leverage PyYaml to parse the data structures, we need to perform a second pass to perform
             # variable substitutions.
-            if parser is not None:
-                output = RecipeReader._parse_yaml_recursive_sub(
-                    output, parser._render_jinja_vars  # pylint: disable=protected-access
+            output = _sub_jinja(
+                RecipeReader._parse_yaml_recursive_sub(
+                    cast(JsonType, yaml.load(s, Loader=SafeLoader)), lambda d: substitute_markers(d, sub_list)
                 )
+            )
         return output
 
     @staticmethod
@@ -225,6 +222,48 @@ class RecipeReader(IsModifiable):
         # Primitives can be safely stringified to generate a parse tree.
         return RecipeReader(str(stringify_yaml(value)))._root.children  # pylint: disable=protected-access
 
+    def _set_on_schema_version(self) -> tuple[int, re.Pattern[str]]:
+        """
+        Helper function for `_render_jinja_vars()` that initialize `schema_version`-specific substitution details.
+
+        :returns: The starting index and the regex pattern used to substitute V0 or V1 JINJA variables.
+        """
+        match self._schema_version:
+            case SchemaVersion.V0:
+                return 2, Regex.JINJA_V0_SUB
+            case SchemaVersion.V1:
+                return 3, Regex.JINJA_V1_SUB
+
+    @staticmethod
+    def _set_key_and_matches(
+        key: str,
+    ) -> tuple[str, Optional[re.Match[str]], Optional[re.Match[str]], Optional[re.Match[str]]]:
+        """
+        Helper function for `_render_jinja_vars()` that takes a JINJA statement (string inside the braces) and attempts
+        to match and apply any currently supported "JINJA functions" to the statement.
+
+        :param key: Sanitized key to perform JINJA functions on.
+        :returns: The modified key, if any JINJA functions apply.
+        """
+        # TODO add support for REPLACE
+
+        # Example: {{ name | lower }}
+        lower_match = Regex.JINJA_FUNCTION_LOWER.search(key)
+        if lower_match:
+            key = key.replace(lower_match.group(), "").strip()
+
+        # Example: {{ name | upper }}
+        upper_match = Regex.JINJA_FUNCTION_UPPER.search(key)
+        if upper_match:
+            key = key.replace(upper_match.group(), "").strip()
+
+        # Example: {{ name[0] }}
+        idx_match = Regex.JINJA_FUNCTION_IDX_ACCESS.search(key)
+        if idx_match:
+            key = key.replace(f"[{cast(str, idx_match.group(2))}]", "").strip()
+
+        return key, lower_match, upper_match, idx_match
+
     def _render_jinja_vars(self, s: str) -> JsonType:
         """
         Helper function that replaces Jinja substitutions with their actual set values.
@@ -233,38 +272,35 @@ class RecipeReader(IsModifiable):
         :returns: The original value, augmented with Jinja substitutions. Types are re-rendered to account for multiline
             strings that may have been "normalized" prior to this call.
         """
-
-        # Initialize `schema_version` specific details.
-        def _set_on_schema_version() -> tuple[int, re.Pattern[str]]:
-            match self._schema_version:
-                case SchemaVersion.V0:
-                    return 2, Regex.JINJA_V0_SUB
-                case SchemaVersion.V1:
-                    return 3, Regex.JINJA_V1_SUB
-
-        start_idx, sub_regex = _set_on_schema_version()
+        start_idx, sub_regex = self._set_on_schema_version()
 
         # Search the string, replacing all substitutions we can recognize
         for match in cast(list[str], sub_regex.findall(s)):
             # The regex guarantees the string starts and ends with double braces
             key = match[start_idx:-2].strip()
             # Check for and interpret common JINJA functions
-            # TODO add support for UPPER and REPLACE
-            lower_match = Regex.JINJA_FUNCTION_LOWER.search(key)
-            if lower_match:
-                key = key.replace(lower_match.group(), "").strip()
+            key, lower_match, upper_match, idx_match = RecipeReader._set_key_and_matches(key)
 
             if key in self._vars_tbl:
                 # Replace value as a string. Re-interpret the entire value before returning.
                 value = str(self._vars_tbl[key])
                 if lower_match:
                     value = value.lower()
+                if upper_match:
+                    value = value.upper()
+                if idx_match:
+                    idx = int(cast(str, idx_match.group(2)))
+                    # From our research, it looks string indexing on JINJA variables is almost exclusively used to get
+                    # the first character in a string. If the index is out of bounds, we will default to the variable's
+                    # value as a fall-back.
+                    if 0 <= idx < len(key):
+                        value = value[idx]
                 s = s.replace(match, value)
             # $-Escaping the unresolved variable does a few things:
             #   - Clearly identifies the value as an unresolved variable
             #   - Normalizes the substitution syntax with V1
             #   - Ensures the returned value is YAML-parsable
-            elif self._schema_version == SchemaVersion.V0:
+            elif self._schema_version == SchemaVersion.V0 and s[:2] == "{{":
                 s = f"${s}"
         return cast(JsonType, yaml.load(s, Loader=SafeLoader))
 
@@ -403,6 +439,7 @@ class RecipeReader(IsModifiable):
 
         # Auto-detect and deserialize the version of the recipe schema. This will change how the class behaves.
         self._schema_version = SchemaVersion.V0
+        # TODO bootstrap this better. `get_value()` has a circular dependency on `_vars_tbl` if `sub_vars` is used.
         schema_version = cast(SchemaVersion | int, self.get_value("/schema_version", SchemaVersion.V0))
         if isinstance(schema_version, int) and schema_version == 1:
             self._schema_version = SchemaVersion.V1
@@ -766,7 +803,6 @@ class RecipeReader(IsModifiable):
         return_value: JsonType = None
         # Handle unpacking of the last key-value set of nodes.
         if node.is_single_key() and not node.is_root():
-            # As of writing, Jinja substitutions are not used
             if node.children[0].multiline_variant != MultilineVariant.NONE:
                 multiline_str = cast(
                     str,

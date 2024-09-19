@@ -136,16 +136,14 @@ def test_get_package_names_to_path(file: str, expected: dict[str, str]) -> None:
                         "cctools-and-ld64",
                         "/requirements/build/0",
                         DependencySection.BUILD,
-                        # TODO Future: Add support for `sub_vars` to render these common compiler variables and/or parse
-                        # the meaning.
-                        MatchSpec("gcc_{{ native_compiler_subdir }}"),
+                        MatchSpec("gcc_linux-64"),
                         SelectorParser("[linux]", SchemaVersion.V0),
                     ),
                     Dependency(
                         "cctools-and-ld64",
                         "/requirements/build/1",
                         DependencySection.BUILD,
-                        MatchSpec("gxx_{{ native_compiler_subdir }}"),
+                        MatchSpec("gxx_linux-64"),
                         SelectorParser("[linux]", SchemaVersion.V0),
                     ),
                     Dependency(
@@ -192,14 +190,14 @@ def test_get_package_names_to_path(file: str, expected: dict[str, str]) -> None:
                         "cctools",
                         "/requirements/build/0",
                         DependencySection.BUILD,
-                        MatchSpec("gcc_{{ native_compiler_subdir }}"),
+                        MatchSpec("gcc_linux-64"),
                         SelectorParser("[linux]", SchemaVersion.V0),
                     ),
                     Dependency(
                         "cctools",
                         "/requirements/build/1",
                         DependencySection.BUILD,
-                        MatchSpec("gxx_{{ native_compiler_subdir }}"),
+                        MatchSpec("gxx_linux-64"),
                         SelectorParser("[linux]", SchemaVersion.V0),
                     ),
                     Dependency(
@@ -245,14 +243,14 @@ def test_get_package_names_to_path(file: str, expected: dict[str, str]) -> None:
                         "ld64",
                         "/requirements/build/0",
                         DependencySection.BUILD,
-                        MatchSpec("gcc_{{ native_compiler_subdir }}"),
+                        MatchSpec("gcc_linux-64"),
                         SelectorParser("[linux]", SchemaVersion.V0),
                     ),
                     Dependency(
                         "ld64",
                         "/requirements/build/1",
                         DependencySection.BUILD,
-                        MatchSpec("gxx_{{ native_compiler_subdir }}"),
+                        MatchSpec("gxx_linux-64"),
                         SelectorParser("[linux]", SchemaVersion.V0),
                     ),
                     Dependency("ld64", "/requirements/build/2", DependencySection.BUILD, MatchSpec("autoconf"), None),

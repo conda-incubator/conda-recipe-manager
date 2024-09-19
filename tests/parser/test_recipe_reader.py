@@ -583,6 +583,15 @@ def test_contains_value(file: str, path: str, expected: bool) -> None:
         ("simple-recipe_multiline_strings.yaml", "/about/description3", True, QUICK_FOX_SUB_CARROT),
         ("simple-recipe_multiline_strings.yaml", "/about/description4", True, QUICK_FOX_SUB_CARROT_PLUS),
         ("simple-recipe_multiline_strings.yaml", "/about/description5", True, QUICK_FOX_SUB_CARROT_MINUS),
+        ## types-toml.yaml ##
+        # TODO False case and whole source object w/ sub
+        # Regression: `{ name[0] }` could not be evaluated.
+        (
+            "types-toml.yaml",
+            "/source/url",
+            True,
+            "https://pypi.io/packages/source/t/types-toml/types-toml-0.10.8.6.tar.gz",
+        ),
         ## v1_simple-recipe.yaml ##
         ("v1_format/v1_simple-recipe.yaml", "/build/number", False, 0),
         ("v1_format/v1_simple-recipe.yaml", "/build/number/", False, 0),
