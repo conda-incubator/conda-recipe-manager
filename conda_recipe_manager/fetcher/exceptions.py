@@ -11,6 +11,21 @@ class FetcherException(Exception):
     """
 
 
+class FetchUnsupportedError(FetcherException):
+    """
+    An issue occurred because the target artifact/source format is unsupported.
+    """
+
+    def __init__(self, message: str):
+        """
+        Constructs a FetchUnsupportedError Exception.
+
+        :param message: String description of the issue encountered.
+        """
+        self.message = message if len(message) else "The target artifact format is unsupported."
+        super().__init__(self.message)
+
+
 class FetchError(FetcherException):
     """
     General exception to be thrown when there is a failure to fetch an artifact.
