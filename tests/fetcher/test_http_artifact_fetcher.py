@@ -10,6 +10,7 @@ from typing import Final, cast
 from unittest.mock import patch
 
 import pytest
+from pyfakefs.fake_filesystem import FakeFilesystem
 
 from conda_recipe_manager.fetcher.exceptions import FetchError, FetchRequiredError
 from conda_recipe_manager.fetcher.http_artifact_fetcher import ArtifactArchiveType, HttpArtifactFetcher
@@ -113,7 +114,7 @@ def test_fetch(
 
 
 def test_fetch_file_io_failure(
-    fs: pytest.Function, http_fetcher_failure: HttpArtifactFetcher  # pylint: disable=unused-argument
+    fs: FakeFilesystem, http_fetcher_failure: HttpArtifactFetcher  # pylint: disable=unused-argument
 ) -> None:
     """
     Tests that a file I/O error raises the correct exception.
@@ -129,14 +130,14 @@ def test_fetch_file_io_failure(
     assert str(e.value) == "A file system error occurred while fetching the archive."
 
 
-def test_fetch_http_failure(fs: pytest.Function, http_fetcher_failure: HttpArtifactFetcher) -> None:
+def test_fetch_http_failure(fs: FakeFilesystem, http_fetcher_failure: HttpArtifactFetcher) -> None:
     """
     Tests that an HTTP error raises the correct exception.
 
     :param fs: pyfakefs fixture used to replace the file system
     :param http_fetcher_failure: HttpArtifactFetcher test fixture
     """
-    fs.add_real_directory(TEST_FILES_PATH / "archive_files")  # type: ignore[attr-defined]
+    fs.add_real_directory(TEST_FILES_PATH / "archive_files")
 
     with pytest.raises(FetchError) as e:
         with patch("requests.get", new=mock_requests_get):
@@ -173,7 +174,7 @@ def test_get_path_to_source_code(http_fixture: str, expected_src: str, request: 
 
 
 def test_get_path_to_source_code_raises_no_fetch(
-    fs: pytest.Function, http_fetcher_failure: HttpArtifactFetcher  # pylint: disable=unused-argument
+    fs: FakeFilesystem, http_fetcher_failure: HttpArtifactFetcher  # pylint: disable=unused-argument
 ) -> None:
     """
     Ensures `get_path_to_source_code()` throws if `fetch()` has not been called.
@@ -211,7 +212,7 @@ def test_get_archive_sha256(http_fixture: str, expected_hash: str, request: pyte
 
 
 def test_get_archive_sha256_raises_no_fetch(
-    fs: pytest.Function, http_fetcher_failure: HttpArtifactFetcher  # pylint: disable=unused-argument
+    fs: FakeFilesystem, http_fetcher_failure: HttpArtifactFetcher  # pylint: disable=unused-argument
 ) -> None:
     """
     Ensures `get_archive_sha256()` throws if `fetch()` has not been called.
@@ -251,7 +252,7 @@ def test_get_archive_type(
 
 
 def test_get_archive_type_raises_no_fetch(
-    fs: pytest.Function, http_fetcher_failure: HttpArtifactFetcher  # pylint: disable=unused-argument
+    fs: FakeFilesystem, http_fetcher_failure: HttpArtifactFetcher  # pylint: disable=unused-argument
 ) -> None:
     """
     Ensures `get_archive_type()` throws if `fetch()` has not been called.
