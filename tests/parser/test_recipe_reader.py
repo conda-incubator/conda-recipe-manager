@@ -583,6 +583,45 @@ def test_contains_value(file: str, path: str, expected: bool) -> None:
         ("simple-recipe_multiline_strings.yaml", "/about/description3", True, QUICK_FOX_SUB_CARROT),
         ("simple-recipe_multiline_strings.yaml", "/about/description4", True, QUICK_FOX_SUB_CARROT_PLUS),
         ("simple-recipe_multiline_strings.yaml", "/about/description5", True, QUICK_FOX_SUB_CARROT_MINUS),
+        ## types-toml.yaml ##
+        # Regression: `{ name[0] }` could not be evaluated.
+        (
+            "types-toml.yaml",
+            "/source/url",
+            True,
+            "https://pypi.io/packages/source/t/types-toml/types-toml-0.10.8.6.tar.gz",
+        ),
+        (
+            "types-toml.yaml",
+            "/source",
+            True,
+            {
+                "url": "https://pypi.io/packages/source/t/types-toml/types-toml-0.10.8.6.tar.gz",
+                "sha256": "6d3ac79e36c9ee593c5d4fb33a50cca0e3adceb6ef5cff8b8e5aef67b4c4aaf2",
+            },
+        ),
+        ## sub_vars.yaml ##
+        (
+            "sub_vars.yaml",
+            "/package/name",
+            True,
+            "types-toml",
+        ),
+        (
+            "sub_vars.yaml",
+            "/source/url",
+            True,
+            "https://pypi.io/packages/source/t/TYPES-TOML/types-toml-6.tar.gz",
+        ),
+        (
+            "sub_vars.yaml",
+            "/source",
+            True,
+            {
+                "url": "https://pypi.io/packages/source/t/TYPES-TOML/types-toml-6.tar.gz",
+                "sha256": "6d3ac79e36c9ee593c5d4fb33a50cca0e3adceb6ef5cff8b8e5aef67b4c4aaf2",
+            },
+        ),
         ## v1_simple-recipe.yaml ##
         ("v1_format/v1_simple-recipe.yaml", "/build/number", False, 0),
         ("v1_format/v1_simple-recipe.yaml", "/build/number/", False, 0),
@@ -681,6 +720,45 @@ def test_contains_value(file: str, path: str, expected: bool) -> None:
                 "last",
             ],
         ),
+        ## v1_types-toml.yaml ##
+        # Regression: `{ name[0] }` could not be evaluated.
+        (
+            "v1_format/v1_types-toml.yaml",
+            "/source/url",
+            True,
+            "https://pypi.io/packages/source/t/types-toml/types-toml-0.10.8.6.tar.gz",
+        ),
+        (
+            "v1_format/v1_types-toml.yaml",
+            "/source",
+            True,
+            {
+                "url": "https://pypi.io/packages/source/t/types-toml/types-toml-0.10.8.6.tar.gz",
+                "sha256": "6d3ac79e36c9ee593c5d4fb33a50cca0e3adceb6ef5cff8b8e5aef67b4c4aaf2",
+            },
+        ),
+        ## v1_sub_vars.yaml ##
+        (
+            "v1_format/v1_sub_vars.yaml",
+            "/package/name",
+            True,
+            "types-toml",
+        ),
+        (
+            "v1_format/v1_sub_vars.yaml",
+            "/source/url",
+            True,
+            "https://pypi.io/packages/source/t/TYPES-TOML/types-toml-6.tar.gz",
+        ),
+        (
+            "v1_format/v1_sub_vars.yaml",
+            "/source",
+            True,
+            {
+                "url": "https://pypi.io/packages/source/t/TYPES-TOML/types-toml-6.tar.gz",
+                "sha256": "6d3ac79e36c9ee593c5d4fb33a50cca0e3adceb6ef5cff8b8e5aef67b4c4aaf2",
+            },
+        ),
         ## multi-output.yaml ##
         ("multi-output.yaml", "/outputs/0/build/run_exports/0", False, "bar"),
         ("multi-output.yaml", "/outputs/0/build/run_exports", False, ["bar"]),
@@ -699,6 +777,12 @@ def test_contains_value(file: str, path: str, expected: bool) -> None:
         #        "test": {"commands": ["db_archive -m hello"]},
         #    },
         # ),
+        ## v1_multi-output.yaml ##
+        ("v1_format/v1_multi-output.yaml", "/outputs/0/requirements/run_exports/0", False, "bar"),
+        ("v1_format/v1_multi-output.yaml", "/outputs/0/requirements/run_exports", False, ["bar"]),
+        # TODO FIX: This case
+        # ("v1_format/v1_multi-output.yaml", "/outputs/0/build", False, None),
+        ("v1_format/v1_multi-output.yaml", "/outputs/0/requirements", False, {"run_exports": ["bar"]}),
     ],
 )
 def test_get_value(file: str, path: str, sub_vars: bool, expected: JsonType) -> None:
