@@ -116,7 +116,7 @@ class Regex:
     """
 
     # Pattern to detect Jinja variable names and functions
-    _JINJA_VAR_FUNCTION_PATTERN: Final[str] = r"[a-zA-Z_][a-zA-Z0-9_\|\'\"\(\)\, =\.\-]*"
+    _JINJA_VAR_FUNCTION_PATTERN: Final[str] = r"[a-zA-Z_][a-zA-Z0-9_\|\'\"\(\)\[\]\, =\.\-]*"
 
     ## Pre-process conversion tooling regular expressions ##
     # Finds `environ[]` used by a some recipe files. Requires a whitespace character to prevent matches with
@@ -165,10 +165,11 @@ class Regex:
     JINJA_V1_SUB: Final[re.Pattern[str]] = re.compile(r"\${{\s*" + _JINJA_VAR_FUNCTION_PATTERN + r"\s*}}")
 
     # All recognized JINJA functions are kept in a set for the convenience of trying to match against all of them.
-    # Group 1 contains the function name, Group 2 contains the arguments, if any.
+    # Group 1 contains the function or variable name, Group 2 contains the arguments, if any.
     JINJA_FUNCTION_LOWER: Final[re.Pattern[str]] = re.compile(r"\|\s*(lower)")
     JINJA_FUNCTION_UPPER: Final[re.Pattern[str]] = re.compile(r"\|\s*(upper)")
     JINJA_FUNCTION_REPLACE: Final[re.Pattern[str]] = re.compile(r"\|\s*(replace)\((.*)\)")
+    JINJA_FUNCTION_IDX_ACCESS: Final[re.Pattern[str]] = re.compile(r"(\w+)\[(\d+)\]")
     # `match()` is a JINJA function available in the V1 recipe format
     JINJA_FUNCTION_MATCH: Final[re.Pattern[str]] = re.compile(r"match\(.*,.*\)")
     JINJA_FUNCTIONS_SET: Final[set[re.Pattern[str]]] = {
