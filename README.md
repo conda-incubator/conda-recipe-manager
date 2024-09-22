@@ -1,19 +1,26 @@
+[integration-tests-badge]: https://github.com/conda-incubator/conda-recipe-manager/actions/workflows/integration_tests.yaml/badge.svg?branch=main
+[release-badge]: https://img.shields.io/github/v/release/conda-incubator/conda-recipe-manager?logo=github
+
+
 # conda-recipe-manager
+
+[![Integration Tests][integration-tests-badge]](https://github.com/conda-incubator/conda-recipe-manager/actions/workflows/integration_tests.yaml)
+[![GitHub Release][release-badge]](https://github.com/conda-incubator/conda-recipe-manager/releases)
 
 ## Table of Contents
 <!-- TOC -->
 
 - [conda-recipe-manager](#conda-recipe-manager)
-    - [Table of Contents](#table-of-contents)
+  - [Table of Contents](#table-of-contents)
 - [Overview](#overview)
-    - [History](#history)
+  - [History](#history)
 - [Getting Started](#getting-started)
-    - [General Installation](#general-installation)
-        - [Install into your current environment](#install-into-your-current-environment)
-        - [Install into a custom environment](#install-into-a-custom-environment)
+  - [General Installation](#general-installation)
+    - [Install into your current environment](#install-into-your-current-environment)
+    - [Install into a custom environment](#install-into-a-custom-environment)
 - [Developer Notes](#developer-notes)
-        - [Running pre-commit checks](#running-pre-commit-checks)
-    - [Release process](#release-process)
+    - [Running pre-commit checks](#running-pre-commit-checks)
+  - [Release process](#release-process)
 - [Special Thanks](#special-thanks)
 
 <!-- /TOC -->
