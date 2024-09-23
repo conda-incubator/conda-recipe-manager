@@ -1,5 +1,5 @@
 """
-:Description: CLI for patching JSON blobs to recipe files.
+:Description: CLI for patching JSON patch blobs to recipe files.
 """
 
 from __future__ import annotations
@@ -23,6 +23,9 @@ def _pre_patch_validate(
 ) -> tuple[JsonPatchType | list[JsonPatchType], RecipeParser]:
     """
     Confirm that the json patch file and recipe file can be read and that the recipe parser object is created.
+    :param json_patch_file_path: path to the json file containing the patch blobs
+    :param recipe_file_path: recipe_file_path: path to the target recipe file
+    :returns: A tuple containing the patch blob/blobs from the json file and a RecipeParser object
     """
     try:
         contents_json = cast(JsonPatchType | list[JsonPatchType], json.loads(json_patch_file_path.read_text()))
@@ -47,10 +50,12 @@ def _pre_patch_validate(
 
 @click.argument("recipe_file_path", type=click.Path(exists=True, path_type=Path))  # type: ignore[misc]
 @click.argument("json_patch_file_path", type=click.Path(exists=True, path_type=Path))  # type: ignore[misc]
-@click.command(short_help="Add JSON blobs to recipe files.")
+@click.command(short_help="Modify recipe files with JSON patch blobs.")
 def patch(json_patch_file_path: Path, recipe_file_path: Path) -> None:
     """
-    Patch JSON blobs to recipe files.
+    Patches recipe files with JSON patch blobs.
+    :param json_patch_file_path: path to the json file containing the patch blobs
+    :param recipe_file_path: path to the target recipe file
     """
     contents_json, recipe_parser = _pre_patch_validate(json_patch_file_path, recipe_file_path)
 
