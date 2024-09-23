@@ -23,6 +23,7 @@ def _pre_patch_validate(
 ) -> tuple[JsonPatchType | list[JsonPatchType], RecipeParser]:
     """
     Confirm that the json patch file and recipe file can be read and that the recipe parser object is created.
+
     :param json_patch_file_path: path to the json file containing the patch blobs
     :param recipe_file_path: recipe_file_path: path to the target recipe file
     :returns: A tuple containing the patch blob/blobs from the json file and a RecipeParser object
@@ -54,6 +55,7 @@ def _pre_patch_validate(
 def patch(json_patch_file_path: Path, recipe_file_path: Path) -> None:
     """
     Patches recipe files with JSON patch blobs.
+
     :param json_patch_file_path: path to the json file containing the patch blobs
     :param recipe_file_path: path to the target recipe file
     """
@@ -66,6 +68,7 @@ def patch(json_patch_file_path: Path, recipe_file_path: Path) -> None:
     try:
         for patch_blob in contents_json:
             if not recipe_parser.patch(patch_blob):
+                print_err(f"Couldn't perform the patch: {patch_blob}.")
                 error_code = ExitCode.ILLEGAL_OPERATION
                 break
     except JsonPatchValidationException:

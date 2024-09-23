@@ -18,47 +18,47 @@ def test_usage() -> None:
     assert_cli_usage(patch)
 
 
-def test_patch_cli_faulty_recipe_file(fs: FakeFilesystem) -> None:
+def test_patch_cli_faulty_patch(fs: FakeFilesystem) -> None:
     """
-    Test to check the patch operation fails with a bad recipe file i.
-    a recipe which does not have the correct format etc
-    :param fs: the pyfakes library
+    Test to check that patch operation fails with a patch that cannot be applied.
+
+    :param fs: pyfakefs fixture used to replace the file system
     """
     runner = CliRunner()
-    fs.add_real_directory(TEST_FILES_PATH, read_only=False)  # type: ignore[attr-defined]
+    fs.add_real_directory(TEST_FILES_PATH, read_only=False)
 
-    json_patch_path = TEST_FILES_PATH / "patch" / "json_patch.json"
-    faulty_recipe_file_path = TEST_FILES_PATH / "patch" / "bad_recipe.yaml"
+    json_patch_path = TEST_FILES_PATH / "patch/json_patch.json"
+    bad_recipe_file_path = TEST_FILES_PATH / "patch/bad_recipe.yaml"
 
-    result = runner.invoke(patch, [str(json_patch_path), str(faulty_recipe_file_path)])
-    # assert pytest.raises(IOError)
-    # assert result.exit_code == ExitCode.IO_ERROR
+    result = runner.invoke(patch, [str(json_patch_path), str(bad_recipe_file_path)])
     assert result.exit_code == ExitCode.ILLEGAL_OPERATION
 
 
 def test_patch_cli_faulty_json_patch_file(fs: FakeFilesystem) -> None:
     """
     Test to check the patch operation fails with a invalid JSON patch file
-    :param fs: the pyfakes library
+
+    :param fs: pyfakefs fixture used to replace the file system
     """
     runner = CliRunner()
-    fs.add_real_directory(TEST_FILES_PATH, read_only=False)  # type: ignore[attr-defined]
+    fs.add_real_directory(TEST_FILES_PATH, read_only=False)
 
     faulty_json_patch_path = TEST_FILES_PATH / "patch" / "bad_json_patch.json"
     recipe_file_path = TEST_FILES_PATH / "patch" / "recipe.yaml"
 
     result = runner.invoke(patch, [str(faulty_json_patch_path), str(recipe_file_path)])
-    # assert pytest.raises(json.JSONDecodeError)
+    # this JSON_ERROR comes after
     assert result.exit_code == ExitCode.JSON_ERROR
 
 
 def test_patch_cli(fs: FakeFilesystem) -> None:
     """
     Test to check the case when both the recipe file and the JSON patch file are in the correct format and read-able.
-    :param fs: the pyfakes library
+
+    :param fs: pyfakefs fixture used to replace the file system
     """
     runner = CliRunner()
-    fs.add_real_directory(TEST_FILES_PATH, read_only=False)  # type: ignore[attr-defined]
+    fs.add_real_directory(TEST_FILES_PATH, read_only=False)
 
     json_patch_path = TEST_FILES_PATH / "patch" / "json_patch.json"
     recipe_file_path = TEST_FILES_PATH / "patch" / "recipe.yaml"
