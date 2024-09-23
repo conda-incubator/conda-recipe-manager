@@ -591,10 +591,10 @@ class RecipeParserConvert(RecipeParser):
             pip_check = True
             break
 
-        # Edge-case: Remove `script` if pip-check was the only command present
+        # Edge-case: Remove `commands` (which will soon become `script`) if pip-check was the only command present.
+        # Otherwise, we will have a corrupted `script` section that doesn't make sense.
         if pip_check and len(commands) == 1:
-            # TODO calc path
-            self._patch_and_log({"op": "remove", "path": RecipeParser.append_to_path(test_path, "/script")})
+            self._patch_and_log({"op": "remove", "path": RecipeParser.append_to_path(test_path, "/commands")})
 
         self._patch_add_missing_path(test_path, "/python")
         self._patch_and_log(
