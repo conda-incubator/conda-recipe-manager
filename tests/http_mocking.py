@@ -10,7 +10,7 @@ from typing import Iterable
 import requests
 
 from conda_recipe_manager.types import JsonType, SentinelType
-from tests.file_loading import TEST_FILES_PATH, load_file, load_json_file
+from tests.file_loading import get_test_path, load_file, load_json_file
 
 
 class MockHttpResponse:
@@ -107,14 +107,15 @@ class MockHttpStreamResponse(MockHttpResponse):
         """
         Constructs a mocked HTTP response that streams data.
 
-        NOTE: `fs.add_real_directory(TEST_FILES_PATH)` must be called before this mocker is used in order to
+        NOTE: `fs.add_real_directory()` must be called before this mocker is used in order to ensure
+        the file is available to the fake file system.
 
         :param status_code: HTTP status code to return
         :param file: Path to file to load data from.
         :param content_type: (Optional) `content-type` header string
         """
         super().__init__(status_code, content_type)
-        self._file_obj = open(TEST_FILES_PATH / file, "rb")  # pylint: disable=consider-using-with
+        self._file_obj = open(get_test_path() / file, "rb")  # pylint: disable=consider-using-with
 
         # Mock `iter_content()` by passing the buck to `read()`
         def _mock_iter_content(chunk_size: int) -> Iterable[bytes]:

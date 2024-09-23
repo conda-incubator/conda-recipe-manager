@@ -10,7 +10,7 @@ from typing import Callable
 import pytest
 
 from conda_recipe_manager.utils.cryptography.hashing import hash_file, hash_str
-from tests.file_loading import TEST_FILES_PATH, load_file
+from tests.file_loading import get_test_path, load_file
 
 
 @pytest.mark.parametrize(
@@ -33,7 +33,7 @@ def test_hash_file(file: str, algo: str | Callable[[], hashlib._Hash], expected:
     :param algo: Target algorithm
     :param expected: Expected value to return
     """
-    assert hash_file(TEST_FILES_PATH / file, algo) == expected
+    assert hash_file(get_test_path() / file, algo) == expected
 
 
 @pytest.mark.parametrize(

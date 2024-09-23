@@ -14,7 +14,7 @@ from pyfakefs.fake_filesystem import FakeFilesystem
 
 from conda_recipe_manager.fetcher.exceptions import FetchError, FetchRequiredError
 from conda_recipe_manager.fetcher.http_artifact_fetcher import ArtifactArchiveType, HttpArtifactFetcher
-from tests.file_loading import TEST_FILES_PATH
+from tests.file_loading import get_test_path
 from tests.http_mocking import MockHttpStreamResponse
 
 
@@ -97,7 +97,7 @@ def test_fetch(
     :param request: Pytest fixture request object.
     """
     # Make the test directory accessible to the HTTP mocker
-    request.getfixturevalue("fs").add_real_directory(TEST_FILES_PATH / "archive_files")  # type: ignore[misc]
+    request.getfixturevalue("fs").add_real_directory(get_test_path() / "archive_files")  # type: ignore[misc]
 
     http_fetcher = cast(HttpArtifactFetcher, request.getfixturevalue(http_fixture))
     with patch("requests.get", new=mock_requests_get):
@@ -137,7 +137,7 @@ def test_fetch_http_failure(fs: FakeFilesystem, http_fetcher_failure: HttpArtifa
     :param fs: pyfakefs fixture used to replace the file system
     :param http_fetcher_failure: HttpArtifactFetcher test fixture
     """
-    fs.add_real_directory(TEST_FILES_PATH / "archive_files")
+    fs.add_real_directory(get_test_path() / "archive_files")
 
     with pytest.raises(FetchError) as e:
         with patch("requests.get", new=mock_requests_get):
@@ -162,7 +162,7 @@ def test_get_path_to_source_code(http_fixture: str, expected_src: str, request: 
     :param request: Pytest fixture request object.
     """
     # Make the test directory accessible to the HTTP mocker
-    request.getfixturevalue("fs").add_real_directory(TEST_FILES_PATH / "archive_files")  # type: ignore[misc]
+    request.getfixturevalue("fs").add_real_directory(get_test_path() / "archive_files")  # type: ignore[misc]
 
     http_fetcher = cast(HttpArtifactFetcher, request.getfixturevalue(http_fixture))
     with patch("requests.get", new=mock_requests_get):
@@ -202,7 +202,7 @@ def test_get_archive_sha256(http_fixture: str, expected_hash: str, request: pyte
     :param request: Pytest fixture request object.
     """
     # Make the test directory accessible to the HTTP mocker
-    request.getfixturevalue("fs").add_real_directory(TEST_FILES_PATH / "archive_files")  # type: ignore[misc]
+    request.getfixturevalue("fs").add_real_directory(get_test_path() / "archive_files")  # type: ignore[misc]
 
     http_fetcher = cast(HttpArtifactFetcher, request.getfixturevalue(http_fixture))
     with patch("requests.get", new=mock_requests_get):
@@ -242,7 +242,7 @@ def test_get_archive_type(
     :param request: Pytest fixture request object.
     """
     # Make the test directory accessible to the HTTP mocker
-    request.getfixturevalue("fs").add_real_directory(TEST_FILES_PATH / "archive_files")  # type: ignore[misc]
+    request.getfixturevalue("fs").add_real_directory(get_test_path() / "archive_files")  # type: ignore[misc]
 
     http_fetcher = cast(HttpArtifactFetcher, request.getfixturevalue(http_fixture))
     with patch("requests.get", new=mock_requests_get):
