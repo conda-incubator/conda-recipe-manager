@@ -40,6 +40,7 @@ from conda_recipe_manager.parser.enums import SchemaVersion
 from conda_recipe_manager.parser.types import TAB_AS_SPACES, TAB_SPACE_COUNT, MultilineVariant
 from conda_recipe_manager.types import PRIMITIVES_TUPLE, JsonType, Primitives, SentinelType
 from conda_recipe_manager.utils.cryptography.hashing import hash_str
+from conda_recipe_manager.utils.typing import optional_str
 
 # Import guard: Fallback to `SafeLoader` if `CSafeLoader` isn't available
 try:
@@ -865,6 +866,22 @@ class RecipeReader(IsModifiable):
         traverse_all(self._root, _find_value_paths)
 
         return paths
+
+    def get_recipe_name(self) -> Optional[str]:
+        """
+        Convenience function that retrieves the "name" of a recipe file. This can be used as an identifier, but it
+        is not guaranteed to be unique. In V0 recipes and single-output V1 recipes, this is known as the "package name".
+
+        In V1 recipe files, the name must be included to pass the schema check that should be enforced by any build
+        system.
+
+        :returns: The name associated with the recipe file. In the unlikely event that no name is found, `None` is
+            returned instead.
+        """
+
+        if self._schema_version == SchemaVersion.V1 and self.is_multi_output():
+            return optional_str(self.get_value("/recipe/name", sub_vars=True, default=None))
+        return optional_str(self.get_value("/package/name", sub_vars=True, default=None))
 
     ## General Convenience Functions ##
 

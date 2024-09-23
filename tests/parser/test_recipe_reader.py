@@ -869,6 +869,33 @@ def test_find_value(file: str, value: Primitives, expected: list[str]) -> None:
 
 
 @pytest.mark.parametrize(
+    "file,expected",
+    [
+        ## V0 Format ##
+        ("types-toml.yaml", "types-toml"),
+        ("boto.yaml", "boto"),
+        ("cctools-ld64.yaml", "cctools-and-ld64"),
+        ("multi-output.yaml", None),
+        ## V1 Format ##
+        ("v1_format/v1_types-toml.yaml", "types-toml"),
+        ("v1_format/v1_boto.yaml", "boto"),
+        ("v1_format/v1_cctools-ld64.yaml", "cctools-and-ld64"),
+        ("v1_format/v1_multi-output.yaml", None),
+    ],
+)
+def test_get_recipe_name(file: str, expected: str) -> None:
+    """
+    Tests finding a value from a parsed YAML example.
+
+    :param file: File to work against
+    :param expected: Expected result of the test
+    """
+    parser = load_recipe(file, RecipeReader)
+    assert parser.get_recipe_name() == expected
+    assert not parser.is_modified()
+
+
+@pytest.mark.parametrize(
     "file,value",
     [
         ("simple-recipe.yaml", ["foo", "bar"]),
