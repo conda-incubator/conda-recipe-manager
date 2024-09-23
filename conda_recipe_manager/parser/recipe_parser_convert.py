@@ -590,6 +590,12 @@ class RecipeParserConvert(RecipeParser):
             self._patch_and_log({"op": "remove", "path": RecipeParser.append_to_path(test_path, f"/commands/{i}")})
             pip_check = True
             break
+
+        # Edge-case: Remove `script` if pip-check was the only command present
+        if pip_check and len(commands) == 1:
+            # TODO calc path
+            self._patch_and_log({"op": "remove", "path": RecipeParser.append_to_path(test_path, "/script")})
+
         self._patch_add_missing_path(test_path, "/python")
         self._patch_and_log(
             {"op": "add", "path": RecipeParser.append_to_path(test_path, "/python/pip_check"), "value": pip_check}
