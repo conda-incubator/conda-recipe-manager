@@ -5,7 +5,7 @@
 from click.testing import CliRunner
 
 from conda_recipe_manager.commands.convert import convert
-from tests.file_loading import TEST_FILES_PATH, load_file
+from tests.file_loading import get_test_path, load_file
 from tests.smoke_testing import assert_cli_usage
 
 
@@ -21,7 +21,7 @@ def test_only_allow_v0_recipes() -> None:
     Ensures the user gets an error when a V1 recipe is provided to the conversion script.
     """
     runner = CliRunner()
-    result = runner.invoke(convert, [f"{TEST_FILES_PATH}/v1_format/v1_simple-recipe.yaml"])
+    result = runner.invoke(convert, [str(get_test_path() / "v1_format/v1_simple-recipe.yaml")])
     assert result.exit_code != 0
     assert result.output.startswith("ILLEGAL OPERATION:")
 
@@ -31,7 +31,7 @@ def test_convert_single_file() -> None:
     Ensures the user gets an error when a V1 recipe is provided to the conversion script.
     """
     runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(convert, [f"{TEST_FILES_PATH}/simple-recipe.yaml"])
+    result = runner.invoke(convert, [str(get_test_path() / "simple-recipe.yaml")])
     # This recipe has warnings
     assert result.exit_code == 100
     # `crm convert` prints an additional newline

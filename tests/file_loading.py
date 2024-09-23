@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from typing import Final, Type, TypeVar, cast
 
@@ -14,11 +15,27 @@ from conda_recipe_manager.parser.recipe_parser_deps import RecipeParserDeps
 from conda_recipe_manager.parser.recipe_reader import RecipeReader
 from conda_recipe_manager.types import JsonType
 
-# Path to supplementary files used in test cases
-TEST_FILES_PATH: Final[Path] = Path(__file__).parent / "test_aux_files"
+# Private string, calculated once, containing the path to the test files.
+_TEST_FILES_PATH_STR: Final[str] = f"{os.path.dirname(__file__)}/test_aux_files"
 
 # Generic Type for recipe-parsing classes
 R = TypeVar("R", bound=RecipeReader)
+
+
+def get_test_path() -> Path:
+    """
+    Returns a path object that points to the directory containing all auxillary testing files. We no longer store this
+    value as a constant by design. We cannot guarantee the proper construction of a global constants Path variable
+    in tests that use `pyfakefs`. So instead, this function aims to provide the convenience of using `pathlib` while
+    simplifying the `pyfakefs` nuance.
+
+    See this documentation for more details:
+    https://pytest-pyfakefs.readthedocs.io/en/latest/troubleshooting.html#pathlib-path-objects-created-outside-of-tests
+
+
+    :returns: Path object that points to where all additional test files are stored.
+    """
+    return Path(_TEST_FILES_PATH_STR)
 
 
 def load_file(file: Path | str) -> str:
@@ -29,7 +46,7 @@ def load_file(file: Path | str) -> str:
     :param file: Filename/relative path of the file to read
     :returns: Text from the file
     """
-    return Path(TEST_FILES_PATH / file).read_text(encoding="utf-8")
+    return (get_test_path() / file).read_text(encoding="utf-8")
 
 
 def load_recipe(file_name: Path | str, recipe_parser: Type[R]) -> R:
@@ -69,7 +86,7 @@ def load_cbc(file_name: Path | str) -> CbcParser:
     :param file_name: File name of the test CBC file to load
     :returns: RecipeParser instance, based on the file
     """
-    cbc: Final[str] = load_file(TEST_FILES_PATH / "cbc_files" / file_name)
+    cbc: Final[str] = load_file(get_test_path() / "cbc_files" / file_name)
     return CbcParser(cbc)
 
 
