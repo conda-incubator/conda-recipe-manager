@@ -1,4 +1,13 @@
+[commit-checks-badge]: https://github.com/conda-incubator/conda-recipe-manager/actions/workflows/commit_checks.yaml/badge.svg?branch=main
+[integration-tests-badge]: https://github.com/conda-incubator/conda-recipe-manager/actions/workflows/integration_tests.yaml/badge.svg?branch=main
+[release-badge]: https://img.shields.io/github/v/release/conda-incubator/conda-recipe-manager?logo=github
+
+
 # conda-recipe-manager
+
+[![Commit Checks][commit-checks-badge]](https://github.com/conda-incubator/conda-recipe-manager/actions/workflows/commit_checks.yaml)
+[![Integration Tests][integration-tests-badge]](https://github.com/conda-incubator/conda-recipe-manager/actions/workflows/integration_tests.yaml)
+[![GitHub Release][release-badge]](https://github.com/conda-incubator/conda-recipe-manager/releases)
 
 ## Table of Contents
 <!-- TOC -->
