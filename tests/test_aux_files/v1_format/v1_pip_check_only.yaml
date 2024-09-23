@@ -9,9 +9,8 @@ package:
   version: ${{ version }}
 
 source:
-  dne_url: https://pypi.io/packages/source/${{ name[0] }}/${{ name }}/types-toml-${{ version }}.tar.gz
-  dne_tag: foo_bar
-  sha386: 6d3ac79e36c9ee593c5d4fb33a50cca0e3adceb6ef5cff8b8e5aef67b4c4aaf2
+  url: https://pypi.io/packages/source/${{ name[0] }}/${{ name }}/types-toml-${{ version }}.tar.gz
+  sha256: 6d3ac79e36c9ee593c5d4fb33a50cca0e3adceb6ef5cff8b8e5aef67b4c4aaf2
 
 build:
   number: 0
@@ -32,9 +31,6 @@ tests:
       imports:
         - types
       pip_check: true
-  - requirements:
-      run:
-        - pip
 
 about:
   summary: Contains only a `pip check` in the test section. This is a regression test.

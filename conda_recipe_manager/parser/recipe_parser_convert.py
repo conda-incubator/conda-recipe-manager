@@ -580,21 +580,27 @@ class RecipeParserConvert(RecipeParser):
         ):
             return
 
-        commands = cast(list[str], self._v1_recipe.get_value(RecipeParser.append_to_path(test_path, "/commands"), []))
+        commands_path: Final[str] = RecipeParser.append_to_path(test_path, "/commands")
+        commands = cast(list[str], self._v1_recipe.get_value(commands_path, []))
         pip_check = False
         for i, command in enumerate(commands):
             # TODO Future: handle selector cases (pip check will be in the `then` section of a dictionary object)
             if not isinstance(command, str) or command not in pip_check_variants:
                 continue
             # For now, we will only patch-out the first instance when no selector is attached
-            self._patch_and_log({"op": "remove", "path": RecipeParser.append_to_path(test_path, f"/commands/{i}")})
+            self._patch_and_log({"op": "remove", "path": RecipeParser.append_to_path(commands_path, f"/{i}")})
             pip_check = True
             break
 
-        # Edge-case: Remove `commands` (which will soon become `script`) if pip-check was the only command present.
-        # Otherwise, we will have a corrupted `script` section that doesn't make sense.
+        # Edge-case: Remove `commands` (which will soon become `script`) and `requirements` if `pip check` was the only
+        # command present. Otherwise, we will effectively create an empty test object.
         if pip_check and len(commands) == 1:
-            self._patch_and_log({"op": "remove", "path": RecipeParser.append_to_path(test_path, "/commands")})
+            # `/commands` must exist in order to get a single command in the list checked above
+            self._patch_and_log({"op": "remove", "path": commands_path})
+            # `/requirements` should exist AND should be requiring `pip`. In the event it doesn't, let's be resilient.
+            requirements_path: Final[str] = RecipeParser.append_to_path(test_path, "/requirements")
+            if self._v1_recipe.contains_value(requirements_path):
+                self._patch_and_log({"op": "remove", "path": requirements_path})
 
         self._patch_add_missing_path(test_path, "/python")
         self._patch_and_log(
