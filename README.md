@@ -13,16 +13,16 @@
 <!-- TOC -->
 
 - [conda-recipe-manager](#conda-recipe-manager)
-  - [Table of Contents](#table-of-contents)
+    - [Table of Contents](#table-of-contents)
 - [Overview](#overview)
-  - [History](#history)
+    - [History](#history)
 - [Getting Started](#getting-started)
-  - [General Installation](#general-installation)
-    - [Install into your current environment](#install-into-your-current-environment)
-    - [Install into a custom environment](#install-into-a-custom-environment)
+    - [General Installation](#general-installation)
+        - [Install into your current environment](#install-into-your-current-environment)
+        - [Install into a custom environment](#install-into-a-custom-environment)
 - [Developer Notes](#developer-notes)
-    - [Running pre-commit checks](#running-pre-commit-checks)
-  - [Release process](#release-process)
+        - [Running pre-commit checks](#running-pre-commit-checks)
+    - [Release process](#release-process)
 - [Special Thanks](#special-thanks)
 
 <!-- /TOC -->
