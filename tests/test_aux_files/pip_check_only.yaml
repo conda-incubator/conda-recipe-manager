@@ -1,0 +1,46 @@
+{% set name = "types-toml" %}
+{% set version = "0.10.8.6" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/types-toml-{{ version }}.tar.gz
+  sha256: 6d3ac79e36c9ee593c5d4fb33a50cca0e3adceb6ef5cff8b8e5aef67b4c4aaf2
+
+build:
+  number: 0
+  skip: true  # [py<37]
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+
+requirements:
+  host:
+    - setuptools
+    - wheel
+    - pip
+    - python
+  run:
+    - python
+
+test:
+  imports:
+    - types
+  requires:
+    - pip
+  commands:
+    - pip check
+
+about:
+  home: https://github.com/python/typeshed
+  summary: Contains only a `pip check` in the test section. This is a regression test.
+  description: Contains only a `pip check` in the test section. This is a regression test.
+  license: MIT
+  license_file: LICENSE
+  dev_url: https://github.com/python/typeshed
+  doc_url: https://pypi.org/project/types-toml/
+
+extra:
+  recipe-maintainers:
+    - fhoehle
+    - conda-forge/mypy

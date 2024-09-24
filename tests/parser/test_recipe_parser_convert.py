@@ -154,6 +154,13 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
             [],
             [],
         ),
+        # Regression test. Ensures we don't emit a bad `script` section if there are no test scripts, other than
+        # `pip check` (which got upgraded to a new flag).
+        (
+            "pip_check_only.yaml",
+            [],
+            [],
+        ),
         # TODO complete: The `rust.yaml` test contains many edge cases and selectors that aren't directly supported in
         # the V1 recipe format
         # (

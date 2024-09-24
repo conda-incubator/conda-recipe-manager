@@ -14,7 +14,7 @@ from conda_recipe_manager.fetcher.exceptions import FetchUnsupportedError
 from conda_recipe_manager.fetcher.git_artifact_fetcher import GitArtifactFetcher
 from conda_recipe_manager.fetcher.http_artifact_fetcher import HttpArtifactFetcher
 from conda_recipe_manager.parser.recipe_reader import RecipeReader
-from tests.file_loading import TEST_FILES_PATH, load_recipe
+from tests.file_loading import get_test_path, load_recipe
 
 
 @pytest.mark.parametrize(
@@ -43,7 +43,7 @@ def test_from_recipe_ignore_unsupported(
     :param file: File to work against
     :param expected: Expected list of classes to match the returned list.
     """
-    request.getfixturevalue("fs").add_real_file(TEST_FILES_PATH / file)  # type: ignore[misc]
+    request.getfixturevalue("fs").add_real_file(get_test_path() / file)  # type: ignore[misc]
     recipe = load_recipe(file, RecipeReader)
 
     fetcher_list: Final[list[BaseArtifactFetcher]] = from_recipe(recipe, True)
@@ -68,7 +68,7 @@ def test_from_recipe_throws_on_unsupported(file: str, request: pytest.FixtureReq
 
     :param file: File to work against
     """
-    request.getfixturevalue("fs").add_real_file(TEST_FILES_PATH / file)  # type: ignore[misc]
+    request.getfixturevalue("fs").add_real_file(get_test_path() / file)  # type: ignore[misc]
     recipe = load_recipe(file, RecipeReader)
 
     with pytest.raises(FetchUnsupportedError):
@@ -91,7 +91,7 @@ def test_from_recipe_does_not_throw_on_ignore_unsupported(file: str, request: py
 
     :param file: File to work against
     """
-    request.getfixturevalue("fs").add_real_file(TEST_FILES_PATH / file)  # type: ignore[misc]
+    request.getfixturevalue("fs").add_real_file(get_test_path() / file)  # type: ignore[misc]
     recipe = load_recipe(file, RecipeReader)
 
     assert not from_recipe(recipe, True)
