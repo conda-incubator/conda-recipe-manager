@@ -2,6 +2,7 @@
 :Description: Tests the `patch` CLI
 """
 
+import pytest
 from click.testing import CliRunner
 from pyfakefs.fake_filesystem import FakeFilesystem
 
@@ -18,7 +19,8 @@ def test_usage() -> None:
     assert_cli_usage(patch)
 
 
-def test_patch_cli(fs: FakeFilesystem) -> None:
+@pytest.mark.parametrize("json_patch_file", ["patch/json_patch.json", "patch/single_patch.json"])
+def test_patch_cli(json_patch_file: str, fs: FakeFilesystem) -> None:
     """
     Test to check the case when both the recipe file and the JSON patch file are in the correct format and read-able.
 
@@ -27,24 +29,7 @@ def test_patch_cli(fs: FakeFilesystem) -> None:
     runner = CliRunner()
     fs.add_real_directory(get_test_path(), read_only=False)
 
-    json_patch_path = get_test_path() / "patch/json_patch.json"
-    recipe_file_path = get_test_path() / "patch/recipe.yaml"
-
-    result = runner.invoke(patch, [str(json_patch_path), str(recipe_file_path)])
-    assert result.exit_code == ExitCode.SUCCESS
-
-
-def test_patch_cli_single_patch(fs: FakeFilesystem) -> None:
-    """
-    Test to check the case when both the recipe file and the JSON patch
-    file are in the correct format and the json patch file only contains a single patch blob.
-
-    :param fs: pyfakefs fixture used to replace the file system
-    """
-    runner = CliRunner()
-    fs.add_real_directory(get_test_path(), read_only=False)
-
-    json_patch_path = get_test_path() / "patch/single_patch.json"
+    json_patch_path = get_test_path() / json_patch_file
     recipe_file_path = get_test_path() / "patch/recipe.yaml"
 
     result = runner.invoke(patch, [str(json_patch_path), str(recipe_file_path)])
@@ -83,7 +68,11 @@ def test_non_existent_json_patch_file(fs: FakeFilesystem) -> None:
     assert result.exit_code == ExitCode.CLICK_USAGE
 
 
-def test_patch_cli_recipe_missing_target_keys(fs: FakeFilesystem) -> None:
+@pytest.mark.parametrize(
+    "recipe_file",
+    ["patch/bad_recipe_files/missing_colon.yaml", "patch/bad_recipe_files/missing_key.yaml"],
+)
+def test_patch_cli_recipe_missing_target_keys(recipe_file: str, fs: FakeFilesystem) -> None:
     """
     Test to check that patch operation fails with a patch that cannot be applied.
     For example due to missing target keys in the recipe.
@@ -94,7 +83,7 @@ def test_patch_cli_recipe_missing_target_keys(fs: FakeFilesystem) -> None:
     fs.add_real_directory(get_test_path(), read_only=False)
 
     json_patch_path = get_test_path() / "patch/json_patch.json"
-    bad_recipe_file_path = get_test_path() / "patch/bad_recipe.yaml"
+    bad_recipe_file_path = get_test_path() / recipe_file
 
     result = runner.invoke(patch, [str(json_patch_path), str(bad_recipe_file_path)])
     assert result.exit_code == ExitCode.ILLEGAL_OPERATION
@@ -110,7 +99,7 @@ def test_patch_cli_invalid_json_patch_operation(fs: FakeFilesystem) -> None:
     runner = CliRunner()
     fs.add_real_directory(get_test_path(), read_only=False)
 
-    faulty_json_patch_path = get_test_path() / "patch/bad_json_patch.json"
+    faulty_json_patch_path = get_test_path() / "patch/bad_json_patch_files/bad_json_patch.json"
     recipe_file_path = get_test_path() / "patch/recipe.yaml"
 
     result = runner.invoke(patch, [str(faulty_json_patch_path), str(recipe_file_path)])
@@ -128,26 +117,9 @@ def test_patch_cli_bad_json_file(fs: FakeFilesystem) -> None:
     runner = CliRunner()
     fs.add_real_directory(get_test_path(), read_only=False)
 
-    faulty_json_patch_path = get_test_path() / "patch/bad_json.json"
+    faulty_json_patch_path = get_test_path() / "patch/bad_json_patch_files/empty_json.json"
     recipe_file_path = get_test_path() / "patch/recipe.yaml"
 
     result = runner.invoke(patch, [str(faulty_json_patch_path), str(recipe_file_path)])
     # this json error comes from `JSONDecodeError` exception occuring when the provided json file cannot be read/decoded
     assert result.exit_code == ExitCode.JSON_ERROR
-
-
-def test_patch_cli_incorrect_recipe_format(fs: FakeFilesystem) -> None:
-    """
-    Test to check that exception occurs when recipe file is in incorrect format
-
-    :param fs: pyfakefs fixture used to replace the file system
-    """
-
-    runner = CliRunner()
-    fs.add_real_directory(get_test_path(), read_only=True)
-
-    json_patch_path = get_test_path() / "patch/json_patch.json"
-    incorrect_recipe_format_file_path = get_test_path() / "patch/incorrect_recipe_format.yaml"
-
-    result = runner.invoke(patch, [str(json_patch_path), str(incorrect_recipe_format_file_path)])
-    assert result.exit_code == ExitCode.PARSE_EXCEPTION
