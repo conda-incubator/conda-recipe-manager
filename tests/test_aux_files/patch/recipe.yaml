@@ -6,7 +6,7 @@ package:
   name: {{ name|lower }}  # [unix]
 
 build:
-  number: 0
+  number: 42
   skip: true  # [py<37]
   is_true: true
 

@@ -62,7 +62,7 @@ def patch(json_patch_file_path: Path, recipe_file_path: Path) -> None:
     contents_json, recipe_parser = _pre_patch_validate(json_patch_file_path, recipe_file_path)
 
     if not isinstance(contents_json, list):
-        contents_json = cast(list[JsonPatchType], list(contents_json))
+        contents_json = [contents_json]
 
     error_code = ExitCode.SUCCESS
     try:
