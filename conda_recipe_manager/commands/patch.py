@@ -38,13 +38,13 @@ def _pre_patch_validate(
         contents_recipe = recipe_file_path.read_text()
     except IOError:
         print_err(f"Couldn't read the given recipe file: {recipe_file_path}")
-        sys.exit(ExitCode.IO_ERROR)
+        sys.exit(ExitCode.IO_ERROR)  # untested
 
     try:
         recipe_parser = RecipeParser(contents_recipe)
     except Exception:  # pylint: disable=broad-except
         print_err("An error occurred while parsing the recipe file contents.")
-        sys.exit(ExitCode.PARSE_EXCEPTION)
+        sys.exit(ExitCode.PARSE_EXCEPTION)  # untested
 
     return contents_json, recipe_parser
 

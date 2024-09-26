@@ -123,3 +123,6 @@ def test_patch_cli_bad_json_file(fs: FakeFilesystem) -> None:
     result = runner.invoke(patch, [str(faulty_json_patch_path), str(recipe_file_path)])
     # this json error comes from `JSONDecodeError` exception occuring when the provided json file cannot be read/decoded
     assert result.exit_code == ExitCode.JSON_ERROR
+
+
+# Tests have not been written for the cases when IO_ERROR and PARSE_EXCEPTION are raised.
