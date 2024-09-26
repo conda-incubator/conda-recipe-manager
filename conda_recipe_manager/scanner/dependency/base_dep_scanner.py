@@ -7,7 +7,7 @@ from __future__ import annotations
 from abc import ABCMeta, abstractmethod
 from typing import NamedTuple
 
-from conda_recipe_manager.types import DependencyType
+from conda_recipe_manager.types import DependencyType, MessageTable
 
 
 class ProjectDependency(NamedTuple):
@@ -30,7 +30,7 @@ class BaseDependencyScanner(metaclass=ABCMeta):
         """
         TODO
         """
-        pass
+        self._msg_tbl = MessageTable()
 
     @abstractmethod
     def scan(self) -> set[ProjectDependency]:
