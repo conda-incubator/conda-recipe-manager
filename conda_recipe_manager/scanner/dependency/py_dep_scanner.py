@@ -7,7 +7,6 @@ from __future__ import annotations
 import ast
 import pkgutil
 
-# TODO filter with sys.stdlib_module_names
 import sys
 from pathlib import Path
 from typing import Final
@@ -74,15 +73,14 @@ class PythonDependencyScanner(BaseDependencyScanner):
         super().__init__()
         self._src_dir: Final[Path] = Path(src_dir)
 
-    def _get_project_modules(self) -> set[ProjectDependency]:
+    def _get_project_modules(self) -> set[str]:
         """
         Calculates the set of module names found in this project. These will not need to be listed as dependencies in
         the recipe file (as they are a part of the project).
 
         :returns: A set of unique dependencies defined in this project's source code.
         """
-        # TODO tag test dependencies.
-        return {ProjectDependency(name, DependencyType.RUN) for _, name, _ in pkgutil.iter_modules([self._src_dir])}
+        return {name for _, name, _ in pkgutil.iter_modules([self._src_dir])}
 
     def _scan_one_file(self, file: Path) -> set[ProjectDependency]:
         """
