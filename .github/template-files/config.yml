@@ -30,8 +30,8 @@ conda/infrastructure:
   - src: templates/issues/documentation.yml
     dst: .github/ISSUE_TEMPLATE/2_documentation.yml
 
-  - src: templates/issues/epic.yml
-    dst: .github/ISSUE_TEMPLATE/epic.yml
+  # - src: templates/issues/epic.yml
+  #   dst: .github/ISSUE_TEMPLATE/epic.yml
 
   # [optional] standard PR template
   # - src: templates/pull_requests/news_tests_docs.md
