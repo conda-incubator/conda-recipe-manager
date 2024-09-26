@@ -1,5 +1,5 @@
 """
-:Description: TODO
+:Description: Provides a base class for all dependency scanners to be derived from.
 """
 
 from __future__ import annotations
@@ -23,17 +23,19 @@ class ProjectDependency(NamedTuple):
 
 class BaseDependencyScanner(metaclass=ABCMeta):
     """
-    TODO
+    Base class for all Dependency Scanner classes.
     """
 
     def __init__(self) -> None:
         """
-        TODO
+        Constructs a `BaseDependencyScanner`.
         """
         self._msg_tbl = MessageTable()
 
     @abstractmethod
     def scan(self) -> set[ProjectDependency]:
         """
-        TODO
+        Actively scans a project for dependencies. Implementation is dependent on the type of scanner used.
+
+        :returns: A set of unique dependencies found by the scanner.
         """

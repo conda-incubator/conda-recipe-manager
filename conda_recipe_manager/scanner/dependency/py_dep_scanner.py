@@ -32,7 +32,7 @@ _IMPORT_TO_DEPENDENCY_NAME_TBL: Final[dict[str, str]] = {
 
 class PythonDependencyScanner(BaseDependencyScanner):
     """
-    TODO
+    Dependency Scanner class capable of scanning Python source code.
     """
 
     @staticmethod
@@ -67,20 +67,28 @@ class PythonDependencyScanner(BaseDependencyScanner):
 
     def __init__(self, src_dir: Path | str):
         """
-        TODO
+        Constructs a `PythonDependencyScanner`.
+
+        :param src_dir: Path to the Python source code to scan.
         """
         super().__init__()
         self._src_dir: Final[Path] = Path(src_dir)
 
     def _get_project_modules(self) -> set[ProjectDependency]:
         """
-        TODO
+        Calculates the set of module names found in this project. These will not need to be listed as dependencies in
+        the recipe file (as they are a part of the project).
+
+        :returns: A set of unique dependencies defined in this project's source code.
         """
-        return {name for _, name, _ in pkgutil.iter_modules([self._src_dir])}
+        # TODO tag test dependencies.
+        return {ProjectDependency(name, DependencyType.RUN) for _, name, _ in pkgutil.iter_modules([self._src_dir])}
 
     def _scan_one_file(self, file: Path) -> set[ProjectDependency]:
         """
-        TODO
+        Helper function that scans one Python file for dependencies.
+
+        :returns: Set of project dependencies found in the target Python file.
         """
         deps: set[ProjectDependency] = set()
         project_modules: Final[set[ProjectDependency]] = self._get_project_modules()
@@ -116,7 +124,9 @@ class PythonDependencyScanner(BaseDependencyScanner):
 
     def scan(self) -> set[ProjectDependency]:
         """
-        TODO
+        Actively scans a project for dependencies.
+
+        :returns: A set of unique dependencies found by the scanner.
         """
         # TODO parallelize
         all_imports: list[ProjectDependency] = set()
