@@ -5,6 +5,7 @@
 import pytest
 from click.testing import CliRunner
 from pyfakefs.fake_filesystem import FakeFilesystem
+from pyfakefs.fake_filesystem_unittest import Patcher
 
 from conda_recipe_manager.commands.patch import patch
 from conda_recipe_manager.commands.utils.types import ExitCode
@@ -89,7 +90,7 @@ def test_patch_cli_bad_recipe_file(recipe_file: str, fs: FakeFilesystem) -> None
     assert result.exit_code == ExitCode.ILLEGAL_OPERATION
 
 
-def test_patch_cli_invalid_json_patch_operation(fs: FakeFilesystem) -> None:
+def test_patch_cli_invalid_json_patch_operation(request: pytest.FixtureRequest) -> None:
     """
     Test for the case when the patch operation fails due to an invalid JSON patch blob
     For example the patch blob might contain invalid patch operations such as `values` instead of `value`.
@@ -97,12 +98,13 @@ def test_patch_cli_invalid_json_patch_operation(fs: FakeFilesystem) -> None:
     :param fs: pyfakefs fixture used to replace the file system
     """
     runner = CliRunner()
-    fs.add_real_directory(get_test_path(), read_only=False)
+    request.getfixturevalue("fs").add_real_directory(get_test_path(), read_only=False)
 
     faulty_json_patch_path = get_test_path() / "patch/bad_json_patch_files/bad_json_patch.json"
     recipe_file_path = get_test_path() / "simple-recipe.yaml"
 
-    result = runner.invoke(patch, [str(faulty_json_patch_path), str(recipe_file_path)])
+    with Patcher(modules_to_reload=[patch]):
+        result = runner.invoke(patch, [str(faulty_json_patch_path), str(recipe_file_path)])
     # this JSON_ERROR comes from JsonPatchValidationException being raised, not from JsonDecodeError
     assert result.exit_code == ExitCode.JSON_ERROR
 
