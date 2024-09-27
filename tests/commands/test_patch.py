@@ -104,7 +104,7 @@ def test_patch_cli_invalid_json_patch_operation(request: pytest.FixtureRequest) 
     recipe_file_path = get_test_path() / "simple-recipe.yaml"
 
     with Patcher(modules_to_reload=[patch]):
-        result = runner.invoke(patch, [str(faulty_json_patch_path), str(recipe_file_path)])
+        result = patch([str(faulty_json_patch_path), str(recipe_file_path)])
     # this JSON_ERROR comes from JsonPatchValidationException being raised, not from JsonDecodeError
     assert result.exit_code == ExitCode.JSON_ERROR
 
