@@ -116,7 +116,7 @@ class Regex:
     """
 
     # Pattern to detect Jinja variable names and functions
-    _JINJA_VAR_FUNCTION_PATTERN: Final[str] = r"[a-zA-Z_][a-zA-Z0-9_\|\'\"\(\)\[\]\, =\.\-]*"
+    _JINJA_VAR_FUNCTION_PATTERN: Final[str] = r"[a-zA-Z_][a-zA-Z0-9_\|\'\"\(\)\[\]\, =\.\-~]*"
 
     ## Pre-process conversion tooling regular expressions ##
     # Finds `environ[]` used by a some recipe files. Requires a whitespace character to prevent matches with
