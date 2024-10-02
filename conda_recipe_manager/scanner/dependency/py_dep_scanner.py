@@ -1,13 +1,14 @@
 """
-:Description: TODO
+:Description: Provides a Dependency Scanner class capable of finding dependencies in a Python project's source code.
 """
 
 from __future__ import annotations
 
 import ast
+import multiprocessing as mp
 import pkgutil
-
 import sys
+from itertools import chain
 from pathlib import Path
 from typing import Final
 
@@ -126,8 +127,10 @@ class PythonDependencyScanner(BaseDependencyScanner):
 
         :returns: A set of unique dependencies found by the scanner.
         """
-        # TODO parallelize
-        all_imports: list[ProjectDependency] = set()
+        # TODO parallelize this? Some preliminary performance tests show conflicting results using `multiprocessing`
+        # pools. Very large Python projects can see a 50% reduction in scanning while small projects take a 30%-40% hit
+        # in speed with spin-up costs.
+        all_imports: set[ProjectDependency] = set()
         for file in self._src_dir.rglob("*.py"):
             try:
                 all_imports |= self._scan_one_file(file)
@@ -143,5 +146,9 @@ class PythonDependencyScanner(BaseDependencyScanner):
             return True
 
         all_imports = set(filter(_filter_test_duplicates, all_imports))
+
+        # Python is inherently a HOST and RUN dependency for all Python projects.
+        all_imports.add(ProjectDependency("python", DependencyType.HOST))
+        all_imports.add(ProjectDependency("python", DependencyType.RUN))
 
         return all_imports

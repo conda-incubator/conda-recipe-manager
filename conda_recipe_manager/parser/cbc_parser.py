@@ -38,7 +38,8 @@ class CbcParser(RecipeReader):
     the recipe format (with commented selectors)
     """
 
-    # TODO: Find out what/if there is an equivalent in the V1 recipe format.
+    # TODO: Add V1-support for the new CBC equivalent:
+    #   https://prefix-dev.github.io/rattler-build/latest/variants/
 
     def __init__(self, content: str):
         """
