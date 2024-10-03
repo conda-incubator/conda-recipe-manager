@@ -151,3 +151,9 @@ class MessageTable:
         warnings: Final[str] = f"{num_warnings} " + _pluralize(num_warnings, "warning")
 
         return f"{errors} and {warnings} were found."
+
+    def clear_messages(self) -> None:
+        """
+        Clears-out the current messages.
+        """
+        self._tbl.clear()

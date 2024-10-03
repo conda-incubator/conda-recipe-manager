@@ -5,15 +5,13 @@
 from __future__ import annotations
 
 import ast
-import multiprocessing as mp
 import pkgutil
 import sys
-from itertools import chain
 from pathlib import Path
 from typing import Final
 
 from conda_recipe_manager.scanner.dependency.base_dep_scanner import BaseDependencyScanner, ProjectDependency
-from conda_recipe_manager.types import DependencyType
+from conda_recipe_manager.types import DependencyType, MessageCategory
 
 # Table that maps import names that do not match the package name for common packages. See this StackOverflow post for
 # more details:
@@ -48,7 +46,7 @@ class PythonDependencyScanner(BaseDependencyScanner):
         return _IMPORT_TO_DEPENDENCY_NAME_TBL[module]
 
     @staticmethod
-    def _is_likely_test_file(file: Path) -> str:
+    def _is_likely_test_file(file: Path) -> bool:
         """
         Attempts to determine if a Python file is a test file.
 
@@ -81,7 +79,7 @@ class PythonDependencyScanner(BaseDependencyScanner):
 
         :returns: A set of unique dependencies defined in this project's source code.
         """
-        return {name for _, name, _ in pkgutil.iter_modules([self._src_dir])}
+        return {name for _, name, _ in pkgutil.iter_modules([str(self._src_dir)])}
 
     def _scan_one_file(self, file: Path) -> set[ProjectDependency]:
         """
@@ -90,7 +88,7 @@ class PythonDependencyScanner(BaseDependencyScanner):
         :returns: Set of project dependencies found in the target Python file.
         """
         deps: set[ProjectDependency] = set()
-        project_modules: Final[set[ProjectDependency]] = self._get_project_modules()
+        project_modules: Final[set[str]] = self._get_project_modules()
         # Adapted from:
         #   https://stackoverflow.com/questions/9008451/python-easy-way-to-read-all-import-statements-from-py-module
         root = ast.parse(file.read_text(), file)
@@ -102,7 +100,7 @@ class PythonDependencyScanner(BaseDependencyScanner):
             module_name = ""
             if isinstance(node, ast.Import):
                 module_name = node.names[0].name.split(".")[0]
-            else:
+            elif node.module is not None:
                 module_name = node.module.split(".")[0]
 
             # TODO filter relative imports
@@ -115,9 +113,9 @@ class PythonDependencyScanner(BaseDependencyScanner):
 
             # Most Python imports fall under the `run` section in the Conda recipe format. The major exception is any
             # import found in test code.
-            type = DependencyType.TEST if PythonDependencyScanner._is_likely_test_file(file) else DependencyType.RUN
+            dep_type = DependencyType.TEST if PythonDependencyScanner._is_likely_test_file(file) else DependencyType.RUN
 
-            deps.add(ProjectDependency(package_name, type))
+            deps.add(ProjectDependency(package_name, dep_type))
 
         return deps
 
@@ -134,9 +132,10 @@ class PythonDependencyScanner(BaseDependencyScanner):
         for file in self._src_dir.rglob("*.py"):
             try:
                 all_imports |= self._scan_one_file(file)
-            except Exception as e:  # pylint: disable=broad-exception
-                # TODO log?
-                continue
+            except Exception as e:  # pylint: disable=broad-exception-caught
+                self._msg_tbl.add_message(
+                    MessageCategory.EXCEPTION, f"Exception encountered while scanning `{file}`: {e}"
+                )
 
         # `RUN` dependencies are automatically added as `TEST` dependencies, so we need to filter if there are
         # (effectively) duplicates

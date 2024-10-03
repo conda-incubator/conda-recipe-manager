@@ -39,3 +39,11 @@ class BaseDependencyScanner(metaclass=ABCMeta):
 
         :returns: A set of unique dependencies found by the scanner.
         """
+
+    def get_message_table(self) -> MessageTable:
+        """
+        Returns the internal message table.
+
+        :returns: Message table object containing logged messages.
+        """
+        return self._msg_tbl
