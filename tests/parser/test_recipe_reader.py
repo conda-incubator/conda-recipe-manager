@@ -18,16 +18,16 @@ from tests.file_loading import load_file, load_recipe
 QUICK_FOX_PIPE: Final[str] = "The quick brown\n{{fox}}\n\njumped over the lazy dog\n"
 QUICK_FOX_PIPE_PLUS: Final[str] = "The quick brown\n{{fox}}\n\njumped over the lazy dog\n"
 QUICK_FOX_PIPE_MINUS: Final[str] = "The quick brown\n{{fox}}\n\njumped over the lazy dog"
-QUICK_FOX_CARROT: Final[str] = "The quick brown {{fox}}\njumped over the lazy dog\n"
-QUICK_FOX_CARROT_PLUS: Final[str] = "The quick brown {{fox}}\njumped over the lazy dog\n"
-QUICK_FOX_CARROT_MINUS: Final[str] = "The quick brown {{fox}}\njumped over the lazy dog"
+QUICK_FOX_R_ANGLE: Final[str] = "The quick brown {{fox}}\njumped over the lazy dog\n"
+QUICK_FOX_R_ANGLE_PLUS: Final[str] = "The quick brown {{fox}}\njumped over the lazy dog\n"
+QUICK_FOX_R_ANGLE_MINUS: Final[str] = "The quick brown {{fox}}\njumped over the lazy dog"
 # Substitution variants of the multiline string
 QUICK_FOX_SUB_PIPE: Final[str] = "The quick brown\ntiger\n\njumped over the lazy dog\n"
 QUICK_FOX_SUB_PIPE_PLUS: Final[str] = "The quick brown\ntiger\n\njumped over the lazy dog\n"
 QUICK_FOX_SUB_PIPE_MINUS: Final[str] = "The quick brown\ntiger\n\njumped over the lazy dog"
-QUICK_FOX_SUB_CARROT: Final[str] = "The quick brown tiger\njumped over the lazy dog\n"
-QUICK_FOX_SUB_CARROT_PLUS: Final[str] = "The quick brown tiger\njumped over the lazy dog\n"
-QUICK_FOX_SUB_CARROT_MINUS: Final[str] = "The quick brown tiger\njumped over the lazy dog"
+QUICK_FOX_L_ANGLE: Final[str] = "The quick brown tiger\njumped over the lazy dog\n"
+QUICK_FOX_L_ANGLE_PLUS: Final[str] = "The quick brown tiger\njumped over the lazy dog\n"
+QUICK_FOX_L_ANGLE_MINUS: Final[str] = "The quick brown tiger\njumped over the lazy dog"
 
 
 ## Construction and rendering sanity checks ##
@@ -235,9 +235,9 @@ def test_round_trip(file: str) -> None:
                     "description0": QUICK_FOX_PIPE,
                     "description1": QUICK_FOX_PIPE_PLUS,
                     "description2": QUICK_FOX_PIPE_MINUS,
-                    "description3": QUICK_FOX_CARROT,
-                    "description4": QUICK_FOX_CARROT_PLUS,
-                    "description5": QUICK_FOX_CARROT_MINUS,
+                    "description3": QUICK_FOX_R_ANGLE,
+                    "description4": QUICK_FOX_R_ANGLE_PLUS,
+                    "description5": QUICK_FOX_R_ANGLE_MINUS,
                     "license": "Apache-2.0 AND MIT",
                     "summary": "This is a small recipe for testing",
                 },
@@ -263,9 +263,9 @@ def test_round_trip(file: str) -> None:
                     "description0": QUICK_FOX_SUB_PIPE,
                     "description1": QUICK_FOX_SUB_PIPE_PLUS,
                     "description2": QUICK_FOX_SUB_PIPE_MINUS,
-                    "description3": QUICK_FOX_SUB_CARROT,
-                    "description4": QUICK_FOX_SUB_CARROT_PLUS,
-                    "description5": QUICK_FOX_SUB_CARROT_MINUS,
+                    "description3": QUICK_FOX_L_ANGLE,
+                    "description4": QUICK_FOX_L_ANGLE_PLUS,
+                    "description5": QUICK_FOX_L_ANGLE_MINUS,
                     "license": "Apache-2.0 AND MIT",
                     "summary": "This is a small recipe for testing",
                 },
@@ -573,16 +573,16 @@ def test_contains_value(file: str, path: str, expected: bool) -> None:
         ("simple-recipe_multiline_strings.yaml", "/about/description0", False, QUICK_FOX_PIPE),
         ("simple-recipe_multiline_strings.yaml", "/about/description1", False, QUICK_FOX_PIPE_PLUS),
         ("simple-recipe_multiline_strings.yaml", "/about/description2", False, QUICK_FOX_PIPE_MINUS),
-        ("simple-recipe_multiline_strings.yaml", "/about/description3", False, QUICK_FOX_CARROT),
-        ("simple-recipe_multiline_strings.yaml", "/about/description4", False, QUICK_FOX_CARROT_PLUS),
-        ("simple-recipe_multiline_strings.yaml", "/about/description5", False, QUICK_FOX_CARROT_MINUS),
+        ("simple-recipe_multiline_strings.yaml", "/about/description3", False, QUICK_FOX_R_ANGLE),
+        ("simple-recipe_multiline_strings.yaml", "/about/description4", False, QUICK_FOX_R_ANGLE_PLUS),
+        ("simple-recipe_multiline_strings.yaml", "/about/description5", False, QUICK_FOX_R_ANGLE_MINUS),
         # Return multiline string variants, with substitution
         ("simple-recipe_multiline_strings.yaml", "/about/description0", True, QUICK_FOX_SUB_PIPE),
         ("simple-recipe_multiline_strings.yaml", "/about/description1", True, QUICK_FOX_SUB_PIPE_PLUS),
         ("simple-recipe_multiline_strings.yaml", "/about/description2", True, QUICK_FOX_SUB_PIPE_MINUS),
-        ("simple-recipe_multiline_strings.yaml", "/about/description3", True, QUICK_FOX_SUB_CARROT),
-        ("simple-recipe_multiline_strings.yaml", "/about/description4", True, QUICK_FOX_SUB_CARROT_PLUS),
-        ("simple-recipe_multiline_strings.yaml", "/about/description5", True, QUICK_FOX_SUB_CARROT_MINUS),
+        ("simple-recipe_multiline_strings.yaml", "/about/description3", True, QUICK_FOX_L_ANGLE),
+        ("simple-recipe_multiline_strings.yaml", "/about/description4", True, QUICK_FOX_L_ANGLE_PLUS),
+        ("simple-recipe_multiline_strings.yaml", "/about/description5", True, QUICK_FOX_L_ANGLE_MINUS),
         ## types-toml.yaml ##
         # Regression: `{ name[0] }` could not be evaluated.
         (
