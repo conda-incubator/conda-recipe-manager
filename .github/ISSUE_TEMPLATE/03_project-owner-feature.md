@@ -4,11 +4,7 @@ about: New feature description, filed by CRM maintainers
 labels:
   - enhancement
   - source::maintainer
-assignees:
-  - schuylermartin45
-  - ForgottenProgramme
-  - beeankha
-
+  - "to sort"
 
 ---
 

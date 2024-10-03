@@ -1,11 +1,9 @@
 ---
 name: Bug Report
 about: Create a bug report.
-labels: bug
-assignees:
-  - schuylermartin45
-  - ForgottenProgramme
-  - beeankha
+labels:
+  - bug
+  - "to sort"
 
 ---
 

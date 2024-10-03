@@ -4,10 +4,7 @@ about: Create a feature request.
 labels:
   - enhancement
   - source::user-request
-assignees:
-  - schuylermartin45
-  - ForgottenProgramme
-  - beeankha
+  - "to sort"
 
 ---
 
