@@ -4,7 +4,7 @@
 
 import hashlib
 
-from dummy_module import meaning_of_life
+from dummy_module import meaning_of_life  # type: ignore[import-not-found]
 
 from conda_recipe_manager.utils.cryptography.hashing import hash_str
 
