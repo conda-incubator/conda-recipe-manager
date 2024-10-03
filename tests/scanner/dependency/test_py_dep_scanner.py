@@ -23,13 +23,18 @@ from tests.file_loading import get_test_path
                 ProjectDependency("conda_recipe_manager", DependencyType.RUN),
                 ProjectDependency("python", DependencyType.HOST),
                 ProjectDependency("python", DependencyType.RUN),
+                ProjectDependency("pyyaml", DependencyType.TEST),
+                ProjectDependency("requests", DependencyType.RUN),  # Found in source and test code.
             },
         ),
     ],
 )
 def test_scan(project_name: str, expected: set[ProjectDependency], request: pytest.FixtureRequest) -> None:
     """
-    TODO
+    Tests scanning for Python dependencies with a mocked-out Python project.
+
+    :param project_name: Name of the dummy Python project directory to use
+    :param expected: Expected value
     """
     fs = cast(FakeFilesystem, request.getfixturevalue("fs"))
     project_path: Final[Path] = get_test_path() / "software_projects" / project_name

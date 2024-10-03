@@ -146,6 +146,11 @@ class PythonDependencyScanner(BaseDependencyScanner):
 
         all_imports = set(filter(_filter_test_duplicates, all_imports))
 
+        # TODO determine if users care to attempt to determine if `types-*` packages are to be included for common
+        # libraries.
+
+        # TODO filter unused imports
+
         # Python is inherently a HOST and RUN dependency for all Python projects.
         all_imports.add(ProjectDependency("python", DependencyType.HOST))
         all_imports.add(ProjectDependency("python", DependencyType.RUN))
