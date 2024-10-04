@@ -1,8 +1,9 @@
 ---
 name: Bug Report
 about: Create a bug report.
-labels: bug
-assignees: ''
+labels:
+  - bug
+  - "to sort"
 
 ---
 

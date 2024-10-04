@@ -1,8 +1,10 @@
 ---
 name: Feature Request
 about: Create a feature request.
-labels: enhancement, source::user-request
-assignees: ''
+labels:
+  - enhancement
+  - source::user-request
+  - "to sort"
 
 ---
 
