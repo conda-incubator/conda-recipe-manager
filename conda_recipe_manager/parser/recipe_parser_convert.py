@@ -181,8 +181,10 @@ class RecipeParserConvert(RecipeParser):
             if complex_jinja:
                 complex_jinja_patterns = [re.sub(r"\\(.)", r"\1", regex.pattern) for regex in Regex.V0_FORBIDDEN_JINJA]
                 raise ValueError(
-                    f"Complex Jinja expressions detected in key(s): {", ".join(complex_jinja)}.\n"
-                    f"The following syntax cannot be automatically converted: {complex_jinja_patterns}"
+                    f"""
+    Complex Jinja expressions detected in key(s): {", ".join(complex_jinja)}
+    The following syntax cannot be automatically converted: {", ".join(complex_jinja_patterns)}
+                    """
                 )
 
             self._patch_and_log({"op": "add", "path": "/context", "value": cast(JsonType, context_obj)})
