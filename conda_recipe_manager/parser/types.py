@@ -27,9 +27,6 @@ V0_FORMAT_RECIPE_FILE_NAME: Final[str] = "meta.yaml"
 # Required file name for the recipe, specified in CEP-13
 V1_FORMAT_RECIPE_FILE_NAME: Final[str] = "recipe.yaml"
 
-# Jinja syntax that is too complex to convert
-V0_FORBIDDEN_JINJA: list[str] = ['".".join']
-
 # Indicates how many spaces are in a level of indentation
 TAB_SPACE_COUNT: Final[int] = 2
 TAB_AS_SPACES: Final[str] = " " * TAB_SPACE_COUNT

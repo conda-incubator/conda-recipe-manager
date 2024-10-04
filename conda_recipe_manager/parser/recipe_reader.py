@@ -37,7 +37,7 @@ from conda_recipe_manager.parser._utils import (
 )
 from conda_recipe_manager.parser.dependency import DependencySection, dependency_section_to_str
 from conda_recipe_manager.parser.enums import SchemaVersion
-from conda_recipe_manager.parser.types import TAB_AS_SPACES, TAB_SPACE_COUNT, V0_FORBIDDEN_JINJA, MultilineVariant
+from conda_recipe_manager.parser.types import TAB_AS_SPACES, TAB_SPACE_COUNT, MultilineVariant
 from conda_recipe_manager.types import PRIMITIVES_TUPLE, JsonType, Primitives, SentinelType
 from conda_recipe_manager.utils.cryptography.hashing import hash_str
 from conda_recipe_manager.utils.typing import optional_str
@@ -123,11 +123,6 @@ class RecipeReader(IsModifiable):
                     cast(JsonType, yaml.load(s, Loader=SafeLoader)), lambda d: substitute_markers(d, sub_list)
                 )
             )
-        # Check for Jinja that is too complex to convert
-        for forbidden_str in V0_FORBIDDEN_JINJA:
-            if forbidden_str in s:
-                raise ValueError(f"Complex Jinja expression with {forbidden_str} detected")
-
         return output
 
     @staticmethod

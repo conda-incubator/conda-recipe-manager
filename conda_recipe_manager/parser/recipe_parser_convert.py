@@ -6,6 +6,7 @@
 
 from __future__ import annotations
 
+import re
 from typing import Final, Optional, cast
 
 from conda_recipe_manager.licenses.spdx_utils import SpdxUtils
@@ -171,6 +172,19 @@ class RecipeParserConvert(RecipeParser):
             context_obj[name] = value
         # Ensure that we do not include an empty context object (which is forbidden by the schema).
         if context_obj:
+            # Check for Jinja that is too complex to convert
+            complex_jinja = [
+                key
+                for key, value in context_obj.items()
+                if isinstance(value, str) and any(pattern.search(value) for pattern in Regex.V0_FORBIDDEN_JINJA)
+            ]
+            if complex_jinja:
+                complex_jinja_patterns = [re.sub(r"\\(.)", r"\1", regex.pattern) for regex in Regex.V0_FORBIDDEN_JINJA]
+                raise ValueError(
+                    f"Complex Jinja expressions detected in key(s): {", ".join(complex_jinja)}.\n"
+                    f"The following syntax cannot be automatically converted: {complex_jinja_patterns}"
+                )
+
             self._patch_and_log({"op": "add", "path": "/context", "value": cast(JsonType, context_obj)})
 
         # Similarly, patch-in the new `schema_version` value to the top of the file
