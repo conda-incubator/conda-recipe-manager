@@ -48,7 +48,7 @@ test:
     - pyfakefs
   commands:
     - pip check
-    - python -m pytest -n auto tests/
+    - python -m pytest -n auto --ignore=tests/test_aux_files tests/
 
 about:
   home: https://github.com/anaconda/conda-recipe-manager
