@@ -21,6 +21,8 @@ from tests.file_loading import get_test_path
             "dummy_py_project_01",
             {
                 ProjectDependency("conda_recipe_manager", DependencyType.RUN),
+                ProjectDependency("matplotlib", DependencyType.RUN),  # Two imports on one line
+                ProjectDependency("networkx", DependencyType.RUN),  # Two imports on one line
                 ProjectDependency("python", DependencyType.HOST),
                 ProjectDependency("python", DependencyType.RUN),
                 ProjectDependency("pyyaml", DependencyType.TEST),

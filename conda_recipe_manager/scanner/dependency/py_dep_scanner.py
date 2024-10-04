@@ -97,25 +97,30 @@ class PythonDependencyScanner(BaseDependencyScanner):
             if not isinstance(node, (ast.Import, ast.ImportFrom)):
                 continue
 
-            module_name = ""
+            module_names = []
             if isinstance(node, ast.Import):
-                module_name = node.names[0].name.split(".")[0]
+                # Handle multiple (comma-separated) imports on one line
+                for alias in node.names:
+                    module_names.append(alias.name.split(".")[0])
             elif node.module is not None:
-                module_name = node.module.split(".")[0]
+                module_names.append(node.module.split(".")[0])
 
-            # TODO filter relative imports
-            # Filter-out the standard library modules and local module names (i.e. modules defined in the target
-            # project).
-            if not module_name or module_name in sys.stdlib_module_names or module_name in project_modules:
-                continue
+            for module_name in module_names:
+                # TODO filter relative imports
+                # Filter-out the standard library modules and local module names (i.e. modules defined in the target
+                # project).
+                if not module_name or module_name in sys.stdlib_module_names or module_name in project_modules:
+                    continue
 
-            package_name = PythonDependencyScanner._correct_module_to_dependency(module_name)
+                package_name = PythonDependencyScanner._correct_module_to_dependency(module_name)
 
-            # Most Python imports fall under the `run` section in the Conda recipe format. The major exception is any
-            # import found in test code.
-            dep_type = DependencyType.TEST if PythonDependencyScanner._is_likely_test_file(file) else DependencyType.RUN
+                # Most Python imports fall under the `run` section in the Conda recipe format. The major exception is
+                # any import found in test code.
+                dep_type = (
+                    DependencyType.TEST if PythonDependencyScanner._is_likely_test_file(file) else DependencyType.RUN
+                )
 
-            deps.add(ProjectDependency(package_name, dep_type))
+                deps.add(ProjectDependency(package_name, dep_type))
 
         return deps
 
