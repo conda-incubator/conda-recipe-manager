@@ -176,10 +176,12 @@ class RecipeParserConvert(RecipeParser):
             complex_jinja = [
                 key
                 for key, value in context_obj.items()
-                if isinstance(value, str) and any(pattern.search(value) for pattern in Regex.V0_FORBIDDEN_JINJA)
+                if isinstance(value, str) and any(pattern.search(value) for pattern in Regex.V0_UNSUPPORTED_JINJA)
             ]
             if complex_jinja:
-                complex_jinja_patterns = [re.sub(r"\\(.)", r"\1", regex.pattern) for regex in Regex.V0_FORBIDDEN_JINJA]
+                complex_jinja_patterns = [
+                    re.sub(r"\\(.)", r"\1", regex.pattern) for regex in Regex.V0_UNSUPPORTED_JINJA
+                ]
                 raise ValueError(
                     f"""
     Complex Jinja expressions detected in key(s): {", ".join(complex_jinja)}

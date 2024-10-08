@@ -116,7 +116,7 @@ class Regex:
     """
 
     # Jinja syntax that is too complicated to convert
-    V0_FORBIDDEN_JINJA: Final[list[re.Pattern[str]]] = [re.compile(r"\.join\(")]
+    V0_UNSUPPORTED_JINJA: Final[list[re.Pattern[str]]] = [re.compile(r"\.join\(")]
 
     # Pattern to detect Jinja variable names and functions
     _JINJA_VAR_FUNCTION_PATTERN: Final[str] = r"[a-zA-Z_][a-zA-Z0-9_\|\'\"\(\)\[\]\, =\.\-~]*"
