@@ -1,5 +1,6 @@
 {% set name = "types-toml" %}
 {% set version = "0.10.8.6" %}
+{% set soversion = ".".join(version.split(".")[:3]) %}
 
 package:
   name: {{ name|lower }}
@@ -17,6 +18,7 @@ build:
 requirements:
   host:
     - python
+    - {{ pin_subpackage("libnvpl-fft" ~ somajor ) }}
   run:
     - python
 
