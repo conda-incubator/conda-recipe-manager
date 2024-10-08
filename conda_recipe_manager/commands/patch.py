@@ -25,7 +25,7 @@ def _pre_patch_validate(
     Confirm that the json patch file and recipe file can be read and that the recipe parser object is created.
 
     :param json_patch_file_path: path to the json file containing the patch blobs
-    :param recipe_file_path: recipe_file_path: path to the target recipe file
+    :param recipe_file_path: path to the target recipe file
     :returns: A tuple containing the patch blob/blobs from the json file and a RecipeParser object
     """
     try:
@@ -49,17 +49,23 @@ def _pre_patch_validate(
     return contents_json, recipe_parser
 
 
-@click.argument("recipe_file_path", type=click.Path(exists=True, path_type=Path))  # type: ignore[misc]
-@click.argument("json_patch_file_path", type=click.Path(exists=True, path_type=Path))  # type: ignore[misc]
+# TODO Improve. In order for `click` to play nice with `pyfakefs`, we set `path_type=str` and delay converting to a
+# `Path` instance. This is caused by how `click` uses decorators. See these links for more detail:
+# - https://pytest-pyfakefs.readthedocs.io/en/latest/troubleshooting.html#pathlib-path-objects-created-outside-of-tests
+# - https://github.com/pytest-dev/pyfakefs/discussions/605
 @click.command(short_help="Modify recipe files with JSON patch blobs.")
-def patch(json_patch_file_path: Path, recipe_file_path: Path) -> None:
+@click.argument("json_patch_file_path", type=click.Path(exists=True, path_type=str))
+@click.argument("recipe_file_path", type=click.Path(exists=True, path_type=str))
+def patch(json_patch_file_path: str, recipe_file_path: str) -> None:
     """
     Patches recipe files with JSON patch blobs.
 
-    :param json_patch_file_path: path to the json file containing the patch blobs
-    :param recipe_file_path: path to the target recipe file
+    JSON_PATCH_FILE_PATH: Path to the json file containing the patch blobs
+    RECIPE_FILE_PATH: Path to the target recipe file
     """
-    contents_json, recipe_parser = _pre_patch_validate(json_patch_file_path, recipe_file_path)
+    # Manually convert to a `Path` object. See note above about `pyfakefs` test issues.
+    recipe_path = Path(recipe_file_path)
+    contents_json, recipe_parser = _pre_patch_validate(Path(json_patch_file_path), recipe_path)
 
     if not isinstance(contents_json, list):
         contents_json = [contents_json]
@@ -75,5 +81,5 @@ def patch(json_patch_file_path: Path, recipe_file_path: Path) -> None:
         print_err("The patch provided did not follow the expected schema.")
         error_code = ExitCode.JSON_ERROR
 
-    recipe_file_path.write_text(recipe_parser.render())
+    recipe_path.write_text(recipe_parser.render(), encoding="utf-8")
     sys.exit(error_code)

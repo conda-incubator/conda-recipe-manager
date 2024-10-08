@@ -98,15 +98,16 @@ def test_patch_cli_invalid_json_patch_operation(request: pytest.FixtureRequest) 
     :param fs: pyfakefs fixture used to replace the file system
     """
 
+    runner = CliRunner()
     request.getfixturevalue("fs").add_real_directory(get_test_path(), read_only=False)  # type: ignore[misc]
 
     faulty_json_patch_path = get_test_path() / "patch/bad_json_patch_files/bad_json_patch.json"
     recipe_file_path = get_test_path() / "simple-recipe.yaml"
 
     with Patcher(modules_to_reload=[patch]):  # here patch is the patch.py module
-        result = patch.patch([str(faulty_json_patch_path), str(recipe_file_path)])  # type: ignore[misc]
+        result = runner.invoke(patch.patch, [str(faulty_json_patch_path), str(recipe_file_path)])
     # this JSON_ERROR comes from JsonPatchValidationException being raised, not from JsonDecodeError
-    assert result.exit_code == ExitCode.JSON_ERROR  # type: ignore[misc]
+    assert result.exit_code == ExitCode.JSON_ERROR
 
 
 def test_patch_cli_bad_json_file(fs: FakeFilesystem) -> None:
