@@ -179,14 +179,13 @@ class RecipeParserConvert(RecipeParser):
                 if isinstance(value, str) and any(pattern.search(value) for pattern in Regex.V0_UNSUPPORTED_JINJA)
             ]
             if complex_jinja:
-                complex_jinja_patterns = [
-                    re.sub(r"\\(.)", r"\1", regex.pattern) for regex in Regex.V0_UNSUPPORTED_JINJA
-                ]
-                raise ValueError(
-                    f"""
-    Complex Jinja expressions detected in key(s): {", ".join(complex_jinja)}
-    The following syntax cannot be automatically converted: {", ".join(complex_jinja_patterns)}
-                    """
+                complex_jinja_pattern = [re.sub(r"\\(.)", r"\1", regex.pattern) for regex in Regex.V0_UNSUPPORTED_JINJA]
+                complex_jinja_display = ", ".join(complex_jinja)
+                complex_jinja_pattern_display = ", ".join(complex_jinja_pattern)
+                self._msg_tbl.add_message(
+                    MessageCategory.WARNING,
+                    f"Complex Jinja expressions detected in key(s): {complex_jinja_display}\n"
+                    f"The following syntax cannot be automatically converted: {complex_jinja_pattern_display}",
                 )
 
             self._patch_and_log({"op": "add", "path": "/context", "value": cast(JsonType, context_obj)})
