@@ -124,8 +124,7 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
             "regression_jinja_sub.yaml",
             [],
             [
-                "Complex Jinja expressions detected in key(s): soversion\n"
-                "The following syntax cannot be automatically converted: .join(",
+                "The following key(s) contain unsupported syntax: soversion",
                 "No `license` provided in `/about`",
             ],
         ),
