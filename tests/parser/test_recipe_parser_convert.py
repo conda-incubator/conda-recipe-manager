@@ -123,7 +123,10 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
         (
             "regression_jinja_sub.yaml",
             [],
-            ["No `license` provided in `/about`"],
+            [
+                "The following key(s) contain unsupported syntax: soversion",
+                "No `license` provided in `/about`",
+            ],
         ),
         # Tests upgrading the `/build/script` when `script_env` is present (this is essentially a test for
         # `_upgrade_build_script_section()`)
