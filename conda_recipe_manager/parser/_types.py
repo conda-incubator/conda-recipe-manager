@@ -115,8 +115,11 @@ class Regex:
     Namespace used to organize all regular expressions used by the `parser` module.
     """
 
+    # Jinja syntax that is too complicated to convert
+    V0_UNSUPPORTED_JINJA: Final[list[re.Pattern[str]]] = [re.compile(r"\.join\(")]
+
     # Pattern to detect Jinja variable names and functions
-    _JINJA_VAR_FUNCTION_PATTERN: Final[str] = r"[a-zA-Z_][a-zA-Z0-9_\|\'\"\(\)\[\]\, =\.\-]*"
+    _JINJA_VAR_FUNCTION_PATTERN: Final[str] = r"[a-zA-Z_][a-zA-Z0-9_\|\'\"\(\)\[\]\, =\.\-~]*"
 
     ## Pre-process conversion tooling regular expressions ##
     # Finds `environ[]` used by a some recipe files. Requires a whitespace character to prevent matches with
