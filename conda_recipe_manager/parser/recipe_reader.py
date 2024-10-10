@@ -238,13 +238,13 @@ class RecipeReader(IsModifiable):
     @staticmethod
     def _set_key_and_matches(
         key: str,
-    ) -> tuple[str, Optional[re.Match[str]], Optional[re.Match[str]], Optional[re.Match[str]]]:
+    ) -> tuple[str, Optional[re.Match[str]], Optional[re.Match[str]], Optional[re.Match[str]], Optional[re.Match[str]]]:
         """
         Helper function for `_render_jinja_vars()` that takes a JINJA statement (string inside the braces) and attempts
         to match and apply any currently supported "JINJA functions" to the statement.
 
         :param key: Sanitized key to perform JINJA functions on.
-        :returns: The modified key, if any JINJA functions apply.
+        :returns: The modified key, if any JINJA functions apply. Also returns any applicable match objects.
         """
         # TODO add support for REPLACE
 
@@ -263,7 +263,39 @@ class RecipeReader(IsModifiable):
         if idx_match:
             key = key.replace(f"[{cast(str, idx_match.group(2))}]", "").strip()
 
-        return key, lower_match, upper_match, idx_match
+        # Addition/concatenation. Note the key(s) will need to be evaluated later.
+        # Example: {{ build_number + 100 }}
+        # Example: {{ version + ".1" }}
+        add_concat_match = Regex.JINJA_FUNCTION_ADD_CONCAT.search(key)
+
+        return key, lower_match, upper_match, idx_match, add_concat_match
+
+    def _eval_jinja_token(self, s: str) -> JsonType:
+        """
+        Given a string that matches one of the two groups in the `JINJA_FUNCTION_ADD_CONCAT` regex, evaluate the
+        string's intended value. NOTE: This does not invoke `eval()` for security reasons.
+
+        :param s: The string to evaluate.
+        :returns: The evaluated value of the string.
+        """
+        # Variable
+        if s in self._vars_tbl:
+            return self._vars_tbl[s]
+
+        # int
+        if s.isdigit():
+            return int(s)
+
+        # float
+        try:
+            return float(s)
+        except ValueError:
+            pass
+
+        # Strip outer quotes, if applicable (unrecognized variables will be treated as strings).
+        if s and s[0] == s[-1] and (s[0] == "'" or s[0] == '"'):
+            return s[1:-1]
+        return s
 
     def _render_jinja_vars(self, s: str) -> JsonType:
         """
@@ -273,6 +305,9 @@ class RecipeReader(IsModifiable):
         :returns: The original value, augmented with Jinja substitutions. Types are re-rendered to account for multiline
             strings that may have been "normalized" prior to this call.
         """
+        # TODO: Consider tokenizing expressions over using regular expressions. The scope of this function has expanded
+        # drastically.
+
         start_idx, sub_regex = self._set_on_schema_version()
 
         # Search the string, replacing all substitutions we can recognize
@@ -280,9 +315,18 @@ class RecipeReader(IsModifiable):
             # The regex guarantees the string starts and ends with double braces
             key = match[start_idx:-2].strip()
             # Check for and interpret common JINJA functions
-            key, lower_match, upper_match, idx_match = RecipeReader._set_key_and_matches(key)
+            key, lower_match, upper_match, idx_match, add_concat_match = RecipeReader._set_key_and_matches(key)
 
-            if key in self._vars_tbl:
+            if add_concat_match:
+                lhs = self._eval_jinja_token(cast(str, add_concat_match.group(1)))
+                rhs = self._eval_jinja_token(cast(str, add_concat_match.group(2)))
+                # Perform arithmetic addition, IFF both sides are numeric types.
+                if isinstance(lhs, (int, float)) and isinstance(rhs, (int, float)):
+                    s = str(lhs + rhs)
+                # Otherwise, concat two strings and quote them. This ensures YAML will interpret the type correctly.
+                else:
+                    s = f'"{str(lhs) + str(rhs)}"'
+            elif key in self._vars_tbl:
                 # Replace value as a string. Re-interpret the entire value before returning.
                 value = str(self._vars_tbl[key])
                 if lower_match:
