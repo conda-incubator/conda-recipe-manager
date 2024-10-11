@@ -132,6 +132,7 @@ def test_loading_obj_in_list() -> None:
         "pytest-pep8.yaml",
         "google-cloud-cpp.yaml",
         "dynamic-linking.yaml",
+        "sub_vars.yaml",
         # V1 Recipe Files
         "v1_format/v1_types-toml.yaml",
         "v1_format/v1_simple-recipe.yaml",
@@ -141,6 +142,7 @@ def test_loading_obj_in_list() -> None:
         "v1_format/v1_pytest-pep8.yaml",
         "v1_format/v1_google-cloud-cpp.yaml",
         "v1_format/v1_dynamic-linking.yaml",
+        "v1_format/v1_sub_vars.yaml",
     ],
 )
 def test_round_trip(file: str) -> None:

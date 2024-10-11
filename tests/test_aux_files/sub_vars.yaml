@@ -21,6 +21,7 @@ requirements:
     - wheel
     - pip
     - python
+    - {{ compiler('rust') }} >=1.65.0
   run_constrained:
     # Add/concat cases
     - {{ number + 1 }}

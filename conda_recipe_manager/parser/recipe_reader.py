@@ -108,6 +108,9 @@ class RecipeReader(IsModifiable):
             try:
                 output = _sub_jinja(cast(JsonType, yaml.load(s, Loader=SafeLoader)))
             except yaml.scanner.ScannerError:
+                # We quote-escape here for problematic YAML strings that are non-JINJA, like `**/lib.so`. Parsing
+                # invalid YAML containing V0 JINJA statements should cause an exception and fallback to the other
+                # recovery logic.
                 output = _sub_jinja(cast(JsonType, yaml.load(quote_special_strings(s), Loader=SafeLoader)))
         except Exception:  # pylint: disable=broad-exception-caught
             # If a construction exception is thrown, attempt to re-parse by replacing Jinja macros (substrings in
