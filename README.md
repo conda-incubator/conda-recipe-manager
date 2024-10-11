@@ -82,7 +82,7 @@ running all or part of the `pre-commit` automations:
 
 ## Release process
 1. Update `CHANGELOG.md`
-1. Update the version number in `pyproject.toml`
+1. Update the version number in `pyproject.toml` and `docs/conf.py`
 1. Ensure `environment.yaml` is up to date with the latest dependencies
 1. Create a new release on GitHub with a version tag.
 1. Manage the conda-forge feedstock, as per [this doc](https://conda-forge.org/docs/maintainer/adding_pkgs/)
