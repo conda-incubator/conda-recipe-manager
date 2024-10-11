@@ -40,6 +40,7 @@ requirements:
     - {{ '4' + "2" }}
     - {{ dne + 42 }}
     - foo > {{ '4' + "2" }}
+    - foo > {{ 4 + 2 }}
   run:
     - python
 
