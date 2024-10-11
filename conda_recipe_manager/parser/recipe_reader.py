@@ -311,8 +311,6 @@ class RecipeReader(IsModifiable):
         # TODO: Consider tokenizing expressions over using regular expressions. The scope of this function has expanded
         # drastically.
 
-        print(f"TODO rm: {s}")
-
         start_idx, sub_regex = self._set_on_schema_version()
 
         # Search the string, replacing all substitutions we can recognize
