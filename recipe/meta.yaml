@@ -1,5 +1,5 @@
 {% set name = "conda-recipe-manager" %}
-{% set version = "0.2.1" %}
+{% set version = "0.3.0" %}
 
 package:
   name: {{ name|lower }}
@@ -14,6 +14,7 @@ build:
   script: pip install . --no-deps --no-build-isolation -vv
   entry_points:
     - conda-recipe-manager = conda_recipe_manager.commands.conda_recipe_manager:conda_recipe_manager
+    - crm = conda_recipe_manager.commands.conda_recipe_manager:conda_recipe_manager
 
 requirements:
   host:
