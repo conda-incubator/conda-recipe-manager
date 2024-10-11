@@ -108,6 +108,9 @@ class RecipeReader(IsModifiable):
             try:
                 output = _sub_jinja(cast(JsonType, yaml.load(s, Loader=SafeLoader)))
             except yaml.scanner.ScannerError:
+                # We quote-escape here for problematic YAML strings that are non-JINJA, like `**/lib.so`. Parsing
+                # invalid YAML containing V0 JINJA statements should cause an exception and fallback to the other
+                # recovery logic.
                 output = _sub_jinja(cast(JsonType, yaml.load(quote_special_strings(s), Loader=SafeLoader)))
         except Exception:  # pylint: disable=broad-exception-caught
             # If a construction exception is thrown, attempt to re-parse by replacing Jinja macros (substrings in
@@ -308,6 +311,8 @@ class RecipeReader(IsModifiable):
         # TODO: Consider tokenizing expressions over using regular expressions. The scope of this function has expanded
         # drastically.
 
+        print(f"TODO rm: {s}")
+
         start_idx, sub_regex = self._set_on_schema_version()
 
         # Search the string, replacing all substitutions we can recognize
@@ -320,12 +325,12 @@ class RecipeReader(IsModifiable):
             if add_concat_match:
                 lhs = self._eval_jinja_token(cast(str, add_concat_match.group(1)))
                 rhs = self._eval_jinja_token(cast(str, add_concat_match.group(2)))
-                # Perform arithmetic addition, IFF both sides are numeric types.
+                # By default concat two strings and quote them. This ensures YAML will interpret the type correctly.
+                value = f'"{str(lhs) + str(rhs)}"'
+                # Otherwise, perform arithmetic addition, IFF both sides are numeric types.
                 if isinstance(lhs, (int, float)) and isinstance(rhs, (int, float)):
-                    s = str(lhs + rhs)
-                # Otherwise, concat two strings and quote them. This ensures YAML will interpret the type correctly.
-                else:
-                    s = f'"{str(lhs) + str(rhs)}"'
+                    value = str(lhs + rhs)
+                s = s.replace(match, value)
             elif key in self._vars_tbl:
                 # Replace value as a string. Re-interpret the entire value before returning.
                 value = str(self._vars_tbl[key])
