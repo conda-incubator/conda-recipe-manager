@@ -14,7 +14,7 @@ exclude = ["tests"]
 
 [project]
 name = "conda_recipe_manager"
-version = "0.2.1"
+version = "0.3.0"
 authors = [
   { name="Anaconda, Inc.", email="distribution_team@anaconda.com" },
 ]
@@ -42,6 +42,10 @@ dependencies = [
   "pyyaml",
   "jsonschema",
   "requests",
+  "gitpython",
+  "networkx",
+  "matplotlib",
+  "pygraphviz",
 ]
 
 [project.optional-dependencies]

@@ -1,6 +1,19 @@
 # Changelog
 Note: version releases in the 0.x.y range may introduce breaking changes.
 
+## 0.3.0
+With this release, Conda Recipe Manager expands past it's original abilities to parse and
+upgrade Conda recipe files.
+
+Some highlights:
+- Introduces the `scanner`, `fetcher`, and `grapher` modules.
+- Adds significant tooling around our ability to parse Conda recipe dependencies.
+- Adds some initial V1 recipe file format support.
+- Introduces many bug fixes, parser improvements, and quality of life changes.
+- Adds `pyfakefs` to the unit testing suite.
+
+Full changelog available at:
+https://github.com/conda-incubator/conda-recipe-manager/compare/v0.2.1...v0.3.0
 
 ## 0.2.1
 Minor bug fixes and documentation improvements. Conversion compatibility with Bioconda recipe has improved significantly.
