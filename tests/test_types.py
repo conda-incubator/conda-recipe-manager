@@ -60,8 +60,8 @@ def test_message_table_add(messages_and_contents: list[tuple[MessageCategory, st
     Tests the addition of messages to the message table and checks the expected output of warnings and errors
     contained in the messaging object.
 
-    param messages_and_contents: Message category and message content
-    param expected: Expected output
+    :param messages_and_contents: Message category and message content
+    :param expected: Expected output
     """
     message_table = MessageTable()
     for category, content in messages_and_contents:
@@ -98,8 +98,8 @@ def test_message_get_count(
     Tests the addition of messages to the message table and checks the count of warnings and
     errors contained in the messaging object.
 
-    param messages_and_contents: Message category and message content
-    param count: Expected count
+    :param messages_and_contents: Message category and message content
+    :param count: Expected count
     """
     message_table = MessageTable()
 
@@ -138,8 +138,8 @@ def test_message_table_clear(
     """
     Tests whether or not the message table properly clears all messages.
 
-    param messages_and_contents: Message category and message content
-    param count: Expected count
+    :param messages_and_contents: Message category and message content
+    :param count: Expected count
     """
     message_table = MessageTable()
     for category, content in messages_and_contents:
