@@ -10,59 +10,145 @@ from conda_recipe_manager.types import MessageCategory, MessageTable
 
 
 @pytest.mark.parametrize(
-    "message,content,output",
+    "messages_and_contents,expected",
     [
-        (MessageCategory.WARNING, "Test warning message", "0 errors and 1 warning were found."),
-        (MessageCategory.ERROR, "Test error message", "1 error and 0 warnings were found."),
+        (
+            [
+                (MessageCategory.WARNING, "Test warning message"),
+            ],
+            ("0 errors and 1 warning were found."),
+        ),
+        (
+            [
+                (MessageCategory.ERROR, "Test error message"),
+            ],
+            ("1 error and 0 warnings were found."),
+        ),
+        (
+            [
+                (MessageCategory.WARNING, "Test warning message"),
+                (MessageCategory.ERROR, "Test error message"),
+            ],
+            ("1 error and 1 warning were found."),
+        ),
+        (
+            [
+                (MessageCategory.WARNING, "Test warning message"),
+                (MessageCategory.ERROR, "Test error message"),
+                (MessageCategory.ERROR, "Another test error message"),
+            ],
+            ("2 errors and 1 warning were found."),
+        ),
+        (
+            [
+                (MessageCategory.WARNING, "Test warning message"),
+                (MessageCategory.ERROR, "Test error message"),
+                (MessageCategory.EXCEPTION, "Test exception message"),
+            ],
+            ("1 error and 1 warning were found."),
+        ),
+        (
+            [
+                (MessageCategory.EXCEPTION, "Test exception message"),
+            ],
+            ("0 errors and 0 warnings were found."),
+        ),
     ],
 )
-def test_message_table_add(message: MessageCategory, content: str, output: str) -> None:
+def test_message_table_add(messages_and_contents: list[tuple[MessageCategory, str]], expected: str) -> None:
     """
-    Tests the addition of messages to the message table and checks output of warnings and errors contained
-    in the messaging object.
+    Tests the addition of messages to the message table and checks the expected output of warnings and errors
+    contained in the messaging object.
 
-    param message: Message category
-    param content: Message content
-    param output: Expected output
+    param messages_and_contents: Message category and message content
+    param expected: Expected output
     """
     message_table = MessageTable()
-    message_table.add_message(message, content)
-    assert message_table.get_totals_message() == output
+    for category, content in messages_and_contents:
+        message_table.add_message(category, content)
+    assert message_table.get_totals_message() == expected
 
 
 @pytest.mark.parametrize(
-    "message,content,count",
+    "messages_and_contents,expected_count",
     [
-        (MessageCategory.EXCEPTION, "Test exception message", 1),
-        (MessageCategory.WARNING, "Test warning message", 1),
-        (MessageCategory.ERROR, "Test error message", 1),
+        (
+            [
+                (MessageCategory.EXCEPTION, "Test exception message"),
+                (MessageCategory.WARNING, "Test warning message"),
+                (MessageCategory.ERROR, "Test error message"),
+            ],
+            {MessageCategory.EXCEPTION: 1, MessageCategory.WARNING: 1, MessageCategory.ERROR: 1},
+        ),
+        (
+            [
+                (MessageCategory.WARNING, "Test warning 1"),
+                (MessageCategory.WARNING, "Test warning 2"),
+                (MessageCategory.ERROR, "Test error 1"),
+            ],
+            {MessageCategory.EXCEPTION: 0, MessageCategory.WARNING: 2, MessageCategory.ERROR: 1},
+        ),
+        ([], {MessageCategory.EXCEPTION: 0, MessageCategory.WARNING: 0, MessageCategory.ERROR: 0}),
     ],
 )
-def test_message_get_count(message: MessageCategory, content: str, count: int) -> None:
+def test_message_get_count(
+    messages_and_contents: list[tuple[MessageCategory, str]], expected_count: dict[MessageCategory, int]
+) -> None:
     """
     Tests the addition of messages to the message table and checks the count of warnings and
     errors contained in the messaging object.
 
-    param message: Message category
-    param content: Message content
+    param messages_and_contents: Message category and message content
     param count: Expected count
     """
     message_table = MessageTable()
 
-    message_table.add_message(message, content)
-    assert message_table.get_message_count(message) == count
+    for category, content in messages_and_contents:
+        message_table.add_message(category, content)
+
+    for category, counts in expected_count.items():
+        assert message_table.get_message_count(category) == counts
 
 
-def test_message_table_clear() -> None:
+@pytest.mark.parametrize(
+    "messages_and_contents,expected_count",
+    [
+        (
+            [
+                (MessageCategory.EXCEPTION, "Test exception message"),
+                (MessageCategory.WARNING, "Test warning message"),
+                (MessageCategory.ERROR, "Test error message"),
+            ],
+            {MessageCategory.EXCEPTION: 1, MessageCategory.WARNING: 1, MessageCategory.ERROR: 1},
+        ),
+        (
+            [
+                (MessageCategory.WARNING, "Test warning 1"),
+                (MessageCategory.WARNING, "Test warning 2"),
+                (MessageCategory.ERROR, "Test error 1"),
+            ],
+            {MessageCategory.EXCEPTION: 0, MessageCategory.WARNING: 2, MessageCategory.ERROR: 1},
+        ),
+        ([], {MessageCategory.EXCEPTION: 0, MessageCategory.WARNING: 0, MessageCategory.ERROR: 0}),
+    ],
+)
+def test_message_table_clear(
+    messages_and_contents: list[tuple[MessageCategory, str]], expected_count: dict[MessageCategory, int]
+) -> None:
     """
     Tests whether or not the message table properly clears all messages.
+
+    param messages_and_contents: Message category and message content
+    param count: Expected count
     """
     message_table = MessageTable()
-    message_table.add_message(MessageCategory.ERROR, "Test warning message")
-    message_table.add_message(MessageCategory.WARNING, "Test error message")
+    for category, content in messages_and_contents:
+        message_table.add_message(category, content)
+
+    # Check that there are actually warning and error messages being registered and counted before clearing them
+    for category, counts in expected_count.items():
+        assert message_table.get_message_count(category) == counts
 
     message_table.clear_messages()
-    assert message_table.get_message_count(MessageCategory.EXCEPTION) == 0
-    assert message_table.get_message_count(MessageCategory.ERROR) == 0
-    assert message_table.get_message_count(MessageCategory.WARNING) == 0
     assert message_table.get_totals_message() == ""
+    assert message_table.get_message_count(category) == 0
