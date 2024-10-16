@@ -11,9 +11,9 @@ dependencies:
   - pytest
   - pytest-cov
   - pytest-xdist
-  - conda-forge::pyfakefs
+  - pyfakefs
   # Match version with .pre-commit-config.yaml to ensure consistent rules with `make lint`.
-  - conda-forge::pylint ==3.2.2
+  - pylint ==3.2.7
   - pip
   - click >=8.1.7
   - conda
