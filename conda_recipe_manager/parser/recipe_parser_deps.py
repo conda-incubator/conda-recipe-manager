@@ -13,6 +13,7 @@ from conda_recipe_manager.parser.dependency import (
     dependency_data_get_original_str,
     str_to_dependency_section,
 )
+from conda_recipe_manager.parser.enums import SelectorConflictMode
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
 from conda_recipe_manager.parser.recipe_reader_deps import RecipeReaderDeps
 
@@ -63,14 +64,21 @@ class RecipeParserDeps(RecipeParser, RecipeReaderDeps):
         )
 
     def add_dependency(
-        self, dep: Dependency, conflict_mode: DependencyConflictMode = DependencyConflictMode.REPLACE
+        self,
+        dep: Dependency,
+        dep_mode: DependencyConflictMode = DependencyConflictMode.REPLACE,
+        sel_mode: SelectorConflictMode = SelectorConflictMode.REPLACE,
     ) -> bool:
         """
-        Convenience function that adds a dependency from a recipe file.
+        Convenience function that adds a dependency to a recipe file. The `path` attribute is used to locate which
+        section and output is being used, but the index position is not guaranteed, unless `EXACT_POSITION` mode is
+        used.
 
-        :param dep: Dependency to add
-        :param conflict_mode: (Optional) Indicates how duplicate dependencies should be handled. Defaults to replacing
-            the existing dependency. Duplicates match by name only.
+        :param dep: Dependency to add.
+        :param dep_mode: (Optional) Indicates how duplicate dependencies should be handled. Defaults to replacing the
+            existing dependency. Duplicates match by name only.
+        :param sel_mode: (Optional) Indicates how an existing selector should be handled. Defaults to replacing the
+            existing selector.
         :returns: The result of the underlying patch command, indicating that a change occurred.
         """
         # TODO add V1 support
@@ -80,14 +88,14 @@ class RecipeParserDeps(RecipeParser, RecipeReaderDeps):
 
         # TODO handle path does not exist -> add path
         base_path: Final[str] = dep.path.rsplit("/", 1)[0]
-        patch_path = f"{base_path}/-"
+        patch_path = dep.path if dep_mode == DependencyConflictMode.EXACT_POSITION else f"{base_path}/-"
         # TODO: Add a "get dependencies at path" function to `RecipeReaderDeps`
         cur_deps: Final[list[Optional[str]]] = cast(
             list[Optional[str]], self.get_value(base_path, sub_vars=True, default=[])
         )
 
         # Check for duplicate dependencies, if applicable.
-        if conflict_mode != DependencyConflictMode.USE_BOTH:
+        if dep_mode not in {DependencyConflictMode.USE_BOTH, DependencyConflictMode.EXACT_POSITION}:
             for i, cur_dep in enumerate(cur_deps):
                 cur_dep = RecipeReaderDeps._sanitize_dep(cur_dep)
                 if cur_dep is None:
@@ -98,16 +106,22 @@ class RecipeParserDeps(RecipeParser, RecipeReaderDeps):
                     continue
 
                 # If we have a name match, act according to the conflict mode
-                match conflict_mode:
+                match dep_mode:
                     case DependencyConflictMode.IGNORE:
                         return False
                     case DependencyConflictMode.REPLACE:
                         patch_path = f"{base_path}/{i}"
                         break
 
-        return self.patch({"op": "add", "path": patch_path, "value": dependency_data_get_original_str(dep.data)})
+        # Patch to add the dependency and apply any selectors.
+        patch_success = self.patch(
+            {"op": "add", "path": patch_path, "value": dependency_data_get_original_str(dep.data)}
+        )
+        if patch_success and dep.selector is not None:
+            self.add_selector(patch_path, dep.selector, mode=sel_mode)
+        return patch_success
 
-    def rm_dependency(self, dep: Dependency) -> bool:
+    def remove_dependency(self, dep: Dependency) -> bool:
         """
         Convenience function that removes a dependency from a recipe file. No exceptions are thrown if the dependency
         does not exist.

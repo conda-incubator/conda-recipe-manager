@@ -37,12 +37,15 @@ class DependencyConflictMode(Enum):
     Mode of operation to use when handling duplicate dependencies (identified by name).
     """
 
-    # Replace the existing dependency with the incoming dependency.
+    # Replace the existing dependency with the incoming dependency. Append to the end if there is no duplicate.
     REPLACE = auto()
-    # Ignore the incoming dependency.
+    # Ignore the incoming dependency if there is a duplicate and do not modify any existing selector. Otherwise, append
+    # to the end of the list.
     IGNORE = auto()
-    # Include both dependencies.
+    # Include both dependencies, always appending to the end of the list.
     USE_BOTH = auto()
+    # Write over what exists at the index provided, regardless of duplicates.
+    EXACT_POSITION = auto()
 
 
 def dependency_section_to_str(section: DependencySection, schema: SchemaVersion) -> str:

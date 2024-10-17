@@ -1,5 +1,5 @@
 """
-:Description: Tests for the advanced dependency tools for the Recipe Parser.
+:Description: Tests for the advanced dependency tools for the `RecipeReader`.
 """
 
 from __future__ import annotations
