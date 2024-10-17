@@ -11,8 +11,8 @@ from typing import Final, Type, TypeVar, cast
 
 from conda_recipe_manager.grapher.recipe_graph import RecipeGraph
 from conda_recipe_manager.parser.cbc_parser import CbcParser
-from conda_recipe_manager.parser.recipe_parser_deps import RecipeReaderDeps
 from conda_recipe_manager.parser.recipe_reader import RecipeReader
+from conda_recipe_manager.parser.recipe_reader_deps import RecipeReaderDeps
 from conda_recipe_manager.types import JsonType
 
 # Private string, calculated once, containing the path to the test files.

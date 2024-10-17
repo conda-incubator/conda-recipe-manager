@@ -8,7 +8,7 @@ import pytest
 from conda.models.match_spec import MatchSpec
 
 from conda_recipe_manager.parser.dependency import Dependency, DependencyMap, DependencySection, DependencyVariable
-from conda_recipe_manager.parser.recipe_parser_deps import RecipeReaderDeps
+from conda_recipe_manager.parser.recipe_reader_deps import RecipeReaderDeps
 from conda_recipe_manager.parser.selector_parser import SchemaVersion, SelectorParser
 from tests.file_loading import load_recipe
 

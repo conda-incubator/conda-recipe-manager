@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Final, Optional
 
 from conda_recipe_manager.grapher.recipe_graph import RecipeGraph
-from conda_recipe_manager.parser.recipe_parser_deps import RecipeReaderDeps
+from conda_recipe_manager.parser.recipe_reader_deps import RecipeReaderDeps
 from conda_recipe_manager.parser.types import V0_FORMAT_RECIPE_FILE_NAME, V1_FORMAT_RECIPE_FILE_NAME
 
 
