@@ -11,7 +11,7 @@ import pytest
 
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
 from conda_recipe_manager.parser.recipe_parser_convert import RecipeParserConvert
-from conda_recipe_manager.parser.recipe_parser_deps import RecipeParserDeps
+from conda_recipe_manager.parser.recipe_parser_deps import RecipeReaderDeps
 from conda_recipe_manager.parser.selector_parser import SelectorParser
 from conda_recipe_manager.parser.types import SchemaVersion
 from conda_recipe_manager.types import SentinelType
@@ -36,10 +36,10 @@ def test_pickle_integration_sentinel_type() -> None:
         ("cctools-ld64.yaml", RecipeParserConvert),
         ("v1_format/v1_types-toml.yaml", RecipeParserConvert),
         ("v1_format/v1_cctools-ld64.yaml", RecipeParserConvert),
-        ("types-toml.yaml", RecipeParserDeps),
-        ("cctools-ld64.yaml", RecipeParserDeps),
-        ("v1_format/v1_types-toml.yaml", RecipeParserDeps),
-        ("v1_format/v1_cctools-ld64.yaml", RecipeParserDeps),
+        ("types-toml.yaml", RecipeReaderDeps),
+        ("cctools-ld64.yaml", RecipeReaderDeps),
+        ("v1_format/v1_types-toml.yaml", RecipeReaderDeps),
+        ("v1_format/v1_cctools-ld64.yaml", RecipeReaderDeps),
     ],
 )
 def test_pickle_integration_recipe_parsers(file: str, constructor: Callable[[str], RecipeParser]) -> None:

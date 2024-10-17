@@ -12,7 +12,7 @@ from networkx.drawing.nx_agraph import graphviz_layout  # type: ignore[import-un
 
 from conda_recipe_manager.grapher.types import GraphDirection, GraphType, PackageStats
 from conda_recipe_manager.parser.dependency import DependencySection
-from conda_recipe_manager.parser.recipe_parser_deps import RecipeParserDeps
+from conda_recipe_manager.parser.recipe_parser_deps import RecipeReaderDeps
 
 # TODO: Remove all the typing ignore lines tied to `networkx`
 #   See this mypy issue for more details: https://github.com/python/mypy/issues/17699
@@ -52,7 +52,7 @@ class RecipeGraph:
 
     def __init__(
         self,
-        recipe_cache: dict[str, RecipeParserDeps],
+        recipe_cache: dict[str, RecipeReaderDeps],
         recipes_failed_to_parse: set[str],
     ):
         """

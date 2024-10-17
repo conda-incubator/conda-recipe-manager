@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Final, Optional
 
 from conda_recipe_manager.grapher.recipe_graph import RecipeGraph
-from conda_recipe_manager.parser.recipe_parser_deps import RecipeParserDeps
+from conda_recipe_manager.parser.recipe_parser_deps import RecipeReaderDeps
 from conda_recipe_manager.parser.types import V0_FORMAT_RECIPE_FILE_NAME, V1_FORMAT_RECIPE_FILE_NAME
 
 
@@ -19,7 +19,7 @@ class RecipeGraphFromDisk(RecipeGraph):
     """
 
     @staticmethod
-    def _read_and_parse_recipe(file: Path) -> tuple[str, Optional[RecipeParserDeps]]:
+    def _read_and_parse_recipe(file: Path) -> tuple[str, Optional[RecipeReaderDeps]]:
         """
         Callback that parses a single recipe file.
 
@@ -28,7 +28,7 @@ class RecipeGraphFromDisk(RecipeGraph):
             a debug string and None.
         """
         try:
-            parser = RecipeParserDeps(file.read_text())
+            parser = RecipeReaderDeps(file.read_text())
             return (parser.calc_sha256(), parser)
         except Exception:  # pylint: disable=broad-exception-caught
             return (file.as_posix(), None)
@@ -53,7 +53,7 @@ class RecipeGraphFromDisk(RecipeGraph):
             results = pool.map(RecipeGraphFromDisk._read_and_parse_recipe, files)
         # Process results
         failed_paths: set[str] = set()
-        recipe_cache: dict[str, RecipeParserDeps] = {}
+        recipe_cache: dict[str, RecipeReaderDeps] = {}
         for result in results:
             if result[1] is None:
                 failed_paths.add(result[0])

@@ -18,7 +18,7 @@ from conda_recipe_manager.parser.selector_parser import SelectorParser
 from conda_recipe_manager.parser.types import SchemaVersion
 
 
-class RecipeParserDeps(RecipeReader):
+class RecipeReaderDeps(RecipeReader):
     """
     Extension of the base RecipeReader class to enables advanced dependency management abilities. The base RecipeReader
     class is so large, that this has been broken-out for maintenance purposes.
@@ -133,6 +133,6 @@ class RecipeParserDeps(RecipeReader):
                     )
 
         # Apply top-level dependencies to multi-output recipe packages
-        RecipeParserDeps._add_top_level_dependencies(root_package, dep_map)
+        RecipeReaderDeps._add_top_level_dependencies(root_package, dep_map)
 
         return dep_map
