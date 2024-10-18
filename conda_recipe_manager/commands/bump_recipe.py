@@ -42,15 +42,18 @@ def bump_recipe(recipe_file_path: str, build_num: bool) -> None:
         print_err("An error occurred while parsing the recipe file contents.")
         sys.exit(ExitCode.PARSE_EXCEPTION)  # untested
 
-    print(recipe_file_path)
-
     if build_num:
-        build_number = recipe_parser.get_value("/build/number")
+        error_code = ExitCode.SUCCESS
+        try:
+            build_number = recipe_parser.get_value("/build/number")
+        except KeyError:
+            print_err("`/build/number` key could not be found in the recipe.")
+            sys.exit(ExitCode.ILLEGAL_OPERATION)
+
         if not isinstance(build_number, int):
             print_err("Build number is not an integer.")
             sys.exit(ExitCode.ILLEGAL_OPERATION)
         required_patch_blob = cast(JsonPatchType, {"op": "replace", "path": "/build/number", "value": build_number + 1})
         recipe_parser.patch(required_patch_blob)
         Path(recipe_file_path).write_text(recipe_parser.render(), encoding="utf-8")
-        print(recipe_parser.get_value("/build/number"))
         sys.exit(error_code)
