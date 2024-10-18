@@ -177,3 +177,25 @@ def test_does_selector_apply(selector: str, schema: SchemaVersion, query: Select
     """
     parser = SelectorParser(selector, schema)
     assert parser.does_selector_apply(query) == expected
+
+@pytest.mark.parametrize(
+    "selector,expected",
+    [
+        (SelectorParser("[osx]", SchemaVersion.V0), "[osx]"),
+        (SelectorParser("[ osx ]", SchemaVersion.V0), "[osx]"),
+        (SelectorParser("[not osx]", SchemaVersion.V0), "[not osx]"),
+        (SelectorParser("[unix or osx]", SchemaVersion.V0), "[unix or osx]"),
+        (SelectorParser("[ unix or osx ]", SchemaVersion.V0), "[unix or osx]"),
+        (SelectorParser("[osx and not unix]", SchemaVersion.V0), "[osx and not unix]"),
+        (SelectorParser("[osx or not unix]", SchemaVersion.V0), "[osx or not unix]"),
+        # TODO Add V1 support
+    ],
+)
+def test_selector_render(selector: SelectorParser, expected: str) -> None:
+    """
+    Tests selector rendering.
+
+    :param selector: Target selector
+    :param expected: Expected value to return
+    """
+    assert selector.render() == expected

@@ -234,8 +234,9 @@ class SelectorParser(IsModifiable):
         :returns: The rendered equivalent selector.
         """
         # TODO Add V1 support
+        # TODO will need to render from the tree if we add editing functionality.
         match self._schema_version:
             case SchemaVersion.V0:
-                return f"[{self._content}]"
+                return f"[{self._content.strip()}]"
             case SchemaVersion.V1:
                 return self._content
