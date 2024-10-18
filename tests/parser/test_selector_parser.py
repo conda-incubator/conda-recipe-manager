@@ -178,6 +178,7 @@ def test_does_selector_apply(selector: str, schema: SchemaVersion, query: Select
     parser = SelectorParser(selector, schema)
     assert parser.does_selector_apply(query) == expected
 
+
 @pytest.mark.parametrize(
     "selector,expected",
     [

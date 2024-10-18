@@ -9,6 +9,8 @@ import pytest
 from conda_recipe_manager.parser.enums import SelectorConflictMode
 from conda_recipe_manager.parser.exceptions import JsonPatchValidationException
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
+from conda_recipe_manager.parser.selector_parser import SelectorParser
+from conda_recipe_manager.parser.types import SchemaVersion
 from tests.constants import SIMPLE_DESCRIPTION
 from tests.file_loading import load_file, load_recipe
 
@@ -70,7 +72,8 @@ def test_del_variable(file: str) -> None:
 
 ## Selectors ##
 
-
+# TODO parameterize
+# TODO Add V1 support
 def test_add_selector() -> None:
     """
     Tests adding a selector to a recipe
@@ -86,7 +89,8 @@ def test_add_selector() -> None:
     # Add selectors to lines without existing selectors
     parser.add_selector("/requirements/empty_field3", "[unix]")
     parser.add_selector("/multi_level/list_1/0", "[unix]")
-    parser.add_selector("/build/number", "[win]")
+    # SelectorParser equivalent
+    parser.add_selector("/build/number", SelectorParser("[win]", SchemaVersion.V0))
     parser.add_selector("/multi_level/list_2/1", "[win]")
     assert parser.get_selector_paths("[unix]") == [
         "/package/name",
@@ -109,7 +113,8 @@ def test_add_selector() -> None:
     ]
     parser.add_selector("/requirements/host/1", "[win]", SelectorConflictMode.AND)
     assert parser.get_selector_paths("[unix and win]") == ["/requirements/host/1", "/requirements/empty_field2"]
-    parser.add_selector("/build/skip", "[win]", SelectorConflictMode.OR)
+    # SelectorParser equivalent
+    parser.add_selector("/build/skip", SelectorParser("[win]", SchemaVersion.V0), SelectorConflictMode.OR)
     assert parser.get_selector_paths("[py<37 or win]") == ["/build/skip"]
     parser.add_selector("/requirements/run/0", "[win]", SelectorConflictMode.AND)
     assert parser.get_selector_paths("[win]") == [
