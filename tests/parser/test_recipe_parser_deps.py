@@ -19,6 +19,38 @@ from tests.file_loading import load_recipe
 @pytest.mark.parametrize(
     "file,dep,dep_mode,sel_mode,expected_return,dep_path,expected_deps,sel_path,expected_sel",
     [
+        # Invalid path provided, too long
+        (
+            "types-toml.yaml",
+            Dependency(
+                "types-toml",
+                "/requirements/run/0/more/stuff",
+                DependencySection.RUN,
+                MatchSpec("openssl >= 1.4.2"),
+                None,
+            ),
+            DependencyConflictMode.REPLACE,
+            SelectorConflictMode.REPLACE,
+            False,
+            "/requirements/run",
+            ["python"],
+            "/requirements/run/1",
+            None,
+        ),
+        # Invalid path provided, invalid dependency section
+        (
+            "types-toml.yaml",
+            Dependency(
+                "types-toml", "/requirements/fake_section/0", DependencySection.RUN, MatchSpec("openssl >= 1.4.2"), None
+            ),
+            DependencyConflictMode.REPLACE,
+            SelectorConflictMode.REPLACE,
+            False,
+            "/requirements/run",
+            ["python"],
+            "/requirements/run/1",
+            None,
+        ),
         # Single-output, default behavior, add a new dependency, no selector
         (
             "types-toml.yaml",
