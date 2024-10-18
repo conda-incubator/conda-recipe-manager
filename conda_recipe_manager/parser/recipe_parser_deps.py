@@ -88,6 +88,7 @@ class RecipeParserDeps(RecipeParser, RecipeReaderDeps):
 
         # TODO handle path does not exist -> add path
         base_path: Final[str] = dep.path.rsplit("/", 1)[0]
+        patch_op = "replace" if dep_mode == DependencyConflictMode.EXACT_POSITION else "add"
         patch_path = dep.path if dep_mode == DependencyConflictMode.EXACT_POSITION else f"{base_path}/-"
         # TODO: Add a "get dependencies at path" function to `RecipeReaderDeps`
         cur_deps: Final[list[Optional[str]]] = cast(
@@ -111,11 +112,12 @@ class RecipeParserDeps(RecipeParser, RecipeReaderDeps):
                         return False
                     case DependencyConflictMode.REPLACE:
                         patch_path = f"{base_path}/{i}"
+                        patch_op = "replace"
                         break
 
         # Patch to add the dependency and apply any selectors.
         patch_success = self.patch(
-            {"op": "add", "path": patch_path, "value": dependency_data_get_original_str(dep.data)}
+            {"op": patch_op, "path": patch_path, "value": dependency_data_get_original_str(dep.data)}
         )
         if patch_success and dep.selector is not None:
             sel_path = patch_path

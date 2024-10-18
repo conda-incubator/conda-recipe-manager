@@ -81,6 +81,78 @@ from tests.file_loading import load_recipe
             "/requirements/run/1",
             "[osx and unix]",
         ),
+        # Single-output, duplicate dependency, replace mode, with a selector
+        (
+            "types-toml.yaml",
+            Dependency(
+                "types-toml",
+                "/requirements/run/0",
+                DependencySection.RUN,
+                MatchSpec("python >= 3.11"),
+                SelectorParser("[osx and unix]", SchemaVersion.V0),
+            ),
+            DependencyConflictMode.REPLACE,
+            SelectorConflictMode.REPLACE,
+            True,
+            "/requirements/run",
+            ["python >= 3.11"],
+            "/requirements/run/0",
+            "[osx and unix]",
+        ),
+        # Single-output, duplicate dependency, ignore mode, with a selector
+        (
+            "types-toml.yaml",
+            Dependency(
+                "types-toml",
+                "/requirements/run/0",
+                DependencySection.RUN,
+                MatchSpec("python >= 3.11"),
+                SelectorParser("[osx and unix]", SchemaVersion.V0),
+            ),
+            DependencyConflictMode.IGNORE,
+            SelectorConflictMode.REPLACE,
+            False,
+            "/requirements/run",
+            ["python"],
+            "/requirements/run/1",
+            None,
+        ),
+        # Single-output, duplicate dependency, use-both mode, with a selector
+        (
+            "types-toml.yaml",
+            Dependency(
+                "types-toml",
+                "/requirements/run/0",
+                DependencySection.RUN,
+                MatchSpec("python >= 3.11"),
+                SelectorParser("[osx and unix]", SchemaVersion.V0),
+            ),
+            DependencyConflictMode.USE_BOTH,
+            SelectorConflictMode.REPLACE,
+            True,
+            "/requirements/run",
+            ["python", "python >= 3.11"],
+            "/requirements/run/1",
+            "[osx and unix]",
+        ),
+        # Single-output, duplicate dependency, exact position mode, with a selector
+        (
+            "types-toml.yaml",
+            Dependency(
+                "types-toml",
+                "/requirements/run/0",
+                DependencySection.RUN,
+                MatchSpec("python >= 3.11"),
+                SelectorParser("[osx and unix]", SchemaVersion.V0),
+            ),
+            DependencyConflictMode.EXACT_POSITION,
+            SelectorConflictMode.REPLACE,
+            True,
+            "/requirements/run",
+            ["python >= 3.11"],
+            "/requirements/run/0",
+            "[osx and unix]",
+        ),
         # Multi-output, default behavior, add a new dependency, no selector
         (
             "cctools-ld64.yaml",
