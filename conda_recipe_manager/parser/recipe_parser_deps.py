@@ -16,6 +16,7 @@ from conda_recipe_manager.parser.dependency import (
 from conda_recipe_manager.parser.enums import SelectorConflictMode
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
 from conda_recipe_manager.parser.recipe_reader_deps import RecipeReaderDeps
+from conda_recipe_manager.types import JsonType
 
 # Dependency validation constants
 _SINGLE_OUTPUT_LEN: Final[int] = 4
@@ -63,7 +64,44 @@ class RecipeParserDeps(RecipeParser, RecipeReaderDeps):
             and path[5].isdigit()
         )
 
-    def _patch_add_dep(self, dep: Dependency, patch_op: str, patch_path: str, sel_mode: SelectorConflictMode) -> bool:
+    @staticmethod
+    def _init_patch_path(
+        dep: Dependency, dep_mode: DependencyConflictMode, base_path: str, is_new_section: bool
+    ) -> str:
+        """
+        Helper function for `add_dependency` that determines what path should be used for the `patch()` call.
+
+        :param dep: Dependency to add.
+        :param dep_mode: Indicates how duplicate dependencies should be handled.
+        :param base_path: Base path the dependency is using (i.e. path that does not end in an index)
+        :param is_new_section: Indicates that dependency being added is in a new section, changing the patch op.
+        :returns: The correct path to use when adding/replacing a dependency.
+        """
+        if dep_mode == DependencyConflictMode.EXACT_POSITION:
+            return dep.path
+        if is_new_section:
+            return base_path
+        return f"{base_path}/-"
+
+    def _calc_is_new_section(self, base_path: str) -> Optional[bool]:
+        """
+        Determines if a new dependency section (`run`, `host`, etc) need to be added.
+
+        :param base_path: Base path the dependency is using (i.e. path that does not end in an index)
+        :returns: True if a new dependency section is needed, False if no new section is needed, and None if the
+            path given is missing too many components.
+        """
+        if not self.contains_value(base_path):
+            # We will not handle construction of more than a key that holds a list of dependencies.
+            if not self.contains_value(base_path.rsplit("/", 1)[0]):
+                return None
+            return True
+
+        return False
+
+    def _patch_add_dep(
+        self, dep: Dependency, patch_op: str, patch_path: str, sel_mode: SelectorConflictMode, is_new_section: bool
+    ) -> bool:
         """
         Helper function that executes a patch operation to add a dependency and apply a selector (if applicable). In
         some cases, the previous selector may have to be preserved.
@@ -72,6 +110,7 @@ class RecipeParserDeps(RecipeParser, RecipeReaderDeps):
         :param patch_op: Patch operation to perform
         :param patch_path: Target path to apply the patch to
         :param sel_mode: Mode of operation for handling Selector conflicts.
+        :param is_new_section: Indicates that dependency being added is in a new section, changing the patch op.
         :returns: True if the patch was successful. False otherwise.
         """
         preserve_sel: Optional[str] = None
@@ -82,9 +121,12 @@ class RecipeParserDeps(RecipeParser, RecipeReaderDeps):
             except KeyError:
                 pass
 
-        patch_success = self.patch(
-            {"op": patch_op, "path": patch_path, "value": dependency_data_get_original_str(dep.data)}
-        )
+        value: JsonType = dependency_data_get_original_str(dep.data)
+        # This allows us to create new lists for dependency sections that do not currently exist.
+        if is_new_section:
+            value = [value]
+
+        patch_success = self.patch({"op": patch_op, "path": patch_path, "value": value})
 
         if preserve_sel is not None:
             self.add_selector(patch_path, preserve_sel)
@@ -102,6 +144,9 @@ class RecipeParserDeps(RecipeParser, RecipeReaderDeps):
         section and output is being used, but the index position is not guaranteed, unless `EXACT_POSITION` mode is
         used.
 
+        This function will add new dependency sections (`run`, `host`, etc) but it will not add any additional missing
+        infrastructure (like `requirements` or an `outputs` section).
+
         :param dep: Dependency to add.
         :param dep_mode: (Optional) Indicates how duplicate dependencies should be handled. Defaults to replacing the
             existing dependency. Duplicates match by name only.
@@ -114,10 +159,15 @@ class RecipeParserDeps(RecipeParser, RecipeReaderDeps):
         if not RecipeParserDeps._is_valid_dependency_path(dep.path):
             return False
 
-        # TODO handle path does not exist -> add path
         base_path: Final[str] = dep.path.rsplit("/", 1)[0]
+
+        is_new_section = self._calc_is_new_section(base_path)
+        if is_new_section is None:
+            return False
+
         patch_op = "replace" if dep_mode == DependencyConflictMode.EXACT_POSITION else "add"
-        patch_path = dep.path if dep_mode == DependencyConflictMode.EXACT_POSITION else f"{base_path}/-"
+        patch_path = RecipeParserDeps._init_patch_path(dep, dep_mode, base_path, is_new_section)
+
         # TODO: Add a "get dependencies at path" function to `RecipeReaderDeps`
         cur_deps: Final[list[Optional[str]]] = cast(
             list[Optional[str]], self.get_value(base_path, sub_vars=True, default=[])
@@ -143,7 +193,7 @@ class RecipeParserDeps(RecipeParser, RecipeReaderDeps):
                         patch_op = "replace"
                         break
 
-        patch_success: Final[bool] = self._patch_add_dep(dep, patch_op, patch_path, sel_mode)
+        patch_success: Final[bool] = self._patch_add_dep(dep, patch_op, patch_path, sel_mode, is_new_section)
 
         if patch_success and dep.selector is not None:
             sel_path = patch_path

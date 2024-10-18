@@ -286,6 +286,24 @@ from tests.file_loading import load_recipe
             "[unix]",
         ),
         # TODO add missing paths test
+        # Single-output, add to a non-existent section
+        (
+            "types-toml.yaml",
+            Dependency(
+                "types-toml",
+                "/requirements/run_constrained/0",
+                DependencySection.RUN,
+                MatchSpec("openssl >= 1.4.2"),
+                SelectorParser("[osx]", SchemaVersion.V0),
+            ),
+            DependencyConflictMode.REPLACE,
+            SelectorConflictMode.REPLACE,
+            True,
+            "/requirements/run_constrained",
+            ["openssl >= 1.4.2"],
+            "/requirements/run_constrained/0",
+            "[osx]",
+        ),
         # TODO Add V1 support
     ],
 )
