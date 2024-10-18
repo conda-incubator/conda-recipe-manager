@@ -41,13 +41,13 @@ class RecipeParserDeps(RecipeParser, RecipeReaderDeps):
         # TODO add V1 support
         path = dep_path.split("/")
         len_path = len(path)
-        if len_path != _SINGLE_OUTPUT_LEN or len_path != _MULTI_OUTPUT_LEN:
+        if len_path not in {_SINGLE_OUTPUT_LEN, _MULTI_OUTPUT_LEN}:
             return False
 
         # Single-output
         if len_path == _SINGLE_OUTPUT_LEN:
             return (
-                bool(path[0])
+                not bool(path[0])
                 and path[1] == "requirements"
                 and str_to_dependency_section(path[2]) is not None
                 and path[3].isdigit()
@@ -55,7 +55,7 @@ class RecipeParserDeps(RecipeParser, RecipeReaderDeps):
 
         # Multi-output
         return (
-            bool(path[0])
+            not bool(path[0])
             and path[1] == "outputs"
             and path[2].isdigit()
             and path[3] == "requirements"
@@ -118,7 +118,13 @@ class RecipeParserDeps(RecipeParser, RecipeReaderDeps):
             {"op": "add", "path": patch_path, "value": dependency_data_get_original_str(dep.data)}
         )
         if patch_success and dep.selector is not None:
-            self.add_selector(patch_path, dep.selector, mode=sel_mode)
+            sel_path = patch_path
+            # `add_selector()`, by nature of how selectors work, does not support "append" mode. If an append operation
+            # occurred, we must calculate the position of the last array element. We only add selectors on a successful
+            # patch, so we know we can make assume a dependency list exists.
+            if sel_path.endswith("/-"):
+                sel_path = sel_path[0:-1] + str(len(cast(list[str], self.get_value(base_path))) - 1)
+            self.add_selector(sel_path, dep.selector, mode=sel_mode)
         return patch_success
 
     def remove_dependency(self, dep: Dependency) -> bool:
