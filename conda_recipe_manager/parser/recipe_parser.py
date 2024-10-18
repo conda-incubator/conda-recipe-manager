@@ -266,7 +266,8 @@ class RecipeParser(RecipeReader):
         # Attempt to run a second time, if no node is found. As per the RFC, the containing object/list must exist. That
         # allows us to create only 1 level in the path.
         path_to_create = ""
-        if node is None:
+        # NOTE: Appending to a non-existent list is effectively adding a second level and disallowed by the RFC.
+        if node is None and not append_to_list:
             path_to_create = path_stack_copy.pop(0)
             node, virt_idx, phys_idx = traverse_with_index(self._root, path_stack_copy)
 
