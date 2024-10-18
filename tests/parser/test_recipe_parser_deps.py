@@ -213,6 +213,78 @@ from tests.file_loading import load_recipe
             "/outputs/1/requirements/host/2",
             "[osx and unix]",
         ),
+        # Multi-output, duplicate dependency, replace mode, with a selector mode
+        (
+            "cctools-ld64.yaml",
+            Dependency(
+                "ld64",
+                "/outputs/1/requirements/host/0",
+                DependencySection.HOST,
+                MatchSpec("libcxx >= 6.9.1"),
+                SelectorParser("[unix]", SchemaVersion.V0),
+            ),
+            DependencyConflictMode.REPLACE,
+            SelectorConflictMode.AND,
+            True,
+            "/outputs/1/requirements/host",
+            ["llvm-lto-tapi", "libcxx >= 6.9.1"],
+            "/outputs/1/requirements/host/1",
+            "[osx and unix]",
+        ),
+        # Multi-output, duplicate dependency, ignore mode, with a selector mode
+        (
+            "cctools-ld64.yaml",
+            Dependency(
+                "ld64",
+                "/outputs/1/requirements/host/0",
+                DependencySection.HOST,
+                MatchSpec("libcxx >= 6.9.1"),
+                SelectorParser("[unix]", SchemaVersion.V0),
+            ),
+            DependencyConflictMode.IGNORE,
+            SelectorConflictMode.OR,
+            False,
+            "/outputs/1/requirements/host",
+            ["llvm-lto-tapi", "libcxx"],
+            "/outputs/1/requirements/host/1",
+            "[osx]",
+        ),
+        # Multi-output, duplicate dependency, use-both mode, with a selector mode
+        (
+            "cctools-ld64.yaml",
+            Dependency(
+                "ld64",
+                "/outputs/1/requirements/host/0",
+                DependencySection.HOST,
+                MatchSpec("libcxx >= 6.9.1"),
+                SelectorParser("[unix]", SchemaVersion.V0),
+            ),
+            DependencyConflictMode.USE_BOTH,
+            SelectorConflictMode.AND,
+            True,
+            "/outputs/1/requirements/host",
+            ["llvm-lto-tapi", "libcxx", "libcxx >= 6.9.1"],
+            "/outputs/1/requirements/host/2",
+            "[unix]",
+        ),
+        # Multi-output, duplicate dependency, exact position mode, with a selector mode
+        (
+            "cctools-ld64.yaml",
+            Dependency(
+                "ld64",
+                "/outputs/1/requirements/host/0",
+                DependencySection.HOST,
+                MatchSpec("libcxx >= 6.9.1"),
+                SelectorParser("[unix]", SchemaVersion.V0),
+            ),
+            DependencyConflictMode.EXACT_POSITION,
+            SelectorConflictMode.OR,
+            True,
+            "/outputs/1/requirements/host",
+            ["libcxx >= 6.9.1", "libcxx"],
+            "/outputs/1/requirements/host/0",
+            "[unix]",
+        ),
         # TODO add missing paths test
         # TODO Add V1 support
     ],

@@ -63,6 +63,34 @@ class RecipeParserDeps(RecipeParser, RecipeReaderDeps):
             and path[5].isdigit()
         )
 
+    def _patch_add_dep(self, dep: Dependency, patch_op: str, patch_path: str, sel_mode: SelectorConflictMode) -> bool:
+        """
+        Helper function that executes a patch operation to add a dependency and apply a selector (if applicable). In
+        some cases, the previous selector may have to be preserved.
+
+        :param dep: Dependency to add
+        :param patch_op: Patch operation to perform
+        :param patch_path: Target path to apply the patch to
+        :param sel_mode: Mode of operation for handling Selector conflicts.
+        :returns: True if the patch was successful. False otherwise.
+        """
+        preserve_sel: Optional[str] = None
+
+        if patch_op == "replace" and sel_mode != SelectorConflictMode.REPLACE:
+            try:
+                preserve_sel = self.get_selector_at_path(patch_path)
+            except KeyError:
+                pass
+
+        patch_success = self.patch(
+            {"op": patch_op, "path": patch_path, "value": dependency_data_get_original_str(dep.data)}
+        )
+
+        if preserve_sel is not None:
+            self.add_selector(patch_path, preserve_sel)
+
+        return patch_success
+
     def add_dependency(
         self,
         dep: Dependency,
@@ -115,10 +143,8 @@ class RecipeParserDeps(RecipeParser, RecipeReaderDeps):
                         patch_op = "replace"
                         break
 
-        # Patch to add the dependency and apply any selectors.
-        patch_success = self.patch(
-            {"op": patch_op, "path": patch_path, "value": dependency_data_get_original_str(dep.data)}
-        )
+        patch_success: Final[bool] = self._patch_add_dep(dep, patch_op, patch_path, sel_mode)
+
         if patch_success and dep.selector is not None:
             sel_path = patch_path
             # `add_selector()`, by nature of how selectors work, does not support "append" mode. If an append operation
