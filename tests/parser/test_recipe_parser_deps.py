@@ -19,7 +19,7 @@ from tests.file_loading import load_recipe
 @pytest.mark.parametrize(
     "file,dep,dep_mode,sel_mode,expected_return,dep_path,expected_deps,sel_path,expected_sel",
     [
-        # Default behavior, add a new dependency, no selector
+        # Single-output, default behavior, add a new dependency, no selector
         (
             "types-toml.yaml",
             Dependency("types-toml", "/requirements/run/0", DependencySection.RUN, MatchSpec("openssl >= 1.4.2"), None),
@@ -31,7 +31,7 @@ from tests.file_loading import load_recipe
             "/requirements/run/1",
             None,
         ),
-        # Default behavior, add a new dependency, with a selector
+        # Single-output, default behavior, add a new dependency, with a selector
         (
             "types-toml.yaml",
             Dependency(
@@ -47,6 +47,38 @@ from tests.file_loading import load_recipe
             "/requirements/run",
             ["python", "openssl >= 1.4.2"],
             "/requirements/run/1",
+            "[osx and unix]",
+        ),
+        # Multi-output, default behavior, add a new dependency, no selector
+        (
+            "cctools-ld64.yaml",
+            Dependency(
+                "ld64", "/outputs/1/requirements/host/1", DependencySection.HOST, MatchSpec("openssl >= 1.4.2"), None
+            ),
+            DependencyConflictMode.REPLACE,
+            SelectorConflictMode.REPLACE,
+            True,
+            "/outputs/1/requirements/host",
+            ["llvm-lto-tapi", "libcxx", "openssl >= 1.4.2"],
+            "/outputs/1/requirements/host/2",
+            None,
+        ),
+        # Multi-output, default behavior, add a new dependency, with a selector
+        (
+            "cctools-ld64.yaml",
+            Dependency(
+                "ld64",
+                "/outputs/1/requirements/host/1",
+                DependencySection.HOST,
+                MatchSpec("openssl >= 1.4.2"),
+                SelectorParser("[osx and unix]", SchemaVersion.V0),
+            ),
+            DependencyConflictMode.REPLACE,
+            SelectorConflictMode.REPLACE,
+            True,
+            "/outputs/1/requirements/host",
+            ["llvm-lto-tapi", "libcxx", "openssl >= 1.4.2"],
+            "/outputs/1/requirements/host/2",
             "[osx and unix]",
         ),
         # TODO multi-output.
