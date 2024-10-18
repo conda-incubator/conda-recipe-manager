@@ -24,7 +24,7 @@ from tests.file_loading import load_recipe
             "types-toml.yaml",
             Dependency(
                 "types-toml",
-                "/requirements/run/0/more/stuff",
+                "/requirements/run/0/way/more/stuff",
                 DependencySection.RUN,
                 MatchSpec("openssl >= 1.4.2"),
                 None,
@@ -35,6 +35,34 @@ from tests.file_loading import load_recipe
             "/requirements/run",
             ["python"],
             "/requirements/run/1",
+            None,
+        ),
+        # Invalid path provided, does not end in a digit
+        (
+            "types-toml.yaml",
+            Dependency(
+                "types-toml", "/requirements/run/foo", DependencySection.RUN, MatchSpec("openssl >= 1.4.2"), None
+            ),
+            DependencyConflictMode.REPLACE,
+            SelectorConflictMode.REPLACE,
+            False,
+            "/requirements/run",
+            ["python"],
+            "/requirements/run/1",
+            None,
+        ),
+        # Invalid path provided, illegal output section
+        (
+            "cctools-ld64.yaml",
+            Dependency(
+                "ld64", "/outputs/foo/requirements/run/0", DependencySection.RUN, MatchSpec("openssl >= 1.4.2"), None
+            ),
+            DependencyConflictMode.REPLACE,
+            SelectorConflictMode.REPLACE,
+            False,
+            "/outputs/1/requirements/host",
+            ["llvm-lto-tapi", "libcxx"],
+            "/outputs/1/requirements/host/2",
             None,
         ),
         # Invalid path provided, invalid dependency section
