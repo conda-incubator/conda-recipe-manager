@@ -81,9 +81,8 @@ from tests.file_loading import load_recipe
             "/outputs/1/requirements/host/2",
             "[osx and unix]",
         ),
-        # TODO multi-output.
-        # TODO add missing paths
-        # TODO add v1 support
+        # TODO add missing paths test
+        # TODO Add V1 support
     ],
 )
 def test_add_dependency(
@@ -101,8 +100,14 @@ def test_add_dependency(
     Tests the ability to add a `Dependency` object to a recipe.
 
     :param file: File to test against
+    :param dep: Dependency to add
+    :param dep_mode: Target Dependency conflict mode
+    :param sel_mode: Target Selector conflict mode
     :param expected_return: Expected return value
-    :param expected_file: Text file containing expected rendered recipe
+    :param dep_path: Dependency section path to use in post-op validation
+    :param expected_deps: List of dependencies that should be found in the altered dependency path
+    :param sel_path: Selector path to use in post-op validation
+    :param expected_deps: Expected Selector value on the new dependency. If no selector was added, set this to `NONE`.
     """
     parser = load_recipe(file, RecipeParserDeps)
     assert parser.add_dependency(dep, dep_mode=dep_mode, sel_mode=sel_mode) == expected_return
@@ -114,3 +119,65 @@ def test_add_dependency(
             parser.get_selector_at_path(sel_path)
     else:
         assert parser.get_selector_at_path(sel_path) == expected_sel
+
+
+@pytest.mark.parametrize(
+    "file,dep,expected_return,dep_path,expected_deps",
+    [
+        # Single-output, dependency exists
+        (
+            "types-toml.yaml",
+            Dependency("types-toml", "/requirements/run/0", DependencySection.RUN, MatchSpec("python"), None),
+            True,
+            "/requirements/run",
+            # TODO Fix the return value of an empty reference in `get_value()`. Seems related to Issue #20
+            "run",
+        ),
+        # Single-output, dependency does not exist
+        (
+            "types-toml.yaml",
+            Dependency("types-toml", "/requirements/run/1", DependencySection.RUN, MatchSpec("openssl >= 1.4.2"), None),
+            False,
+            "/requirements/run",
+            ["python"],
+        ),
+        # Multi-output, dependency exists
+        (
+            "cctools-ld64.yaml",
+            Dependency("ld64", "/outputs/1/requirements/host/1", DependencySection.HOST, MatchSpec("libcxx"), None),
+            True,
+            "/outputs/1/requirements/host",
+            ["llvm-lto-tapi"],
+        ),
+        # Multi-output, dependency does not exist
+        (
+            "cctools-ld64.yaml",
+            Dependency(
+                "ld64", "/outputs/1/requirements/host/2", DependencySection.HOST, MatchSpec("openssl >= 1.4.2"), None
+            ),
+            False,
+            "/outputs/1/requirements/host",
+            ["llvm-lto-tapi", "libcxx"],
+        ),
+        # TODO Add V1 support
+    ],
+)
+def test_remove_dependency(
+    file: str,
+    dep: Dependency,
+    expected_return: bool,
+    dep_path: str,
+    expected_deps: list[str] | str,
+) -> None:
+    """
+    Tests the ability to remove a `Dependency` object to a recipe.
+
+    :param file: File to test against
+    :param dep: Dependency to remove
+    :param expected_return: Expected return value
+    :param dep_path: Dependency section path to use in post-op validation
+    :param expected_deps: List of dependencies that should be found in the altered dependency path
+    """
+    parser = load_recipe(file, RecipeParserDeps)
+    assert parser.remove_dependency(dep) == expected_return
+    assert parser.get_value(dep_path) == expected_deps
