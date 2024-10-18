@@ -5,7 +5,7 @@
 from __future__ import annotations
 
 from enum import Enum, auto
-from typing import NamedTuple, Optional
+from typing import NamedTuple, Optional, cast
 
 from conda.models.match_spec import MatchSpec
 
@@ -30,6 +30,22 @@ class DependencySection(Enum):
     #   - There are major changes to the testing section in V1.
     # TODO TEST not covered in get_all_dependencies()
     TESTS = auto()
+
+
+class DependencyConflictMode(Enum):
+    """
+    Mode of operation to use when handling duplicate dependencies (identified by name).
+    """
+
+    # Replace the existing dependency with the incoming dependency. Append to the end if there is no duplicate.
+    REPLACE = auto()
+    # Ignore the incoming dependency if there is a duplicate and do not modify any existing selector. Otherwise, append
+    # to the end of the list.
+    IGNORE = auto()
+    # Include both dependencies, always appending to the end of the list.
+    USE_BOTH = auto()
+    # Write over what exists at the index provided, regardless of duplicates.
+    EXACT_POSITION = auto()
 
 
 def dependency_section_to_str(section: DependencySection, schema: SchemaVersion) -> str:
@@ -131,14 +147,28 @@ DependencyData = MatchSpec | DependencyVariable
 
 def dependency_data_from_string(s: str) -> DependencyData:
     """
-    Constructs a DataDependency object from a dependency string in a recipe file.
+    Constructs a `DependencyData` object from a dependency string in a recipe file.
 
     :param s: String to process.
-    :returns: A DataDependency instance.
+    :returns: A `DependencyData` instance.
     """
     if Regex.JINJA_V1_SUB.search(s):
         return DependencyVariable(s)
     return MatchSpec(s)
+
+
+def dependency_data_get_original_str(data: DependencyData) -> str:
+    """
+    Given a `DependencyData` instance, derive the original string found in the recipe.
+
+    :param data: Target `DependencyData`
+    :return s: The original (raw) string found in the recipe file.
+    """
+    match data:
+        case MatchSpec():
+            return cast(str, data.original_spec_str)
+        case DependencyVariable():
+            return data.name
 
 
 class Dependency(NamedTuple):
