@@ -11,7 +11,7 @@ conf.py file
 """
 project = "Conda Recipe Manager"
 author = "various"
-release = "0.3.1"
+release = "0.3.2"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

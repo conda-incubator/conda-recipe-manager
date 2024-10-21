@@ -3,6 +3,11 @@ NOTES:
 - Version releases in the 0.x.y range may introduce breaking changes.
 - See the auto-generated release notes for more details.
 
+## 0.3.2
+- Refactors `RecipeParserDeps` into `RecipeReaderDeps`. Creates a new `RecipeParserDeps` that adds the high-level
+  `add_dependency()` and `remove_dependency` functions.
+- A few bug fixes and some unit testing improvements
+
 ## 0.3.1
 Minor bug fixes. Addresses feedback from `conda-forge` users.
 
