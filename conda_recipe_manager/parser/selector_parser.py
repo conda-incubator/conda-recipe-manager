@@ -150,6 +150,7 @@ class SelectorParser(IsModifiable):
 
         # Sanitizes content string
         def _init_content() -> str:
+            # TODO Future: validate with Selector regex for consistency, not string indexing.
             if self._schema_version == SchemaVersion.V0 and content and content[0] == "[" and content[-1] == "]":
                 return content[1:-1]
             return content
@@ -225,3 +226,17 @@ class SelectorParser(IsModifiable):
 
         # No constraints? No problem!
         return True
+
+    def render(self) -> str:
+        """
+        Renders the selector as it would appear in a recipe file.
+
+        :returns: The rendered equivalent selector.
+        """
+        # TODO Add V1 support
+        # TODO will need to render from the tree if we add editing functionality.
+        match self._schema_version:
+            case SchemaVersion.V0:
+                return f"[{self._content.strip()}]"
+            case SchemaVersion.V1:
+                return self._content

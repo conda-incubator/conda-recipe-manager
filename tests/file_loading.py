@@ -11,8 +11,8 @@ from typing import Final, Type, TypeVar, cast
 
 from conda_recipe_manager.grapher.recipe_graph import RecipeGraph
 from conda_recipe_manager.parser.cbc_parser import CbcParser
-from conda_recipe_manager.parser.recipe_parser_deps import RecipeParserDeps
 from conda_recipe_manager.parser.recipe_reader import RecipeReader
+from conda_recipe_manager.parser.recipe_reader_deps import RecipeReaderDeps
 from conda_recipe_manager.types import JsonType
 
 # Private string, calculated once, containing the path to the test files.
@@ -67,11 +67,11 @@ def load_recipe_graph(recipes: list[str]) -> RecipeGraph:
     :param recipes: List of recipe test files
     :returns: RecipeParser graph consisting of the recipes provided
     """
-    tbl: dict[str, RecipeParserDeps] = {}
+    tbl: dict[str, RecipeReaderDeps] = {}
     failed: set[str] = set()
     for recipe in recipes:
         try:
-            parser = RecipeParserDeps(load_file(recipe))
+            parser = RecipeReaderDeps(load_file(recipe))
             tbl[parser.calc_sha256()] = parser
         except Exception:  # pylint: disable=broad-exception-caught
             failed.add(recipe)

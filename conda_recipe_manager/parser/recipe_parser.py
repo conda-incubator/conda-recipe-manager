@@ -35,6 +35,7 @@ from conda_recipe_manager.parser._utils import str_to_stack_path
 from conda_recipe_manager.parser.enums import SelectorConflictMode
 from conda_recipe_manager.parser.exceptions import JsonPatchValidationException
 from conda_recipe_manager.parser.recipe_reader import RecipeReader
+from conda_recipe_manager.parser.selector_parser import SelectorParser
 from conda_recipe_manager.parser.types import JSON_PATCH_SCHEMA
 from conda_recipe_manager.types import PRIMITIVES_TUPLE, JsonPatchType, JsonType
 
@@ -71,7 +72,9 @@ class RecipeParser(RecipeReader):
         self._is_modified = True
 
     ## Selector Editing Functions ##
-    def add_selector(self, path: str, selector: str, mode: SelectorConflictMode = SelectorConflictMode.REPLACE) -> None:
+    def add_selector(
+        self, path: str, selector: str | SelectorParser, mode: SelectorConflictMode = SelectorConflictMode.REPLACE
+    ) -> None:
         """
         Given a path, add a selector (include the surrounding brackets) to the line denoted by path.
 
@@ -81,8 +84,14 @@ class RecipeParser(RecipeReader):
         :raises KeyError: If the path provided is not found
         :raises ValueError: If the selector provided is malformed
         """
+        # TODO add V1 support
         path_stack = str_to_stack_path(path)
         node = traverse(self._root, path_stack)
+
+        # Shim layer that allows us to support the newer SelectorParser object.
+        # TODO Future: Swap the string usage in favor of using the SelectorParser.
+        if isinstance(selector, SelectorParser):
+            selector = selector.render()
 
         if node is None:
             raise KeyError(f"Path not found: {path!r}")
@@ -257,7 +266,8 @@ class RecipeParser(RecipeReader):
         # Attempt to run a second time, if no node is found. As per the RFC, the containing object/list must exist. That
         # allows us to create only 1 level in the path.
         path_to_create = ""
-        if node is None:
+        # NOTE: Appending to a non-existent list is effectively adding a second level and disallowed by the RFC.
+        if node is None and not append_to_list:
             path_to_create = path_stack_copy.pop(0)
             node, virt_idx, phys_idx = traverse_with_index(self._root, path_stack_copy)
 
