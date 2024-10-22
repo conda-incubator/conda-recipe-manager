@@ -21,7 +21,7 @@ from conda_recipe_manager.types import JsonPatchType
 @click.option(
     "--build-num",
     is_flag=True,
-    help="bump the build number by 1.",
+    help="Bump the build number by 1.",
 )
 def bump_recipe(recipe_file_path: str, build_num: bool) -> None:
     """
