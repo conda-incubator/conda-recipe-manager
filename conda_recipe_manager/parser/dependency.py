@@ -7,7 +7,7 @@ from __future__ import annotations
 from enum import Enum, auto
 from typing import NamedTuple, Optional, cast
 
-from conda.models.match_spec import MatchSpec
+from conda.models.match_spec import InvalidMatchSpec, MatchSpec
 
 from conda_recipe_manager.parser._types import Regex
 from conda_recipe_manager.parser.selector_parser import SelectorParser
@@ -110,6 +110,10 @@ def str_to_dependency_section(s: str) -> Optional[DependencySection]:
             return DependencySection.RUN_CONSTRAINTS
         case "run_exports":
             return DependencySection.RUN_EXPORTS
+        # This is included for the sake of completeness. Realistically, test dependencies should be detected by looking
+        # at the testing section, not `/requirements`.
+        case "requires":
+            return DependencySection.TESTS
         case _:
             return None
 
@@ -145,19 +149,24 @@ class DependencyVariable:
 DependencyData = MatchSpec | DependencyVariable
 
 
-def dependency_data_from_string(s: str) -> DependencyData:
+def dependency_data_from_str(s: str) -> DependencyData:
     """
     Constructs a `DependencyData` object from a dependency string in a recipe file.
 
     :param s: String to process.
     :returns: A `DependencyData` instance.
     """
-    if Regex.JINJA_V1_SUB.search(s):
+    if Regex.JINJA_V0_SUB.search(s) or Regex.JINJA_V1_SUB.search(s):
         return DependencyVariable(s)
-    return MatchSpec(s)
+
+    try:
+        return MatchSpec(s)
+    except (ValueError, InvalidMatchSpec):
+        # In an effort to be more resilient, fallback to the simpler type.
+        return DependencyVariable(s)
 
 
-def dependency_data_get_original_str(data: DependencyData) -> str:
+def dependency_data_render_as_str(data: DependencyData) -> str:
     """
     Given a `DependencyData` instance, derive the original string found in the recipe.
 
