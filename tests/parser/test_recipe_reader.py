@@ -133,6 +133,7 @@ def test_loading_obj_in_list() -> None:
         "google-cloud-cpp.yaml",
         "dynamic-linking.yaml",
         "sub_vars.yaml",
+        "h5py.yaml",  # `numpy {{ numpy }}` regression example.
         # V1 Recipe Files
         "v1_format/v1_types-toml.yaml",
         "v1_format/v1_simple-recipe.yaml",

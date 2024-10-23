@@ -10,7 +10,7 @@ from conda_recipe_manager.parser._types import ROOT_NODE_VALUE
 from conda_recipe_manager.parser.dependency import (
     Dependency,
     DependencyMap,
-    dependency_data_from_string,
+    dependency_data_from_str,
     str_to_dependency_section,
 )
 from conda_recipe_manager.parser.recipe_reader import RecipeReader
@@ -141,7 +141,7 @@ class RecipeReaderDeps(RecipeReader):
                             required_by=package,
                             path=dep_path,
                             type=section,
-                            data=dependency_data_from_string(dep),
+                            data=dependency_data_from_str(dep),
                             selector=self._fetch_optional_selector(dep_path),
                         )
                     )
