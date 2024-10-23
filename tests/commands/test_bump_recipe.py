@@ -33,7 +33,7 @@ def test_bump_recipe_cli(fs: FakeFilesystem) -> None:
     assert result.exit_code == ExitCode.SUCCESS
 
 
-def test_bump_recipe_cli_fails(fs: FakeFilesystem) -> None:
+def test_bump_build_num_not_int(fs: FakeFilesystem) -> None:
     """
     Test that the command fails gracefully case when the build number is not an integer,
     and we are trying to increment it.
