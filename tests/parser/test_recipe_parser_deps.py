@@ -285,7 +285,6 @@ from tests.file_loading import load_recipe
             "/outputs/1/requirements/host/0",
             "[unix]",
         ),
-        # TODO add missing paths test
         # Single-output, add to a non-existent section
         (
             "types-toml.yaml",
