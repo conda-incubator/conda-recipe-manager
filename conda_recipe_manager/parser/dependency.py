@@ -144,6 +144,14 @@ class DependencyVariable:
             return False
         return self.name == o.name
 
+    def __hash__(self) -> int:
+        """
+        Hashes this `DependencyVariable` instance.
+
+        :returns: The hash value of this object.
+        """
+        return hash(self.name)
+
 
 # Type alias for types allowed in a Dependency's `data` field.
 DependencyData = MatchSpec | DependencyVariable

@@ -3,6 +3,9 @@ NOTES:
 - Version releases in the 0.x.y range may introduce breaking changes.
 - See the auto-generated release notes for more details.
 
+## 0.3.4
+- Makes `DependencyVariable` type hashable.
+
 ## 0.3.3
 - Fixes a bug discovered by user testing relating to manipulating complex dependencies.
 - Renames a few newer functions from `*_string` to `*_str` for project consistency.
