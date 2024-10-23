@@ -321,6 +321,34 @@ from tests.file_loading import load_recipe
             "/outputs/1/requirements/run_constrained/0",
             "[unix]",
         ),
+        # Regression: Add a dependency to a recipe containing the dependency: `- numpy {{ numpy }}`
+        (
+            "h5py.yaml",
+            Dependency(
+                "h5py",
+                "/requirements/host/0",
+                DependencySection.RUN_CONSTRAINTS,
+                MatchSpec("libcxx >= 6.9.1"),
+                SelectorParser("[unix]", SchemaVersion.V0),
+            ),
+            DependencyConflictMode.IGNORE,
+            SelectorConflictMode.OR,
+            True,
+            "/requirements/host",
+            [
+                "python",
+                "cython >=0.29.15,<4",
+                "hdf5 1.12.1",
+                "numpy {{ numpy }}",
+                "pip",
+                "pkgconfig",
+                "setuptools",
+                "wheel",
+                "libcxx >= 6.9.1",
+            ],
+            "/requirements/host/8",
+            "[unix]",
+        ),
         # TODO Add V1 support
     ],
 )
