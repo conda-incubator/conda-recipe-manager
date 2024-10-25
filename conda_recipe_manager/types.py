@@ -60,6 +60,17 @@ class SentinelType:
             return _schema_type_singleton
 
 
+class DependencyType(StrEnum):
+    """
+    Enumerates the dependency categories found in Conda recipe files.
+    """
+
+    BUILD = auto()
+    HOST = auto()
+    RUN = auto()
+    TEST = auto()
+
+
 class MessageCategory(StrEnum):
     """
     Categories to classify messages into.
@@ -140,3 +151,9 @@ class MessageTable:
         warnings: Final[str] = f"{num_warnings} " + _pluralize(num_warnings, "warning")
 
         return f"{errors} and {warnings} were found."
+
+    def clear_messages(self) -> None:
+        """
+        Clears-out the current messages.
+        """
+        self._tbl.clear()

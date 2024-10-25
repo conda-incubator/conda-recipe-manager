@@ -132,7 +132,9 @@ def quote_special_strings(s: str, multiline_variant: MultilineVariant = Multilin
     # without substitution markers (like `match()`)
     if (
         multiline_variant != MultilineVariant.NONE
-        or Regex.JINJA_V0_SUB.match(s)
+        # We check the entire string for JINJA statements to avoid quoting valid YAML strings like:
+        # `- ${{ compiler('rust') }} >=1.65.0` and `foo > {{ '4' + "2" }}`.
+        or cast(list[str], Regex.JINJA_V0_SUB.findall(s))
         or Regex.JINJA_FUNCTION_MATCH.search(s)
     ):
         return s

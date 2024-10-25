@@ -123,7 +123,10 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
         (
             "regression_jinja_sub.yaml",
             [],
-            ["No `license` provided in `/about`"],
+            [
+                "The following key(s) contain unsupported syntax: soversion",
+                "No `license` provided in `/about`",
+            ],
         ),
         # Tests upgrading the `/build/script` when `script_env` is present (this is essentially a test for
         # `_upgrade_build_script_section()`)
@@ -160,6 +163,15 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
             "pip_check_only.yaml",
             [],
             [],
+        ),
+        # Regression test. `sub_vars.yaml` contains many JINJA edge cases.
+        (
+            "sub_vars.yaml",
+            [],
+            [
+                "Could not patch unrecognized license: `Apache-2.0 AND MIT`",
+                "Field at `/about/license_family` is no longer supported.",
+            ],
         ),
         # TODO complete: The `rust.yaml` test contains many edge cases and selectors that aren't directly supported in
         # the V1 recipe format

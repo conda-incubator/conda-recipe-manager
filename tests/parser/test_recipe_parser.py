@@ -9,6 +9,9 @@ import pytest
 from conda_recipe_manager.parser.enums import SelectorConflictMode
 from conda_recipe_manager.parser.exceptions import JsonPatchValidationException
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
+from conda_recipe_manager.parser.selector_parser import SelectorParser
+from conda_recipe_manager.parser.types import SchemaVersion
+from conda_recipe_manager.types import JsonType
 from tests.constants import SIMPLE_DESCRIPTION
 from tests.file_loading import load_file, load_recipe
 
@@ -71,6 +74,8 @@ def test_del_variable(file: str) -> None:
 ## Selectors ##
 
 
+# TODO parameterize
+# TODO Add V1 support
 def test_add_selector() -> None:
     """
     Tests adding a selector to a recipe
@@ -86,7 +91,8 @@ def test_add_selector() -> None:
     # Add selectors to lines without existing selectors
     parser.add_selector("/requirements/empty_field3", "[unix]")
     parser.add_selector("/multi_level/list_1/0", "[unix]")
-    parser.add_selector("/build/number", "[win]")
+    # SelectorParser equivalent
+    parser.add_selector("/build/number", SelectorParser("[win]", SchemaVersion.V0))
     parser.add_selector("/multi_level/list_2/1", "[win]")
     assert parser.get_selector_paths("[unix]") == [
         "/package/name",
@@ -109,7 +115,8 @@ def test_add_selector() -> None:
     ]
     parser.add_selector("/requirements/host/1", "[win]", SelectorConflictMode.AND)
     assert parser.get_selector_paths("[unix and win]") == ["/requirements/host/1", "/requirements/empty_field2"]
-    parser.add_selector("/build/skip", "[win]", SelectorConflictMode.OR)
+    # SelectorParser equivalent
+    parser.add_selector("/build/skip", SelectorParser("[win]", SchemaVersion.V0), SelectorConflictMode.OR)
     assert parser.get_selector_paths("[py<37 or win]") == ["/build/skip"]
     parser.add_selector("/requirements/run/0", "[win]", SelectorConflictMode.AND)
     assert parser.get_selector_paths("[win]") == [
@@ -775,6 +782,32 @@ def test_patch_add() -> None:
     # Sanity check: validate all modifications
     assert parser.is_modified()
     assert parser.render() == load_file("simple-recipe_test_patch_add.yaml")
+
+
+@pytest.mark.parametrize(
+    "file,path,value",
+    [
+        # Can't add more than one path level
+        ("types-toml.yaml", "/foo/bar", "baz"),
+        ("types-toml.yaml", "/requirements/run/foo/bar", "baz"),
+        # The RFC allows for 1 level of path to be added, but that does not include adding to a list.
+        ("types-toml.yaml", "/requirements/run_constrained/0", "openssl"),
+        ("types-toml.yaml", "/requirements/run_constrained/-", "openssl"),
+        ("cctools-ld64.yaml", "/outputs/-/requirements/run/0", "openssl"),
+        # TODO Add V1 support
+    ],
+)
+def test_patch_add_illegal_op(file: str, path: str, value: JsonType) -> None:
+    """
+    Ensures that illegal add operations fail gracefully.
+
+    :param file: Recipe file to test
+    :parma path: Target path to add to
+    :param value: Target value to add
+    """
+    parser = load_recipe(file, RecipeParser)
+    assert not parser.patch({"op": "add", "path": path, "value": value})
+    assert not parser.is_modified()
 
 
 def test_patch_remove() -> None:

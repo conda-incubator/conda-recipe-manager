@@ -1,528 +1,450 @@
 """
-:Description: Tests for the advanced dependency tools for the Recipe Parser.
+:Description: Tests for the advanced dependency tools for the `RecipeParser`.
 """
 
 from __future__ import annotations
 
+from typing import Optional
+
 import pytest
 from conda.models.match_spec import MatchSpec
 
-from conda_recipe_manager.parser.dependency import Dependency, DependencyMap, DependencySection, DependencyVariable
+from conda_recipe_manager.parser.dependency import Dependency, DependencyConflictMode, DependencySection
+from conda_recipe_manager.parser.enums import SelectorConflictMode
 from conda_recipe_manager.parser.recipe_parser_deps import RecipeParserDeps
 from conda_recipe_manager.parser.selector_parser import SchemaVersion, SelectorParser
 from tests.file_loading import load_recipe
 
 
 @pytest.mark.parametrize(
-    "file,expected",
+    "file,dep,dep_mode,sel_mode,expected_return,dep_path,expected_deps,sel_path,expected_sel",
     [
-        ("types-toml.yaml", {"types-toml": "/"}),
-        ("v1_format/v1_types-toml.yaml", {"types-toml": "/"}),
-        ("boto.yaml", {"boto": "/"}),
-        ("v1_format/v1_boto.yaml", {"boto": "/"}),
+        # Invalid path provided, too long
         (
-            "google-cloud-cpp.yaml",
-            {
-                "google-cloud-cpp-split": "/",
-                "libgoogle-cloud-all": "/outputs/0",
-                "libgoogle-cloud-all-devel": "/outputs/1",
-                "google-cloud-cpp": "/outputs/2",
-            },
+            "types-toml.yaml",
+            Dependency(
+                "types-toml",
+                "/requirements/run/0/way/more/stuff",
+                DependencySection.RUN,
+                MatchSpec("openssl >= 1.4.2"),
+                None,
+            ),
+            DependencyConflictMode.REPLACE,
+            SelectorConflictMode.REPLACE,
+            False,
+            "/requirements/run",
+            ["python"],
+            "/requirements/run/1",
+            None,
         ),
+        # Invalid path provided, does not end in a digit
         (
-            "v1_format/v1_google-cloud-cpp.yaml",
-            {
-                "google-cloud-cpp-split": "/",
-                "libgoogle-cloud-all": "/outputs/0",
-                "libgoogle-cloud-all-devel": "/outputs/1",
-                "google-cloud-cpp": "/outputs/2",
-            },
+            "types-toml.yaml",
+            Dependency(
+                "types-toml", "/requirements/run/foo", DependencySection.RUN, MatchSpec("openssl >= 1.4.2"), None
+            ),
+            DependencyConflictMode.REPLACE,
+            SelectorConflictMode.REPLACE,
+            False,
+            "/requirements/run",
+            ["python"],
+            "/requirements/run/1",
+            None,
         ),
+        # Invalid path provided, illegal output section
         (
-            "libprotobuf.yaml",
-            {"libprotobuf-suite": "/", "libprotobuf": "/outputs/0", "libprotobuf-static": "/outputs/1"},
+            "cctools-ld64.yaml",
+            Dependency(
+                "ld64", "/outputs/foo/requirements/run/0", DependencySection.RUN, MatchSpec("openssl >= 1.4.2"), None
+            ),
+            DependencyConflictMode.REPLACE,
+            SelectorConflictMode.REPLACE,
+            False,
+            "/outputs/1/requirements/host",
+            ["llvm-lto-tapi", "libcxx"],
+            "/outputs/1/requirements/host/2",
+            None,
         ),
+        # Invalid path provided, invalid dependency section
+        (
+            "types-toml.yaml",
+            Dependency(
+                "types-toml", "/requirements/fake_section/0", DependencySection.RUN, MatchSpec("openssl >= 1.4.2"), None
+            ),
+            DependencyConflictMode.REPLACE,
+            SelectorConflictMode.REPLACE,
+            False,
+            "/requirements/run",
+            ["python"],
+            "/requirements/run/1",
+            None,
+        ),
+        # Single-output, default behavior, add a new dependency, no selector
+        (
+            "types-toml.yaml",
+            Dependency("types-toml", "/requirements/run/0", DependencySection.RUN, MatchSpec("openssl >= 1.4.2"), None),
+            DependencyConflictMode.REPLACE,
+            SelectorConflictMode.REPLACE,
+            True,
+            "/requirements/run",
+            ["python", "openssl >= 1.4.2"],
+            "/requirements/run/1",
+            None,
+        ),
+        # Single-output, default behavior, add a new dependency, with a selector
+        (
+            "types-toml.yaml",
+            Dependency(
+                "types-toml",
+                "/requirements/run/0",
+                DependencySection.RUN,
+                MatchSpec("openssl >= 1.4.2"),
+                SelectorParser("[osx and unix]", SchemaVersion.V0),
+            ),
+            DependencyConflictMode.REPLACE,
+            SelectorConflictMode.REPLACE,
+            True,
+            "/requirements/run",
+            ["python", "openssl >= 1.4.2"],
+            "/requirements/run/1",
+            "[osx and unix]",
+        ),
+        # Single-output, duplicate dependency, replace mode, with a selector
+        (
+            "types-toml.yaml",
+            Dependency(
+                "types-toml",
+                "/requirements/run/0",
+                DependencySection.RUN,
+                MatchSpec("python >= 3.11"),
+                SelectorParser("[osx and unix]", SchemaVersion.V0),
+            ),
+            DependencyConflictMode.REPLACE,
+            SelectorConflictMode.REPLACE,
+            True,
+            "/requirements/run",
+            ["python >= 3.11"],
+            "/requirements/run/0",
+            "[osx and unix]",
+        ),
+        # Single-output, duplicate dependency, ignore mode, with a selector
+        (
+            "types-toml.yaml",
+            Dependency(
+                "types-toml",
+                "/requirements/run/0",
+                DependencySection.RUN,
+                MatchSpec("python >= 3.11"),
+                SelectorParser("[osx and unix]", SchemaVersion.V0),
+            ),
+            DependencyConflictMode.IGNORE,
+            SelectorConflictMode.REPLACE,
+            False,
+            "/requirements/run",
+            ["python"],
+            "/requirements/run/1",
+            None,
+        ),
+        # Single-output, duplicate dependency, use-both mode, with a selector
+        (
+            "types-toml.yaml",
+            Dependency(
+                "types-toml",
+                "/requirements/run/0",
+                DependencySection.RUN,
+                MatchSpec("python >= 3.11"),
+                SelectorParser("[osx and unix]", SchemaVersion.V0),
+            ),
+            DependencyConflictMode.USE_BOTH,
+            SelectorConflictMode.REPLACE,
+            True,
+            "/requirements/run",
+            ["python", "python >= 3.11"],
+            "/requirements/run/1",
+            "[osx and unix]",
+        ),
+        # Single-output, duplicate dependency, exact position mode, with a selector
+        (
+            "types-toml.yaml",
+            Dependency(
+                "types-toml",
+                "/requirements/run/0",
+                DependencySection.RUN,
+                MatchSpec("python >= 3.11"),
+                SelectorParser("[osx and unix]", SchemaVersion.V0),
+            ),
+            DependencyConflictMode.EXACT_POSITION,
+            SelectorConflictMode.REPLACE,
+            True,
+            "/requirements/run",
+            ["python >= 3.11"],
+            "/requirements/run/0",
+            "[osx and unix]",
+        ),
+        # Multi-output, default behavior, add a new dependency, no selector
+        (
+            "cctools-ld64.yaml",
+            Dependency(
+                "ld64", "/outputs/1/requirements/host/1", DependencySection.HOST, MatchSpec("openssl >= 1.4.2"), None
+            ),
+            DependencyConflictMode.REPLACE,
+            SelectorConflictMode.REPLACE,
+            True,
+            "/outputs/1/requirements/host",
+            ["llvm-lto-tapi", "libcxx", "openssl >= 1.4.2"],
+            "/outputs/1/requirements/host/2",
+            None,
+        ),
+        # Multi-output, default behavior, add a new dependency, with a selector
+        (
+            "cctools-ld64.yaml",
+            Dependency(
+                "ld64",
+                "/outputs/1/requirements/host/1",
+                DependencySection.HOST,
+                MatchSpec("openssl >= 1.4.2"),
+                SelectorParser("[osx and unix]", SchemaVersion.V0),
+            ),
+            DependencyConflictMode.REPLACE,
+            SelectorConflictMode.REPLACE,
+            True,
+            "/outputs/1/requirements/host",
+            ["llvm-lto-tapi", "libcxx", "openssl >= 1.4.2"],
+            "/outputs/1/requirements/host/2",
+            "[osx and unix]",
+        ),
+        # Multi-output, duplicate dependency, replace mode, with a selector mode
+        (
+            "cctools-ld64.yaml",
+            Dependency(
+                "ld64",
+                "/outputs/1/requirements/host/0",
+                DependencySection.HOST,
+                MatchSpec("libcxx >= 6.9.1"),
+                SelectorParser("[unix]", SchemaVersion.V0),
+            ),
+            DependencyConflictMode.REPLACE,
+            SelectorConflictMode.AND,
+            True,
+            "/outputs/1/requirements/host",
+            ["llvm-lto-tapi", "libcxx >= 6.9.1"],
+            "/outputs/1/requirements/host/1",
+            "[osx and unix]",
+        ),
+        # Multi-output, duplicate dependency, ignore mode, with a selector mode
+        (
+            "cctools-ld64.yaml",
+            Dependency(
+                "ld64",
+                "/outputs/1/requirements/host/0",
+                DependencySection.HOST,
+                MatchSpec("libcxx >= 6.9.1"),
+                SelectorParser("[unix]", SchemaVersion.V0),
+            ),
+            DependencyConflictMode.IGNORE,
+            SelectorConflictMode.OR,
+            False,
+            "/outputs/1/requirements/host",
+            ["llvm-lto-tapi", "libcxx"],
+            "/outputs/1/requirements/host/1",
+            "[osx]",
+        ),
+        # Multi-output, duplicate dependency, use-both mode, with a selector mode
+        (
+            "cctools-ld64.yaml",
+            Dependency(
+                "ld64",
+                "/outputs/1/requirements/host/0",
+                DependencySection.HOST,
+                MatchSpec("libcxx >= 6.9.1"),
+                SelectorParser("[unix]", SchemaVersion.V0),
+            ),
+            DependencyConflictMode.USE_BOTH,
+            SelectorConflictMode.AND,
+            True,
+            "/outputs/1/requirements/host",
+            ["llvm-lto-tapi", "libcxx", "libcxx >= 6.9.1"],
+            "/outputs/1/requirements/host/2",
+            "[unix]",
+        ),
+        # Multi-output, duplicate dependency, exact position mode, with a selector mode
+        (
+            "cctools-ld64.yaml",
+            Dependency(
+                "ld64",
+                "/outputs/1/requirements/host/0",
+                DependencySection.HOST,
+                MatchSpec("libcxx >= 6.9.1"),
+                SelectorParser("[unix]", SchemaVersion.V0),
+            ),
+            DependencyConflictMode.EXACT_POSITION,
+            SelectorConflictMode.OR,
+            True,
+            "/outputs/1/requirements/host",
+            ["libcxx >= 6.9.1", "libcxx"],
+            "/outputs/1/requirements/host/0",
+            "[unix]",
+        ),
+        # Single-output, add to a non-existent section
+        (
+            "types-toml.yaml",
+            Dependency(
+                "types-toml",
+                "/requirements/run_constrained/0",
+                DependencySection.RUN_CONSTRAINTS,
+                MatchSpec("openssl >= 1.4.2"),
+                SelectorParser("[osx]", SchemaVersion.V0),
+            ),
+            DependencyConflictMode.REPLACE,
+            SelectorConflictMode.AND,
+            True,
+            "/requirements/run_constrained",
+            ["openssl >= 1.4.2"],
+            "/requirements/run_constrained/0",
+            "[osx]",
+        ),
+        # Multi-output, add to a non-existent section
+        (
+            "cctools-ld64.yaml",
+            Dependency(
+                "ld64",
+                "/outputs/1/requirements/run_constrained/0",
+                DependencySection.RUN_CONSTRAINTS,
+                MatchSpec("libcxx >= 6.9.1"),
+                SelectorParser("[unix]", SchemaVersion.V0),
+            ),
+            DependencyConflictMode.IGNORE,
+            SelectorConflictMode.OR,
+            True,
+            "/outputs/1/requirements/run_constrained",
+            ["libcxx >= 6.9.1"],
+            "/outputs/1/requirements/run_constrained/0",
+            "[unix]",
+        ),
+        # Regression: Add a dependency to a recipe containing the dependency: `- numpy {{ numpy }}`
+        (
+            "h5py.yaml",
+            Dependency(
+                "h5py",
+                "/requirements/host/0",
+                DependencySection.RUN_CONSTRAINTS,
+                MatchSpec("libcxx >= 6.9.1"),
+                SelectorParser("[unix]", SchemaVersion.V0),
+            ),
+            DependencyConflictMode.IGNORE,
+            SelectorConflictMode.OR,
+            True,
+            "/requirements/host",
+            [
+                "python",
+                "cython >=0.29.15,<4",
+                "hdf5 1.12.1",
+                "numpy {{ numpy }}",
+                "pip",
+                "pkgconfig",
+                "setuptools",
+                "wheel",
+                "libcxx >= 6.9.1",
+            ],
+            "/requirements/host/8",
+            "[unix]",
+        ),
+        # TODO Add V1 support
     ],
 )
-def test_get_package_names_to_path(file: str, expected: dict[str, str]) -> None:
+def test_add_dependency(
+    file: str,
+    dep: Dependency,
+    dep_mode: DependencyConflictMode,
+    sel_mode: SelectorConflictMode,
+    expected_return: bool,
+    dep_path: str,
+    expected_deps: list[str],
+    sel_path: str,
+    expected_sel: Optional[str],
+) -> None:
     """
-    Validates generating a map of package names to locations in the recipe file
+    Tests the ability to add a `Dependency` object to a recipe.
 
     :param file: File to test against
-    :param expected: Expected output
+    :param dep: Dependency to add
+    :param dep_mode: Target Dependency conflict mode
+    :param sel_mode: Target Selector conflict mode
+    :param expected_return: Expected return value
+    :param dep_path: Dependency section path to use in post-op validation
+    :param expected_deps: List of dependencies that should be found in the altered dependency path
+    :param sel_path: Selector path to use in post-op validation
+    :param expected_deps: Expected Selector value on the new dependency. If no selector was added, set this to `NONE`.
     """
     parser = load_recipe(file, RecipeParserDeps)
-    assert parser.get_package_names_to_path() == expected
+    assert parser.add_dependency(dep, dep_mode=dep_mode, sel_mode=sel_mode) == expected_return
+
+    assert parser.get_value(dep_path) == expected_deps
+    # Branch to perform different checks, depending if a selector is expected or not.
+    if expected_sel is None:
+        with pytest.raises(KeyError):
+            parser.get_selector_at_path(sel_path)
+    else:
+        assert parser.get_selector_at_path(sel_path) == expected_sel
 
 
 @pytest.mark.parametrize(
-    "file,expected",
+    "file,dep,expected_return,dep_path,expected_deps",
     [
+        # Single-output, dependency exists
         (
             "types-toml.yaml",
-            {
-                "types-toml": [
-                    Dependency(
-                        "types-toml", "/requirements/host/0", DependencySection.HOST, MatchSpec("setuptools"), None
-                    ),
-                    Dependency("types-toml", "/requirements/host/1", DependencySection.HOST, MatchSpec("wheel"), None),
-                    Dependency("types-toml", "/requirements/host/2", DependencySection.HOST, MatchSpec("pip"), None),
-                    Dependency("types-toml", "/requirements/host/3", DependencySection.HOST, MatchSpec("python"), None),
-                    Dependency("types-toml", "/requirements/run/0", DependencySection.RUN, MatchSpec("python"), None),
-                ]
-            },
+            Dependency("types-toml", "/requirements/run/0", DependencySection.RUN, MatchSpec("python"), None),
+            True,
+            "/requirements/run",
+            # TODO Fix the return value of an empty reference in `get_value()`. Seems related to Issue #20
+            "run",
         ),
+        # Single-output, dependency does not exist
         (
-            "v1_format/v1_types-toml.yaml",
-            {
-                "types-toml": [
-                    Dependency(
-                        "types-toml", "/requirements/host/0", DependencySection.HOST, MatchSpec("setuptools"), None
-                    ),
-                    Dependency("types-toml", "/requirements/host/1", DependencySection.HOST, MatchSpec("wheel"), None),
-                    Dependency("types-toml", "/requirements/host/2", DependencySection.HOST, MatchSpec("pip"), None),
-                    Dependency("types-toml", "/requirements/host/3", DependencySection.HOST, MatchSpec("python"), None),
-                    Dependency("types-toml", "/requirements/run/0", DependencySection.RUN, MatchSpec("python"), None),
-                ]
-            },
+            "types-toml.yaml",
+            Dependency("types-toml", "/requirements/run/1", DependencySection.RUN, MatchSpec("openssl >= 1.4.2"), None),
+            False,
+            "/requirements/run",
+            ["python"],
         ),
-        # simple-recipe.yaml tests that unrecognized requirements fields are ignored
-        (
-            "simple-recipe.yaml",
-            {
-                "types-toml": [
-                    Dependency(
-                        "types-toml",
-                        "/requirements/host/0",
-                        DependencySection.HOST,
-                        MatchSpec("setuptools"),
-                        SelectorParser("[unix]", SchemaVersion.V0),
-                    ),
-                    Dependency(
-                        "types-toml",
-                        "/requirements/host/1",
-                        DependencySection.HOST,
-                        MatchSpec("fakereq"),
-                        SelectorParser("[unix]", SchemaVersion.V0),
-                    ),
-                    Dependency("types-toml", "/requirements/run/0", DependencySection.RUN, MatchSpec("python"), None),
-                ]
-            },
-        ),
-        (
-            "boto.yaml",
-            {
-                "boto": [
-                    Dependency("boto", "/requirements/host/0", DependencySection.HOST, MatchSpec("python"), None),
-                    Dependency("boto", "/requirements/run/0", DependencySection.RUN, MatchSpec("python"), None),
-                ]
-            },
-        ),
-        (
-            "v1_format/v1_boto.yaml",
-            {
-                "boto": [
-                    Dependency("boto", "/requirements/host/0", DependencySection.HOST, MatchSpec("python"), None),
-                    Dependency("boto", "/requirements/run/0", DependencySection.RUN, MatchSpec("python"), None),
-                ]
-            },
-        ),
-        # TODO Future: Add V1 variant of this test when V1 selector support is added.
+        # Multi-output, dependency exists
         (
             "cctools-ld64.yaml",
-            {
-                "cctools-and-ld64": [
-                    Dependency(
-                        "cctools-and-ld64",
-                        "/requirements/build/0",
-                        DependencySection.BUILD,
-                        MatchSpec("gcc_linux-64"),
-                        SelectorParser("[linux]", SchemaVersion.V0),
-                    ),
-                    Dependency(
-                        "cctools-and-ld64",
-                        "/requirements/build/1",
-                        DependencySection.BUILD,
-                        MatchSpec("gxx_linux-64"),
-                        SelectorParser("[linux]", SchemaVersion.V0),
-                    ),
-                    Dependency(
-                        "cctools-and-ld64",
-                        "/requirements/build/2",
-                        DependencySection.BUILD,
-                        MatchSpec("autoconf"),
-                        None,
-                    ),
-                    Dependency(
-                        "cctools-and-ld64",
-                        "/requirements/build/3",
-                        DependencySection.BUILD,
-                        MatchSpec("automake"),
-                        None,
-                    ),
-                    Dependency(
-                        "cctools-and-ld64",
-                        "/requirements/host/0",
-                        DependencySection.HOST,
-                        MatchSpec("xar-bootstrap"),
-                        None,
-                    ),
-                    Dependency(
-                        "cctools-and-ld64", "/requirements/host/1", DependencySection.HOST, MatchSpec("zlib"), None
-                    ),
-                    Dependency(
-                        "cctools-and-ld64",
-                        "/requirements/host/2",
-                        DependencySection.HOST,
-                        MatchSpec("llvm-lto-tapi"),
-                        None,
-                    ),
-                ],
-                "cctools": [
-                    Dependency(
-                        "cctools",
-                        "/outputs/0/requirements/run/0",
-                        DependencySection.RUN,
-                        MatchSpec("llvm-lto-tapi"),
-                        None,
-                    ),
-                    Dependency(
-                        "cctools",
-                        "/requirements/build/0",
-                        DependencySection.BUILD,
-                        MatchSpec("gcc_linux-64"),
-                        SelectorParser("[linux]", SchemaVersion.V0),
-                    ),
-                    Dependency(
-                        "cctools",
-                        "/requirements/build/1",
-                        DependencySection.BUILD,
-                        MatchSpec("gxx_linux-64"),
-                        SelectorParser("[linux]", SchemaVersion.V0),
-                    ),
-                    Dependency(
-                        "cctools", "/requirements/build/2", DependencySection.BUILD, MatchSpec("autoconf"), None
-                    ),
-                    Dependency(
-                        "cctools", "/requirements/build/3", DependencySection.BUILD, MatchSpec("automake"), None
-                    ),
-                    Dependency(
-                        "cctools", "/requirements/host/0", DependencySection.HOST, MatchSpec("xar-bootstrap"), None
-                    ),
-                    Dependency("cctools", "/requirements/host/1", DependencySection.HOST, MatchSpec("zlib"), None),
-                    Dependency(
-                        "cctools", "/requirements/host/2", DependencySection.HOST, MatchSpec("llvm-lto-tapi"), None
-                    ),
-                ],
-                "ld64": [
-                    Dependency(
-                        "ld64",
-                        "/outputs/1/requirements/host/0",
-                        DependencySection.HOST,
-                        MatchSpec("llvm-lto-tapi"),
-                        None,
-                    ),
-                    Dependency(
-                        "ld64",
-                        "/outputs/1/requirements/host/1",
-                        DependencySection.HOST,
-                        MatchSpec("libcxx"),
-                        SelectorParser("[osx]", SchemaVersion.V0),
-                    ),
-                    Dependency(
-                        "ld64", "/outputs/1/requirements/run/0", DependencySection.RUN, MatchSpec("llvm-lto-tapi"), None
-                    ),
-                    Dependency(
-                        "ld64",
-                        "/outputs/1/requirements/run/1",
-                        DependencySection.RUN,
-                        MatchSpec("libcxx"),
-                        SelectorParser("[osx]", SchemaVersion.V0),
-                    ),
-                    Dependency(
-                        "ld64",
-                        "/requirements/build/0",
-                        DependencySection.BUILD,
-                        MatchSpec("gcc_linux-64"),
-                        SelectorParser("[linux]", SchemaVersion.V0),
-                    ),
-                    Dependency(
-                        "ld64",
-                        "/requirements/build/1",
-                        DependencySection.BUILD,
-                        MatchSpec("gxx_linux-64"),
-                        SelectorParser("[linux]", SchemaVersion.V0),
-                    ),
-                    Dependency("ld64", "/requirements/build/2", DependencySection.BUILD, MatchSpec("autoconf"), None),
-                    Dependency("ld64", "/requirements/build/3", DependencySection.BUILD, MatchSpec("automake"), None),
-                    Dependency(
-                        "ld64", "/requirements/host/0", DependencySection.HOST, MatchSpec("xar-bootstrap"), None
-                    ),
-                    Dependency("ld64", "/requirements/host/1", DependencySection.HOST, MatchSpec("zlib"), None),
-                    Dependency(
-                        "ld64", "/requirements/host/2", DependencySection.HOST, MatchSpec("llvm-lto-tapi"), None
-                    ),
-                ],
-            },
+            Dependency("ld64", "/outputs/1/requirements/host/1", DependencySection.HOST, MatchSpec("libcxx"), None),
+            True,
+            "/outputs/1/requirements/host",
+            ["llvm-lto-tapi"],
         ),
-        # Regression Test: The parser previously crashed when trying to substitute `{{ compiler('c' ) }}`
+        # Multi-output, dependency does not exist
         (
-            "libprotobuf.yaml",
-            {
-                "libprotobuf": [
-                    Dependency(
-                        "libprotobuf",
-                        "/outputs/0/requirements/build/0",
-                        DependencySection.BUILD,
-                        DependencyVariable("${{ compiler('c') }}"),
-                        selector=None,
-                    ),
-                    Dependency(
-                        "libprotobuf",
-                        "/outputs/0/requirements/build/1",
-                        DependencySection.BUILD,
-                        DependencyVariable("${{ compiler('cxx') }}"),
-                        selector=None,
-                    ),
-                    Dependency(
-                        "libprotobuf",
-                        "/outputs/0/requirements/build/2",
-                        DependencySection.BUILD,
-                        MatchSpec("cmake"),
-                        SelectorParser("[win]", SchemaVersion.V0),
-                    ),
-                    Dependency(
-                        "libprotobuf",
-                        "/outputs/0/requirements/build/3",
-                        DependencySection.BUILD,
-                        MatchSpec("ninja"),
-                        SelectorParser("[win]", SchemaVersion.V0),
-                    ),
-                    Dependency(
-                        "libprotobuf",
-                        "/outputs/0/requirements/build/4",
-                        DependencySection.BUILD,
-                        MatchSpec("autoconf"),
-                        SelectorParser("[not win]", SchemaVersion.V0),
-                    ),
-                    Dependency(
-                        "libprotobuf",
-                        "/outputs/0/requirements/build/5",
-                        DependencySection.BUILD,
-                        MatchSpec("automake"),
-                        SelectorParser("[not win]", SchemaVersion.V0),
-                    ),
-                    Dependency(
-                        "libprotobuf",
-                        "/outputs/0/requirements/build/6",
-                        DependencySection.BUILD,
-                        MatchSpec("libtool"),
-                        SelectorParser("[not win]", SchemaVersion.V0),
-                    ),
-                    Dependency(
-                        "libprotobuf",
-                        "/outputs/0/requirements/build/7",
-                        DependencySection.BUILD,
-                        MatchSpec("pkg-config"),
-                        SelectorParser("[not win]", SchemaVersion.V0),
-                    ),
-                    Dependency(
-                        "libprotobuf",
-                        "/outputs/0/requirements/build/8",
-                        DependencySection.BUILD,
-                        MatchSpec("unzip"),
-                        SelectorParser("[not win]", SchemaVersion.V0),
-                    ),
-                    Dependency(
-                        "libprotobuf",
-                        "/outputs/0/requirements/build/9",
-                        DependencySection.BUILD,
-                        MatchSpec("make"),
-                        SelectorParser("[not win]", SchemaVersion.V0),
-                    ),
-                    Dependency(
-                        "libprotobuf",
-                        "/outputs/0/requirements/build/10",
-                        DependencySection.BUILD,
-                        MatchSpec("sed"),
-                        SelectorParser("[osx and arm64]", SchemaVersion.V0),
-                    ),
-                    Dependency(
-                        "libprotobuf",
-                        "/outputs/0/requirements/host/0",
-                        DependencySection.HOST,
-                        MatchSpec("zlib"),
-                        selector=None,
-                    ),
-                    Dependency(
-                        "libprotobuf",
-                        "/outputs/0/requirements/run/0",
-                        DependencySection.RUN,
-                        MatchSpec("zlib"),
-                        selector=None,
-                    ),
-                    Dependency(
-                        "libprotobuf",
-                        "/requirements/build/0",
-                        DependencySection.BUILD,
-                        MatchSpec("patch"),
-                        SelectorParser("[linux]", SchemaVersion.V0),
-                    ),
-                    Dependency(
-                        "libprotobuf",
-                        "/requirements/build/1",
-                        DependencySection.BUILD,
-                        MatchSpec("sed"),
-                        SelectorParser("[osx and arm64]", SchemaVersion.V0),
-                    ),
-                ],
-                "libprotobuf-static": [
-                    Dependency(
-                        "libprotobuf-static",
-                        "/outputs/1/requirements/build/0",
-                        DependencySection.BUILD,
-                        DependencyVariable("${{ compiler('c') }}"),
-                        selector=None,
-                    ),
-                    Dependency(
-                        "libprotobuf-static",
-                        "/outputs/1/requirements/build/1",
-                        DependencySection.BUILD,
-                        DependencyVariable("${{ compiler('cxx') }}"),
-                        selector=None,
-                    ),
-                    Dependency(
-                        "libprotobuf-static",
-                        "/outputs/1/requirements/build/2",
-                        DependencySection.BUILD,
-                        MatchSpec("cmake"),
-                        SelectorParser("win", SchemaVersion.V0),
-                    ),
-                    Dependency(
-                        "libprotobuf-static",
-                        "/outputs/1/requirements/build/3",
-                        DependencySection.BUILD,
-                        MatchSpec("ninja"),
-                        SelectorParser("win", SchemaVersion.V0),
-                    ),
-                    Dependency(
-                        "libprotobuf-static",
-                        "/outputs/1/requirements/build/4",
-                        DependencySection.BUILD,
-                        MatchSpec("autoconf"),
-                        SelectorParser("[not win]", SchemaVersion.V0),
-                    ),
-                    Dependency(
-                        "libprotobuf-static",
-                        "/outputs/1/requirements/build/5",
-                        DependencySection.BUILD,
-                        MatchSpec("automake"),
-                        SelectorParser("[not win]", SchemaVersion.V0),
-                    ),
-                    Dependency(
-                        "libprotobuf-static",
-                        "/outputs/1/requirements/build/6",
-                        DependencySection.BUILD,
-                        MatchSpec("libtool"),
-                        SelectorParser("[not win]", SchemaVersion.V0),
-                    ),
-                    Dependency(
-                        "libprotobuf-static",
-                        "/outputs/1/requirements/build/7",
-                        DependencySection.BUILD,
-                        MatchSpec("pkg-config"),
-                        SelectorParser("[not win]", SchemaVersion.V0),
-                    ),
-                    Dependency(
-                        "libprotobuf-static",
-                        "/outputs/1/requirements/build/8",
-                        DependencySection.BUILD,
-                        MatchSpec("unzip"),
-                        SelectorParser("[not win]", SchemaVersion.V0),
-                    ),
-                    Dependency(
-                        "libprotobuf-static",
-                        "/outputs/1/requirements/build/9",
-                        DependencySection.BUILD,
-                        MatchSpec("make"),
-                        SelectorParser("[not win]", SchemaVersion.V0),
-                    ),
-                    Dependency(
-                        "libprotobuf-static",
-                        "/outputs/1/requirements/host/0",
-                        DependencySection.HOST,
-                        MatchSpec("zlib"),
-                        SelectorParser("[not win]", SchemaVersion.V0),
-                    ),
-                    Dependency(
-                        "libprotobuf-static",
-                        "/outputs/1/requirements/host/1",
-                        DependencySection.HOST,
-                        DependencyVariable("${{ pin_subpackage('libprotobuf', exact=True) }}"),
-                        SelectorParser("[not win]", SchemaVersion.V0),
-                    ),
-                    Dependency(
-                        "libprotobuf-static",
-                        "/outputs/1/requirements/run/0",
-                        DependencySection.RUN,
-                        MatchSpec("zlib"),
-                        SelectorParser("[not win]", SchemaVersion.V0),
-                    ),
-                    Dependency(
-                        "libprotobuf-static",
-                        "/outputs/1/requirements/run/1",
-                        DependencySection.RUN,
-                        DependencyVariable("${{ pin_subpackage('libprotobuf', exact=True) }}"),
-                        SelectorParser("[not win]", SchemaVersion.V0),
-                    ),
-                    Dependency(
-                        "libprotobuf-static",
-                        "/outputs/1/requirements/run_constrained/0",
-                        DependencySection.RUN_CONSTRAINTS,
-                        MatchSpec("libprotobuf[version='<0a0']"),
-                        SelectorParser("[win]", SchemaVersion.V0),
-                    ),
-                    Dependency(
-                        "libprotobuf-static",
-                        "/requirements/build/0",
-                        DependencySection.BUILD,
-                        MatchSpec("patch"),
-                        SelectorParser("[linux]", SchemaVersion.V0),
-                    ),
-                    Dependency(
-                        "libprotobuf-static",
-                        "/requirements/build/1",
-                        DependencySection.BUILD,
-                        MatchSpec("sed"),
-                        SelectorParser("[osx and arm64]", SchemaVersion.V0),
-                    ),
-                ],
-                "libprotobuf-suite": [
-                    Dependency(
-                        "libprotobuf-suite",
-                        "/requirements/build/0",
-                        DependencySection.BUILD,
-                        MatchSpec("patch"),
-                        SelectorParser("[linux]", SchemaVersion.V0),
-                    ),
-                    Dependency(
-                        "libprotobuf-suite",
-                        "/requirements/build/1",
-                        DependencySection.BUILD,
-                        MatchSpec("sed"),
-                        SelectorParser("[osx and arm64]", SchemaVersion.V0),
-                    ),
-                ],
-            },
+            "cctools-ld64.yaml",
+            Dependency(
+                "ld64", "/outputs/1/requirements/host/2", DependencySection.HOST, MatchSpec("openssl >= 1.4.2"), None
+            ),
+            False,
+            "/outputs/1/requirements/host",
+            ["llvm-lto-tapi", "libcxx"],
         ),
+        # TODO Add V1 support
     ],
 )
-def test_get_all_dependencies(file: str, expected: DependencyMap) -> None:
+def test_remove_dependency(
+    file: str,
+    dep: Dependency,
+    expected_return: bool,
+    dep_path: str,
+    expected_deps: list[str] | str,
+) -> None:
     """
-    Validates generating all the dependency meta data associated with a recipe file.
+    Tests the ability to remove a `Dependency` object to a recipe.
 
     :param file: File to test against
-    :param expected: Expected output
+    :param dep: Dependency to remove
+    :param expected_return: Expected return value
+    :param dep_path: Dependency section path to use in post-op validation
+    :param expected_deps: List of dependencies that should be found in the altered dependency path
     """
     parser = load_recipe(file, RecipeParserDeps)
-    assert parser.get_all_dependencies() == expected
+    assert parser.remove_dependency(dep) == expected_return
+    assert parser.get_value(dep_path) == expected_deps

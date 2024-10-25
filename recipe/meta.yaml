@@ -1,5 +1,5 @@
 {% set name = "conda-recipe-manager" %}
-{% set version = "0.2.1" %}
+{% set version = "0.3.4" %}
 
 package:
   name: {{ name|lower }}
@@ -14,6 +14,7 @@ build:
   script: pip install . --no-deps --no-build-isolation -vv
   entry_points:
     - conda-recipe-manager = conda_recipe_manager.commands.conda_recipe_manager:conda_recipe_manager
+    - crm = conda_recipe_manager.commands.conda_recipe_manager:conda_recipe_manager
 
 requirements:
   host:
@@ -48,7 +49,7 @@ test:
     - pyfakefs
   commands:
     - pip check
-    - python -m pytest -n auto tests/
+    - python -m pytest -n auto --ignore=tests/test_aux_files tests/
 
 about:
   home: https://github.com/anaconda/conda-recipe-manager
@@ -58,5 +59,5 @@ about:
   summary: Helper tool for recipes on aggregate.
   description: |
     Renders local recipes, provides build orders, find outdated recipes.
-  doc_url: https://github.com/anaconda/conda-recipe-manager
+  doc_url: https://conda-incubator.github.io/conda-recipe-manager/index.html
   dev_url: https://github.com/anaconda/conda-recipe-manager

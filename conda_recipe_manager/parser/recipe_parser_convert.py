@@ -171,6 +171,18 @@ class RecipeParserConvert(RecipeParser):
             context_obj[name] = value
         # Ensure that we do not include an empty context object (which is forbidden by the schema).
         if context_obj:
+            # Check for Jinja that is too complex to convert
+            complex_jinja = [
+                key
+                for key, value in context_obj.items()
+                if isinstance(value, str) and any(pattern.search(value) for pattern in Regex.V0_UNSUPPORTED_JINJA)
+            ]
+            if complex_jinja:
+                complex_jinja_display = ", ".join(complex_jinja)
+                self._msg_tbl.add_message(
+                    MessageCategory.WARNING, f"The following key(s) contain unsupported syntax: {complex_jinja_display}"
+                )
+
             self._patch_and_log({"op": "add", "path": "/context", "value": cast(JsonType, context_obj)})
 
         # Similarly, patch-in the new `schema_version` value to the top of the file

@@ -1,6 +1,36 @@
 # Changelog
-Note: version releases in the 0.x.y range may introduce breaking changes.
+NOTES:
+- Version releases in the 0.x.y range may introduce breaking changes.
+- See the auto-generated release notes for more details.
 
+## 0.3.4
+- Makes `DependencyVariable` type hashable.
+
+## 0.3.3
+- Fixes a bug discovered by user testing relating to manipulating complex dependencies.
+- Renames a few newer functions from `*_string` to `*_str` for project consistency.
+
+## 0.3.2
+- Refactors `RecipeParserDeps` into `RecipeReaderDeps`. Creates a new `RecipeParserDeps` that adds the high-level
+  `add_dependency()` and `remove_dependency` functions.
+- A few bug fixes and some unit testing improvements
+
+## 0.3.1
+Minor bug fixes. Addresses feedback from `conda-forge` users.
+
+## 0.3.0
+With this release, Conda Recipe Manager expands past it's original abilities to parse and
+upgrade Conda recipe files.
+
+Some highlights:
+- Introduces the `scanner`, `fetcher`, and `grapher` modules.
+- Adds significant tooling around our ability to parse Conda recipe dependencies.
+- Adds some initial V1 recipe file format support.
+- Introduces many bug fixes, parser improvements, and quality of life changes.
+- Adds `pyfakefs` to the unit testing suite.
+
+Full changelog available at:
+https://github.com/conda-incubator/conda-recipe-manager/compare/v0.2.1...v0.3.0
 
 ## 0.2.1
 Minor bug fixes and documentation improvements. Conversion compatibility with Bioconda recipe has improved significantly.
