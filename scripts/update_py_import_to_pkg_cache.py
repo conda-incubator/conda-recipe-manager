@@ -2,6 +2,10 @@
 """
 :Description: Script that fetches the Conda Forge's import name to package name mapping, shrinks it to decrease the
     cached size, and applies custom mappings for CRM. This data can be found in the `cf-graph-countyfair` project.
+    NOTE: There is an on-going effort to combine all conda-forge metadata into one API. At the time of writing this
+    tool, the API does not include the `import` naming data. See the links below for more context:
+      - https://github.com/conda-forge/conda-forge-metadata/tree/main
+      - https://github.com/conda-incubator/conda-recipe-manager/pull/218
 """
 from __future__ import annotations
 
