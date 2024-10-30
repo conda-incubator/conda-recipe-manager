@@ -462,23 +462,29 @@ class RecipeReader(IsModifiable):
                     multiline_indent = num_tab_spaces(multiline)
                 # The previous level is the key to this multi-line value, so we can safely reset it.
                 new_node.children = [multiline_node]
-            if new_indent > cur_indent:
-                node_stack.append(last_node)
-                # Edge case: The first element of a list of objects that is NOT a 1-line key-value pair needs
-                # to be added to the stack to maintain composition
-                if last_node.is_collection_element() and not last_node.children[0].is_single_key():
-                    node_stack.append(last_node.children[0])
-            elif new_indent < cur_indent:
-                # Multiple levels of depth can change from line to line, so multiple stack nodes must be pop'd. Example:
-                # foo:
-                #   bar:
-                #     fizz: buzz
-                # baz: blah
-                # TODO Figure out tab-depth of the recipe being read. 4 spaces is technically valid in YAML
-                depth_to_pop = (cur_indent - new_indent) // TAB_SPACE_COUNT
-                for _ in range(depth_to_pop):
-                    node_stack.pop()
-            cur_indent = new_indent
+
+            # Comment-only lines ignore indentation rules
+            if not new_node.is_comment() or (
+                new_node.is_comment() and new_indent != 0
+            ):  # abs(cur_indent - new_indent) <= TAB_SPACE_COUNT):
+                if new_indent > cur_indent:
+                    node_stack.append(last_node)
+                    # Edge case: The first element of a list of objects that is NOT a 1-line key-value pair needs
+                    # to be added to the stack to maintain composition
+                    if last_node.is_collection_element() and not last_node.children[0].is_single_key():
+                        node_stack.append(last_node.children[0])
+                elif new_indent < cur_indent:
+                    # Multiple levels of depth can change from line to line, so multiple stack nodes must be pop'd.
+                    # Example:
+                    #   foo:
+                    #     bar:
+                    #       fizz: buzz
+                    #   baz: blah
+                    # TODO Figure out tab-depth of the recipe being read. 4 spaces is technically valid in YAML
+                    depth_to_pop = (cur_indent - new_indent) // TAB_SPACE_COUNT
+                    for _ in range(depth_to_pop):
+                        node_stack.pop()
+                cur_indent = new_indent
             # Look at the stack to determine the parent Node and then append the current node to the new parent.
             parent = node_stack[-1]
             parent.children.append(new_node)
