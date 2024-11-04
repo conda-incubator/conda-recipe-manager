@@ -7,6 +7,9 @@ All tools are executed by running `conda-recipe-manger <tool-name>` or `crm <too
 To get a full list of all currently available tools, run: `crm --help`
 To get help with a particular tool, run: `crm <tool-name> --help`
 
+All of these commands should return a POSIX-style error code when they encounter an issue. The codes should correlate
+to unique error cases.
+
 <!-- TOC -->
 
 - [Conda Recipe Manager CLI Overview](#conda-recipe-manager-cli-overview)
@@ -25,6 +28,15 @@ To get help with a particular tool, run: `crm <tool-name> --help`
 # List of Tools
 
 ## `convert`
+This tool converts one or more recipe files from the V0 recipe format to the
+[V1 recipe format](https://github.com/conda/ceps/blob/main/cep-14.md).
+
+In single file mode, a converted recipe file is dumped to `STDOUT` or can be written to a specified file using the `-o`
+option. Warnings and errors are printed to `STDERR`
+
+In bulk (multi-recipe) mode, the converted recipe files can written to a `recipe.yaml` file in the same directory as
+the original V0 `meta.yaml` file is found in. Various statistics about the bulk conversion process are dumped to a
+JSON blob to `STDOUT`.
 
 ### Usage
 ```sh
