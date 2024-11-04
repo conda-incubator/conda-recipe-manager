@@ -3,84 +3,130 @@
 [release-badge]: https://img.shields.io/github/v/release/conda-incubator/conda-recipe-manager?logo=github
 
 
-# conda-recipe-manager
+# `conda-recipe-manager`
 
 [![Commit Checks][commit-checks-badge]](https://github.com/conda-incubator/conda-recipe-manager/actions/workflows/commit_checks.yaml)
 [![Integration Tests][integration-tests-badge]](https://github.com/conda-incubator/conda-recipe-manager/actions/workflows/integration_tests.yaml)
 [![GitHub Release][release-badge]](https://github.com/conda-incubator/conda-recipe-manager/releases)
 
-## Table of Contents
+# Overview
+Conda Recipe Manager (CRM) is a library and tool-set capable of managing Conda recipe files. It is intended
+to be used by package builders and developers to automate the generation and editing of Conda recipe files.
+
+The most mature portion of this project is the `parser` module, that allows developers to parse, render, and edit
+existing recipe files. There is also some on-going work for parsing recipe selectors and Conda Build Config files.
+
+For a more comprehensive break-down and status of the library modules, see
+[this document](./conda_recipe_manager/README.md).
+
+## Recipe Compatibility
+The latest recipe-parsing compatibility statistics can be found in our the summary of our automated
+[Integration Tests](https://github.com/conda-incubator/conda-recipe-manager/actions).
+
+NOTE: CRM only officially supports recipe files in the V0. There is on-going work to add full support for editing
+V1-formatted files.
 <!-- TOC -->
 
 - [conda-recipe-manager](#conda-recipe-manager)
-    - [Table of Contents](#table-of-contents)
 - [Overview](#overview)
+    - [Recipe Compatibility](#recipe-compatibility)
     - [History](#history)
 - [Getting Started](#getting-started)
     - [General Installation](#general-installation)
-        - [Install into your current environment](#install-into-your-current-environment)
-        - [Install into a custom environment](#install-into-a-custom-environment)
-- [Developer Notes](#developer-notes)
+    - [CLI Usage](#cli-usage)
+    - [Developer Installation and Notes](#developer-installation-and-notes)
+        - [Troubleshooting](#troubleshooting)
         - [Running pre-commit checks](#running-pre-commit-checks)
     - [Release process](#release-process)
 - [Special Thanks](#special-thanks)
 
 <!-- /TOC -->
-# Overview
-Conda Recipe Manager (CRM) is a library and tool set capable of parsing Conda recipe files. It is intended to be
-used by package builders and developers to automate the generation and editing of Conda recipe files.
-
-Currently only recipe files in the V0 format are supported, but there is some on-going work to add full support for
-V1-formatted files.
-
-Library documentation can be found [here](https://conda-incubator.github.io/conda-recipe-manager/index.html).
 
 ## History
 This project started out as a recipe parsing library in Anaconda's
-[percy](https://github.com/anaconda-distribution/percy) project.
+[percy](https://github.com/anaconda-distribution/percy) project. Some `git` history was lost during that transfer
+process.
+
+For those of you who come from `conda-forge`, you may associate CRM as "the tool that converts recipe files for
+`rattler-build`". Admittedly, that was the first-use case of the parsing capabilities provided by in this library. In
+the future, we aim to expand past that and offer a number of recipe automation tools and modules.
 
 # Getting Started
 
 ## General Installation
 
-### Install into your current environment
+To install the project to your current `conda` environment, run:
 ```sh
-make install
+conda install -c conda-forge conda-recipe-manager
+```
+This will add the commands `conda-recipe-manager` and `crm` to your environment's path. Note that both of these
+commands are the same. `crm` is provided for convenience of typing.
+
+## CLI Usage
+Although CRM is a library, it does ship with a handful of command line tools. Running `crm --help` will provide a
+an up-to-date listing of all available tools. Run `crm <tool-name> --help` for usage documentation about each tool.
+
+The following usage message was last updated on 2024-10-31:
+```sh
+Usage: crm [OPTIONS] COMMAND [ARGS]...
+
+  Command line interface for conda recipe management commands.
+
+Options:
+  --help  Show this message and exit.
+
+Commands:
+  convert             Converts a `meta.yaml` formatted-recipe file to the new
+                      `recipe.yaml` format.
+  graph               Interactive CLI for examining recipe dependency graphs.
+  patch               Modify recipe files with JSON patch blobs.
+  rattler-bulk-build  Given a directory, performs a bulk rattler-build
+                      operation. Assumes rattler-build is installed.
 ```
 
-### Install into a custom environment
-```sh
-make environment
-conda activate conda-recipe-manager
-```
+A high-level overview of the CLI tools can be found [here](./conda_recipe_manager/commands/README.md).
 
-# Developer Notes
+## Developer Installation and Notes
+The `make dev` directive will configure a `conda` environment named `conda-recipe-manager` for you with
+a development version of the tooling installed.
+
 ```sh
 make dev
 conda activate conda-recipe-manager
 ```
-The `dev` recipe will configure a `conda` environment named `conda-recipe-manager` with
-development tools installed.
 
-`pre-commit` is automatically installed and configured for you to run a number
-of automated checks on each commit.
+### Developer Documentation
+We aim for a very high bar when it comes to code documentation so that we may leverage automatic documentation
+workflows. API docs are hosted [here](https://conda-incubator.github.io/conda-recipe-manager/index.html)
 
-**NOTE:** As of writing, only a handful of files are checked by the linter and
-`pre-commit`. **ANY NEW FILES** should be added to these checks.
+### Setup Troubleshooting
+- If you are currently in the `conda-recipe-manager` environment, make sure that you exit the environment with
+  `conda deactivate` before running `make dev`. There have been known issues with attempting to delete the environment
+  while an active instance is open.
+- There have been known some issues using Berkley `make` (`bmake`) to setup the environment. The `Makefile` provided
+  assumes GNU `make` is being used. This should only be an issue when running `make dev` as the `conda-recipe-manager`
+  environment installs a version of GNU `make` to the environment.
 
-### Running pre-commit checks
-The provided `Makefile` also provides a handful of convenience recipes for
-running all or part of the `pre-commit` automations:
+### Making Commits
+`pre-commit` is automatically installed and configured for you to run a number of automated checks on each commit. These
+checks will also be strictly enforced by our automated GitHub workflows.
+
+This project uses modern Python type annotations and a strict set of `pylint` and `mypy` configurations to ensure code
+quality. We also use the `black` text formatter to prevent arguments over code style.
+
+### Running pre-commit Checks Individually
+The provided `Makefile` also provides a handful of convenience directives for running all or part of the `pre-commit`
+checks:
+
 1. `make test`: Runs all the unit tests
-1. `make test-cov`: Reports the current test coverage percentage and indicates
-   which lines are currently untested.
-1. `make lint`: Runs our `pylint` configuration, based on Google's Python
-   standards.
+1. `make test-cov`: Reports the current test coverage percentage and indicates which lines are currently untested.
+1. `make lint`: Runs our `pylint` configuration, based on Google's Python standards.
 1. `make format`: Automatically formats code
 1. `make analyze`: Runs the static analyzer, `mypy`.
-1. `make pre-commit`: Runs all the `pre-commit` checks
+1. `make pre-commit`: Runs all the `pre-commit` checks on every file.
 
-## Release process
+### Release process
+Here is a brief overview of our current release process:
 1. Update `CHANGELOG.md`
 1. Update the version number in `pyproject.toml`, `docs/conf.py`, and `recipe/meta.yaml`
 1. Ensure `environment.yaml` is up to date with the latest dependencies
