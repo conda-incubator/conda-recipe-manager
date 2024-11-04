@@ -7,7 +7,8 @@ from pyfakefs.fake_filesystem import FakeFilesystem
 
 from conda_recipe_manager.commands import bump_recipe
 from conda_recipe_manager.commands.utils.types import ExitCode
-from tests.file_loading import get_test_path
+from conda_recipe_manager.parser.recipe_parser import RecipeParser
+from tests.file_loading import get_test_path, load_recipe
 from tests.smoke_testing import assert_cli_usage
 
 
@@ -27,9 +28,14 @@ def test_bump_recipe_cli(fs: FakeFilesystem) -> None:
     fs.add_real_directory(get_test_path(), read_only=False)
 
     recipe_file_path = get_test_path() / "simple-recipe.yaml"
+    incremented_recipe_file_path = get_test_path() / "bump_recipe/incremented_by_one.yaml"
 
     result = runner.invoke(bump_recipe.bump_recipe, ["--build-num", str(recipe_file_path)])
-    # TODO: check that the build number has been updated by 1
+
+    parser = load_recipe(recipe_file_path, RecipeParser)
+    incremented_parser = load_recipe(incremented_recipe_file_path, RecipeParser)
+
+    assert parser.render() == incremented_parser.render()
     assert result.exit_code == ExitCode.SUCCESS
 
 
