@@ -25,6 +25,7 @@ The latest recipe-parsing compatibility statistics can be found in our the summa
 
 NOTE: CRM only officially supports recipe files in the V0. There is on-going work to add full support for editing
 V1-formatted files.
+
 <!-- TOC -->
 
 - [conda-recipe-manager](#conda-recipe-manager)
@@ -35,9 +36,11 @@ V1-formatted files.
     - [General Installation](#general-installation)
     - [CLI Usage](#cli-usage)
     - [Developer Installation and Notes](#developer-installation-and-notes)
-        - [Troubleshooting](#troubleshooting)
-        - [Running pre-commit checks](#running-pre-commit-checks)
-    - [Release process](#release-process)
+        - [Developer Documentation](#developer-documentation)
+        - [Setup Troubleshooting](#setup-troubleshooting)
+        - [Making Commits](#making-commits)
+        - [Running pre-commit Checks Individually](#running-pre-commit-checks-individually)
+        - [Release process](#release-process)
 - [Special Thanks](#special-thanks)
 
 <!-- /TOC -->
