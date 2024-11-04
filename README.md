@@ -23,6 +23,9 @@ For a more comprehensive break-down and status of the library modules, see
 The latest recipe-parsing compatibility statistics can be found in our the summary of our automated
 [Integration Tests](https://github.com/conda-incubator/conda-recipe-manager/actions).
 
+Our integration test data set is available [here](https://github.com/conda-incubator/conda-recipe-manager-test-data)
+and is based off of publicly available recipe files from various sources.
+
 NOTE: CRM only officially supports recipe files in the V0. There is on-going work to add full support for editing
 V1-formatted files.
 
