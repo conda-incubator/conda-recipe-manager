@@ -118,7 +118,8 @@ workflows. API docs are hosted [here](https://conda-incubator.github.io/conda-re
 checks will also be strictly enforced by our automated GitHub workflows.
 
 This project uses modern Python type annotations and a strict set of `pylint` and `mypy` configurations to ensure code
-quality. We also use the `black` text formatter to prevent arguments over code style.
+quality. We use the `black` text formatter to prevent arguments over code style. We attempt to signify if a type,
+variable, function, etc is `private`/`protected` with a single leading `_`.
 
 ### Running pre-commit Checks Individually
 The provided `Makefile` also provides a handful of convenience directives for running all or part of the `pre-commit`

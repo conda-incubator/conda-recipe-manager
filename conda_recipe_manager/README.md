@@ -34,3 +34,7 @@ The primary class for reading recipe files is called the `RecipeReader` while ed
 This module provides tools for _scanning_ files and other feedstock/recipe artifacts. Unlike the parsers, full
 comprehension of the file(s) is not guaranteed. We hope to develop some advanced static project analysis here for
 multiple programming languages.
+
+### `utils`
+This module provides general utilities that have no other sensible home. These modules tend to
+be used by multiple modules throughout this project.
