@@ -38,7 +38,7 @@ export PRINT_HELP_PYSCRIPT
 
 BROWSER := python -c "$$BROWSER_PYSCRIPT"
 
-clean: clean-test clean-build clean-env ## remove all build, test, coverage, and Python artifacts
+clean: clean-test clean-build clean-env clean-docs ## remove all build, test, coverage, and Python artifacts
 
 clean-build: ## remove build and Python artifacts
 	rm -fr build/
@@ -64,6 +64,10 @@ clean-test: ## remove test, coverage, and profiler artifacts
 	rm -rf pytest-coverage.txt
 	rm -fr *.prof
 	rm -fr profile.html profile.json
+
+clean-docs:	## Removes temporary and auto-generated static doc files
+	rm -rf docs/_autosummary
+	rm -rf docs/_build
 
 help:
 	$(PYTHON3) -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
@@ -96,5 +100,5 @@ format-docs:	## runs the docstring auto-formatter. NOTE: this requires manually 
 analyze:		## runs static analyzer on the project
 	mypy --config-file=.mypy.ini --cache-dir=/dev/null $(SRC_DIR) $(TEST_DIR) $(SCRIPTS_DIR)
 
-docs:			## generates static html documentation
+docs: clean-docs	## generates static html documentation
 	$(MAKE) -C docs html

@@ -2,6 +2,9 @@ conda_recipe_manager
 ====================
 
 .. toctree::
-   :maxdepth: 4
+
+.. autosummary::
+   :recursive:
+   :toctree: _autosummary
 
    conda_recipe_manager

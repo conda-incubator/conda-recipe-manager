@@ -27,7 +27,7 @@ class RecipeParserDeps(RecipeParser, RecipeReaderDeps):
     """
     Extension of the RecipeParser and RecipeReaderDeps classes to enables advanced dependency management abilities.
 
-    Beware of _The Diamond Problem_. This class extends the capabilities of the `RecipeParser` class with the
+    Beware of "The Diamond Problem". This class extends the capabilities of the `RecipeParser` class with the
     dependency tooling found in `RecipeReaderDeps`.
     """
 
