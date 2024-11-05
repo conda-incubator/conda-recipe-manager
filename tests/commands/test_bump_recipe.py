@@ -53,6 +53,7 @@ def test_bump_build_num_not_int(fs: FakeFilesystem) -> None:
     """
     Test that the command fails gracefully case when the build number is not an integer,
     and we are trying to increment it.
+
     :param fs: `pyfakefs` Fixture used to replace the file system
     """
 
