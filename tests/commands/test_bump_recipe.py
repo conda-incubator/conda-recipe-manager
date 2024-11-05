@@ -69,6 +69,7 @@ def test_bump_build_num_not_int(fs: FakeFilesystem) -> None:
 def test_bump_build_num_key_not_found(fs: FakeFilesystem) -> None:
     """
     Test that the command fails gracefully when the build number key is missing and we try to increment it's value.
+
     :param fs: `pyfakefs` Fixture used to replace the file system
     """
 
