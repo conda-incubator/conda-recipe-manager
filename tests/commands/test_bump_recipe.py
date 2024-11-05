@@ -32,6 +32,7 @@ def test_usage() -> None:
 def test_bump_recipe_cli(fs: FakeFilesystem, recipe_file: str, expected_recipe_file: str) -> None:
     """
     Test for the case when build number is successfully incremented by 1.
+
     :param fs: `pyfakefs` Fixture used to replace the file system
     """
     runner = CliRunner()
