@@ -11,7 +11,7 @@ repos:
   rev: v4.6.0
   hooks:
   - id: check-added-large-files
-    exclude_types: ["json", "yaml", "pdf", "html"]
+    exclude_types: ["json", "yaml", "pdf", "html", "png"]
   - id: check-ast
   - id: fix-byte-order-marker
   - id: check-case-conflict

@@ -23,6 +23,17 @@ extensions = [
     "sphinx.ext.doctest",
     "sphinx.ext.autosummary",
 ]
+autosummary_generate = True
+# See this doc for more details on autosummary options:
+#   https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#confval-autodoc_default_options
+autodoc_default_options = {
+    "members": True,
+    "undoc-members": True,
+    "private-members": False,
+    "show-inheritance": True,
+    "inherited-members": True,
+    "member-order": "groupwise",
+}
 
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
@@ -33,4 +44,4 @@ language = "English"
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = "sphinx_rtd_theme"
-html_static_path = ["_static"]
+# html_static_path = ["_static"]

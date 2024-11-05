@@ -64,8 +64,8 @@ class SpdxUtils:
 
         TODO Future: We might want to evaluate these tools for future use as they likely do a better job at matching
         licenses to the SPDX standard.
-          - https://github.com/spdx/spdx-license-matcher
-          - https://github.com/nexB/license-expression
+        * https://github.com/spdx/spdx-license-matcher
+        * https://github.com/nexB/license-expression
 
         :param license_field: License string provided by the recipe to match
         :returns: The closest matching SPDX identifier, if found
