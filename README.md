@@ -10,7 +10,7 @@
 [![GitHub Release][release-badge]](https://github.com/conda-incubator/conda-recipe-manager/releases)
 
 # Overview
-Conda Recipe Manager (CRM) is a library and tool-set capable of managing Conda recipe files. It is intended
+Conda Recipe Manager (CRM) is a library and tool-set capable of managing `conda` recipe files. It is intended
 to be used by package builders and developers to automate the generation and editing of Conda recipe files.
 
 The most mature portion of this project is the `parser` module, that allows developers to parse, render, and edit
