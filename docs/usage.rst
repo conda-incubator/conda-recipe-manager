@@ -1,20 +1,15 @@
 .. installation directions
 
 Getting Started/Installation
-===============
+============================
 
 **General Installation**
 
-Install into your current environment
+To install this project to your current conda environment:
 
 .. code-block:: console
 
-    make install
+    conda install -c conda-forge conda-recipe-manager
 
 
-Install into a custom environment
-
-.. code-block:: console
-
-    make environment
-    conda activate conda-recipe-manager
+For contributing to conda-recipe-manager, please refer to our developer (README) docs on GitHub.

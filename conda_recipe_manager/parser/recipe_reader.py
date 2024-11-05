@@ -53,7 +53,7 @@ class RecipeReader(IsModifiable):
     """
     Class that parses a recipe file string for read-only operations.
     NOTE: This base class inherits `IsModifiable` even though it provides read-only operations. This is done to
-          simplify some problems using Python's multi-inheritance mechanisms.
+    simplify some problems using Python's multi-inheritance mechanisms.
     """
 
     # Sentinel object used for detecting defaulting behavior.
