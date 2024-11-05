@@ -20,7 +20,7 @@ For a more comprehensive break-down and status of the library modules, see
 [this document](./conda_recipe_manager/README.md).
 
 ## Recipe Compatibility
-The latest recipe-parsing compatibility statistics can be found in our the summary of our automated
+The latest recipe-parsing compatibility statistics can be found in the summary of our automated
 [Integration Tests](https://github.com/conda-incubator/conda-recipe-manager/actions).
 
 Our integration test data set is available [here](https://github.com/conda-incubator/conda-recipe-manager-test-data)
