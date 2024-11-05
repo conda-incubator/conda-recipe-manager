@@ -1,5 +1,5 @@
 # Contributing
-Before contributing code to this project, please check to see if a similar or identical GitHub issue is already open.
+Before contributing to this project, please check to see if a similar or identical GitHub issue is already open.
 If no such issue applies, please file one so we may openly discuss the requested changes. This process aims to prevent
 duplicated work and to reduce wasted time on work that may already be underway.
 
