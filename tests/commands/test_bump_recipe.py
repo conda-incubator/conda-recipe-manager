@@ -43,7 +43,7 @@ def test_bump_recipe_cli(fs: FakeFilesystem, recipe_file: str, expected_recipe_f
     result = runner.invoke(bump_recipe.bump_recipe, ["--build-num", str(recipe_file_path)])
 
     parser = load_recipe(recipe_file_path, RecipeParser)
-    incremented_parser = load_recipe(incremented_recipe_file_path, RecipeParser)
+    expected_parser = load_recipe(expected_recipe_file_path, RecipeParser)
 
     assert parser == incremented_parser
     assert result.exit_code == ExitCode.SUCCESS
