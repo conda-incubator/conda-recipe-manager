@@ -1,0 +1,11 @@
+{% set zz_non_alpha_first = 42 %}
+{% set name = "types-toml" %}
+{% set version = "0.10.8.6" %}
+
+package:
+  name: {{ name|lower }}  # [unix]
+
+build:
+  number: []
+  skip: true  # [py<37]
+  is_true: true
