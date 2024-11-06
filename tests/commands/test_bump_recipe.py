@@ -21,7 +21,7 @@ def test_usage() -> None:
 
 
 @pytest.mark.parametrize(
-    "recipe_file, bumped_recipe_file",
+    "recipe_file, expected_recipe_file",
     [
         ("simple-recipe.yaml", "bump_recipe/build_num_1.yaml"),
         ("bump_recipe/build_num_1.yaml", "bump_recipe/build_num_2.yaml"),
@@ -39,14 +39,14 @@ def test_bump_recipe_cli(fs: FakeFilesystem, recipe_file: str, expected_recipe_f
     fs.add_real_directory(get_test_path(), read_only=False)
 
     recipe_file_path = get_test_path() / recipe_file
-    incremented_recipe_file_path = get_test_path() / bumped_recipe_file
+    expected_recipe_file_path = get_test_path() / expected_recipe_file
 
     result = runner.invoke(bump_recipe.bump_recipe, ["--build-num", str(recipe_file_path)])
 
     parser = load_recipe(recipe_file_path, RecipeParser)
     expected_parser = load_recipe(expected_recipe_file_path, RecipeParser)
 
-    assert parser == incremented_parser
+    assert parser == expected_parser
     assert result.exit_code == ExitCode.SUCCESS
 
 

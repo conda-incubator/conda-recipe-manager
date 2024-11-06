@@ -61,10 +61,7 @@ def bump_recipe(recipe_file_path: str, build_num: bool) -> None:
         if not recipe_parser.patch(required_patch_blob):
             print_err(f"Couldn't perform the patch: {required_patch_blob}.")
             sys.exit(ExitCode.PARSE_EXCEPTION)
-        else:
-            Path(recipe_file_path).write_text(recipe_parser.render(), encoding="utf-8")
-            sys.exit(ExitCode.SUCCESS)
 
-    # TODO Future rm
-    else:
-        print_err("Sorry, the default bump behaviour has not been implemented yet.")
+        Path(recipe_file_path).write_text(recipe_parser.render(), encoding="utf-8")
+        sys.exit(ExitCode.SUCCESS)
+    print_err("Sorry, the default bump behaviour has not been implemented yet.")
