@@ -7,7 +7,8 @@ from __future__ import annotations
 from abc import ABCMeta, abstractmethod
 from typing import NamedTuple
 
-from conda_recipe_manager.types import DependencyType, MessageTable
+from conda_recipe_manager.parser.dependency import DependencySection
+from conda_recipe_manager.types import MessageTable
 
 
 class ProjectDependency(NamedTuple):
@@ -18,7 +19,7 @@ class ProjectDependency(NamedTuple):
     """
 
     name: str
-    type: DependencyType
+    type: DependencySection
 
 
 class BaseDependencyScanner(metaclass=ABCMeta):
