@@ -23,15 +23,45 @@ def test_usage() -> None:
 @pytest.mark.parametrize(
     "recipe_file, expected_recipe_file",
     [
+        ("simple-recipe.yaml", "simple-recipe.yaml"),
+        ("bump_recipe/build_num_1.yaml", "simple-recipe.yaml"),
+        ("bump_recipe/build_num_42.yaml", "simple-recipe.yaml"),
+        ("bump_recipe/build_num_-1.yaml", "simple-recipe.yaml"),
+    ],
+)
+def test_bump_recipe_cli(fs: FakeFilesystem, recipe_file: str, expected_recipe_file: str) -> None:
+    """
+    Test that the build number is successfully reset to 0.
+
+    :param fs: `pyfakefs` Fixture used to replace the file system
+    """
+    runner = CliRunner()
+    fs.add_real_directory(get_test_path(), read_only=False)
+
+    recipe_file_path = get_test_path() / recipe_file
+    expected_recipe_file_path = get_test_path() / expected_recipe_file
+
+    result = runner.invoke(bump_recipe.bump_recipe, [str(recipe_file_path)])
+
+    parser = load_recipe(recipe_file_path, RecipeParser)
+    expected_parser = load_recipe(expected_recipe_file_path, RecipeParser)
+
+    assert parser == expected_parser
+    assert result.exit_code == ExitCode.SUCCESS
+
+
+@pytest.mark.parametrize(
+    "recipe_file, expected_recipe_file",
+    [
         ("simple-recipe.yaml", "bump_recipe/build_num_1.yaml"),
         ("bump_recipe/build_num_1.yaml", "bump_recipe/build_num_2.yaml"),
         ("bump_recipe/build_num_42.yaml", "bump_recipe/build_num_43.yaml"),
         ("bump_recipe/build_num_-1.yaml", "simple-recipe.yaml"),
     ],
 )
-def test_bump_recipe_cli(fs: FakeFilesystem, recipe_file: str, expected_recipe_file: str) -> None:
+def test_bump_recipe_cli_build_num_true(fs: FakeFilesystem, recipe_file: str, expected_recipe_file: str) -> None:
     """
-    Test for the case when build number is successfully incremented by 1.
+    Test that the build number is successfully incremented by 1.
 
     :param fs: `pyfakefs` Fixture used to replace the file system
     """
@@ -79,4 +109,19 @@ def test_bump_build_num_key_not_found(fs: FakeFilesystem) -> None:
 
     recipe_file_path = get_test_path() / "bump_recipe/no_build_num.yaml"
     result = runner.invoke(bump_recipe.bump_recipe, ["--build-num", str(recipe_file_path)])
+    assert result.exit_code == ExitCode.ILLEGAL_OPERATION
+
+
+def test_bump_no_build_key_found(fs: FakeFilesystem) -> None:
+    """
+    Test that the command fails gracefully when the build key is missing and we try to revert build number to zero.
+
+    :param fs: `pyfakefs` Fixture used to replace the file system
+    """
+
+    runner = CliRunner()
+    fs.add_real_directory(get_test_path(), read_only=False)
+
+    recipe_file_path = get_test_path() / "bump_recipe/no_build_key.yaml"
+    result = runner.invoke(bump_recipe.bump_recipe, [str(recipe_file_path)])
     assert result.exit_code == ExitCode.ILLEGAL_OPERATION
