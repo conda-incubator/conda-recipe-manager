@@ -1,5 +1,4 @@
-# The `.ONESHELL` and setting `SHELL` allows us to run commands that require
-# `conda activate`
+# The `.ONESHELL` and setting `SHELL` allows us to run commands that require `conda activate`
 .ONESHELL:
 SHELL := /bin/bash
 # For GNU Make v4 and above, you must include the `-c` in order for `make` to find symbols from `PATH`
@@ -8,7 +7,7 @@ CONDA_ACTIVATE = source $$(conda info --base)/etc/profile.d/conda.sh ; conda act
 # Ensure that we are using the python interpretter provided by the conda environment.
 PYTHON3 := "$(CONDA_PREFIX)/bin/python3"
 
-.PHONY: clean clean-env clean-test clean-pyc clean-build clean-other help dev test test-debug test-cov pre-commit lint format format-docs analyze docs
+.PHONY: clean clean-build clean-env clean-test help dev pre-commit test test-cov lint format format-docs analyze docs
 .DEFAULT_GOAL := help
 
 CONDA_ENV_NAME ?= conda-recipe-manager
@@ -16,6 +15,7 @@ SRC_DIR = conda_recipe_manager
 TEST_DIR = tests/
 SCRIPTS_DIR = scripts/
 
+# Auto-generated `make help` directives defined in this `Makefile`.
 define BROWSER_PYSCRIPT
 import os, webbrowser, sys
 
@@ -38,50 +38,39 @@ export PRINT_HELP_PYSCRIPT
 
 BROWSER := python -c "$$BROWSER_PYSCRIPT"
 
-clean: clean-cov clean-build clean-env clean-pyc clean-test clean-other ## remove all build, test, coverage and Python artifacts
+clean: clean-test clean-build clean-env clean-docs ## remove all build, test, coverage, and Python artifacts
 
-clean-cov:
-	rm -rf .coverage
-	rm -rf htmlcov
-	rm -rf reports/{*.html,*.png,*.js,*.css,*.json}
-	rm -rf pytest.xml
-	rm -rf pytest-coverage.txt
-
-clean-build: ## remove build artifacts
+clean-build: ## remove build and Python artifacts
 	rm -fr build/
 	rm -fr dist/
 	rm -fr .eggs/
 	find . -name '*.egg-info' -exec rm -fr {} +
 	find . -name '*.egg' -exec rm -f {} +
-
-clean-env:					## remove conda environment
-	conda remove -y -n $(CONDA_ENV_NAME) --all
-
-clean-pyc: ## remove Python file artifacts
 	find . -name '*.pyc' -exec rm -f {} +
 	find . -name '*.pyo' -exec rm -f {} +
 	find . -name '*~' -exec rm -f {} +
 	find . -name '__pycache__' -exec rm -fr {} +
 
-clean-test: ## remove test and coverage artifacts
+clean-env:					## remove conda environment
+	conda remove -y -n $(CONDA_ENV_NAME) --all
+
+clean-test: ## remove test, coverage, and profiler artifacts
 	rm -fr .tox/
 	rm -f .coverage
 	rm -fr htmlcov/
 	rm -fr .pytest_cache
-
-clean-other:
+	rm -rf reports/{*.html,*.png,*.js,*.css,*.json}
+	rm -rf pytest.xml
+	rm -rf pytest-coverage.txt
 	rm -fr *.prof
 	rm -fr profile.html profile.json
 
+clean-docs:	## Removes temporary and auto-generated static doc files
+	rm -rf docs/_autosummary
+	rm -rf docs/_build
+
 help:
 	$(PYTHON3) -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
-
-install: clean	## install the package to the active Python's site-packages
-	pip install .
-
-environment:    ## handles environment creation
-	conda env create -f environment.yaml --name $(CONDA_ENV_NAME) --yes
-	conda run --name $(CONDA_ENV_NAME) pip install .
 
 dev: clean		## install the package's development version to a fresh environment
 	conda env create -f environment.yaml --name $(CONDA_ENV_NAME) --yes
@@ -94,9 +83,6 @@ pre-commit:     ## runs pre-commit against files. NOTE: older files are disabled
 test:			## runs test cases
 	$(PYTHON3) -m pytest -n auto --capture=no $(TEST_DIR)
 
-test-debug:		## runs test cases with debugging info enabled
-	$(PYTHON3) -m pytest -n auto -vv --capture=no $(TEST_DIR)
-
 test-cov:		## checks test coverage requirements
 	$(PYTHON3) -m pytest -n auto --cov-config=.coveragerc --cov=$(SRC_DIR) \
 		$(TEST_DIR) --cov-fail-under=80 --cov-report term-missing
@@ -108,11 +94,11 @@ format:			## runs the code auto-formatter
 	isort --profile black --line-length=120 $(SRC_DIR) $(TEST_DIR) $(SCRIPTS_DIR)
 	black --line-length=120 $(SRC_DIR) $(TEST_DIR) $(SCRIPTS_DIR)
 
-format-docs:	## runs the docstring auto-formatter. Note this requires manually installing `docconvert` with `pip`
+format-docs:	## runs the docstring auto-formatter. NOTE: this requires manually installing `docconvert` with `pip`
 	docconvert --in-place --config .docconvert.json $(SRC_DIR)
 
 analyze:		## runs static analyzer on the project
 	mypy --config-file=.mypy.ini --cache-dir=/dev/null $(SRC_DIR) $(TEST_DIR) $(SCRIPTS_DIR)
 
-docs:
+docs: clean-docs	## generates static html documentation
 	$(MAKE) -C docs html
