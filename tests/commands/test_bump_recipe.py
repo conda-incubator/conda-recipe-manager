@@ -50,6 +50,27 @@ def test_bump_recipe_cli(fs: FakeFilesystem, recipe_file: str, expected_recipe_f
     assert result.exit_code == ExitCode.SUCCESS
 
 
+def test_bump_cli_build_number_key_missing(fs: FakeFilesystem) -> None:
+    """
+    Test that a `build: number:` key is added and set to 0 when it's missing.
+
+    :param fs: `pyfakefs` Fixture used to replace the file system
+    """
+    runner = CliRunner()
+    fs.add_real_directory(get_test_path(), read_only=False)
+
+    recipe_file_path = get_test_path() / "bump_recipe/no_build_num.yaml"
+    expected_recipe_file_path = get_test_path() / "bump_recipe/build_num_added.yaml"
+
+    result = runner.invoke(bump_recipe.bump_recipe, [str(recipe_file_path)])
+
+    parser = load_recipe(recipe_file_path, RecipeParser)
+    expected_parser = load_recipe(expected_recipe_file_path, RecipeParser)
+
+    assert parser == expected_parser
+    assert result.exit_code == ExitCode.SUCCESS
+
+
 @pytest.mark.parametrize(
     "recipe_file, expected_recipe_file",
     [
@@ -59,7 +80,7 @@ def test_bump_recipe_cli(fs: FakeFilesystem, recipe_file: str, expected_recipe_f
         ("bump_recipe/build_num_-1.yaml", "simple-recipe.yaml"),
     ],
 )
-def test_bump_recipe_cli_build_num_true(fs: FakeFilesystem, recipe_file: str, expected_recipe_file: str) -> None:
+def test_bump_recipe_cli_build_num_flag_true(fs: FakeFilesystem, recipe_file: str, expected_recipe_file: str) -> None:
     """
     Test that the build number is successfully incremented by 1.
 
@@ -80,7 +101,7 @@ def test_bump_recipe_cli_build_num_true(fs: FakeFilesystem, recipe_file: str, ex
     assert result.exit_code == ExitCode.SUCCESS
 
 
-def test_bump_build_num_not_int(fs: FakeFilesystem) -> None:
+def test_bump_cli_build_num_not_int(fs: FakeFilesystem) -> None:
     """
     Test that the command fails gracefully case when the build number is not an integer,
     and we are trying to increment it.
@@ -97,7 +118,7 @@ def test_bump_build_num_not_int(fs: FakeFilesystem) -> None:
     assert result.exit_code == ExitCode.ILLEGAL_OPERATION
 
 
-def test_bump_build_num_key_not_found(fs: FakeFilesystem) -> None:
+def test_bump_cli_build_numb_key_not_found(fs: FakeFilesystem) -> None:
     """
     Test that the command fails gracefully when the build number key is missing and we try to increment it's value.
 
@@ -112,7 +133,7 @@ def test_bump_build_num_key_not_found(fs: FakeFilesystem) -> None:
     assert result.exit_code == ExitCode.ILLEGAL_OPERATION
 
 
-def test_bump_no_build_key_found(fs: FakeFilesystem) -> None:
+def test_bump_cli_no_build_key_found(fs: FakeFilesystem) -> None:
     """
     Test that the command fails gracefully when the build key is missing and we try to revert build number to zero.
 
