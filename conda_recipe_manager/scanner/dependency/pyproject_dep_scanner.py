@@ -47,19 +47,26 @@ class PyProjectDependencyScanner(BaseDependencyScanner):
                 self._msg_tbl.add_message(MessageCategory.EXCEPTION, "Could not parse `pyproject.toml` file.")
             return set()
 
-        # TODO perform schema check against `pyproject.toml`. There is a `validate-pyproject` library hosted on
-        # `conda-forge`, but it is marked as "experimental" by its maintainers.
+        # NOTE: There is a `validate-pyproject` library hosted on `conda-forge`, but it is marked as "experimental" by
+        # its maintainers. Given that and that we only read a small portion of the file, we only validate what we use.
+        if "project" not in data:
+            self._msg_tbl.add_message(MessageCategory.ERROR, "`pyproject.toml` file is missing a `project` section.")
+            return set()
 
         # NOTE: The dependency constraint system used in `pyproject.toml` appears to be compatible with `conda`'s
         # `MatchSpec` object. For now, dependencies that can't be parsed with `MatchSpec` will store the raw string in
         # a `.name` field.
         deps: set[ProjectDependency] = set()
-        for dep_name in cast(list[str], data["project"]["dependencies"]):
+        for dep_name in cast(list[str], data["project"].get("dependencies", default=[])):  # type: ignore[call-overload]
             deps.add(new_project_dependency(dep_name, DependencySection.RUN))
 
         # Optional dependencies are stored in a dictionary, where the key is the "package extra" name and the value is
         # a dependency list. For example: {'dev': ['pytest'], 'conda_build': ['conda-build']}
-        for dep_lst in cast(dict[str, list[str]], data["project"]["optional-dependencies"]).values():
+        opt_deps_map = cast(
+            dict[str, list[str]],
+            data["project"].get("optional-dependencies", default={}),  # type: ignore[call-overload]
+        )
+        for dep_lst in opt_deps_map.values():
             for dep_name in dep_lst:
                 deps.add(new_project_dependency(dep_name, DependencySection.RUN_CONSTRAINTS))
 
