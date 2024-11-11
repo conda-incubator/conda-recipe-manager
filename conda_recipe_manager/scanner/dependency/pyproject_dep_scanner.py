@@ -9,7 +9,11 @@ from pathlib import Path
 from typing import Final, cast
 
 from conda_recipe_manager.parser.dependency import DependencySection
-from conda_recipe_manager.scanner.dependency.base_dep_scanner import BaseDependencyScanner, ProjectDependency
+from conda_recipe_manager.scanner.dependency.base_dep_scanner import (
+    BaseDependencyScanner,
+    ProjectDependency,
+    new_project_dependency,
+)
 
 
 class PyProjectDependencyScanner(BaseDependencyScanner):
@@ -37,15 +41,17 @@ class PyProjectDependencyScanner(BaseDependencyScanner):
         with open(self._src_dir / "pyproject.toml", "rb") as f:
             data = cast(dict[str, dict[str, list[str] | dict[str, list[str]]]], tomllib.load(f))
 
-        # TODO matchspec equivalency
+        # NOTE: The dependency constraint system used in `pyproject.toml` appears to be compatible with `conda`'s
+        # `MatchSpec` object. For now, dependencies that can't be parsed with `MatchSpec` will store the raw string in
+        # a `.name` field.
         deps: set[ProjectDependency] = set()
         for dep_name in cast(list[str], data["project"]["dependencies"]):
-            deps.add(ProjectDependency(dep_name, DependencySection.RUN))
+            deps.add(new_project_dependency(dep_name, DependencySection.RUN))
 
         # Optional dependencies are stored in a dictionary, where the key is the "package extra" name and the value is
         # a dependency list. For example: {'dev': ['pytest'], 'conda_build': ['conda-build']}
         for dep_lst in cast(dict[str, list[str]], data["project"]["optional-dependencies"]).values():
             for dep_name in dep_lst:
-                deps.add(ProjectDependency(dep_name, DependencySection.RUN_CONSTRAINTS))
+                deps.add(new_project_dependency(dep_name, DependencySection.RUN_CONSTRAINTS))
 
         return deps

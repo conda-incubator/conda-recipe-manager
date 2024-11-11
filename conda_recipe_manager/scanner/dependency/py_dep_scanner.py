@@ -11,7 +11,11 @@ from pathlib import Path
 from typing import Final
 
 from conda_recipe_manager.parser.dependency import DependencySection
-from conda_recipe_manager.scanner.dependency.base_dep_scanner import BaseDependencyScanner, ProjectDependency
+from conda_recipe_manager.scanner.dependency.base_dep_scanner import (
+    BaseDependencyScanner,
+    ProjectDependency,
+    new_project_dependency,
+)
 from conda_recipe_manager.types import MessageCategory
 
 # Table that maps import names that do not match the package name for common packages. See this StackOverflow post for
@@ -123,7 +127,7 @@ class PythonDependencyScanner(BaseDependencyScanner):
                     else DependencySection.RUN
                 )
 
-                deps.add(ProjectDependency(package_name, dep_type))
+                deps.add(new_project_dependency(package_name, dep_type))
 
         return deps
 
@@ -150,7 +154,7 @@ class PythonDependencyScanner(BaseDependencyScanner):
         def _filter_test_duplicates(dep: ProjectDependency) -> bool:
             if (
                 dep.type == DependencySection.TESTS
-                and ProjectDependency(dep.name, DependencySection.RUN) in all_imports
+                and ProjectDependency(dep.data, DependencySection.RUN) in all_imports
             ):
                 return False
             return True
@@ -163,7 +167,7 @@ class PythonDependencyScanner(BaseDependencyScanner):
         # TODO filter unused imports
 
         # Python is inherently a HOST and RUN dependency for all Python projects.
-        all_imports.add(ProjectDependency("python", DependencySection.HOST))
-        all_imports.add(ProjectDependency("python", DependencySection.RUN))
+        all_imports.add(new_project_dependency("python", DependencySection.HOST))
+        all_imports.add(new_project_dependency("python", DependencySection.RUN))
 
         return all_imports

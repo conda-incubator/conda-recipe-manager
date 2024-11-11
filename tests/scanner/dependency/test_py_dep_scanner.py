@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Final, cast
 
 import pytest
+from conda.models.match_spec import MatchSpec
 from pyfakefs.fake_filesystem import FakeFilesystem
 
 from conda_recipe_manager.parser.dependency import DependencySection
@@ -20,13 +21,13 @@ from tests.file_loading import get_test_path
         (
             "dummy_py_project_01",
             {
-                ProjectDependency("conda_recipe_manager", DependencySection.RUN),
-                ProjectDependency("matplotlib", DependencySection.RUN),  # Two imports on one line
-                ProjectDependency("networkx", DependencySection.RUN),  # Two imports on one line
-                ProjectDependency("python", DependencySection.HOST),
-                ProjectDependency("python", DependencySection.RUN),
-                ProjectDependency("pyyaml", DependencySection.TESTS),
-                ProjectDependency("requests", DependencySection.RUN),  # Found in source and test code.
+                ProjectDependency(MatchSpec("conda_recipe_manager"), DependencySection.RUN),
+                ProjectDependency(MatchSpec("matplotlib"), DependencySection.RUN),  # Two imports on one line
+                ProjectDependency(MatchSpec("networkx"), DependencySection.RUN),  # Two imports on one line
+                ProjectDependency(MatchSpec("python"), DependencySection.HOST),
+                ProjectDependency(MatchSpec("python"), DependencySection.RUN),
+                ProjectDependency(MatchSpec("pyyaml"), DependencySection.TESTS),
+                ProjectDependency(MatchSpec("requests"), DependencySection.RUN),  # Found in source and test code.
             },
         ),
     ],
