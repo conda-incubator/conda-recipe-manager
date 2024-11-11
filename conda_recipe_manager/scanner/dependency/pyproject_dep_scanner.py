@@ -14,6 +14,7 @@ from conda_recipe_manager.scanner.dependency.base_dep_scanner import (
     ProjectDependency,
     new_project_dependency,
 )
+from conda_recipe_manager.types import MessageCategory
 
 
 class PyProjectDependencyScanner(BaseDependencyScanner):
@@ -34,12 +35,20 @@ class PyProjectDependencyScanner(BaseDependencyScanner):
         """
         Actively scans a project for dependencies. Implementation is dependent on the type of scanner used.
 
-        :returns: A set of unique dependencies found by the scanner.
+        :returns: A set of unique dependencies found by the scanner, if any are found.
         """
-        # TODO handle malformed `pyproject.toml` exceptions
-        # TODO perform schema check against `pyproject.toml`
-        with open(self._src_dir / "pyproject.toml", "rb") as f:
-            data = cast(dict[str, dict[str, list[str] | dict[str, list[str]]]], tomllib.load(f))
+        try:
+            with open(self._src_dir / "pyproject.toml", "rb") as f:
+                data = cast(dict[str, dict[str, list[str] | dict[str, list[str]]]], tomllib.load(f))
+        except (FileNotFoundError, tomllib.TOMLDecodeError) as e:
+            if isinstance(e, FileNotFoundError):
+                self._msg_tbl.add_message(MessageCategory.EXCEPTION, "`pyproject.toml` file not found.")
+            if isinstance(e, tomllib.TOMLDecodeError):
+                self._msg_tbl.add_message(MessageCategory.EXCEPTION, "Could not parse `pyproject.toml` file.")
+            return set()
+
+        # TODO perform schema check against `pyproject.toml`. There is a `validate-pyproject` library hosted on
+        # `conda-forge`, but it is marked as "experimental" by its maintainers.
 
         # NOTE: The dependency constraint system used in `pyproject.toml` appears to be compatible with `conda`'s
         # `MatchSpec` object. For now, dependencies that can't be parsed with `MatchSpec` will store the raw string in
