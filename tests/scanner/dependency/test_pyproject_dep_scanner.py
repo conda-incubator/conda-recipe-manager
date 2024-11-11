@@ -32,6 +32,27 @@ from tests.file_loading import get_test_path
                 ProjectDependency(MatchSpec("conda-build"), DependencySection.RUN_CONSTRAINTS),
             },
         ),
+        (
+            "crm_mock_pyproject_only_deps.toml",
+            {
+                ProjectDependency(MatchSpec("click"), DependencySection.RUN),
+                ProjectDependency(MatchSpec("jinja2"), DependencySection.RUN),
+                ProjectDependency(MatchSpec("pyyaml"), DependencySection.RUN),
+                ProjectDependency(MatchSpec("jsonschema"), DependencySection.RUN),
+                ProjectDependency(MatchSpec("requests"), DependencySection.RUN),
+                ProjectDependency(MatchSpec("gitpython"), DependencySection.RUN),
+                ProjectDependency(MatchSpec("networkx"), DependencySection.RUN),
+                ProjectDependency(MatchSpec("matplotlib"), DependencySection.RUN),
+                ProjectDependency(MatchSpec("pygraphviz"), DependencySection.RUN),
+            },
+        ),
+        (
+            "crm_mock_pyproject_only_optional.toml",
+            {
+                ProjectDependency(MatchSpec("pytest"), DependencySection.RUN_CONSTRAINTS),
+                ProjectDependency(MatchSpec("conda-build"), DependencySection.RUN_CONSTRAINTS),
+            },
+        ),
     ],
 )
 def test_scan(project_fn: str, expected: set[ProjectDependency]) -> None:
