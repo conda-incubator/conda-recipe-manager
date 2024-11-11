@@ -45,9 +45,9 @@ class PyProjectDependencyScanner(BaseDependencyScanner):
                 data = cast(dict[str, dict[str, list[str] | dict[str, list[str]]]], tomllib.load(f))
         except (FileNotFoundError, tomllib.TOMLDecodeError) as e:
             if isinstance(e, FileNotFoundError):
-                self._msg_tbl.add_message(MessageCategory.EXCEPTION, "`pyproject.toml` file not found.")
+                self._msg_tbl.add_message(MessageCategory.EXCEPTION, f"`{self._project_fn}` file not found.")
             if isinstance(e, tomllib.TOMLDecodeError):
-                self._msg_tbl.add_message(MessageCategory.EXCEPTION, "Could not parse `pyproject.toml` file.")
+                self._msg_tbl.add_message(MessageCategory.EXCEPTION, f"Could not parse `{self._project_fn}` file.")
             return set()
 
         # NOTE: There is a `validate-pyproject` library hosted on `conda-forge`, but it is marked as "experimental" by
@@ -62,16 +62,12 @@ class PyProjectDependencyScanner(BaseDependencyScanner):
         # `MatchSpec` object. For now, dependencies that can't be parsed with `MatchSpec` will store the raw string in
         # a `.name` field.
         deps: set[ProjectDependency] = set()
-        for dep_name in cast(list[str], data["project"].get("dependencies", default=[])):  # type: ignore[call-overload]
+        for dep_name in cast(list[str], data["project"].get("dependencies", [])):
             deps.add(new_project_dependency(dep_name, DependencySection.RUN))
 
         # Optional dependencies are stored in a dictionary, where the key is the "package extra" name and the value is
         # a dependency list. For example: {'dev': ['pytest'], 'conda_build': ['conda-build']}
-        opt_deps_map = cast(
-            dict[str, list[str]],
-            data["project"].get("optional-dependencies", default={}),  # type: ignore[call-overload]
-        )
-        for dep_lst in opt_deps_map.values():
+        for dep_lst in cast(dict[str, list[str]], data["project"].get("optional-dependencies", {})).values():
             for dep_name in dep_lst:
                 deps.add(new_project_dependency(dep_name, DependencySection.RUN_CONSTRAINTS))
 
