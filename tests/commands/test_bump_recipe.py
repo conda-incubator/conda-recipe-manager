@@ -39,7 +39,7 @@ def test_bump_recipe_cli(
     fs: FakeFilesystem, recipe_file: str, increment_build_num: bool, expected_recipe_file: str
 ) -> None:
     """
-    Test that the build number is successfully reset to 0.
+    Test that the recipe file is successfully updated/bumped.
 
     :param fs: `pyfakefs` Fixture used to replace the file system
     """
@@ -82,7 +82,7 @@ def test_bump_cli_build_number_key_missing(fs: FakeFilesystem) -> None:
     assert result.exit_code == ExitCode.SUCCESS
 
 
-def test_bump_cli_build_num_not_int(fs: FakeFilesystem) -> None:
+def test_bump_cli_build_number_not_int(fs: FakeFilesystem) -> None:
     """
     Test that the command fails gracefully case when the build number is not an integer,
     and we are trying to increment it.
@@ -99,7 +99,7 @@ def test_bump_cli_build_num_not_int(fs: FakeFilesystem) -> None:
     assert result.exit_code == ExitCode.ILLEGAL_OPERATION
 
 
-def test_bump_cli_build_numb_key_not_found(fs: FakeFilesystem) -> None:
+def test_bump_cli_build_number_key_not_found(fs: FakeFilesystem) -> None:
     """
     Test that the command fails gracefully when the build number key is missing and we try to increment it's value.
 
