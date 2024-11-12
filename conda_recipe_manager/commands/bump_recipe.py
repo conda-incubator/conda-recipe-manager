@@ -12,8 +12,40 @@ import click
 
 from conda_recipe_manager.commands.utils.print import print_err
 from conda_recipe_manager.commands.utils.types import ExitCode
+from conda_recipe_manager.fetcher.artifact_fetcher import from_recipe as af_from_recipe
+from conda_recipe_manager.fetcher.http_artifact_fetcher import HttpArtifactFetcher
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
 from conda_recipe_manager.types import JsonPatchType
+
+
+def _update_sha256(recipe_parser: RecipeParser) -> None:
+    """
+    Attempts to update the SHA-256 hash(s) in the `/source` section of a recipe file, if applicable. Note that this is
+    only required for build artifacts that are hosted as compressed software archives. If this field must be updated,
+    a lengthy network request may be required to calculate the new hash.
+
+    :param recipe_parser: Recipe file to update.
+    """
+    fetcher_lst = af_from_recipe(recipe_parser, True)
+    if not fetcher_lst:
+        return
+
+    # TODO handle case where SHA is stored in one or more variables (see cctools-ld64.yaml)
+
+    # TODO Future: Figure out
+    # NOTE: Each source _might_ have a different SHA-256 hash. This is the case for the `cctools-ld64` feedstock. That
+    # project has a different implementation per architecture. However, in other circumstances, mirrored sources with
+    # different hashes might imply there is a security threat.
+    for src_path, fetcher in fetcher_lst.items():
+        if not isinstance(fetcher, HttpArtifactFetcher):
+            continue
+
+        # TODO retry mechanism
+        # TODO attempt fetch in the background, especially if multiple fetch() calls are required.
+        fetcher.fetch()
+        sha = fetcher.get_archive_sha256()
+        # TODO make this an `add` op if the path is missing
+        recipe_parser.patch({"op": "replace", "path": src_path, "value": sha})
 
 
 # TODO Improve. In order for `click` to play nice with `pyfakefs`, we set `path_type=str` and delay converting to a
