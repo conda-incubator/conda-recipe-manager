@@ -99,7 +99,7 @@ def test_bump_cli_build_number_not_int(fs: FakeFilesystem) -> None:
     assert result.exit_code == ExitCode.ILLEGAL_OPERATION
 
 
-def test_bump_cli_build_number_key_not_found(fs: FakeFilesystem) -> None:
+def test_bump_cli_increment_build_num_key_not_found(fs: FakeFilesystem) -> None:
     """
     Test that the command fails gracefully when the build number key is missing and we try to increment it's value.
 
