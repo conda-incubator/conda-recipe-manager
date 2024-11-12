@@ -33,6 +33,23 @@ from tests.file_loading import get_test_path
             },
         ),
         (
+            "crm_mock_pyproject_version_constraints.toml",
+            {
+                ProjectDependency(MatchSpec("click >= 1.2"), DependencySection.RUN),
+                ProjectDependency(MatchSpec("jinja2"), DependencySection.RUN),
+                ProjectDependency(MatchSpec("pyyaml"), DependencySection.RUN),
+                ProjectDependency(MatchSpec("jsonschema"), DependencySection.RUN),
+                ProjectDependency(MatchSpec("requests >= 2.8.1, == 2.8.*"), DependencySection.RUN),
+                ProjectDependency(MatchSpec("gitpython"), DependencySection.RUN),
+                ProjectDependency(MatchSpec("networkx"), DependencySection.RUN),
+                ProjectDependency(MatchSpec("matplotlib"), DependencySection.RUN),
+                ProjectDependency(MatchSpec("pygraphviz"), DependencySection.RUN),
+                # Optional dependencies
+                ProjectDependency(MatchSpec("pytest ~= 8.1"), DependencySection.RUN_CONSTRAINTS),
+                ProjectDependency(MatchSpec("conda-build"), DependencySection.RUN_CONSTRAINTS),
+            },
+        ),
+        (
             "crm_mock_pyproject_only_deps.toml",
             {
                 ProjectDependency(MatchSpec("click"), DependencySection.RUN),

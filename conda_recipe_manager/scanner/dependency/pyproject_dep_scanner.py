@@ -61,6 +61,8 @@ class PyProjectDependencyScanner(BaseDependencyScanner):
         # NOTE: The dependency constraint system used in `pyproject.toml` appears to be compatible with `conda`'s
         # `MatchSpec` object. For now, dependencies that can't be parsed with `MatchSpec` will store the raw string in
         # a `.name` field.
+        # TODO Future, consider handling Environment Markers:
+        #   https://packaging.python.org/en/latest/specifications/dependency-specifiers/#environment-markers
         deps: set[ProjectDependency] = set()
         for dep_name in cast(list[str], data["project"].get("dependencies", [])):
             deps.add(new_project_dependency(dep_name, DependencySection.RUN))
