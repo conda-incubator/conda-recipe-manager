@@ -24,10 +24,28 @@ from tests.file_loading import get_test_path, load_recipe
         ("types-toml.yaml", {"/source/0": HttpArtifactFetcher}),
         ("multi-output.yaml", {}),
         ("git-src.yaml", {"/source/0": GitArtifactFetcher}),
+        (
+            "cctools-ld64.yaml",
+            {
+                "/source/0": HttpArtifactFetcher,
+                "/source/1": HttpArtifactFetcher,
+                "/source/2": HttpArtifactFetcher,
+                "/source/3": HttpArtifactFetcher,
+            },
+        ),
         ## V1 Format ##
         ("v1_format/v1_types-toml.yaml", {"/source/0": HttpArtifactFetcher}),
         ("v1_format/v1_multi-output.yaml", {}),
         ("v1_format/v1_git-src.yaml", {"/source/0": GitArtifactFetcher}),
+        (
+            "v1_format/v1_cctools-ld64.yaml",
+            {
+                "/source/0": HttpArtifactFetcher,
+                "/source/1": HttpArtifactFetcher,
+                "/source/2": HttpArtifactFetcher,
+                "/source/3": HttpArtifactFetcher,
+            },
+        ),
     ],
 )
 def test_from_recipe_ignore_unsupported(
