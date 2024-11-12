@@ -21,17 +21,17 @@ from tests.file_loading import get_test_path, load_recipe
     "file,expected",
     [
         ## V0 Format ##
-        ("types-toml.yaml", [HttpArtifactFetcher]),
-        ("multi-output.yaml", []),
-        ("git-src.yaml", [GitArtifactFetcher]),
+        ("types-toml.yaml", {"/source/0": HttpArtifactFetcher}),
+        ("multi-output.yaml", {}),
+        ("git-src.yaml", {"/source/0": GitArtifactFetcher}),
         ## V1 Format ##
-        ("v1_format/v1_types-toml.yaml", [HttpArtifactFetcher]),
-        ("v1_format/v1_multi-output.yaml", []),
-        ("v1_format/v1_git-src.yaml", [GitArtifactFetcher]),
+        ("v1_format/v1_types-toml.yaml", {"/source/0": HttpArtifactFetcher}),
+        ("v1_format/v1_multi-output.yaml", {}),
+        ("v1_format/v1_git-src.yaml", {"/source/0": GitArtifactFetcher}),
     ],
 )
 def test_from_recipe_ignore_unsupported(
-    file: str, expected: list[Type[BaseArtifactFetcher]], request: pytest.FixtureRequest
+    file: str, expected: dict[str, Type[BaseArtifactFetcher]], request: pytest.FixtureRequest
 ) -> None:
     """
     Tests that a list of Artifact Fetchers can be derived from a parsed recipe.
@@ -41,16 +41,17 @@ def test_from_recipe_ignore_unsupported(
           `/source` path. That should be covered by recipe parsing unit tests.
 
     :param file: File to work against
-    :param expected: Expected list of classes to match the returned list.
+    :param expected: Expected mapping of source paths to classes in the returned list.
     """
     request.getfixturevalue("fs").add_real_file(get_test_path() / file)  # type: ignore[misc]
     recipe = load_recipe(file, RecipeReader)
 
-    fetcher_list: Final[list[BaseArtifactFetcher]] = from_recipe(recipe, True)
+    fetcher_map: Final[dict[str, BaseArtifactFetcher]] = from_recipe(recipe, True)
 
-    assert len(fetcher_list) == len(expected)
-    for i, fetcher in enumerate(fetcher_list):
-        assert isinstance(fetcher, expected[i])
+    assert len(fetcher_map) == len(expected)
+    for key, expected_fetcher_t in expected.items():
+        assert key in fetcher_map
+        assert isinstance(fetcher_map[key], expected_fetcher_t)
 
 
 @pytest.mark.parametrize(
