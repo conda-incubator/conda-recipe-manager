@@ -2,6 +2,8 @@
 :Description: Tests the `bump-recipe` CLI
 """
 
+from typing import Final
+
 import pytest
 from click.testing import CliRunner
 from pyfakefs.fake_filesystem import FakeFilesystem
@@ -21,15 +23,21 @@ def test_usage() -> None:
 
 
 @pytest.mark.parametrize(
-    "recipe_file, expected_recipe_file",
+    "recipe_file, increment_build_num, expected_recipe_file",
     [
-        ("simple-recipe.yaml", "simple-recipe.yaml"),
-        ("bump_recipe/build_num_1.yaml", "simple-recipe.yaml"),
-        ("bump_recipe/build_num_42.yaml", "simple-recipe.yaml"),
-        ("bump_recipe/build_num_-1.yaml", "simple-recipe.yaml"),
+        ("simple-recipe.yaml", True, "bump_recipe/build_num_1.yaml"),
+        ("simple-recipe.yaml", False, "simple-recipe.yaml"),
+        ("bump_recipe/build_num_1.yaml", True, "bump_recipe/build_num_2.yaml"),
+        ("bump_recipe/build_num_1.yaml", False, "simple-recipe.yaml"),
+        ("bump_recipe/build_num_42.yaml", True, "bump_recipe/build_num_43.yaml"),
+        ("bump_recipe/build_num_42.yaml", False, "simple-recipe.yaml"),
+        ("bump_recipe/build_num_-1.yaml", True, "simple-recipe.yaml"),
+        ("bump_recipe/build_num_-1.yaml", False, "simple-recipe.yaml"),
     ],
 )
-def test_bump_recipe_cli(fs: FakeFilesystem, recipe_file: str, expected_recipe_file: str) -> None:
+def test_bump_recipe_cli(
+    fs: FakeFilesystem, recipe_file: str, increment_build_num: bool, expected_recipe_file: str
+) -> None:
     """
     Test that the build number is successfully reset to 0.
 
@@ -41,7 +49,10 @@ def test_bump_recipe_cli(fs: FakeFilesystem, recipe_file: str, expected_recipe_f
     recipe_file_path = get_test_path() / recipe_file
     expected_recipe_file_path = get_test_path() / expected_recipe_file
 
-    result = runner.invoke(bump_recipe.bump_recipe, [str(recipe_file_path)])
+    cli_args: Final[list[str]] = (
+        ["--build-num", str(recipe_file_path)] if increment_build_num else [str(recipe_file_path)]
+    )
+    result = runner.invoke(bump_recipe.bump_recipe, cli_args)
 
     parser = load_recipe(recipe_file_path, RecipeParser)
     expected_parser = load_recipe(expected_recipe_file_path, RecipeParser)
@@ -63,36 +74,6 @@ def test_bump_cli_build_number_key_missing(fs: FakeFilesystem) -> None:
     expected_recipe_file_path = get_test_path() / "bump_recipe/build_num_added.yaml"
 
     result = runner.invoke(bump_recipe.bump_recipe, [str(recipe_file_path)])
-
-    parser = load_recipe(recipe_file_path, RecipeParser)
-    expected_parser = load_recipe(expected_recipe_file_path, RecipeParser)
-
-    assert parser == expected_parser
-    assert result.exit_code == ExitCode.SUCCESS
-
-
-@pytest.mark.parametrize(
-    "recipe_file, expected_recipe_file",
-    [
-        ("simple-recipe.yaml", "bump_recipe/build_num_1.yaml"),
-        ("bump_recipe/build_num_1.yaml", "bump_recipe/build_num_2.yaml"),
-        ("bump_recipe/build_num_42.yaml", "bump_recipe/build_num_43.yaml"),
-        ("bump_recipe/build_num_-1.yaml", "simple-recipe.yaml"),
-    ],
-)
-def test_bump_recipe_cli_build_num_flag_true(fs: FakeFilesystem, recipe_file: str, expected_recipe_file: str) -> None:
-    """
-    Test that the build number is successfully incremented by 1.
-
-    :param fs: `pyfakefs` Fixture used to replace the file system
-    """
-    runner = CliRunner()
-    fs.add_real_directory(get_test_path(), read_only=False)
-
-    recipe_file_path = get_test_path() / recipe_file
-    expected_recipe_file_path = get_test_path() / expected_recipe_file
-
-    result = runner.invoke(bump_recipe.bump_recipe, ["--build-num", str(recipe_file_path)])
 
     parser = load_recipe(recipe_file_path, RecipeParser)
     expected_parser = load_recipe(expected_recipe_file_path, RecipeParser)

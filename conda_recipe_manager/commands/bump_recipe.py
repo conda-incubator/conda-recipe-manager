@@ -40,6 +40,8 @@ def get_required_patch_blob(recipe_parser: RecipeParser, build_num: bool) -> Jso
     # if build key is found, try to get build/number key
     # in case of `build_num` set to false, `build/number` key will be added and set to zero
     # when `build_num` is set to true, throw error and sys.exit()
+
+    # TODO use contains_value() instead of try catch
     try:
         build_number = recipe_parser.get_value("/build/number")
         required_patch_blob = cast(JsonPatchType, {"op": "replace", "path": "/build/number", "value": 0})
