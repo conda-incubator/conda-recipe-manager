@@ -8,6 +8,7 @@ package:
 build:
   skip: true  # [py<37]
   is_true: true
+  number: 0
 
 # Comment above a top-level structure
 requirements:

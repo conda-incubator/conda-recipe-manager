@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import cast
+from typing import Final, cast
 
 import click
 
@@ -16,6 +16,42 @@ from conda_recipe_manager.fetcher.artifact_fetcher import from_recipe as af_from
 from conda_recipe_manager.fetcher.http_artifact_fetcher import HttpArtifactFetcher
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
 from conda_recipe_manager.types import JsonPatchType
+
+
+def _get_required_patch_blob_build_num(recipe_parser: RecipeParser, increment_build_num: bool) -> JsonPatchType:
+    """
+    Returns the required JSON Patch Blob
+
+    :param recipe_parser: Recipe file to update.
+    :param increment_build_num: Increments the `/build/number` field by 1 if set to `True`. Otherwise resets to 0.
+    :returns: A JSON Patch blob to add or modify the build number
+    """
+
+    # Try to get "build" key from the recipe, exit if not found
+    try:
+        recipe_parser.get_value("/build")
+    except KeyError:
+        print_err("`/build` key could not be found in the recipe.")
+        sys.exit(ExitCode.ILLEGAL_OPERATION)
+
+    # If build key is found, try to get build/number key in case of `build_num` set to false, `build/number` key will be
+    # added and set to zero when `build_num` is set to true, throw error and sys.exit()
+
+    # TODO use contains_value() instead of try catch
+    try:
+        build_number = recipe_parser.get_value("/build/number")
+        if increment_build_num:
+            if not isinstance(build_number, int):
+                print_err("Build number is not an integer.")
+                sys.exit(ExitCode.ILLEGAL_OPERATION)
+
+            return cast(JsonPatchType, {"op": "replace", "path": "/build/number", "value": build_number + 1})
+    except KeyError:
+        if increment_build_num:
+            print_err("`/build/number` key could not be found in the recipe.")
+            sys.exit(ExitCode.ILLEGAL_OPERATION)
+
+    return cast(JsonPatchType, {"op": "add", "path": "/build/number", "value": 0})
 
 
 def _update_sha256(recipe_parser: RecipeParser) -> None:
@@ -77,23 +113,11 @@ def bump_recipe(recipe_file_path: str, build_num: bool) -> None:
         print_err("An error occurred while parsing the recipe file contents.")
         sys.exit(ExitCode.PARSE_EXCEPTION)
 
-    if build_num:
-        try:
-            build_number = recipe_parser.get_value("/build/number")
-        except KeyError:
-            print_err("`/build/number` key could not be found in the recipe.")
-            sys.exit(ExitCode.ILLEGAL_OPERATION)
+    required_patch_blob: Final[JsonPatchType] = _get_required_patch_blob_build_num(recipe_parser, build_num)
 
-        if not isinstance(build_number, int):
-            print_err("Build number is not an integer.")
-            sys.exit(ExitCode.ILLEGAL_OPERATION)
+    if not recipe_parser.patch(required_patch_blob):
+        print_err(f"Couldn't perform the patch: {required_patch_blob}.")
+        sys.exit(ExitCode.PARSE_EXCEPTION)
 
-        required_patch_blob = cast(JsonPatchType, {"op": "replace", "path": "/build/number", "value": build_number + 1})
-
-        if not recipe_parser.patch(required_patch_blob):
-            print_err(f"Couldn't perform the patch: {required_patch_blob}.")
-            sys.exit(ExitCode.PARSE_EXCEPTION)
-
-        Path(recipe_file_path).write_text(recipe_parser.render(), encoding="utf-8")
-        sys.exit(ExitCode.SUCCESS)
-    print_err("Sorry, the default bump behaviour has not been implemented yet.")
+    Path(recipe_file_path).write_text(recipe_parser.render(), encoding="utf-8")
+    sys.exit(ExitCode.SUCCESS)
