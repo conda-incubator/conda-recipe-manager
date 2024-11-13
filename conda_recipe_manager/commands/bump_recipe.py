@@ -25,8 +25,8 @@ def _get_required_patch_blob(recipe_parser: RecipeParser, increment_build_num: b
     """
     Returns the required JSON Patch Blob
 
-    :recipe_parser: RecipeParser object
-    :build_num: `build_num` boolean flag
+    :param recipe_parser: Recipe file to update.
+    :param increment_build_num: Increments the `/build/number` field by 1 if set to `True`. Otherwise resets to 0.
     :returns: A JSON Patch blob to add or modify the build number
     """
 
