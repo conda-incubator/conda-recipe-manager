@@ -821,6 +821,7 @@ class RecipeReader(IsModifiable):
         """
         Determines if a value (via a path) is contained in this recipe. This also allows the caller to determine if a
         path exists.
+
         :param path: JSON patch (RFC 6902)-style path to a value.
         :returns: True if the path exists. False otherwise.
         """
