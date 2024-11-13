@@ -78,6 +78,8 @@ def _update_sha256(recipe_parser: RecipeParser) -> None:
     only required for build artifacts that are hosted as compressed software archives. If this field must be updated,
     a lengthy network request may be required to calculate the new hash.
 
+    NOTE: For this to make any meaningful changes, the `version` field will need to be updated first.
+
     :param recipe_parser: Recipe file to update.
     """
     fetcher_lst = af_from_recipe(recipe_parser, True)
@@ -136,7 +138,8 @@ def bump_recipe(recipe_file_path: str, build_num: bool) -> None:
 
     # Attempt to update fields
     _update_build_num(recipe_parser, build_num)
-    _update_sha256(recipe_parser)
+    if not build_num:
+        _update_sha256(recipe_parser)
 
     Path(recipe_file_path).write_text(recipe_parser.render(), encoding="utf-8")
     sys.exit(ExitCode.SUCCESS)
