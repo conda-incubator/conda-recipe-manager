@@ -67,6 +67,7 @@ def _update_sha256(recipe_parser: RecipeParser) -> None:
         return
 
     # TODO handle case where SHA is stored in one or more variables (see cctools-ld64.yaml)
+    # TODO handle case where SHA is a variable
 
     # TODO Future: Figure out
     # NOTE: Each source _might_ have a different SHA-256 hash. This is the case for the `cctools-ld64` feedstock. That
@@ -80,8 +81,10 @@ def _update_sha256(recipe_parser: RecipeParser) -> None:
         # TODO attempt fetch in the background, especially if multiple fetch() calls are required.
         fetcher.fetch()
         sha = fetcher.get_archive_sha256()
-        # TODO make this an `add` op if the path is missing
-        recipe_parser.patch({"op": "replace", "path": src_path, "value": sha})
+
+        # Guard against the unlikely scenario that the `sha256` field is missing.
+        patch_op = "replace" if recipe_parser.contains_value(src_path) else "add"
+        recipe_parser.patch({"op": patch_op, "path": src_path, "value": sha})
 
 
 # TODO Improve. In order for `click` to play nice with `pyfakefs`, we set `path_type=str` and delay converting to a
