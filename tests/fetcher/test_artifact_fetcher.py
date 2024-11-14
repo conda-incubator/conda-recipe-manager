@@ -22,6 +22,7 @@ from tests.file_loading import get_test_path, load_recipe
     [
         ## V0 Format ##
         ("types-toml.yaml", {"/source": HttpArtifactFetcher}),
+        ("types-toml_src_lst.yaml", {"/source/0": HttpArtifactFetcher}),
         ("multi-output.yaml", {}),
         ("git-src.yaml", {"/source": GitArtifactFetcher}),
         (
@@ -35,6 +36,7 @@ from tests.file_loading import get_test_path, load_recipe
         ),
         ## V1 Format ##
         ("v1_format/v1_types-toml.yaml", {"/source": HttpArtifactFetcher}),
+        ("v1_format/v1_types-toml_src_lst.yaml", {"/source/0": HttpArtifactFetcher}),
         ("v1_format/v1_multi-output.yaml", {}),
         ("v1_format/v1_git-src.yaml", {"/source": GitArtifactFetcher}),
         (
