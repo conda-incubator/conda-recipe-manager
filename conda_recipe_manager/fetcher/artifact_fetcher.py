@@ -69,8 +69,10 @@ def from_recipe(recipe: RecipeReader, ignore_unsupported: bool = False) -> dict[
     # TODO Handle selector evaluation/determine how common it is to have a selector in `/source`
 
     # Normalize to a list to handle both single and multi-source cases.
+    is_src_lst = True
     if not isinstance(parsed_sources, list):
         parsed_sources = [parsed_sources]
+        is_src_lst = False
 
     recipe_name = recipe.get_recipe_name()
     if recipe_name is None:
@@ -85,7 +87,8 @@ def from_recipe(recipe: RecipeReader, ignore_unsupported: bool = False) -> dict[
 
         src_name = recipe_name if len(parsed_sources) == 1 else f"{recipe_name}_{i}"
 
-        src_path = f"/source/{i}"
+        # If the source section is not a list, it contains one "flag" source object.
+        src_path = f"/source/{i}" if is_src_lst else "/source"
         if url is not None:
             sources[src_path] = HttpArtifactFetcher(src_name, url)
         elif git_url is not None:
@@ -97,6 +100,6 @@ def from_recipe(recipe: RecipeReader, ignore_unsupported: bool = False) -> dict[
                 rev=optional_str(parsed_source.get(_render_git_key(recipe, "git_rev"))),
             )
         elif not ignore_unsupported:
-            raise FetchUnsupportedError(f"{recipe_name} contains an unsupported source object at `/source/{i}`.")
+            raise FetchUnsupportedError(f"{recipe_name} contains an unsupported source object at `{src_path}`.")
 
     return sources

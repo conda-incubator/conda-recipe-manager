@@ -15,6 +15,7 @@ from conda_recipe_manager.commands.utils.types import ExitCode
 from conda_recipe_manager.fetcher.artifact_fetcher import from_recipe as af_from_recipe
 from conda_recipe_manager.fetcher.http_artifact_fetcher import HttpArtifactFetcher
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
+from conda_recipe_manager.parser.recipe_reader import RecipeReader
 from conda_recipe_manager.types import JsonPatchType
 
 
@@ -101,10 +102,11 @@ def _update_sha256(recipe_parser: RecipeParser) -> None:
         # TODO attempt fetch in the background, especially if multiple fetch() calls are required.
         fetcher.fetch()
         sha = fetcher.get_archive_sha256()
+        sha_path = RecipeReader.append_to_path(src_path, "/sha256")
 
         # Guard against the unlikely scenario that the `sha256` field is missing.
-        patch_op = "replace" if recipe_parser.contains_value(src_path) else "add"
-        _exit_on_failed_patch(recipe_parser, {"op": patch_op, "path": src_path, "value": sha})
+        patch_op = "replace" if recipe_parser.contains_value(sha_path) else "add"
+        _exit_on_failed_patch(recipe_parser, {"op": patch_op, "path": sha_path, "value": sha})
 
 
 # TODO Improve. In order for `click` to play nice with `pyfakefs`, we set `path_type=str` and delay converting to a

@@ -1,5 +1,5 @@
 """
-:Description: TODO
+:Description: Unit test file for Artifact Fetcher utilities and factory constructors.
 """
 
 from __future__ import annotations
@@ -21,9 +21,9 @@ from tests.file_loading import get_test_path, load_recipe
     "file,expected",
     [
         ## V0 Format ##
-        ("types-toml.yaml", {"/source/0": HttpArtifactFetcher}),
+        ("types-toml.yaml", {"/source": HttpArtifactFetcher}),
         ("multi-output.yaml", {}),
-        ("git-src.yaml", {"/source/0": GitArtifactFetcher}),
+        ("git-src.yaml", {"/source": GitArtifactFetcher}),
         (
             "cctools-ld64.yaml",
             {
@@ -34,9 +34,9 @@ from tests.file_loading import get_test_path, load_recipe
             },
         ),
         ## V1 Format ##
-        ("v1_format/v1_types-toml.yaml", {"/source/0": HttpArtifactFetcher}),
+        ("v1_format/v1_types-toml.yaml", {"/source": HttpArtifactFetcher}),
         ("v1_format/v1_multi-output.yaml", {}),
-        ("v1_format/v1_git-src.yaml", {"/source/0": GitArtifactFetcher}),
+        ("v1_format/v1_git-src.yaml", {"/source": GitArtifactFetcher}),
         (
             "v1_format/v1_cctools-ld64.yaml",
             {
