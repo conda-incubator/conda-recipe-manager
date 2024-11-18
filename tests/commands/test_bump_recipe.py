@@ -114,7 +114,9 @@ def test_bump_recipe_cli(
     recipe_file_path = get_test_path() / recipe_file
     expected_recipe_file_path = get_test_path() / expected_recipe_file
 
-    cli_args: Final[list[str]] = ["--build-num", str(recipe_file_path)] if version is None else [str(recipe_file_path)]
+    cli_args: Final[list[str]] = (
+        ["--build-num", str(recipe_file_path)] if version is None else ["-t", version, str(recipe_file_path)]
+    )
 
     with patch("requests.get", new=mock_requests_get):
         result = runner.invoke(bump_recipe.bump_recipe, cli_args)
