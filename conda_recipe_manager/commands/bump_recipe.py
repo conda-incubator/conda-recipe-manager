@@ -85,6 +85,7 @@ def _update_sha256(recipe_parser: RecipeParser) -> None:
     """
     fetcher_lst = af_from_recipe(recipe_parser, True)
     if not fetcher_lst:
+        # TODO log
         return
 
     # TODO handle case where SHA is stored in one or more variables (see cctools-ld64.yaml)
