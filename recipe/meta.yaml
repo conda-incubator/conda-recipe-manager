@@ -46,6 +46,7 @@ test:
     - pip
     - pytest
     - pytest-xdist
+    - pytest-socket
     - pyfakefs
   commands:
     - pip check
