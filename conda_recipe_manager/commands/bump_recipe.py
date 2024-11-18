@@ -68,6 +68,16 @@ def _update_build_num(recipe_parser: RecipeParser, increment_build_num: bool) ->
     _exit_on_failed_patch(recipe_parser, cast(JsonPatchType, {"op": "add", "path": "/build/number", "value": 0}))
 
 
+def _update_version(recipe_parser: RecipeParser, target_version: str) -> None:
+    """
+    Attempts to update the `/package/version` field and/or the commonly used `version` JINJA variable.
+
+    :param recipe_parser: Recipe file to update.
+    :param target_version: Target version to update to.
+    """
+    # TODO branch on `/package/version` being specified without a `version` variable
+
+
 def _update_sha256(recipe_parser: RecipeParser) -> None:
     """
     Attempts to update the SHA-256 hash(s) in the `/source` section of a recipe file, if applicable. Note that this is
@@ -149,7 +159,13 @@ def bump_recipe(recipe_file_path: str, build_num: bool, target_version: Optional
 
     # Attempt to update fields
     _update_build_num(recipe_parser, build_num)
-    if not build_num:
+
+    # NOTE: We check if `target_version` is specified to perform a "full bump" for type checking reasons. Also note that
+    # the `build_num` flag is invalidated if we are bumping to a new version. The build number must be reset to 0 in
+    # this case.
+    if target_version is not None:
+        # Version must be updated before hash to ensure the correct artifact is hashed.
+        _update_version(recipe_parser, target_version)
         _update_sha256(recipe_parser)
 
     Path(recipe_file_path).write_text(recipe_parser.render(), encoding="utf-8")
