@@ -13,7 +13,6 @@ from pyfakefs.fake_filesystem import FakeFilesystem
 from conda_recipe_manager.commands import bump_recipe
 from conda_recipe_manager.commands.utils.types import ExitCode
 from conda_recipe_manager.fetcher.http_artifact_fetcher import HttpArtifactFetcher
-from conda_recipe_manager.parser.recipe_parser import RecipeParser
 from conda_recipe_manager.parser.recipe_reader import RecipeReader
 from tests.file_loading import get_test_path, load_recipe
 from tests.http_mocking import MockHttpStreamResponse
@@ -123,8 +122,8 @@ def test_bump_recipe_cli(
         result = runner.invoke(bump_recipe.bump_recipe, cli_args)
 
     # Read the edited file and check it against the expected file.
-    parser = load_recipe(recipe_file_path, RecipeParser)
-    expected_parser = load_recipe(expected_recipe_file_path, RecipeParser)
+    parser = load_recipe(recipe_file_path, RecipeReader)
+    expected_parser = load_recipe(expected_recipe_file_path, RecipeReader)
 
     assert parser == expected_parser
     assert result.exit_code == ExitCode.SUCCESS
@@ -156,8 +155,8 @@ def test_bump_recipe_build_number_key_missing(fs: FakeFilesystem) -> None:
 
     result = runner.invoke(bump_recipe.bump_recipe, ["--build-num", str(recipe_file_path)])
 
-    parser = load_recipe(recipe_file_path, RecipeParser)
-    expected_parser = load_recipe(expected_recipe_file_path, RecipeParser)
+    parser = load_recipe(recipe_file_path, RecipeReader)
+    expected_parser = load_recipe(expected_recipe_file_path, RecipeReader)
 
     assert parser == expected_parser
     assert result.exit_code == ExitCode.SUCCESS
