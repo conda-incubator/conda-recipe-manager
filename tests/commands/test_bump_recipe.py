@@ -141,7 +141,7 @@ def test_bump_recipe_exits_if_target_version_missing() -> None:
     assert result.exit_code == ExitCode.CLICK_USAGE
 
 
-def test_bump_recipe_build_number_key_missing(fs: FakeFilesystem) -> None:
+def test_bump_recipe_increment_build_number_key_missing(fs: FakeFilesystem) -> None:
     """
     Test that a `/build/number` key is added and set to 0 when it's missing.
 
@@ -162,7 +162,7 @@ def test_bump_recipe_build_number_key_missing(fs: FakeFilesystem) -> None:
     assert result.exit_code == ExitCode.SUCCESS
 
 
-def test_bump_recipe_build_number_not_int(fs: FakeFilesystem) -> None:
+def test_bump_recipe_increment_build_number_not_int(fs: FakeFilesystem) -> None:
     """
     Test that the command fails gracefully case when the build number is not an integer,
     and we are trying to increment it.
@@ -198,7 +198,7 @@ def test_bump_recipe_increment_build_num_key_not_found(fs: FakeFilesystem) -> No
     assert result.exit_code == ExitCode.SUCCESS
 
 
-def test_bump_recipe_no_build_key_found(fs: FakeFilesystem) -> None:
+def test_bump_recipe_increment_no_build_key_found(fs: FakeFilesystem) -> None:
     """
     Test that the command fails gracefully when the build key is missing and we try to revert build number to zero.
 
