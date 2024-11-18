@@ -2,7 +2,8 @@
 :Description: Tests the `bump-recipe` CLI
 """
 
-from typing import Final, cast
+from pathlib import Path
+from typing import Final, Optional, cast
 from unittest.mock import patch
 
 import pytest
@@ -77,32 +78,35 @@ def test_usage() -> None:
 
 
 @pytest.mark.parametrize(
-    "recipe_file,increment_build_num,expected_recipe_file",
+    "recipe_file,version,expected_recipe_file",
     [
-        ("types-toml.yaml", True, "bump_recipe/types-toml_build_num_1.yaml"),
+        ("types-toml.yaml", None, "bump_recipe/types-toml_build_num_1.yaml"),
         # TODO: Re-enable test when version bumping is supported.
-        # ("types-toml.yaml", False, "bump_recipe/types-toml_version_bump.yaml"),
+        # ("types-toml.yaml", "0.10.8.20240310", "bump_recipe/types-toml_version_bump.yaml"),
         # NOTE: These have no source section, therefore all SHA-256 update attempts (and associated network requests)
         # should be skipped.
-        ("bump_recipe/build_num_1.yaml", True, "bump_recipe/build_num_2.yaml"),
-        ("bump_recipe/build_num_1.yaml", False, "simple-recipe.yaml"),
-        ("bump_recipe/build_num_42.yaml", True, "bump_recipe/build_num_43.yaml"),
-        ("bump_recipe/build_num_42.yaml", False, "simple-recipe.yaml"),
-        ("bump_recipe/build_num_-1.yaml", True, "simple-recipe.yaml"),
-        ("bump_recipe/build_num_-1.yaml", False, "simple-recipe.yaml"),
+        ("bump_recipe/build_num_1.yaml", None, "bump_recipe/build_num_2.yaml"),
+        ("bump_recipe/build_num_1.yaml", "0.10.8.6", "simple-recipe.yaml"),
+        ("bump_recipe/build_num_42.yaml", None, "bump_recipe/build_num_43.yaml"),
+        ("bump_recipe/build_num_42.yaml", "0.10.8.6", "simple-recipe.yaml"),
+        ("bump_recipe/build_num_-1.yaml", None, "simple-recipe.yaml"),
+        ("bump_recipe/build_num_-1.yaml", "0.10.8.6", "simple-recipe.yaml"),
     ],
 )
 def test_bump_recipe_cli(
     fs: FakeFilesystem,
     recipe_file: str,
-    increment_build_num: bool,
+    version: Optional[str],
     expected_recipe_file: str,
 ) -> None:
     """
     Test that the recipe file is successfully updated/bumped.
 
     :param fs: `pyfakefs` Fixture used to replace the file system
-    :param request: Pytest fixture request object.
+    :param recipe_file: Target recipe file to update
+    :param version: (Optional) version to bump to. If `None`, this indicates `bump-recipe` should be run in
+        increment-only mode.
+    :param expected_recipe_file: Expected resulting recipe file
     """
     runner = CliRunner()
     fs.add_real_directory(get_test_path(), read_only=False)
@@ -110,9 +114,7 @@ def test_bump_recipe_cli(
     recipe_file_path = get_test_path() / recipe_file
     expected_recipe_file_path = get_test_path() / expected_recipe_file
 
-    cli_args: Final[list[str]] = (
-        ["--build-num", str(recipe_file_path)] if increment_build_num else [str(recipe_file_path)]
-    )
+    cli_args: Final[list[str]] = ["--build-num", str(recipe_file_path)] if version is None else [str(recipe_file_path)]
 
     with patch("requests.get", new=mock_requests_get):
         result = runner.invoke(bump_recipe.bump_recipe, cli_args)
@@ -124,7 +126,19 @@ def test_bump_recipe_cli(
     assert result.exit_code == ExitCode.SUCCESS
 
 
-def test_bump_cli_build_number_key_missing(fs: FakeFilesystem) -> None:
+def test_bump_recipe_exits_if_target_version_missing() -> None:
+    """
+    Ensures that the `--target-version` flag is required when `--build-num` is NOT provided.
+    """
+    runner = CliRunner()
+    result = runner.invoke(bump_recipe.bump_recipe, [str(get_test_path() / "types-toml.yaml")])
+
+    # Ensure the expected error case was hit (as opposed to a different error case).
+    assert result.stdout == "The `--target-version` option must be set if `--build-num` is not specified.\n"
+    assert result.exit_code == ExitCode.CLICK_USAGE
+
+
+def test_bump_recipe_build_number_key_missing(fs: FakeFilesystem) -> None:
     """
     Test that a `build: number:` key is added and set to 0 when it's missing.
 
@@ -133,10 +147,10 @@ def test_bump_cli_build_number_key_missing(fs: FakeFilesystem) -> None:
     runner = CliRunner()
     fs.add_real_directory(get_test_path(), read_only=False)
 
-    recipe_file_path = get_test_path() / "bump_recipe/no_build_num.yaml"
-    expected_recipe_file_path = get_test_path() / "bump_recipe/build_num_added.yaml"
+    recipe_file_path: Final[Path] = get_test_path() / "bump_recipe/no_build_num.yaml"
+    expected_recipe_file_path: Final[Path] = get_test_path() / "bump_recipe/build_num_added.yaml"
 
-    result = runner.invoke(bump_recipe.bump_recipe, [str(recipe_file_path)])
+    result = runner.invoke(bump_recipe.bump_recipe, ["--build-num", str(recipe_file_path)])
 
     parser = load_recipe(recipe_file_path, RecipeParser)
     expected_parser = load_recipe(expected_recipe_file_path, RecipeParser)
@@ -145,7 +159,7 @@ def test_bump_cli_build_number_key_missing(fs: FakeFilesystem) -> None:
     assert result.exit_code == ExitCode.SUCCESS
 
 
-def test_bump_cli_build_number_not_int(fs: FakeFilesystem) -> None:
+def test_bump_recipe_build_number_not_int(fs: FakeFilesystem) -> None:
     """
     Test that the command fails gracefully case when the build number is not an integer,
     and we are trying to increment it.
@@ -156,13 +170,13 @@ def test_bump_cli_build_number_not_int(fs: FakeFilesystem) -> None:
     runner = CliRunner()
     fs.add_real_directory(get_test_path(), read_only=False)
 
-    recipe_file_path = get_test_path() / "bump_recipe/non_int_build_num.yaml"
+    recipe_file_path: Final[Path] = get_test_path() / "bump_recipe/non_int_build_num.yaml"
 
     result = runner.invoke(bump_recipe.bump_recipe, ["--build-num", str(recipe_file_path)])
     assert result.exit_code == ExitCode.ILLEGAL_OPERATION
 
 
-def test_bump_cli_increment_build_num_key_not_found(fs: FakeFilesystem) -> None:
+def test_bump_recipe_increment_build_num_key_not_found(fs: FakeFilesystem) -> None:
     """
     Test that the command fails gracefully when the build number key is missing and we try to increment it's value.
 
@@ -172,12 +186,12 @@ def test_bump_cli_increment_build_num_key_not_found(fs: FakeFilesystem) -> None:
     runner = CliRunner()
     fs.add_real_directory(get_test_path(), read_only=False)
 
-    recipe_file_path = get_test_path() / "bump_recipe/no_build_num.yaml"
+    recipe_file_path: Final[Path] = get_test_path() / "bump_recipe/no_build_num.yaml"
     result = runner.invoke(bump_recipe.bump_recipe, ["--build-num", str(recipe_file_path)])
     assert result.exit_code == ExitCode.ILLEGAL_OPERATION
 
 
-def test_bump_cli_no_build_key_found(fs: FakeFilesystem) -> None:
+def test_bump_recipe_no_build_key_found(fs: FakeFilesystem) -> None:
     """
     Test that the command fails gracefully when the build key is missing and we try to revert build number to zero.
 
@@ -187,6 +201,6 @@ def test_bump_cli_no_build_key_found(fs: FakeFilesystem) -> None:
     runner = CliRunner()
     fs.add_real_directory(get_test_path(), read_only=False)
 
-    recipe_file_path = get_test_path() / "bump_recipe/no_build_key.yaml"
-    result = runner.invoke(bump_recipe.bump_recipe, [str(recipe_file_path)])
+    recipe_file_path: Final[Path] = get_test_path() / "bump_recipe/no_build_key.yaml"
+    result = runner.invoke(bump_recipe.bump_recipe, ["--build-num", str(recipe_file_path)])
     assert result.exit_code == ExitCode.ILLEGAL_OPERATION

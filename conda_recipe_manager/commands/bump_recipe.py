@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import cast
+from typing import Optional, cast
 
 import click
 
@@ -117,16 +117,29 @@ def _update_sha256(recipe_parser: RecipeParser) -> None:
 @click.command(short_help="Bumps a recipe file to a new version.")
 @click.argument("recipe_file_path", type=click.Path(exists=True, path_type=str))
 @click.option(
+    "-b",
     "--build-num",
     is_flag=True,
     help="Bump the build number by 1.",
 )
-def bump_recipe(recipe_file_path: str, build_num: bool) -> None:
+@click.option(
+    "-t",
+    "--target-version",
+    default=None,
+    type=str,
+    help="New project version to target. Required if `--build-num` is NOT specified.",
+)
+def bump_recipe(recipe_file_path: str, build_num: bool, target_version: Optional[str]) -> None:
     """
     Bumps a recipe to a new version.
 
     RECIPE_FILE_PATH: Path to the target recipe file
     """
+
+    if not build_num and target_version is None:
+        print_err("The `--target-version` option must be set if `--build-num` is not specified.")
+        sys.exit(ExitCode.CLICK_USAGE)
+
     try:
         contents_recipe = Path(recipe_file_path).read_text(encoding="utf-8")
     except IOError:
