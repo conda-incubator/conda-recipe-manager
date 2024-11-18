@@ -49,26 +49,21 @@ def _update_build_num(recipe_parser: RecipeParser, increment_build_num: bool) ->
         print_err("`/build` key could not be found in the recipe.")
         sys.exit(ExitCode.ILLEGAL_OPERATION)
 
-    # If build key is found, try to get build/number key in case of `build_num` set to false, `build/number` key will be
-    # added and set to zero when `build_num` is set to true, throw error and sys.exit()
-
-    # TODO use contains_value() instead of try catch
-    try:
+    # From the previous check, we know that `/build` exists. If `/build/number` is missing, it'll be added by
+    # a patch-add operation and set to a default value of 0. Otherwise, we attempt to increment the build number, if
+    # requested.
+    if increment_build_num and recipe_parser.contains_value("/build/number"):
         build_number = recipe_parser.get_value("/build/number")
-        if increment_build_num:
-            if not isinstance(build_number, int):
-                print_err("Build number is not an integer.")
-                sys.exit(ExitCode.ILLEGAL_OPERATION)
 
-            _exit_on_failed_patch(
-                recipe_parser,
-                cast(JsonPatchType, {"op": "replace", "path": "/build/number", "value": build_number + 1}),
-            )
-            return
-    except KeyError:
-        if increment_build_num:
-            print_err("`/build/number` key could not be found in the recipe.")
+        if not isinstance(build_number, int):
+            print_err("Build number is not an integer.")
             sys.exit(ExitCode.ILLEGAL_OPERATION)
+
+        _exit_on_failed_patch(
+            recipe_parser,
+            cast(JsonPatchType, {"op": "replace", "path": "/build/number", "value": build_number + 1}),
+        )
+        return
 
     _exit_on_failed_patch(recipe_parser, cast(JsonPatchType, {"op": "add", "path": "/build/number", "value": 0}))
 

@@ -14,6 +14,7 @@ from conda_recipe_manager.commands import bump_recipe
 from conda_recipe_manager.commands.utils.types import ExitCode
 from conda_recipe_manager.fetcher.http_artifact_fetcher import HttpArtifactFetcher
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
+from conda_recipe_manager.parser.recipe_reader import RecipeReader
 from tests.file_loading import get_test_path, load_recipe
 from tests.http_mocking import MockHttpStreamResponse
 from tests.smoke_testing import assert_cli_usage
@@ -121,6 +122,7 @@ def test_bump_recipe_cli(
     with patch("requests.get", new=mock_requests_get):
         result = runner.invoke(bump_recipe.bump_recipe, cli_args)
 
+    # Read the edited file and check it against the expected file.
     parser = load_recipe(recipe_file_path, RecipeParser)
     expected_parser = load_recipe(expected_recipe_file_path, RecipeParser)
 
@@ -142,7 +144,7 @@ def test_bump_recipe_exits_if_target_version_missing() -> None:
 
 def test_bump_recipe_build_number_key_missing(fs: FakeFilesystem) -> None:
     """
-    Test that a `build: number:` key is added and set to 0 when it's missing.
+    Test that a `/build/number` key is added and set to 0 when it's missing.
 
     :param fs: `pyfakefs` Fixture used to replace the file system
     """
@@ -180,7 +182,8 @@ def test_bump_recipe_build_number_not_int(fs: FakeFilesystem) -> None:
 
 def test_bump_recipe_increment_build_num_key_not_found(fs: FakeFilesystem) -> None:
     """
-    Test that the command fails gracefully when the build number key is missing and we try to increment it's value.
+    Test that the command fixes the recipe file when the `/build/number` key is missing and we try to increment it's
+    value.
 
     :param fs: `pyfakefs` Fixture used to replace the file system
     """
@@ -190,7 +193,10 @@ def test_bump_recipe_increment_build_num_key_not_found(fs: FakeFilesystem) -> No
 
     recipe_file_path: Final[Path] = get_test_path() / "bump_recipe/no_build_num.yaml"
     result = runner.invoke(bump_recipe.bump_recipe, ["--build-num", str(recipe_file_path)])
-    assert result.exit_code == ExitCode.ILLEGAL_OPERATION
+    # TODO: Can't compare directly to `simple-recipe.yaml` as the added key `/build/number` is not canonically sorted to
+    # be in the standard position.
+    assert load_recipe(recipe_file_path, RecipeReader).get_value("/build/number") == 0
+    assert result.exit_code == ExitCode.SUCCESS
 
 
 def test_bump_recipe_no_build_key_found(fs: FakeFilesystem) -> None:
