@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import Optional, cast
+from typing import Final, Optional, cast
 
 import click
 
@@ -75,7 +75,22 @@ def _update_version(recipe_parser: RecipeParser, target_version: str) -> None:  
     :param recipe_parser: Recipe file to update.
     :param target_version: Target version to update to.
     """
+    # TODO Add V0 multi-output version support for some recipes (version field is duplicated in cctools-ld64 but not in
+    # most multi-output recipes)
     # TODO branch on `/package/version` being specified without a `version` variable
+    old_variable = recipe_parser.get_variable("version", None)
+    if old_variable is not None:
+        recipe_parser.set_variable("version", target_version)
+        # TODO ensure that `version` is being used in `/package/version`
+        # NOTE: This is a linear search on a small list.
+        if "/package/version" not in recipe_parser.get_variable_references():
+            # TODO log a warning; still patch?
+            pass
+        return
+
+    # TODO handle missing `package` field
+    op: Final[str] = "replace" if recipe_parser.contains_value("/package/version") else "add"
+    recipe_parser.patch({"op": op, "path": "/package/version", "value": target_version})
 
 
 def _update_sha256(recipe_parser: RecipeParser) -> None:

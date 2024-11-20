@@ -14,7 +14,7 @@ from conda_recipe_manager.commands import bump_recipe
 from conda_recipe_manager.commands.utils.types import ExitCode
 from conda_recipe_manager.fetcher.http_artifact_fetcher import HttpArtifactFetcher
 from conda_recipe_manager.parser.recipe_reader import RecipeReader
-from tests.file_loading import get_test_path, load_recipe
+from tests.file_loading import get_test_path, load_file, load_recipe
 from tests.http_mocking import MockHttpStreamResponse
 from tests.smoke_testing import assert_cli_usage
 
@@ -125,6 +125,8 @@ def test_bump_recipe_cli(
     parser = load_recipe(recipe_file_path, RecipeReader)
     expected_parser = load_recipe(expected_recipe_file_path, RecipeReader)
 
+    # TODO figure out why this direct file comparison doesn't work
+    # assert load_file(recipe_file_path) == load_file(expected_recipe_file_path)
     assert parser == expected_parser
     assert result.exit_code == ExitCode.SUCCESS
 
