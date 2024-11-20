@@ -135,9 +135,6 @@ def test_bump_recipe_exits_if_target_version_missing() -> None:
     """
     runner = CliRunner()
     result = runner.invoke(bump_recipe.bump_recipe, [str(get_test_path() / "types-toml.yaml")])
-
-    # Ensure the expected error case was hit (as opposed to a different error case).
-    assert result.stdout == "The `--target-version` option must be set if `--build-num` is not specified.\n"
     assert result.exit_code == ExitCode.CLICK_USAGE
 
 

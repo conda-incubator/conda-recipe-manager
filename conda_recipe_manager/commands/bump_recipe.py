@@ -4,19 +4,21 @@
 
 from __future__ import annotations
 
+import logging
 import sys
 from pathlib import Path
 from typing import Final, Optional, cast
 
 import click
 
-from conda_recipe_manager.commands.utils.print import print_err
 from conda_recipe_manager.commands.utils.types import ExitCode
 from conda_recipe_manager.fetcher.artifact_fetcher import from_recipe as af_from_recipe
 from conda_recipe_manager.fetcher.http_artifact_fetcher import HttpArtifactFetcher
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
 from conda_recipe_manager.parser.recipe_reader import RecipeReader
 from conda_recipe_manager.types import JsonPatchType
+
+log = logging.getLogger(__name__)
 
 
 def _exit_on_failed_patch(recipe_parser: RecipeParser, patch_blob: JsonPatchType) -> None:
@@ -28,9 +30,10 @@ def _exit_on_failed_patch(recipe_parser: RecipeParser, patch_blob: JsonPatchType
     :param patch_blob: Recipe patch to execute.
     """
     if recipe_parser.patch(patch_blob):
+        log.debug("Executed patch: %s", patch_blob)
         return
 
-    print_err(f"Couldn't perform the patch: {patch_blob}.")
+    log.error("Couldn't perform the patch: %s", patch_blob)
     sys.exit(ExitCode.PATCH_ERROR)
 
 
@@ -46,7 +49,7 @@ def _update_build_num(recipe_parser: RecipeParser, increment_build_num: bool) ->
     try:
         recipe_parser.get_value("/build")
     except KeyError:
-        print_err("`/build` key could not be found in the recipe.")
+        log.error("`/build` key could not be found in the recipe.")
         sys.exit(ExitCode.ILLEGAL_OPERATION)
 
     # From the previous check, we know that `/build` exists. If `/build/number` is missing, it'll be added by
@@ -56,7 +59,7 @@ def _update_build_num(recipe_parser: RecipeParser, increment_build_num: bool) ->
         build_number = recipe_parser.get_value("/build/number")
 
         if not isinstance(build_number, int):
-            print_err("Build number is not an integer.")
+            log.error("Build number is not an integer.")
             sys.exit(ExitCode.ILLEGAL_OPERATION)
 
         _exit_on_failed_patch(
@@ -85,8 +88,7 @@ def _update_version(recipe_parser: RecipeParser, target_version: str) -> None:
         # Generate a warning if `version` is not being used in the `/package/version` field. NOTE: This is a linear
         # search on a small list.
         if "/package/version" not in recipe_parser.get_variable_references("version"):
-            # TODO log a warning
-            pass
+            log.warning("`/package/version` does not use the defined JINJA variable `version`.")
         return
 
     op: Final[str] = "replace" if recipe_parser.contains_value("/package/version") else "add"
@@ -105,7 +107,7 @@ def _update_sha256(recipe_parser: RecipeParser) -> None:
     """
     fetcher_lst = af_from_recipe(recipe_parser, True)
     if not fetcher_lst:
-        # TODO log
+        log.warning("`/source` is missing or does not contain a supported source type.")
         return
 
     # TODO handle case where SHA is stored in one or more variables (see cctools-ld64.yaml)
@@ -119,7 +121,7 @@ def _update_sha256(recipe_parser: RecipeParser) -> None:
         if not isinstance(fetcher, HttpArtifactFetcher):
             continue
 
-        # TODO retry mechanism
+        # TODO retry mechanism, and log attempts
         # TODO attempt fetch in the background, especially if multiple fetch() calls are required.
         fetcher.fetch()
         sha = fetcher.get_archive_sha256()
@@ -157,19 +159,19 @@ def bump_recipe(recipe_file_path: str, build_num: bool, target_version: Optional
     """
 
     if not build_num and target_version is None:
-        print_err("The `--target-version` option must be set if `--build-num` is not specified.")
+        log.error("The `--target-version` option must be set if `--build-num` is not specified.")
         sys.exit(ExitCode.CLICK_USAGE)
 
     try:
         contents_recipe = Path(recipe_file_path).read_text(encoding="utf-8")
     except IOError:
-        print_err(f"Couldn't read the given recipe file: {recipe_file_path}")
+        log.error("Couldn't read the given recipe file: %s", recipe_file_path)
         sys.exit(ExitCode.IO_ERROR)
 
     try:
         recipe_parser = RecipeParser(contents_recipe)
     except Exception:  # pylint: disable=broad-except
-        print_err("An error occurred while parsing the recipe file contents.")
+        log.error("An error occurred while parsing the recipe file contents.")
         sys.exit(ExitCode.PARSE_EXCEPTION)
 
     # Attempt to update fields
