@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import cast
+from typing import Optional, cast
 
 import click
 
@@ -49,28 +49,33 @@ def _update_build_num(recipe_parser: RecipeParser, increment_build_num: bool) ->
         print_err("`/build` key could not be found in the recipe.")
         sys.exit(ExitCode.ILLEGAL_OPERATION)
 
-    # If build key is found, try to get build/number key in case of `build_num` set to false, `build/number` key will be
-    # added and set to zero when `build_num` is set to true, throw error and sys.exit()
-
-    # TODO use contains_value() instead of try catch
-    try:
+    # From the previous check, we know that `/build` exists. If `/build/number` is missing, it'll be added by
+    # a patch-add operation and set to a default value of 0. Otherwise, we attempt to increment the build number, if
+    # requested.
+    if increment_build_num and recipe_parser.contains_value("/build/number"):
         build_number = recipe_parser.get_value("/build/number")
-        if increment_build_num:
-            if not isinstance(build_number, int):
-                print_err("Build number is not an integer.")
-                sys.exit(ExitCode.ILLEGAL_OPERATION)
 
-            _exit_on_failed_patch(
-                recipe_parser,
-                cast(JsonPatchType, {"op": "replace", "path": "/build/number", "value": build_number + 1}),
-            )
-            return
-    except KeyError:
-        if increment_build_num:
-            print_err("`/build/number` key could not be found in the recipe.")
+        if not isinstance(build_number, int):
+            print_err("Build number is not an integer.")
             sys.exit(ExitCode.ILLEGAL_OPERATION)
 
+        _exit_on_failed_patch(
+            recipe_parser,
+            cast(JsonPatchType, {"op": "replace", "path": "/build/number", "value": build_number + 1}),
+        )
+        return
+
     _exit_on_failed_patch(recipe_parser, cast(JsonPatchType, {"op": "add", "path": "/build/number", "value": 0}))
+
+
+def _update_version(recipe_parser: RecipeParser, target_version: str) -> None:  # pylint: disable=unused-argument
+    """
+    Attempts to update the `/package/version` field and/or the commonly used `version` JINJA variable.
+
+    :param recipe_parser: Recipe file to update.
+    :param target_version: Target version to update to.
+    """
+    # TODO branch on `/package/version` being specified without a `version` variable
 
 
 def _update_sha256(recipe_parser: RecipeParser) -> None:
@@ -117,16 +122,29 @@ def _update_sha256(recipe_parser: RecipeParser) -> None:
 @click.command(short_help="Bumps a recipe file to a new version.")
 @click.argument("recipe_file_path", type=click.Path(exists=True, path_type=str))
 @click.option(
+    "-b",
     "--build-num",
     is_flag=True,
     help="Bump the build number by 1.",
 )
-def bump_recipe(recipe_file_path: str, build_num: bool) -> None:
+@click.option(
+    "-t",
+    "--target-version",
+    default=None,
+    type=str,
+    help="New project version to target. Required if `--build-num` is NOT specified.",
+)
+def bump_recipe(recipe_file_path: str, build_num: bool, target_version: Optional[str]) -> None:
     """
     Bumps a recipe to a new version.
 
     RECIPE_FILE_PATH: Path to the target recipe file
     """
+
+    if not build_num and target_version is None:
+        print_err("The `--target-version` option must be set if `--build-num` is not specified.")
+        sys.exit(ExitCode.CLICK_USAGE)
+
     try:
         contents_recipe = Path(recipe_file_path).read_text(encoding="utf-8")
     except IOError:
@@ -141,7 +159,13 @@ def bump_recipe(recipe_file_path: str, build_num: bool) -> None:
 
     # Attempt to update fields
     _update_build_num(recipe_parser, build_num)
-    if not build_num:
+
+    # NOTE: We check if `target_version` is specified to perform a "full bump" for type checking reasons. Also note that
+    # the `build_num` flag is invalidated if we are bumping to a new version. The build number must be reset to 0 in
+    # this case.
+    if target_version is not None:
+        # Version must be updated before hash to ensure the correct artifact is hashed.
+        _update_version(recipe_parser, target_version)
         _update_sha256(recipe_parser)
 
     Path(recipe_file_path).write_text(recipe_parser.render(), encoding="utf-8")
