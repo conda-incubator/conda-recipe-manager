@@ -68,7 +68,7 @@ def _update_build_num(recipe_parser: RecipeParser, increment_build_num: bool) ->
     _exit_on_failed_patch(recipe_parser, cast(JsonPatchType, {"op": "add", "path": "/build/number", "value": 0}))
 
 
-def _update_version(recipe_parser: RecipeParser, target_version: str) -> None:  # pylint: disable=unused-argument
+def _update_version(recipe_parser: RecipeParser, target_version: str) -> None:
     """
     Attempts to update the `/package/version` field and/or the commonly used `version` JINJA variable.
 
@@ -83,7 +83,7 @@ def _update_version(recipe_parser: RecipeParser, target_version: str) -> None:  
         recipe_parser.set_variable("version", target_version)
         # TODO ensure that `version` is being used in `/package/version`
         # NOTE: This is a linear search on a small list.
-        if "/package/version" not in recipe_parser.get_variable_references():
+        if "/package/version" not in recipe_parser.get_variable_references("version"):
             # TODO log a warning; still patch?
             pass
         return

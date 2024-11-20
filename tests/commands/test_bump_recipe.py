@@ -14,7 +14,7 @@ from conda_recipe_manager.commands import bump_recipe
 from conda_recipe_manager.commands.utils.types import ExitCode
 from conda_recipe_manager.fetcher.http_artifact_fetcher import HttpArtifactFetcher
 from conda_recipe_manager.parser.recipe_reader import RecipeReader
-from tests.file_loading import get_test_path, load_file, load_recipe
+from tests.file_loading import get_test_path, load_recipe
 from tests.http_mocking import MockHttpStreamResponse
 from tests.smoke_testing import assert_cli_usage
 
@@ -80,9 +80,9 @@ def test_usage() -> None:
 @pytest.mark.parametrize(
     "recipe_file,version,expected_recipe_file",
     [
+        # NOTE: The SHA-256 hashes will be of the mocked archive files, not of the actual source code being referenced.
         ("types-toml.yaml", None, "bump_recipe/types-toml_build_num_1.yaml"),
-        # TODO: Re-enable test when version bumping is supported.
-        # ("types-toml.yaml", "0.10.8.20240310", "bump_recipe/types-toml_version_bump.yaml"),
+        ("types-toml.yaml", "0.10.8.20240310", "bump_recipe/types-toml_version_bump.yaml"),
         # NOTE: These have no source section, therefore all SHA-256 update attempts (and associated network requests)
         # should be skipped.
         ("bump_recipe/build_num_1.yaml", None, "bump_recipe/build_num_2.yaml"),
@@ -125,8 +125,6 @@ def test_bump_recipe_cli(
     parser = load_recipe(recipe_file_path, RecipeReader)
     expected_parser = load_recipe(expected_recipe_file_path, RecipeReader)
 
-    # TODO figure out why this direct file comparison doesn't work
-    # assert load_file(recipe_file_path) == load_file(expected_recipe_file_path)
     assert parser == expected_parser
     assert result.exit_code == ExitCode.SUCCESS
 
