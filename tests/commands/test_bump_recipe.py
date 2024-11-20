@@ -80,9 +80,9 @@ def test_usage() -> None:
 @pytest.mark.parametrize(
     "recipe_file,version,expected_recipe_file",
     [
+        # NOTE: The SHA-256 hashes will be of the mocked archive files, not of the actual source code being referenced.
         ("types-toml.yaml", None, "bump_recipe/types-toml_build_num_1.yaml"),
-        # TODO: Re-enable test when version bumping is supported.
-        # ("types-toml.yaml", "0.10.8.20240310", "bump_recipe/types-toml_version_bump.yaml"),
+        ("types-toml.yaml", "0.10.8.20240310", "bump_recipe/types-toml_version_bump.yaml"),
         # NOTE: These have no source section, therefore all SHA-256 update attempts (and associated network requests)
         # should be skipped.
         ("bump_recipe/build_num_1.yaml", None, "bump_recipe/build_num_2.yaml"),

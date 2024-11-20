@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import Optional, cast
+from typing import Final, Optional, cast
 
 import click
 
@@ -68,14 +68,29 @@ def _update_build_num(recipe_parser: RecipeParser, increment_build_num: bool) ->
     _exit_on_failed_patch(recipe_parser, cast(JsonPatchType, {"op": "add", "path": "/build/number", "value": 0}))
 
 
-def _update_version(recipe_parser: RecipeParser, target_version: str) -> None:  # pylint: disable=unused-argument
+def _update_version(recipe_parser: RecipeParser, target_version: str) -> None:
     """
     Attempts to update the `/package/version` field and/or the commonly used `version` JINJA variable.
 
     :param recipe_parser: Recipe file to update.
     :param target_version: Target version to update to.
     """
-    # TODO branch on `/package/version` being specified without a `version` variable
+    # TODO Add V0 multi-output version support for some recipes (version field is duplicated in cctools-ld64 but not in
+    # most multi-output recipes)
+
+    # If the `version` variable is found, patch that. This is an artifact/pattern from Grayskull.
+    old_variable = recipe_parser.get_variable("version", None)
+    if old_variable is not None:
+        recipe_parser.set_variable("version", target_version)
+        # Generate a warning if `version` is not being used in the `/package/version` field. NOTE: This is a linear
+        # search on a small list.
+        if "/package/version" not in recipe_parser.get_variable_references("version"):
+            # TODO log a warning
+            pass
+        return
+
+    op: Final[str] = "replace" if recipe_parser.contains_value("/package/version") else "add"
+    _exit_on_failed_patch(recipe_parser, {"op": op, "path": "/package/version", "value": target_version})
 
 
 def _update_sha256(recipe_parser: RecipeParser) -> None:
