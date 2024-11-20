@@ -77,20 +77,20 @@ def _update_version(recipe_parser: RecipeParser, target_version: str) -> None:
     """
     # TODO Add V0 multi-output version support for some recipes (version field is duplicated in cctools-ld64 but not in
     # most multi-output recipes)
-    # TODO branch on `/package/version` being specified without a `version` variable
+
+    # If the `version` variable is found, patch that. This is an artifact/pattern from Grayskull.
     old_variable = recipe_parser.get_variable("version", None)
     if old_variable is not None:
         recipe_parser.set_variable("version", target_version)
-        # TODO ensure that `version` is being used in `/package/version`
-        # NOTE: This is a linear search on a small list.
+        # Generate a warning if `version` is not being used in the `/package/version` field. NOTE: This is a linear
+        # search on a small list.
         if "/package/version" not in recipe_parser.get_variable_references("version"):
-            # TODO log a warning; still patch?
+            # TODO log a warning
             pass
         return
 
-    # TODO handle missing `package` field
     op: Final[str] = "replace" if recipe_parser.contains_value("/package/version") else "add"
-    recipe_parser.patch({"op": op, "path": "/package/version", "value": target_version})
+    _exit_on_failed_patch(recipe_parser, {"op": op, "path": "/package/version", "value": target_version})
 
 
 def _update_sha256(recipe_parser: RecipeParser) -> None:
