@@ -68,7 +68,7 @@ def _update_build_num(recipe_parser: RecipeParser, increment_build_num: bool) ->
     _exit_on_failed_patch(recipe_parser, cast(JsonPatchType, {"op": "add", "path": "/build/number", "value": 0}))
 
 
-def _update_version(recipe_parser: RecipeParser, target_version: str) -> None:
+def _update_version(recipe_parser: RecipeParser, target_version: str) -> None:  # pylint: disable=unused-argument
     """
     Attempts to update the `/package/version` field and/or the commonly used `version` JINJA variable.
 
