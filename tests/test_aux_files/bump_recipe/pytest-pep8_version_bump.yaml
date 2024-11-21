@@ -1,6 +1,6 @@
 {% set name = "pytest-pep8" %}
 {% set version = "1.0.7" %}
-{% set sha256 = "e594f5bc141acabe4b0298d05234e80195116667edad3d6a9cd610cab36bc4e1" %}
+{% set sha256 = "032ef7e5fa3ac30f4458c73e05bb67b0f036a8a5cb418a534b3170f89f120318" %}
 
 package:
   name: {{ name|lower }}
@@ -9,7 +9,7 @@ package:
 source:
   fn: {{ name }}-{{ version }}.tar.gz
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: {{ sha256 }}
+  sha256: e594f5bc141acabe4b0298d05234e80195116667edad3d6a9cd610cab36bc4e1
 
 build:
   noarch: python

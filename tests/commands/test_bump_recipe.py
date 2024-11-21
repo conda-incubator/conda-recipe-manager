@@ -32,7 +32,7 @@ def mock_requests_get(*args: tuple[str], **_: dict[str, str | int]) -> MockHttpS
         # types-toml.yaml
         "https://pypi.io/packages/source/t/types-toml/types-toml-0.10.8.20240310.tar.gz",
         # boto.yaml
-        "https://pypi.io/packages/source/b/boto/boto-2.50.0.tar.gz",
+        "https://pypi.org/packages/source/b/boto/boto-2.50.0.tar.gz",
         # huggingface_hub.yaml
         "https://pypi.io/packages/source/h/huggingface_hub/huggingface_hub-0.24.6.tar.gz",
         # gsm-amzn2-aarch64.yaml
@@ -42,7 +42,7 @@ def mock_requests_get(*args: tuple[str], **_: dict[str, str | int]) -> MockHttpS
             "amzn2-core-source/gsm-1.0.13-11.amzn2.0.2.src.rpm"
         ),
         # pytest-pep8.yaml
-        "https://pypi.io/packages/source/p/python-pep8/python-pep8-1.0.7.tar.gz",
+        "https://pypi.io/packages/source/p/pytest-pep8/pytest-pep8-1.0.7.tar.gz",
         # google-cloud-cpp.yaml
         "https://github.com/googleapis/google-cloud-cpp/archive/v2.31.0.tar.gz",
         # x264
@@ -90,6 +90,7 @@ def test_usage() -> None:
         ("gsm-amzn2-aarch64.yaml", "2.0.20210721.2", "bump_recipe/gsm-amzn2-aarch64_version_bump.yaml"),
         # Has a `sha256` variable
         ("pytest-pep8.yaml", None, "bump_recipe/pytest-pep8_build_num_2.yaml"),
+        # TODO: Fix expected file when we support the `sha256` variable
         ("pytest-pep8.yaml", "1.0.7", "bump_recipe/pytest-pep8_version_bump.yaml"),
         ("google-cloud-cpp.yaml", None, "bump_recipe/google-cloud-cpp_build_num_2.yaml"),
         ("google-cloud-cpp.yaml", "2.31.0", "bump_recipe/google-cloud-cpp_version_bump.yaml"),
