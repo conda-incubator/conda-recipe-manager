@@ -42,11 +42,11 @@ def mock_requests_get(*args: tuple[str], **_: dict[str, str | int]) -> MockHttpS
             "amzn2-core-source/gsm-1.0.13-11.amzn2.0.2.src.rpm"
         ),
         # pytest-pep8.yaml
-        "https://pypi.io/packages/source/p/python-pep8/python-pep8-2.3.1.tar.gz",
+        "https://pypi.io/packages/source/p/python-pep8/python-pep8-1.0.7.tar.gz",
         # google-cloud-cpp.yaml
         "https://github.com/googleapis/google-cloud-cpp/archive/v2.31.0.tar.gz",
         # x264
-        "http://download.videolan.org/pub/videolan/x264/snapshots/x264-snapshot-20191217-2245-stable.tar.bz2"
+        "http://download.videolan.org/pub/videolan/x264/snapshots/x264-snapshot-20191217-2245-stable.tar.bz2",
         # curl.yaml
         "https://curl.se/download/curl-8.11.0.tar.bz2",
         # libprotobuf.yaml
@@ -90,7 +90,7 @@ def test_usage() -> None:
         ("gsm-amzn2-aarch64.yaml", "2.0.20210721.2", "bump_recipe/gsm-amzn2-aarch64_version_bump.yaml"),
         # Has a `sha256` variable
         ("pytest-pep8.yaml", None, "bump_recipe/pytest-pep8_build_num_2.yaml"),
-        ("pytest-pep8.yaml", "2.3.1", "bump_recipe/pytest-pep8_version_bump.yaml"),
+        ("pytest-pep8.yaml", "1.0.7", "bump_recipe/pytest-pep8_version_bump.yaml"),
         ("google-cloud-cpp.yaml", None, "bump_recipe/google-cloud-cpp_build_num_2.yaml"),
         ("google-cloud-cpp.yaml", "2.31.0", "bump_recipe/google-cloud-cpp_version_bump.yaml"),
         # Uses `sha256` variable and concatenated `version` variable.
