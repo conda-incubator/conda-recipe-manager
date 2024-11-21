@@ -28,19 +28,34 @@ def mock_requests_get(*args: tuple[str], **_: dict[str, str | int]) -> MockHttpS
     :param _: Name-specified arguments passed to `requests.get()` (Unused)
     """
     endpoint = cast(str, args[0])
-    match endpoint:
+    default_artifact_set: Final[set[str]] = {
         # types-toml.yaml
-        case "https://pypi.io/packages/source/t/types-toml/types-toml-0.10.8.20240310.tar.gz":
-            return MockHttpStreamResponse(200, "archive_files/dummy_project_01.tar.gz")
+        "https://pypi.io/packages/source/t/types-toml/types-toml-0.10.8.20240310.tar.gz",
+        # boto.yaml
+        "https://pypi.io/packages/source/b/boto/boto-2.50.0.tar.gz",
+        # huggingface_hub.yaml
+        "https://pypi.io/packages/source/h/huggingface_hub/huggingface_hub-0.24.6.tar.gz",
+        # gsm-amzn2-aarch64.yaml
+        "https://graviton-rpms.s3.amazonaws.com/amzn2-core_2021_01_26/amzn2-core/gsm-1.0.13-11.amzn2.0.2.aarch64.rpm",
+        (
+            "https://graviton-rpms.s3.amazonaws.com/amzn2-core-source_2021_01_26/"
+            "amzn2-core-source/gsm-1.0.13-11.amzn2.0.2.src.rpm"
+        ),
+        # pytest-pep8.yaml
+        "https://pypi.io/packages/source/p/python-pep8/python-pep8-2.3.1.tar.gz",
+        # google-cloud-cpp.yaml
+        "https://github.com/googleapis/google-cloud-cpp/archive/v2.31.0.tar.gz",
+        # x264
+        "http://download.videolan.org/pub/videolan/x264/snapshots/x264-snapshot-20191217-2245-stable.tar.bz2"
         # curl.yaml
-        case "https://curl.se/download/curl-8.11.0.tar.bz2":
-            return MockHttpStreamResponse(200, "archive_files/dummy_project_01.tar.gz")
+        "https://curl.se/download/curl-8.11.0.tar.bz2",
         # libprotobuf.yaml
-        case "https://github.com/protocolbuffers/protobuf/archive/v25.3/libprotobuf-v25.3.tar.gz":
-            return MockHttpStreamResponse(200, "archive_files/dummy_project_01.tar.gz")
-        case "https://github.com/google/benchmark/archive/5b7683f49e1e9223cf9927b24f6fd3d6bd82e3f8.tar.gz":
-            return MockHttpStreamResponse(200, "archive_files/dummy_project_01.tar.gz")
-        case "https://github.com/google/googletest/archive/5ec7f0c4a113e2f18ac2c6cc7df51ad6afc24081.tar.gz":
+        "https://github.com/protocolbuffers/protobuf/archive/v25.3/libprotobuf-v25.3.tar.gz",
+        "https://github.com/google/benchmark/archive/5b7683f49e1e9223cf9927b24f6fd3d6bd82e3f8.tar.gz",
+        "https://github.com/google/googletest/archive/5ec7f0c4a113e2f18ac2c6cc7df51ad6afc24081.tar.gz",
+    }
+    match endpoint:
+        case endpoint if endpoint in default_artifact_set:
             return MockHttpStreamResponse(200, "archive_files/dummy_project_01.tar.gz")
         # Error cases
         case "https://pypi.io/error_500.html":
@@ -66,17 +81,18 @@ def test_usage() -> None:
         ("types-toml.yaml", "0.10.8.20240310", "bump_recipe/types-toml_version_bump.yaml"),
         # Specifieds rare `fn` field in `source` section
         ("boto.yaml", None, "bump_recipe/boto_build_num_1.yaml"),
-        ("boto.yaml","TODO" , "bump_recipe/boto_version_bump.yaml"),
+        ("boto.yaml", "2.50.0", "bump_recipe/boto_version_bump.yaml"),
         ("huggingface_hub.yaml", None, "bump_recipe/huggingface_hub_build_num_1.yaml"),
-        ("huggingface_hub.yaml", "TODO", "bump_recipe/huggingface_hub_version_bump.yaml"),
-        # Does not use `version` variable, has a non-zero build number
+        ("huggingface_hub.yaml", "0.24.6", "bump_recipe/huggingface_hub_version_bump.yaml"),
+        # Does not use `version` variable, has a non-zero build number. Note that the URL is not parameterized on the
+        # version field.
         ("gsm-amzn2-aarch64.yaml", None, "bump_recipe/gsm-amzn2-aarch64_build_num_6.yaml"),
-        ("gsm-amzn2-aarch64.yaml", "TODO", "bump_recipe/gsm-amzn2-aarch64_version_bump.yaml"),
+        ("gsm-amzn2-aarch64.yaml", "2.0.20210721.2", "bump_recipe/gsm-amzn2-aarch64_version_bump.yaml"),
         # Has a `sha256` variable
         ("pytest-pep8.yaml", None, "bump_recipe/pytest-pep8_build_num_2.yaml"),
-        ("pytest-pep8.yaml", "TODO", "bump_recipe/pytest-pep8_version_bump.yaml"),
+        ("pytest-pep8.yaml", "2.3.1", "bump_recipe/pytest-pep8_version_bump.yaml"),
         ("google-cloud-cpp.yaml", None, "bump_recipe/google-cloud-cpp_build_num_2.yaml"),
-        ("google-cloud-cpp.yaml", "TODO", "bump_recipe/google-cloud-cpp_version_bump.yaml"),
+        ("google-cloud-cpp.yaml", "2.31.0", "bump_recipe/google-cloud-cpp_version_bump.yaml"),
         # Uses `sha256` variable and concatenated `version` variable.
         ("x264.yaml", None, "bump_recipe/x264_build_num_1.yaml"),
         # TODO: Add support for concatenated version strings
