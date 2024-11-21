@@ -64,6 +64,19 @@ def test_usage() -> None:
         # NOTE: The SHA-256 hashes will be of the mocked archive files, not of the actual source code being referenced.
         ("types-toml.yaml", None, "bump_recipe/types-toml_build_num_1.yaml"),
         ("types-toml.yaml", "0.10.8.20240310", "bump_recipe/types-toml_version_bump.yaml"),
+        # Specifieds rare `fn` field in `source` section
+        ("boto.yaml", None, "bump_recipe/boto_build_num_1.yaml"),
+        ("boto.yaml","TODO" , "bump_recipe/boto_version_bump.yaml"),
+        ("huggingface_hub.yaml", None, "bump_recipe/huggingface_hub_build_num_1.yaml"),
+        ("huggingface_hub.yaml", "TODO", "bump_recipe/huggingface_hub_version_bump.yaml"),
+        # Does not use `version` variable, has a non-zero build number
+        ("gsm-amzn2-aarch64.yaml", None, "bump_recipe/gsm-amzn2-aarch64_build_num_6.yaml"),
+        ("gsm-amzn2-aarch64.yaml", "TODO", "bump_recipe/gsm-amzn2-aarch64_version_bump.yaml"),
+        # Has a `sha256` variable
+        ("pytest-pep8.yaml", None, "bump_recipe/pytest-pep8_build_num_2.yaml"),
+        ("pytest-pep8.yaml", "TODO", "bump_recipe/pytest-pep8_version_bump.yaml"),
+        ("google-cloud-cpp.yaml", None, "bump_recipe/google-cloud-cpp_build_num_2.yaml"),
+        ("google-cloud-cpp.yaml", "TODO", "bump_recipe/google-cloud-cpp_version_bump.yaml"),
         # Uses `sha256` variable and concatenated `version` variable.
         ("x264.yaml", None, "bump_recipe/x264_build_num_1.yaml"),
         # TODO: Add support for concatenated version strings
@@ -74,6 +87,7 @@ def test_usage() -> None:
         # NOTE: libprotobuf has multiple sources, on top of being multi-output
         ("libprotobuf.yaml", None, "bump_recipe/libprotobuf_build_num_1.yaml"),
         ("libprotobuf.yaml", "25.3", "bump_recipe/libprotobuf_version_bump.yaml"),
+        # TODO add V1 test cases/support
         ## Version bump edge cases ##
         # NOTE: These have no source section, therefore all SHA-256 update attempts (and associated network requests)
         # should be skipped.
