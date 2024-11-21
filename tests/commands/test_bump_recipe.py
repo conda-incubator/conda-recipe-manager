@@ -12,42 +12,10 @@ from pyfakefs.fake_filesystem import FakeFilesystem
 
 from conda_recipe_manager.commands import bump_recipe
 from conda_recipe_manager.commands.utils.types import ExitCode
-from conda_recipe_manager.fetcher.http_artifact_fetcher import HttpArtifactFetcher
 from conda_recipe_manager.parser.recipe_reader import RecipeReader
-from tests.file_loading import get_test_path, load_recipe
+from tests.file_loading import get_test_path, load_file, load_recipe
 from tests.http_mocking import MockHttpStreamResponse
 from tests.smoke_testing import assert_cli_usage
-
-
-class MockUrl:
-    """
-    Namespace for mocked URLs
-    """
-
-    # URL endpoint(s) used by the `types-toml.yaml` file
-    TYPES_TOML_V0_10_8_20240310_URL: Final[str] = (
-        "https://pypi.io/packages/source/t/types-toml/types-toml-0.10.8.20240310.tar.gz"
-    )
-
-    # Failed URL
-    PYPI_HTTP_500: Final[str] = "https://pypi.io/error_500.html"
-
-
-@pytest.fixture(name="http_fetcher_types_toml")
-def fixture_http_fetcher_types_toml() -> HttpArtifactFetcher:
-    """
-    `HttpArtifactFetcher` test fixture for the `types-toml` project.
-    """
-    return HttpArtifactFetcher("types-toml", MockUrl.TYPES_TOML_V0_10_8_20240310_URL)
-
-
-@pytest.fixture(name="http_pypi_failure")
-def fixture_http_pypi_failure() -> HttpArtifactFetcher:
-    """
-    Single-instance `HttpArtifactFetcher` test fixture. This can be used for error cases that don't need multiple tests
-    to be run or need to simulate a failed HTTP request.
-    """
-    return HttpArtifactFetcher("pypi_failure", MockUrl.PYPI_HTTP_500)
 
 
 def mock_requests_get(*args: tuple[str], **_: dict[str, str | int]) -> MockHttpStreamResponse:
@@ -61,9 +29,21 @@ def mock_requests_get(*args: tuple[str], **_: dict[str, str | int]) -> MockHttpS
     """
     endpoint = cast(str, args[0])
     match endpoint:
-        case MockUrl.TYPES_TOML_V0_10_8_20240310_URL:
+        # types-toml.yaml
+        case "https://pypi.io/packages/source/t/types-toml/types-toml-0.10.8.20240310.tar.gz":
             return MockHttpStreamResponse(200, "archive_files/dummy_project_01.tar.gz")
-        case MockUrl.PYPI_HTTP_500:
+        # curl.yaml
+        case "https://curl.se/download/curl-8.11.0.tar.bz2":
+            return MockHttpStreamResponse(200, "archive_files/dummy_project_01.tar.gz")
+        # libprotobuf.yaml
+        case "https://github.com/protocolbuffers/protobuf/archive/v25.3/libprotobuf-v25.3.tar.gz":
+            return MockHttpStreamResponse(200, "archive_files/dummy_project_01.tar.gz")
+        case "https://github.com/google/benchmark/archive/5b7683f49e1e9223cf9927b24f6fd3d6bd82e3f8.tar.gz":
+            return MockHttpStreamResponse(200, "archive_files/dummy_project_01.tar.gz")
+        case "https://github.com/google/googletest/archive/5ec7f0c4a113e2f18ac2c6cc7df51ad6afc24081.tar.gz":
+            return MockHttpStreamResponse(200, "archive_files/dummy_project_01.tar.gz")
+        # Error cases
+        case "https://pypi.io/error_500.html":
             return MockHttpStreamResponse(500, "archive_files/dummy_project_01.tar.gz")
         case _:
             # TODO fix: pyfakefs does include `/dev/null` by default, but this actually points to `<temp_dir>/dev/null`
@@ -80,9 +60,17 @@ def test_usage() -> None:
 @pytest.mark.parametrize(
     "recipe_file,version,expected_recipe_file",
     [
+        ## Single-output Recipes##
         # NOTE: The SHA-256 hashes will be of the mocked archive files, not of the actual source code being referenced.
         ("types-toml.yaml", None, "bump_recipe/types-toml_build_num_1.yaml"),
         ("types-toml.yaml", "0.10.8.20240310", "bump_recipe/types-toml_version_bump.yaml"),
+        ## Multi-output Recipes ##
+        ("curl.yaml", None, "bump_recipe/curl_build_num_1.yaml"),
+        ("curl.yaml", "8.11.0", "bump_recipe/curl_version_bump.yaml"),
+        # NOTE: libprotobuf has multiple sources, on top of being multi-output
+        ("libprotobuf.yaml", None, "bump_recipe/libprotobuf_build_num_1.yaml"),
+        ("libprotobuf.yaml", "25.3", "bump_recipe/libprotobuf_version_bump.yaml"),
+        ## Version bump edge cases ##
         # NOTE: These have no source section, therefore all SHA-256 update attempts (and associated network requests)
         # should be skipped.
         ("bump_recipe/build_num_1.yaml", None, "bump_recipe/build_num_2.yaml"),
@@ -121,11 +109,10 @@ def test_bump_recipe_cli(
     with patch("requests.get", new=mock_requests_get):
         result = runner.invoke(bump_recipe.bump_recipe, cli_args)
 
-    # Read the edited file and check it against the expected file.
-    parser = load_recipe(recipe_file_path, RecipeReader)
-    expected_parser = load_recipe(expected_recipe_file_path, RecipeReader)
-
-    assert parser == expected_parser
+    # Ensure that we don't check against the file that was edited.
+    assert recipe_file_path != expected_recipe_file_path
+    # Read the edited file and check it against the expected file. We don't parse the recipe file as it isn't necessary.
+    assert load_file(recipe_file_path) == load_file(expected_recipe_file_path)
     assert result.exit_code == ExitCode.SUCCESS
 
 
@@ -152,10 +139,9 @@ def test_bump_recipe_increment_build_number_key_missing(fs: FakeFilesystem) -> N
 
     result = runner.invoke(bump_recipe.bump_recipe, ["--build-num", str(recipe_file_path)])
 
-    parser = load_recipe(recipe_file_path, RecipeReader)
-    expected_parser = load_recipe(expected_recipe_file_path, RecipeReader)
-
-    assert parser == expected_parser
+    # Ensure that we don't check against the file that was edited.
+    assert recipe_file_path != expected_recipe_file_path
+    assert load_file(recipe_file_path) == load_file(expected_recipe_file_path)
     assert result.exit_code == ExitCode.SUCCESS
 
 
