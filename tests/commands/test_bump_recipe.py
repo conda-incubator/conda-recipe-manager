@@ -64,6 +64,10 @@ def test_usage() -> None:
         # NOTE: The SHA-256 hashes will be of the mocked archive files, not of the actual source code being referenced.
         ("types-toml.yaml", None, "bump_recipe/types-toml_build_num_1.yaml"),
         ("types-toml.yaml", "0.10.8.20240310", "bump_recipe/types-toml_version_bump.yaml"),
+        # Uses `sha256` variable and concatenated `version` variable.
+        ("x264.yaml", None, "bump_recipe/x264_build_num_1.yaml"),
+        # TODO: Add support for concatenated version strings
+        # ("x264.yaml", "1!153.20191217", "bump_recipe/x264_version_bump.yaml"),
         ## Multi-output Recipes ##
         ("curl.yaml", None, "bump_recipe/curl_build_num_1.yaml"),
         ("curl.yaml", "8.11.0", "bump_recipe/curl_version_bump.yaml"),
