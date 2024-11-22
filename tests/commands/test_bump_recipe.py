@@ -90,7 +90,6 @@ def test_usage() -> None:
         ("gsm-amzn2-aarch64.yaml", "2.0.20210721.2", "bump_recipe/gsm-amzn2-aarch64_version_bump.yaml"),
         # Has a `sha256` variable
         ("pytest-pep8.yaml", None, "bump_recipe/pytest-pep8_build_num_2.yaml"),
-        # TODO: Fix expected file when we support the `sha256` variable
         ("pytest-pep8.yaml", "1.0.7", "bump_recipe/pytest-pep8_version_bump.yaml"),
         ("google-cloud-cpp.yaml", None, "bump_recipe/google-cloud-cpp_build_num_2.yaml"),
         ("google-cloud-cpp.yaml", "2.31.0", "bump_recipe/google-cloud-cpp_version_bump.yaml"),
