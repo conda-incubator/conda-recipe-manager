@@ -113,10 +113,12 @@ def _update_sha256(recipe_parser: RecipeParser) -> None:
     # TODO handle case where SHA is stored in one or more variables (see cctools-ld64.yaml)
     # TODO handle case where SHA is a variable
 
-    # TODO Future: Figure out
     # NOTE: Each source _might_ have a different SHA-256 hash. This is the case for the `cctools-ld64` feedstock. That
     # project has a different implementation per architecture. However, in other circumstances, mirrored sources with
-    # different hashes might imply there is a security threat.
+    # different hashes might imply there is a security threat. We will log some statistics so the user can best decide
+    # what to do.
+    unique_hashes: set[str] = set()
+    total_hash_cntr = 0
     for src_path, fetcher in fetcher_lst.items():
         if not isinstance(fetcher, HttpArtifactFetcher):
             continue
@@ -125,11 +127,19 @@ def _update_sha256(recipe_parser: RecipeParser) -> None:
         # TODO attempt fetch in the background, especially if multiple fetch() calls are required.
         fetcher.fetch()
         sha = fetcher.get_archive_sha256()
+        total_hash_cntr += 1
+        unique_hashes.add(sha)
         sha_path = RecipeReader.append_to_path(src_path, "/sha256")
 
         # Guard against the unlikely scenario that the `sha256` field is missing.
         patch_op = "replace" if recipe_parser.contains_value(sha_path) else "add"
         _exit_on_failed_patch(recipe_parser, {"op": patch_op, "path": sha_path, "value": sha})
+    log.info(
+        "Found %d unique SHA-256 hash(es) out of a total of %d hash(es) in %d sources.",
+        len(unique_hashes),
+        total_hash_cntr,
+        len(fetcher_lst),
+    )
 
 
 # TODO Improve. In order for `click` to play nice with `pyfakefs`, we set `path_type=str` and delay converting to a
