@@ -16,7 +16,6 @@ from conda_recipe_manager.fetcher.artifact_fetcher import from_recipe as af_from
 from conda_recipe_manager.fetcher.base_artifact_fetcher import BaseArtifactFetcher
 from conda_recipe_manager.fetcher.http_artifact_fetcher import HttpArtifactFetcher
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
-from conda_recipe_manager.parser.recipe_reader import RecipeReader
 from conda_recipe_manager.types import JsonPatchType
 
 log = logging.getLogger(__name__)
@@ -73,14 +72,16 @@ def _exit_on_failed_patch(recipe_parser: RecipeParser, patch_blob: JsonPatchType
     sys.exit(ExitCode.PATCH_ERROR)
 
 
-def _pre_update_cleanup(recipe_parser: RecipeParser) -> None:  # pylint: disable=unused-argument
+def _pre_process_cleanup(recipe_content: str) -> str:
     """
-    Performs some recipe clean-up tasks before other upgrade operations can commence.
+    Performs some recipe clean-up tasks before parsing the recipe file. This should correct common issues and improve
+    parsing compatibility.
 
-    :param recipe_parser: Recipe file to update.
+    :param recipe_content: Recipe file content to fix.
+    :returns: Post-processed recipe file text.
     """
-    # TODO `hash_type` will need to be corrected
-    # TODO delete unused variables?
+    # TODO delete unused variables? Unsure if that may be too prescriptive.
+    return RecipeParser.pre_process_remove_hash_type(recipe_content)
 
 
 def _update_build_num(recipe_parser: RecipeParser, increment_build_num: bool) -> None:
@@ -213,7 +214,7 @@ def _update_sha256(recipe_parser: RecipeParser) -> None:
         sha = _get_sha256(fetcher)
         total_hash_cntr += 1
         unique_hashes.add(sha)
-        sha_path = RecipeReader.append_to_path(src_path, "/sha256")
+        sha_path = RecipeParser.append_to_path(src_path, "/sha256")
 
         # Guard against the unlikely scenario that the `sha256` field is missing.
         patch_op = "replace" if recipe_parser.contains_value(sha_path) else "add"
@@ -259,13 +260,16 @@ def bump_recipe(recipe_file_path: str, build_num: bool, target_version: Optional
         sys.exit(ExitCode.CLICK_USAGE)
 
     try:
-        contents_recipe = Path(recipe_file_path).read_text(encoding="utf-8")
+        recipe_content = Path(recipe_file_path).read_text(encoding="utf-8")
     except IOError:
         log.error("Couldn't read the given recipe file: %s", recipe_file_path)
         sys.exit(ExitCode.IO_ERROR)
 
+    # Attempt to remove problematic recipe patterns that cause issues for the parser.
+    recipe_content = _pre_process_cleanup(recipe_content)
+
     try:
-        recipe_parser = RecipeParser(contents_recipe)
+        recipe_parser = RecipeParser(recipe_content)
     except Exception:  # pylint: disable=broad-except
         log.error("An error occurred while parsing the recipe file contents.")
         sys.exit(ExitCode.PARSE_EXCEPTION)
@@ -280,7 +284,6 @@ def bump_recipe(recipe_file_path: str, build_num: bool, target_version: Optional
         if target_version == recipe_parser.get_value(RecipePaths.VERSION, default=None, sub_vars=True):
             log.warning("The provided target version is the same value found in the recipe file: %s", target_version)
 
-        _pre_update_cleanup(recipe_parser)
         # Version must be updated before hash to ensure the correct artifact is hashed.
         _update_version(recipe_parser, target_version)
         _update_sha256(recipe_parser)

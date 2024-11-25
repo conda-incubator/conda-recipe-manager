@@ -48,6 +48,29 @@ class RecipeParser(RecipeReader):
     # Static set of patch operations that require `from`. The others require `value` or nothing.
     _patch_ops_requiring_from = set(["copy", "move"])
 
+    ## Pre-processing Recipe Text Functions ##
+
+    @staticmethod
+    def pre_process_remove_hash_type(content: str) -> str:
+        """
+        There is a common-enough-to-be-annoying pattern used in some recipe files where the `/source/sha256` key is
+        stored as a variable. For example: `{{ hash_type }}: <hash>`
+
+        This variable-as-a-key mechanism is not supported by the parser and causes issues for other tooling. This
+        function, if run before parsing the recipe file, will remove and fix this pattern.
+
+        :param content: Recipe file contents to pre-process
+        :returns: Pre-processed recipe file contents, devoid of `hash_type` key/variable usage.
+        """
+        hash_type_var_variants: Final[set[str]] = {
+            '{% set hash_type = "sha256" %}\n',
+            '{% set hashtype = "sha256" %}\n',
+            '{% set hash = "sha256" %}\n',  # NOTE: `hash` is also commonly used for the actual SHA-256 hash value
+        }
+        for hash_type_variant in hash_type_var_variants:
+            content = content.replace(hash_type_variant, "")
+        return Regex.PRE_PROCESS_JINJA_HASH_TYPE_KEY.sub("sha256:", content)
+
     ## JINJA Variable Editing Functions ##
 
     def set_variable(self, var: str, value: JsonType) -> None:
