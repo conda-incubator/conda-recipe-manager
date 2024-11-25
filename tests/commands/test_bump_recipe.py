@@ -103,6 +103,9 @@ def test_usage() -> None:
         # NOTE: libprotobuf has multiple sources, on top of being multi-output
         ("libprotobuf.yaml", None, "bump_recipe/libprotobuf_build_num_1.yaml"),
         ("libprotobuf.yaml", "25.3", "bump_recipe/libprotobuf_version_bump.yaml"),
+        # Validates removal of `hash_type` variable that is sometimes used instead of the `/source/sha256` key
+        ("types-toml_hash_type.yaml", None, "bump_recipe/types-toml_hash_type_build_num_1.yaml"),
+        ("types-toml_hash_type.yaml", "0.10.8.20240310", "bump_recipe/types-toml_hash_type_version_bump.yaml"),
         # TODO add V1 test cases/support
         ## Version bump edge cases ##
         # NOTE: These have no source section, therefore all SHA-256 update attempts (and associated network requests)
