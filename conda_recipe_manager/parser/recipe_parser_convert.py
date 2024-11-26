@@ -9,15 +9,8 @@ from __future__ import annotations
 from typing import Final, Optional, cast
 
 from conda_recipe_manager.licenses.spdx_utils import SpdxUtils
-from conda_recipe_manager.parser._node import Node
-from conda_recipe_manager.parser._traverse import traverse
 from conda_recipe_manager.parser._types import ROOT_NODE_VALUE, CanonicalSortOrder, Regex
-from conda_recipe_manager.parser._utils import (
-    search_any_regex,
-    set_key_conditionally,
-    stack_path_to_str,
-    str_to_stack_path,
-)
+from conda_recipe_manager.parser._utils import search_any_regex, set_key_conditionally, stack_path_to_str
 from conda_recipe_manager.parser.enums import SchemaVersion
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
 from conda_recipe_manager.parser.types import CURRENT_RECIPE_SCHEMA_FORMAT
@@ -313,7 +306,9 @@ class RecipeParserConvert(RecipeParser):
                 self._patch_move_base_path(src_path, "/git_depth", "/depth")
 
                 # Canonically sort this section
-                self._sort_subtree_keys(src_path, CanonicalSortOrder.V1_SOURCE_SECTION_KEY_SORT_ORDER)
+                self._v1_recipe._sort_subtree_keys(  # pylint: disable=protected-access
+                    src_path, CanonicalSortOrder.V1_SOURCE_SECTION_KEY_SORT_ORDER
+                )
 
     def _upgrade_build_script_section(self, build_path: str) -> None:
         """
@@ -453,7 +448,9 @@ class RecipeParserConvert(RecipeParser):
             self._patch_deprecated_fields(build_path, build_deprecated)
 
             # Canonically sort this section
-            self._sort_subtree_keys(build_path, CanonicalSortOrder.V1_BUILD_SECTION_KEY_SORT_ORDER)
+            self._v1_recipe._sort_subtree_keys(  # pylint: disable=protected-access
+                build_path, CanonicalSortOrder.V1_BUILD_SECTION_KEY_SORT_ORDER
+            )
 
     def _upgrade_requirements_section(self, base_package_paths: list[str]) -> None:
         """
@@ -640,7 +637,7 @@ class RecipeParserConvert(RecipeParser):
             self._patch_move_base_path(test_path, "/downstreams", "/downstream")
 
             # Canonically sort the python section, if it exists
-            self._sort_subtree_keys(
+            self._v1_recipe._sort_subtree_keys(  # pylint: disable=protected-access
                 RecipeParser.append_to_path(test_path, "/python"), CanonicalSortOrder.V1_PYTHON_TEST_KEY_SORT_ORDER
             )
 
@@ -690,7 +687,9 @@ class RecipeParserConvert(RecipeParser):
 
             # Not all the top-level keys are found in each output section, but all the output section keys are
             # found at the top-level. So for consistency, we sort on that ordering.
-            self._sort_subtree_keys(output_path, CanonicalSortOrder.TOP_LEVEL_KEY_SORT_ORDER)
+            self._v1_recipe._sort_subtree_keys(  # pylint: disable=protected-access
+                output_path, CanonicalSortOrder.TOP_LEVEL_KEY_SORT_ORDER
+            )
 
     @staticmethod
     def pre_process_recipe_text(content: str) -> str:
@@ -811,7 +810,9 @@ class RecipeParserConvert(RecipeParser):
 
         # Sort the top-level keys to a "canonical" ordering. This should make previous patch operations look more
         # "sensible" to a human reader.
-        self._sort_subtree_keys("/", CanonicalSortOrder.TOP_LEVEL_KEY_SORT_ORDER)
+        self._v1_recipe._sort_subtree_keys(  # pylint: disable=protected-access
+            "/", CanonicalSortOrder.TOP_LEVEL_KEY_SORT_ORDER
+        )
 
         # Override the schema value as the recipe conversion is now complete.
         self._v1_recipe._schema_version = SchemaVersion.V1  # pylint: disable=protected-access

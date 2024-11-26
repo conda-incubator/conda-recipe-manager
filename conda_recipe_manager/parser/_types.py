@@ -29,8 +29,8 @@ class CanonicalSortOrder:
     Namespace that contains all canonical sort-ordering look-up tables.
     """
 
-    # Ideal sort-order of the top-level YAML keys for human readability and traditionally how we organize our files. This
-    # should work on both V0 (pre CEP-13) and V1 recipe formats.
+    # Ideal sort-order of the top-level YAML keys for human readability and traditionally how we organize our files.
+    # This should work on both V0 (pre CEP-13) and V1 recipe formats.
     TOP_LEVEL_KEY_SORT_ORDER: Final[dict[str, int]] = {
         "schema_version": 0,
         "context": 10,

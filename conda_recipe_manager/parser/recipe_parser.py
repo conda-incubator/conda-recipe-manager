@@ -63,8 +63,7 @@ class RecipeParser(RecipeReader):
         def _comparison(n: Node) -> int:
             return RecipeParser._canonical_sort_keys_comparison(n, tbl)
 
-        # TODO fix: need to override for Convert subclass
-        node = traverse(self._v1_recipe._root, str_to_stack_path(sort_path))  # pylint: disable=protected-access
+        node = traverse(self._root, str_to_stack_path(sort_path))  # pylint: disable=protected-access
         if node is None:
             return
         if rename:
