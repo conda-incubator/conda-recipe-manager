@@ -30,13 +30,13 @@ from conda_recipe_manager.parser._traverse import (
     traverse,
     traverse_with_index,
 )
-from conda_recipe_manager.parser._types import CanonicalSortOrder, Regex, StrStack
+from conda_recipe_manager.parser._types import Regex, StrStack
 from conda_recipe_manager.parser._utils import str_to_stack_path
 from conda_recipe_manager.parser.enums import SelectorConflictMode
 from conda_recipe_manager.parser.exceptions import JsonPatchValidationException
 from conda_recipe_manager.parser.recipe_reader import RecipeReader
 from conda_recipe_manager.parser.selector_parser import SelectorParser
-from conda_recipe_manager.parser.types import JSON_PATCH_SCHEMA, SchemaVersion
+from conda_recipe_manager.parser.types import JSON_PATCH_SCHEMA
 from conda_recipe_manager.types import PRIMITIVES_TUPLE, JsonPatchType, JsonType
 
 
@@ -69,17 +69,6 @@ class RecipeParser(RecipeReader):
         if rename:
             node.value = rename
         node.children.sort(key=_comparison)
-
-    def canonically_sort_all_keys(self) -> None:
-        """
-        TODO
-        """
-        self._sort_subtree_keys("/", CanonicalSortOrder.TOP_LEVEL_KEY_SORT_ORDER)
-        match self.get_schema_version():
-            case SchemaVersion.V0:
-                pass
-            case SchemaVersion.V1:
-                pass
 
     ## Pre-processing Recipe Text Functions ##
 
