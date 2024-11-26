@@ -30,13 +30,13 @@ from conda_recipe_manager.parser._traverse import (
     traverse,
     traverse_with_index,
 )
-from conda_recipe_manager.parser._types import Regex, StrStack
+from conda_recipe_manager.parser._types import CanonicalSortOrder, Regex, StrStack
 from conda_recipe_manager.parser._utils import str_to_stack_path
 from conda_recipe_manager.parser.enums import SelectorConflictMode
 from conda_recipe_manager.parser.exceptions import JsonPatchValidationException
 from conda_recipe_manager.parser.recipe_reader import RecipeReader
 from conda_recipe_manager.parser.selector_parser import SelectorParser
-from conda_recipe_manager.parser.types import JSON_PATCH_SCHEMA
+from conda_recipe_manager.parser.types import JSON_PATCH_SCHEMA, SchemaVersion
 from conda_recipe_manager.types import PRIMITIVES_TUPLE, JsonPatchType, JsonType
 
 
@@ -47,6 +47,40 @@ class RecipeParser(RecipeReader):
 
     # Static set of patch operations that require `from`. The others require `value` or nothing.
     _patch_ops_requiring_from = set(["copy", "move"])
+
+    ## Recipe Key Sorting ##
+
+    def _sort_subtree_keys(self, sort_path: str, tbl: dict[str, int], rename: str = "") -> None:
+        """
+        Convenience function that sorts 1 level of keys, given a path. Optionally allows renaming of the target node.
+        No changes are made if the path provided is invalid/does not exist.
+
+        :param sort_path: Top-level path to target sorting of child keys
+        :param tbl: Table describing how keys should be sorted. Lower-value key names appear towards the top of the list
+        :param rename: (Optional) If specified, renames the top-level key
+        """
+
+        def _comparison(n: Node) -> int:
+            return RecipeParser._canonical_sort_keys_comparison(n, tbl)
+
+        # TODO fix: need to override for Convert subclass
+        node = traverse(self._v1_recipe._root, str_to_stack_path(sort_path))  # pylint: disable=protected-access
+        if node is None:
+            return
+        if rename:
+            node.value = rename
+        node.children.sort(key=_comparison)
+
+    def canonically_sort_all_keys(self) -> None:
+        """
+        TODO
+        """
+        self._sort_subtree_keys("/", CanonicalSortOrder.TOP_LEVEL_KEY_SORT_ORDER)
+        match self.get_schema_version():
+            case SchemaVersion.V0:
+                pass
+            case SchemaVersion.V1:
+                pass
 
     ## Pre-processing Recipe Text Functions ##
 
