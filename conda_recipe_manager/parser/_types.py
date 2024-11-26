@@ -23,76 +23,83 @@ ROOT_NODE_VALUE: Final[str] = "/"
 # Marker used to temporarily work around some Jinja-template parsing issues
 RECIPE_MANAGER_SUB_MARKER: Final[str] = "__RECIPE_MANAGER_SUBSTITUTION_MARKER__"
 
-# Ideal sort-order of the top-level YAML keys for human readability and traditionally how we organize our files. This
-# should work on both V0 (pre CEP-13) and V1 recipe formats.
-TOP_LEVEL_KEY_SORT_ORDER: Final[dict[str, int]] = {
-    "schema_version": 0,
-    "context": 10,
-    "package": 20,
-    "recipe": 30,  # Used in the v1 recipe format
-    "source": 40,
-    "files": 50,
-    "build": 60,
-    "requirements": 70,
-    "outputs": 80,
-    "test": 90,
-    "tests": 100,  # Used in the v1 recipe format
-    "about": 110,
-    "extra": 120,
-}
 
-# Canonical sort order for the new "v1" recipe format's `build` block
-V1_SOURCE_SECTION_KEY_SORT_ORDER: Final[dict[str, int]] = {
-    # URL source fields
-    "url": 0,
-    "sha256": 10,
-    "md5": 20,
-    # Local source fields (not including above)
-    "path": 30,
-    "use_gitignore": 40,
-    # Git source fields (not including above)
-    "git": 50,
-    "branch": 60,
-    "tag": 70,
-    "rev": 80,
-    "depth": 90,
-    "lfs": 100,
-    # Common fields
-    "target_directory": 120,
-    "file_name": 130,
-    "patches": 140,
-}
+class CanonicalSortOrder:
+    """
+    Namespace that contains all canonical sort-ordering look-up tables.
+    """
 
-# Canonical sort order for the new "v1" recipe format's `build` block
-V1_BUILD_SECTION_KEY_SORT_ORDER: Final[dict[str, int]] = {
-    "number": 0,
-    "string": 10,
-    "skip": 20,
-    "noarch": 30,
-    "script": 40,
-    "merge_build_and_host_envs": 50,
-    "always_include_files": 60,
-    "always_copy_files": 70,
-    "variant": 80,
-    "python": 90,
-    "prefix_detection": 100,
-    "dynamic_linking": 110,
-}
+    # Ideal sort-order of the top-level YAML keys for human readability and traditionally how we organize our files.
+    # This should work on both V0 (pre CEP-13) and V1 recipe formats.
+    TOP_LEVEL_KEY_SORT_ORDER: Final[dict[str, int]] = {
+        "schema_version": 0,
+        "context": 10,
+        "package": 20,
+        "recipe": 30,  # Used in the v1 recipe format
+        "source": 40,
+        "files": 50,
+        "build": 60,
+        "requirements": 70,
+        "outputs": 80,
+        "test": 90,
+        "tests": 100,  # Used in the v1 recipe format
+        "about": 110,
+        "extra": 120,
+    }
 
-# Canonical sort order for the new "v1" recipe format's `tests` block
-V1_TEST_SECTION_KEY_SORT_ORDER: Final[dict[str, int]] = {
-    "script": 0,
-    "requirements": 10,
-    "files": 20,
-    "python": 30,
-    "downstream": 40,
-}
+    # Canonical sort order for the new "v1" recipe format's `build` block
+    V1_SOURCE_SECTION_KEY_SORT_ORDER: Final[dict[str, int]] = {
+        # URL source fields
+        "url": 0,
+        "sha256": 10,
+        "md5": 20,
+        # Local source fields (not including above)
+        "path": 30,
+        "use_gitignore": 40,
+        # Git source fields (not including above)
+        "git": 50,
+        "branch": 60,
+        "tag": 70,
+        "rev": 80,
+        "depth": 90,
+        "lfs": 100,
+        # Common fields
+        "target_directory": 120,
+        "file_name": 130,
+        "patches": 140,
+    }
 
-# Canonical sort order for the V1 Python test element
-V1_PYTHON_TEST_KEY_SORT_ORDER: Final[dict[str, int]] = {
-    "imports": 0,
-    "pip_check": 10,
-}
+    # Canonical sort order for the new "v1" recipe format's `build` block
+    V1_BUILD_SECTION_KEY_SORT_ORDER: Final[dict[str, int]] = {
+        "number": 0,
+        "string": 10,
+        "skip": 20,
+        "noarch": 30,
+        "script": 40,
+        "merge_build_and_host_envs": 50,
+        "always_include_files": 60,
+        "always_copy_files": 70,
+        "variant": 80,
+        "python": 90,
+        "prefix_detection": 100,
+        "dynamic_linking": 110,
+    }
+
+    # Canonical sort order for the new "v1" recipe format's `tests` block
+    V1_TEST_SECTION_KEY_SORT_ORDER: Final[dict[str, int]] = {
+        "script": 0,
+        "requirements": 10,
+        "files": 20,
+        "python": 30,
+        "downstream": 40,
+    }
+
+    # Canonical sort order for the V1 Python test element
+    V1_PYTHON_TEST_KEY_SORT_ORDER: Final[dict[str, int]] = {
+        "imports": 0,
+        "pip_check": 10,
+    }
+
 
 #### Private Classes (Not to be used external to the `parser` module) ####
 

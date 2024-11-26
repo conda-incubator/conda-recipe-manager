@@ -48,6 +48,28 @@ class RecipeParser(RecipeReader):
     # Static set of patch operations that require `from`. The others require `value` or nothing.
     _patch_ops_requiring_from = set(["copy", "move"])
 
+    ## Recipe Key Sorting ##
+
+    def _sort_subtree_keys(self, sort_path: str, tbl: dict[str, int], rename: str = "") -> None:
+        """
+        Convenience function that sorts 1 level of keys, given a path. Optionally allows renaming of the target node.
+        No changes are made if the path provided is invalid/does not exist.
+
+        :param sort_path: Top-level path to target sorting of child keys
+        :param tbl: Table describing how keys should be sorted. Lower-value key names appear towards the top of the list
+        :param rename: (Optional) If specified, renames the top-level key
+        """
+
+        def _comparison(n: Node) -> int:
+            return RecipeParser._canonical_sort_keys_comparison(n, tbl)
+
+        node = traverse(self._root, str_to_stack_path(sort_path))  # pylint: disable=protected-access
+        if node is None:
+            return
+        if rename:
+            node.value = rename
+        node.children.sort(key=_comparison)
+
     ## Pre-processing Recipe Text Functions ##
 
     @staticmethod
