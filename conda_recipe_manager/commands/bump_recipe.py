@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import logging
 import sys
+import time
 from pathlib import Path
 from typing import Final, Optional, cast
 
@@ -14,6 +15,7 @@ import click
 from conda_recipe_manager.commands.utils.types import ExitCode
 from conda_recipe_manager.fetcher.artifact_fetcher import from_recipe as af_from_recipe
 from conda_recipe_manager.fetcher.base_artifact_fetcher import BaseArtifactFetcher
+from conda_recipe_manager.fetcher.exceptions import FetchError
 from conda_recipe_manager.fetcher.http_artifact_fetcher import HttpArtifactFetcher
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
 from conda_recipe_manager.types import JsonPatchType
@@ -36,6 +38,12 @@ class RecipePaths:
 
 # Common variable names used for source artifact hashes.
 _COMMON_HASH_VAR_NAMES: Final[set[str]] = {"sha256", "hash", "hash_val", "hash_value"}
+
+# Maximum number of retries to attempt when trying to fetch an external artifact.
+_RETRY_LIMIT: Final[int] = 5
+# How much longer (in seconds) we should wait per retry.
+_RETRY_INTERVAL: Final[int] = 30
+
 
 ## Functions ##
 
@@ -150,10 +158,16 @@ def _get_sha256(fetcher: HttpArtifactFetcher) -> str:
     :raises FetchError: If an issue occurred while downloading or extracting the archive.
     :returns: The SHA-256 hash of the artifact, if it was able to be downloaded.
     """
-    # TODO retry mechanism, and log attempts
     # TODO attempt fetch in the background, especially if multiple fetch() calls are required.
-    fetcher.fetch()
-    return fetcher.get_archive_sha256()
+    for retry_id in range(1, _RETRY_LIMIT + 1):
+        try:
+            log.info("Fetching artifact, attempt #%d", retry_id)
+            fetcher.fetch()
+            return fetcher.get_archive_sha256()
+        except FetchError:
+            time.sleep(retry_id * _RETRY_INTERVAL)
+    # TODO access fetcher name for logging
+    raise FetchError(f"Failed to fetch after {_RETRY_LIMIT} retries.")
 
 
 def _update_sha256(recipe_parser: RecipeParser) -> None:
