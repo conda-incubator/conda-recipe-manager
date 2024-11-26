@@ -770,16 +770,7 @@ class RecipeParserConvert(RecipeParser):
         # Replace `{{ hash_type }}:` with the value of `hash_type`, which is likely `sha256`. This is an uncommon
         # practice that is not part of the V1 specification. Currently, about 70 AnacondaRecipes and conda-forge files
         # do this in our integration testing sample.
-        hash_type_var_variants: Final[set[str]] = {
-            '{% set hash_type = "sha256" %}\n',
-            '{% set hashtype = "sha256" %}\n',
-            '{% set hash = "sha256" %}\n',  # NOTE: `hash` is also commonly used for the actual SHA-256 hash value
-        }
-        for hash_type_variant in hash_type_var_variants:
-            content = content.replace(hash_type_variant, "")
-        content = Regex.PRE_PROCESS_JINJA_HASH_TYPE_KEY.sub("sha256:", content)
-
-        return content
+        return RecipeParser.pre_process_remove_hash_type(content)
 
     def render_to_v1_recipe_format(self) -> tuple[str, MessageTable, str]:
         """
