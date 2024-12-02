@@ -96,12 +96,13 @@ def _exit_on_failed_patch(recipe_parser: RecipeParser, patch_blob: JsonPatchType
     sys.exit(ExitCode.PATCH_ERROR)
 
 
-def _exit_on_failed_fetch() -> None:
+def _exit_on_failed_fetch(fetcher: BaseArtifactFetcher) -> None:
     """
     Exits the script upon a failed fetch.
+
+    :param fetcher: ArtifactFetcher instance used in the fetch attempt.
     """
-    # TODO access fetcher name for logging
-    log.error("Failed to fetch after %s retries.", _RETRY_LIMIT)
+    log.error("Failed to fetch `%s` after %s retries.", fetcher, _RETRY_LIMIT)
     sys.exit(ExitCode.HTTP_ERROR)
 
 
@@ -189,18 +190,14 @@ def _get_sha256(fetcher: HttpArtifactFetcher, retry_interval: float) -> str:
     # operation is so fast in comparison, any gains would likely be lost with the additional overhead. This op is
     # also inherently reliant on having the version change performed ahead of time. In addition, parallelizing the
     # retries defeats the point of having a back-off timer.
-    #
-    # This should be re-evaluated in the future if we start performing other long-running tasks or network-bound
-    # operations.
     for retry_id in range(1, _RETRY_LIMIT + 1):
         try:
-            log.info("Fetching artifact, attempt #%d", retry_id)
+            log.info("Fetching artifact `%s`, attempt #%d", fetcher, retry_id)
             fetcher.fetch()
             return fetcher.get_archive_sha256()
         except FetchError:
             time.sleep(retry_id * retry_interval)
-    # TODO access fetcher name for logging
-    raise FetchError(f"Failed to fetch after {_RETRY_LIMIT} retries.")
+    raise FetchError(f"Failed to fetch `{fetcher}` after {_RETRY_LIMIT} retries.")
 
 
 def _update_sha256_check_hash_var(
@@ -231,7 +228,7 @@ def _update_sha256_check_hash_var(
             try:
                 recipe_parser.set_variable(hash_var, _get_sha256(src_fetcher, retry_interval))
             except FetchError:
-                _exit_on_failed_fetch()
+                _exit_on_failed_fetch(src_fetcher)
             return True
 
         log.warning(
@@ -282,7 +279,7 @@ def _update_sha256(recipe_parser: RecipeParser, retry_interval: float) -> None:
         try:
             sha = _get_sha256(fetcher, retry_interval)
         except FetchError:
-            _exit_on_failed_fetch()
+            _exit_on_failed_fetch(fetcher)
         total_hash_cntr += 1
         unique_hashes.add(sha)
         sha_path = RecipeParser.append_to_path(src_path, "/sha256")
