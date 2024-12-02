@@ -158,7 +158,9 @@ def test_bump_recipe_cli(
     [
         ("bump_recipe/types-toml_bad_url.yaml", "0.10.8.20240310", 5),
         ("bump_recipe/types-toml_bad_url_hash_var.yaml", "0.10.8.20240310", 5),
-        # ("bump_recipe/TODO.yaml", "TODO", 10),
+        # As of writing, the script will fail on the first URL that fails to be fetched, thus the count is half what
+        # one might expect.
+        ("bump_recipe/types-toml_bad_url_multi_source.yaml", "0.10.8.20240310", 5),
         # TODO validate V1 recipe files
     ],
 )
@@ -173,6 +175,7 @@ def test_bump_recipe_http_retry_mechanism(
     :param version: Version to bump to
     :param expected_retries: Expected number of retries that should have been attempted
     """
+
     runner = CliRunner()
     fs.add_real_directory(get_test_path(), read_only=False)
     recipe_file_path: Final[Path] = get_test_path() / recipe_file
