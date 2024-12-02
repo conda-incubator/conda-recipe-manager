@@ -136,8 +136,8 @@ def test_bump_recipe_cli(
     runner = CliRunner()
     fs.add_real_directory(get_test_path(), read_only=False)
 
-    recipe_file_path = get_test_path() / recipe_file
-    expected_recipe_file_path = get_test_path() / expected_recipe_file
+    recipe_file_path: Final[Path] = get_test_path() / recipe_file
+    expected_recipe_file_path: Final[Path] = get_test_path() / expected_recipe_file
 
     cli_args: Final[list[str]] = (
         ["--build-num", str(recipe_file_path)] if version is None else ["-t", version, str(recipe_file_path)]
@@ -151,6 +151,36 @@ def test_bump_recipe_cli(
     # Read the edited file and check it against the expected file. We don't parse the recipe file as it isn't necessary.
     assert load_file(recipe_file_path) == load_file(expected_recipe_file_path)
     assert result.exit_code == ExitCode.SUCCESS
+
+
+@pytest.mark.parametrize(
+    "recipe_file,version,expected_retries",
+    [
+        ("bump_recipe/types-toml_bad_url.yaml", "0.10.8.20240310", 5),
+        # ("bump_recipe/TODOsha_retry.yaml", "0.10.8.20240310", 5),
+        # ("bump_recipe/TODO.yaml", "TODO", 10),
+        # TODO validate V1 recipe files
+    ],
+)
+def test_bump_recipe_http_retry_mechanism(
+    fs: FakeFilesystem, recipe_file: str, version: str, expected_retries: int
+) -> None:
+    """
+    Ensures that the recipe retry mechanism is used in the event the source artifact URLs are unreachable.
+
+    :param fs: `pyfakefs` Fixture used to replace the file system
+    :param recipe_file: Target recipe file to update
+    :param version: Version to bump to
+    :param expected_retries: Expected number of retries that should have been attempted
+    """
+    runner = CliRunner()
+    fs.add_real_directory(get_test_path(), read_only=False)
+    recipe_file_path: Final[Path] = get_test_path() / recipe_file
+    with patch("requests.get") as mocker:
+        result = runner.invoke(bump_recipe.bump_recipe, ["-t", version, "-i", "0.01", str(recipe_file_path)])
+        assert mocker.call_count == expected_retries
+
+    assert result.exit_code == ExitCode.HTTP_ERROR
 
 
 def test_bump_recipe_exits_if_target_version_missing() -> None:
