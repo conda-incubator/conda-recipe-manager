@@ -20,7 +20,8 @@ from conda_recipe_manager.fetcher.http_artifact_fetcher import HttpArtifactFetch
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
 from conda_recipe_manager.types import JsonPatchType
 
-log = logging.getLogger(__name__)
+# Truncates the `__name__` to the crm command name.
+log = logging.getLogger(__name__.rsplit(".", maxsplit=1)[-1])
 
 ## Constants ##
 
@@ -42,7 +43,7 @@ _COMMON_HASH_VAR_NAMES: Final[set[str]] = {"sha256", "hash", "hash_val", "hash_v
 # Maximum number of retries to attempt when trying to fetch an external artifact.
 _RETRY_LIMIT: Final[int] = 5
 # How much longer (in seconds) we should wait per retry.
-_RETRY_INTERVAL: Final[int] = 30
+_DEFAULT_RETRY_INTERVAL: Final[int] = 30
 
 
 ## Functions ##
@@ -64,6 +65,21 @@ def _validate_target_version(ctx: click.Context, param: str, value: str) -> str:
     return value
 
 
+def _validate_retry_interval(ctx: click.Context, param: str, value: float) -> float:  # pylint: disable=unused-argument
+    """
+    Provides additional input validation on the retry interval
+
+    :param ctx: Click's context object
+    :param param: Argument parameter name
+    :param value: Target value to validate
+    :raises click.BadParameter: In the event the input is not valid.
+    :returns: The value of the argument, if valid.
+    """
+    if value <= 0:
+        raise click.BadParameter("The retry interval must be a positive, non-zero floating-point value.")
+    return value
+
+
 def _exit_on_failed_patch(recipe_parser: RecipeParser, patch_blob: JsonPatchType) -> None:
     """
     Convenience function that exits the program when a patch operation fails. This standardizes how we handle patch
@@ -78,6 +94,15 @@ def _exit_on_failed_patch(recipe_parser: RecipeParser, patch_blob: JsonPatchType
 
     log.error("Couldn't perform the patch: %s", patch_blob)
     sys.exit(ExitCode.PATCH_ERROR)
+
+
+def _exit_on_failed_fetch() -> None:
+    """
+    Exits the script upon a failed fetch.
+    """
+    # TODO access fetcher name for logging
+    log.error("Failed to fetch after %s retries.", _RETRY_LIMIT)
+    sys.exit(ExitCode.HTTP_ERROR)
 
 
 def _pre_process_cleanup(recipe_content: str) -> str:
@@ -150,46 +175,49 @@ def _update_version(recipe_parser: RecipeParser, target_version: str) -> None:
     _exit_on_failed_patch(recipe_parser, {"op": op, "path": RecipePaths.VERSION, "value": target_version})
 
 
-def _get_sha256(fetcher: HttpArtifactFetcher) -> str:
+def _get_sha256(fetcher: HttpArtifactFetcher, retry_interval: float) -> str:
     """
     Wrapping function that attempts to retrieve an HTTP/HTTPS artifact with a retry mechanism.
 
     :param fetcher: Artifact fetching instance to use.
+    :param retry_interval: Scalable interval between fetch requests.
     :raises FetchError: If an issue occurred while downloading or extracting the archive.
     :returns: The SHA-256 hash of the artifact, if it was able to be downloaded.
     """
-    # TODO attempt fetch in the background, especially if multiple fetch() calls are required.
+    # NOTE: This is the most I/O-bound operation in `bump-recipe` by a country mile. At the time of writing,
+    # running this operation in the background will not make any significant improvements to performance. Every other
+    # operation is so fast in comparison, any gains would likely be lost with the additional overhead. This op is
+    # also inherently reliant on having the version change performed ahead of time. In addition, parallelizing the
+    # retries defeats the point of having a back-off timer.
+    #
+    # This should be re-evaluated in the future if we start performing other long-running tasks or network-bound
+    # operations.
     for retry_id in range(1, _RETRY_LIMIT + 1):
         try:
             log.info("Fetching artifact, attempt #%d", retry_id)
             fetcher.fetch()
             return fetcher.get_archive_sha256()
         except FetchError:
-            time.sleep(retry_id * _RETRY_INTERVAL)
+            time.sleep(retry_id * retry_interval)
     # TODO access fetcher name for logging
     raise FetchError(f"Failed to fetch after {_RETRY_LIMIT} retries.")
 
 
-def _update_sha256(recipe_parser: RecipeParser) -> None:
+def _update_sha256_check_hash_var(
+    recipe_parser: RecipeParser, retry_interval: float, fetcher_tbl: dict[str, BaseArtifactFetcher]
+) -> bool:
     """
-    Attempts to update the SHA-256 hash(s) in the `/source` section of a recipe file, if applicable. Note that this is
-    only required for build artifacts that are hosted as compressed software archives. If this field must be updated,
-    a lengthy network request may be required to calculate the new hash.
-
-    NOTE: For this to make any meaningful changes, the `version` field will need to be updated first.
+    Helper function that checks if the SHA-256 is stored in a variable. If it does, it performs the update.
 
     :param recipe_parser: Recipe file to update.
+    :param retry_interval: Scalable interval between fetch requests.
+    :param fetcher_tbl: Table of artifact source locations to corresponding ArtifactFetcher instances.
+    :returns: True if `_update_sha256()` should return early. False otherwise.
     """
-    fetcher_tbl = af_from_recipe(recipe_parser, True)
-    if not fetcher_tbl:
-        log.warning("`/source` is missing or does not contain a supported source type.")
-        return
-
     # Check to see if the SHA-256 hash might be set in a variable. In extremely rare cases, we log warnings to indicate
     # that the "correct" action is unclear and likely requires human intervention. Otherwise, if we see a hash variable
     # and it is used by a single source, we will edit the variable directly.
     hash_vars_set: Final[set[str]] = _COMMON_HASH_VAR_NAMES & set(recipe_parser.list_variables())
-
     if len(hash_vars_set) == 1 and len(fetcher_tbl) == 1:
         hash_var: Final[str] = next(iter(hash_vars_set))
         src_fetcher: Final[Optional[BaseArtifactFetcher]] = fetcher_tbl.get(RecipePaths.SOURCE, None)
@@ -200,8 +228,11 @@ def _update_sha256(recipe_parser: RecipeParser) -> None:
             # NOTE: This is a linear search on a small list.
             and RecipePaths.SINGLE_SHA_256 in recipe_parser.get_variable_references(hash_var)
         ):
-            recipe_parser.set_variable(hash_var, _get_sha256(src_fetcher))
-            return
+            try:
+                recipe_parser.set_variable(hash_var, _get_sha256(src_fetcher, retry_interval))
+            except FetchError:
+                _exit_on_failed_fetch()
+            return True
 
         log.warning(
             (
@@ -215,17 +246,43 @@ def _update_sha256(recipe_parser: RecipeParser) -> None:
             "Multiple commonly used hash variables detected. Hash values will be changed directly in `/source` keys."
         )
 
+    return False
+
+
+def _update_sha256(recipe_parser: RecipeParser, retry_interval: float) -> None:
+    """
+    Attempts to update the SHA-256 hash(s) in the `/source` section of a recipe file, if applicable. Note that this is
+    only required for build artifacts that are hosted as compressed software archives. If this field must be updated,
+    a lengthy network request may be required to calculate the new hash.
+
+    NOTE: For this to make any meaningful changes, the `version` field will need to be updated first.
+
+    :param recipe_parser: Recipe file to update.
+    :param retry_interval: Scalable interval between fetch requests.
+    """
+    fetcher_tbl = af_from_recipe(recipe_parser, True)
+    if not fetcher_tbl:
+        log.warning("`/source` is missing or does not contain a supported source type.")
+        return
+
+    if _update_sha256_check_hash_var(recipe_parser, retry_interval, fetcher_tbl):
+        return
+
     # NOTE: Each source _might_ have a different SHA-256 hash. This is the case for the `cctools-ld64` feedstock. That
     # project has a different implementation per architecture. However, in other circumstances, mirrored sources with
     # different hashes might imply there is a security threat. We will log some statistics so the user can best decide
     # what to do.
     unique_hashes: set[str] = set()
     total_hash_cntr = 0
+    # TODO parallelize requests for multiple sources
     for src_path, fetcher in fetcher_tbl.items():
         if not isinstance(fetcher, HttpArtifactFetcher):
             continue
 
-        sha = _get_sha256(fetcher)
+        try:
+            sha = _get_sha256(fetcher, retry_interval)
+        except FetchError:
+            _exit_on_failed_fetch()
         total_hash_cntr += 1
         unique_hashes.add(sha)
         sha_path = RecipeParser.append_to_path(src_path, "/sha256")
@@ -262,7 +319,18 @@ def _update_sha256(recipe_parser: RecipeParser) -> None:
     callback=_validate_target_version,
     help="New project version to target. Required if `--build-num` is NOT specified.",
 )
-def bump_recipe(recipe_file_path: str, build_num: bool, target_version: Optional[str]) -> None:
+@click.option(
+    "-i",
+    "--retry-interval",
+    default=_DEFAULT_RETRY_INTERVAL,
+    type=float,
+    callback=_validate_retry_interval,
+    help=(
+        "Retry interval (in seconds) for network requests. Scales with number of failed attempts."
+        f" Defaults to {_DEFAULT_RETRY_INTERVAL} seconds"
+    ),
+)
+def bump_recipe(recipe_file_path: str, build_num: bool, target_version: Optional[str], retry_interval: float) -> None:
     """
     Bumps a recipe to a new version.
 
@@ -300,7 +368,7 @@ def bump_recipe(recipe_file_path: str, build_num: bool, target_version: Optional
 
         # Version must be updated before hash to ensure the correct artifact is hashed.
         _update_version(recipe_parser, target_version)
-        _update_sha256(recipe_parser)
+        _update_sha256(recipe_parser, retry_interval)
 
     Path(recipe_file_path).write_text(recipe_parser.render(), encoding="utf-8")
     sys.exit(ExitCode.SUCCESS)
