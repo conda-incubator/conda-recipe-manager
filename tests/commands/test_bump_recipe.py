@@ -157,7 +157,7 @@ def test_bump_recipe_cli(
     "recipe_file,version,expected_retries",
     [
         ("bump_recipe/types-toml_bad_url.yaml", "0.10.8.20240310", 5),
-        # ("bump_recipe/TODOsha_retry.yaml", "0.10.8.20240310", 5),
+        ("bump_recipe/types-toml_bad_url_hash_var.yaml", "0.10.8.20240310", 5),
         # ("bump_recipe/TODO.yaml", "TODO", 10),
         # TODO validate V1 recipe files
     ],
