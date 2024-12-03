@@ -37,6 +37,7 @@ class ExitCode(IntEnum):
 
     # bump-recipe
     PATCH_ERROR = 107
+    HTTP_ERROR = 108
 
     ## rattler-bulk-build ##
     # NOTE: There may be overlap with rattler-build
