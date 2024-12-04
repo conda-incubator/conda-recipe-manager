@@ -4,8 +4,8 @@
 
 from __future__ import annotations
 
+import concurrent.futures as cf
 import logging
-import multiprocessing.pool as mp_pool
 import sys
 import time
 from pathlib import Path
@@ -247,22 +247,17 @@ def _update_sha256_check_hash_var(
     return False
 
 
-def _update_sha256_fetch_and_patch(
-    src_path: str, fetcher: HttpArtifactFetcher, retry_interval: float
-) -> tuple[str, str]:
+def _update_sha256_fetch_one(src_path: str, fetcher: HttpArtifactFetcher, retry_interval: float) -> tuple[str, str]:
     """
     Helper function that retrieves a single HTTP source artifact, so that we can parallelize network requests.
 
     :param src_path: Recipe key path to the applicable artifact source.
     :param fetcher: Artifact fetching instance to use.
     :param retry_interval: Scalable interval between fetch requests.
+    :raises FetchError: In the event that the retry mechanism failed to fetch a source artifact.
     :returns: A tuple containing the path to and the actual SHA-256 value to be updated.
     """
-    try:
-        sha = _get_sha256(fetcher, retry_interval)
-    except FetchError:
-        # TODO how does `exit` handle thread in context manager?
-        _exit_on_failed_fetch(fetcher)
+    sha = _get_sha256(fetcher, retry_interval)
     return (RecipeParser.append_to_path(src_path, "/sha256"), sha)
 
 
@@ -295,16 +290,23 @@ def _update_sha256(recipe_parser: RecipeParser, retry_interval: float) -> None:
     http_fetcher_tbl: Final[dict[str, HttpArtifactFetcher]] = {
         k: v for k, v in fetcher_tbl.items() if isinstance(v, HttpArtifactFetcher)
     }
-    # Parallelize on acquiring multiple source artifacts on the network. In testing, using the process Pool took ~9
-    # seconds and used significantly more resources than using the ThreadPool took ~2 seconds. This test simulated a
-    # recipe with 15 sources. Because this process is so I/O bound, the ThreadPool class is the way to go.
-    with mp_pool.ThreadPool() as pool:
-        sha_path_to_sha_tbl = dict(
-            pool.starmap(
-                _update_sha256_fetch_and_patch,
-                [(src_path, fetcher, retry_interval) for src_path, fetcher in http_fetcher_tbl.items()],
-            )
-        )
+    # Parallelize on acquiring multiple source artifacts on the network. In testing, using a process pool took
+    # significantly more time and resources. That aligns with how I/O bound this process is. We use the
+    # `ThreadPoolExecutor` class over a `ThreadPool` so the script may exit gracefully if we failed to acquire an
+    # artifact.
+    sha_path_to_sha_tbl: dict[str, str] = {}
+    with cf.ThreadPoolExecutor() as executor:
+        artifact_futures_tbl = {
+            executor.submit(_update_sha256_fetch_one, src_path, fetcher, retry_interval): fetcher
+            for src_path, fetcher in http_fetcher_tbl.items()
+        }
+        for future in cf.as_completed(artifact_futures_tbl):
+            fetcher = artifact_futures_tbl[future]
+            try:
+                resolved_tuple = future.result()
+                sha_path_to_sha_tbl[resolved_tuple[0]] = resolved_tuple[1]
+            except FetchError:
+                _exit_on_failed_fetch(fetcher)
 
     for sha_path, sha in sha_path_to_sha_tbl.items():
         unique_hashes.add(sha)
