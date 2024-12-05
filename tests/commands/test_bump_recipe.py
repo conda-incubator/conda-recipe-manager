@@ -87,6 +87,7 @@ def test_usage() -> None:
         # Does not use `version` variable, has a non-zero build number. Note that the URL is not parameterized on the
         # version field.
         ("gsm-amzn2-aarch64.yaml", None, "bump_recipe/gsm-amzn2-aarch64_build_num_6.yaml"),
+        # TODO Fix this slow test tracked by Issue #265
         ("gsm-amzn2-aarch64.yaml", "2.0.20210721.2", "bump_recipe/gsm-amzn2-aarch64_version_bump.yaml"),
         # Has a `sha256` variable
         ("pytest-pep8.yaml", None, "bump_recipe/pytest-pep8_build_num_2.yaml"),
@@ -102,6 +103,7 @@ def test_usage() -> None:
         ("curl.yaml", "8.11.0", "bump_recipe/curl_version_bump.yaml"),
         # NOTE: libprotobuf has multiple sources, on top of being multi-output
         ("libprotobuf.yaml", None, "bump_recipe/libprotobuf_build_num_1.yaml"),
+        # TODO Fix this slow test tracked by Issue #265
         ("libprotobuf.yaml", "25.3", "bump_recipe/libprotobuf_version_bump.yaml"),
         # Validates removal of `hash_type` variable that is sometimes used instead of the `/source/sha256` key
         ("types-toml_hash_type.yaml", None, "bump_recipe/types-toml_hash_type_build_num_1.yaml"),
