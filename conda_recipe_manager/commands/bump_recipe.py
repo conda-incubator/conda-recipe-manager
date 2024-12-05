@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import concurrent.futures as cf
 import logging
 import sys
 import time
@@ -246,6 +247,20 @@ def _update_sha256_check_hash_var(
     return False
 
 
+def _update_sha256_fetch_one(src_path: str, fetcher: HttpArtifactFetcher, retry_interval: float) -> tuple[str, str]:
+    """
+    Helper function that retrieves a single HTTP source artifact, so that we can parallelize network requests.
+
+    :param src_path: Recipe key path to the applicable artifact source.
+    :param fetcher: Artifact fetching instance to use.
+    :param retry_interval: Scalable interval between fetch requests.
+    :raises FetchError: In the event that the retry mechanism failed to fetch a source artifact.
+    :returns: A tuple containing the path to and the actual SHA-256 value to be updated.
+    """
+    sha = _get_sha256(fetcher, retry_interval)
+    return (RecipeParser.append_to_path(src_path, "/sha256"), sha)
+
+
 def _update_sha256(recipe_parser: RecipeParser, retry_interval: float) -> None:
     """
     Attempts to update the SHA-256 hash(s) in the `/source` section of a recipe file, if applicable. Note that this is
@@ -270,20 +285,31 @@ def _update_sha256(recipe_parser: RecipeParser, retry_interval: float) -> None:
     # different hashes might imply there is a security threat. We will log some statistics so the user can best decide
     # what to do.
     unique_hashes: set[str] = set()
-    total_hash_cntr = 0
-    # TODO parallelize requests for multiple sources
-    for src_path, fetcher in fetcher_tbl.items():
-        if not isinstance(fetcher, HttpArtifactFetcher):
-            continue
 
-        try:
-            sha = _get_sha256(fetcher, retry_interval)
-        except FetchError:
-            _exit_on_failed_fetch(fetcher)
-        total_hash_cntr += 1
+    # Filter-out artifacts that don't need a SHA-256 hash.
+    http_fetcher_tbl: Final[dict[str, HttpArtifactFetcher]] = {
+        k: v for k, v in fetcher_tbl.items() if isinstance(v, HttpArtifactFetcher)
+    }
+    # Parallelize on acquiring multiple source artifacts on the network. In testing, using a process pool took
+    # significantly more time and resources. That aligns with how I/O bound this process is. We use the
+    # `ThreadPoolExecutor` class over a `ThreadPool` so the script may exit gracefully if we failed to acquire an
+    # artifact.
+    sha_path_to_sha_tbl: dict[str, str] = {}
+    with cf.ThreadPoolExecutor() as executor:
+        artifact_futures_tbl = {
+            executor.submit(_update_sha256_fetch_one, src_path, fetcher, retry_interval): fetcher
+            for src_path, fetcher in http_fetcher_tbl.items()
+        }
+        for future in cf.as_completed(artifact_futures_tbl):
+            fetcher = artifact_futures_tbl[future]
+            try:
+                resolved_tuple = future.result()
+                sha_path_to_sha_tbl[resolved_tuple[0]] = resolved_tuple[1]
+            except FetchError:
+                _exit_on_failed_fetch(fetcher)
+
+    for sha_path, sha in sha_path_to_sha_tbl.items():
         unique_hashes.add(sha)
-        sha_path = RecipeParser.append_to_path(src_path, "/sha256")
-
         # Guard against the unlikely scenario that the `sha256` field is missing.
         patch_op = "replace" if recipe_parser.contains_value(sha_path) else "add"
         _exit_on_failed_patch(recipe_parser, {"op": patch_op, "path": sha_path, "value": sha})
@@ -291,7 +317,7 @@ def _update_sha256(recipe_parser: RecipeParser, retry_interval: float) -> None:
     log.info(
         "Found %d unique SHA-256 hash(es) out of a total of %d hash(es) in %d sources.",
         len(unique_hashes),
-        total_hash_cntr,
+        len(sha_path_to_sha_tbl),
         len(fetcher_tbl),
     )
 
@@ -307,6 +333,12 @@ def _update_sha256(recipe_parser: RecipeParser, retry_interval: float) -> None:
     "--build-num",
     is_flag=True,
     help="Bump the build number by 1.",
+)
+@click.option(
+    "-d",
+    "--dry-run",
+    is_flag=True,
+    help="Performs a dry-run operation that prints the recipe to STDOUT and does not save to the recipe file.",
 )
 @click.option(
     "-t",
@@ -327,7 +359,9 @@ def _update_sha256(recipe_parser: RecipeParser, retry_interval: float) -> None:
         f" Defaults to {_DEFAULT_RETRY_INTERVAL} seconds"
     ),
 )
-def bump_recipe(recipe_file_path: str, build_num: bool, target_version: Optional[str], retry_interval: float) -> None:
+def bump_recipe(
+    recipe_file_path: str, build_num: bool, dry_run: bool, target_version: Optional[str], retry_interval: float
+) -> None:
     """
     Bumps a recipe to a new version.
 
@@ -367,5 +401,8 @@ def bump_recipe(recipe_file_path: str, build_num: bool, target_version: Optional
         _update_version(recipe_parser, target_version)
         _update_sha256(recipe_parser, retry_interval)
 
-    Path(recipe_file_path).write_text(recipe_parser.render(), encoding="utf-8")
+    if dry_run:
+        print(recipe_parser.render())
+    else:
+        Path(recipe_file_path).write_text(recipe_parser.render(), encoding="utf-8")
     sys.exit(ExitCode.SUCCESS)
