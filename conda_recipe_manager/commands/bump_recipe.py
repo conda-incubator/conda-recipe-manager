@@ -335,6 +335,12 @@ def _update_sha256(recipe_parser: RecipeParser, retry_interval: float) -> None:
     help="Bump the build number by 1.",
 )
 @click.option(
+    "-d",
+    "--dry-run",
+    is_flag=True,
+    help="Performs a dry-run operation that prints the recipe to STDOUT and does not save to the recipe file.",
+)
+@click.option(
     "-t",
     "--target-version",
     default=None,
@@ -353,7 +359,9 @@ def _update_sha256(recipe_parser: RecipeParser, retry_interval: float) -> None:
         f" Defaults to {_DEFAULT_RETRY_INTERVAL} seconds"
     ),
 )
-def bump_recipe(recipe_file_path: str, build_num: bool, target_version: Optional[str], retry_interval: float) -> None:
+def bump_recipe(
+    recipe_file_path: str, build_num: bool, dry_run: bool, target_version: Optional[str], retry_interval: float
+) -> None:
     """
     Bumps a recipe to a new version.
 
@@ -393,5 +401,8 @@ def bump_recipe(recipe_file_path: str, build_num: bool, target_version: Optional
         _update_version(recipe_parser, target_version)
         _update_sha256(recipe_parser, retry_interval)
 
-    Path(recipe_file_path).write_text(recipe_parser.render(), encoding="utf-8")
+    if dry_run:
+        print(recipe_parser.render())
+    else:
+        Path(recipe_file_path).write_text(recipe_parser.render(), encoding="utf-8")
     sys.exit(ExitCode.SUCCESS)
