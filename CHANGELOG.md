@@ -3,6 +3,12 @@ NOTES:
 - Version releases in the 0.x.y range may introduce breaking changes.
 - See the auto-generated release notes for more details.
 
+## 0.4.0
+- Introduces MVP for the `bump-recipe` command. This command should be able to update the
+  version number, build number, and SHA-256 hash for most simple recipe files.
+- Starts work for scanning `pyproject.toml` dependencies
+- Minor bug fixes and infrastructure improvements.
+
 ## 0.3.4
 - Makes `DependencyVariable` type hashable.
 
