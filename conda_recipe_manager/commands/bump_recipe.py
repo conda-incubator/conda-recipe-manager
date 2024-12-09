@@ -359,8 +359,22 @@ def _update_sha256(recipe_parser: RecipeParser, retry_interval: float) -> None:
         f" Defaults to {_DEFAULT_RETRY_INTERVAL} seconds"
     ),
 )
+@click.option(
+    "-s",
+    "--save-on-failure",
+    is_flag=True,
+    help=(
+        "Saves the current state of the recipe file in the event of a failure."
+        " In other words, the file may only contain some automated edits."
+    ),
+)
 def bump_recipe(
-    recipe_file_path: str, build_num: bool, dry_run: bool, target_version: Optional[str], retry_interval: float
+    recipe_file_path: str,
+    build_num: bool,
+    dry_run: bool,
+    target_version: Optional[str],
+    retry_interval: float,
+    save_on_failure: bool,
 ) -> None:
     """
     Bumps a recipe to a new version.
