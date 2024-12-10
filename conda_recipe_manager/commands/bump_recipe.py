@@ -9,7 +9,7 @@ import logging
 import sys
 import time
 from pathlib import Path
-from typing import Final, Optional, cast
+from typing import Final, NamedTuple, NoReturn, Optional, cast
 
 import click
 
@@ -27,7 +27,7 @@ log = logging.getLogger(__name__.rsplit(".", maxsplit=1)[-1])
 ## Constants ##
 
 
-class RecipePaths:
+class _RecipePaths:
     """
     Namespace to store common recipe path constants.
     """
@@ -36,6 +36,23 @@ class RecipePaths:
     SOURCE: Final[str] = "/source"
     SINGLE_SHA_256: Final[str] = f"{SOURCE}/sha256"
     VERSION: Final[str] = "/package/version"
+
+
+class _CliArgs(NamedTuple):
+    """
+    Typed convenience structure that contains all flags and values set by the CLI. This structure is passed once to
+    functions that need access to flags and prevents an annoying refactor every time we add a new option.
+
+    NOTE: These members are all immutable by design. They are set once by the CLI and cannot be altered.
+    """
+
+    recipe_file_path: str
+    # Slightly less confusing name for internal use. If we change the flag, we break users.
+    increment_build_num: bool
+    dry_run: bool
+    target_version: Optional[str]
+    retry_interval: float
+    save_on_failure: bool
 
 
 # Common variable names used for source artifact hashes.
@@ -81,6 +98,19 @@ def _validate_retry_interval(ctx: click.Context, param: str, value: float) -> fl
     return value
 
 
+def _save_or_print(recipe_parser: RecipeParser, cli_args: _CliArgs) -> None:
+    """
+    Helper function that saves the current recipe state to a file or prints it to STDOUT.
+
+    :param recipe_parser: Recipe file to print/write-out.
+    :param cli_args: Immutable CLI arguments from the user.
+    """
+    if cli_args.dry_run:
+        print(recipe_parser.render())
+        return
+    Path(cli_args.recipe_file_path).write_text(recipe_parser.render(), encoding="utf-8")
+
+
 def _exit_on_failed_patch(recipe_parser: RecipeParser, patch_blob: JsonPatchType) -> None:
     """
     Convenience function that exits the program when a patch operation fails. This standardizes how we handle patch
@@ -97,7 +127,7 @@ def _exit_on_failed_patch(recipe_parser: RecipeParser, patch_blob: JsonPatchType
     sys.exit(ExitCode.PATCH_ERROR)
 
 
-def _exit_on_failed_fetch(fetcher: BaseArtifactFetcher) -> None:
+def _exit_on_failed_fetch(fetcher: BaseArtifactFetcher) -> NoReturn:
     """
     Exits the script upon a failed fetch.
 
@@ -119,46 +149,48 @@ def _pre_process_cleanup(recipe_content: str) -> str:
     return RecipeParser.pre_process_remove_hash_type(recipe_content)
 
 
-def _update_build_num(recipe_parser: RecipeParser, increment_build_num: bool) -> None:
+def _update_build_num(recipe_parser: RecipeParser, cli_args: _CliArgs) -> None:
     """
     Attempts to update the build number in a recipe file.
 
     :param recipe_parser: Recipe file to update.
-    :param increment_build_num: Increments the `/build/number` field by 1 if set to `True`. Otherwise resets to 0.
+    :param cli_args: Immutable CLI arguments from the user.
     """
+
+    def _exit_on_build_num_failure(msg: str) -> NoReturn:
+        log.error(msg)
+        sys.exit(ExitCode.ILLEGAL_OPERATION)
 
     # Try to get "build" key from the recipe, exit if not found
     try:
         recipe_parser.get_value("/build")
     except KeyError:
-        log.error("`/build` key could not be found in the recipe.")
-        sys.exit(ExitCode.ILLEGAL_OPERATION)
+        _exit_on_build_num_failure("`/build` key could not be found in the recipe.")
 
     # From the previous check, we know that `/build` exists. If `/build/number` is missing, it'll be added by
     # a patch-add operation and set to a default value of 0. Otherwise, we attempt to increment the build number, if
     # requested.
-    if increment_build_num and recipe_parser.contains_value(RecipePaths.BUILD_NUM):
-        build_number = recipe_parser.get_value(RecipePaths.BUILD_NUM)
+    if cli_args.increment_build_num and recipe_parser.contains_value(_RecipePaths.BUILD_NUM):
+        build_number = recipe_parser.get_value(_RecipePaths.BUILD_NUM)
 
         if not isinstance(build_number, int):
-            log.error("Build number is not an integer.")
-            sys.exit(ExitCode.ILLEGAL_OPERATION)
+            _exit_on_build_num_failure("Build number is not an integer.")
 
         _exit_on_failed_patch(
             recipe_parser,
-            cast(JsonPatchType, {"op": "replace", "path": RecipePaths.BUILD_NUM, "value": build_number + 1}),
+            cast(JsonPatchType, {"op": "replace", "path": _RecipePaths.BUILD_NUM, "value": build_number + 1}),
         )
         return
 
-    _exit_on_failed_patch(recipe_parser, cast(JsonPatchType, {"op": "add", "path": RecipePaths.BUILD_NUM, "value": 0}))
+    _exit_on_failed_patch(recipe_parser, cast(JsonPatchType, {"op": "add", "path": _RecipePaths.BUILD_NUM, "value": 0}))
 
 
-def _update_version(recipe_parser: RecipeParser, target_version: str) -> None:
+def _update_version(recipe_parser: RecipeParser, cli_args: _CliArgs) -> None:
     """
     Attempts to update the `/package/version` field and/or the commonly used `version` JINJA variable.
 
     :param recipe_parser: Recipe file to update.
-    :param target_version: Target version to update to.
+    :param cli_args: Immutable CLI arguments from the user.
     """
     # TODO Add V0 multi-output version support for some recipes (version field is duplicated in cctools-ld64 but not in
     # most multi-output recipes)
@@ -166,23 +198,23 @@ def _update_version(recipe_parser: RecipeParser, target_version: str) -> None:
     # If the `version` variable is found, patch that. This is an artifact/pattern from Grayskull.
     old_variable = recipe_parser.get_variable("version", None)
     if old_variable is not None:
-        recipe_parser.set_variable("version", target_version)
+        recipe_parser.set_variable("version", cli_args.target_version)
         # Generate a warning if `version` is not being used in the `/package/version` field. NOTE: This is a linear
         # search on a small list.
-        if RecipePaths.VERSION not in recipe_parser.get_variable_references("version"):
+        if _RecipePaths.VERSION not in recipe_parser.get_variable_references("version"):
             log.warning("`/package/version` does not use the defined JINJA variable `version`.")
         return
 
-    op: Final[str] = "replace" if recipe_parser.contains_value(RecipePaths.VERSION) else "add"
-    _exit_on_failed_patch(recipe_parser, {"op": op, "path": RecipePaths.VERSION, "value": target_version})
+    op: Final[str] = "replace" if recipe_parser.contains_value(_RecipePaths.VERSION) else "add"
+    _exit_on_failed_patch(recipe_parser, {"op": op, "path": _RecipePaths.VERSION, "value": cli_args.target_version})
 
 
-def _get_sha256(fetcher: HttpArtifactFetcher, retry_interval: float) -> str:
+def _get_sha256(fetcher: HttpArtifactFetcher, cli_args: _CliArgs) -> str:
     """
     Wrapping function that attempts to retrieve an HTTP/HTTPS artifact with a retry mechanism.
 
     :param fetcher: Artifact fetching instance to use.
-    :param retry_interval: Scalable interval between fetch requests.
+    :param cli_args: Immutable CLI arguments from the user.
     :raises FetchError: If an issue occurred while downloading or extracting the archive.
     :returns: The SHA-256 hash of the artifact, if it was able to be downloaded.
     """
@@ -197,19 +229,19 @@ def _get_sha256(fetcher: HttpArtifactFetcher, retry_interval: float) -> str:
             fetcher.fetch()
             return fetcher.get_archive_sha256()
         except FetchError:
-            time.sleep(retry_id * retry_interval)
+            time.sleep(retry_id * cli_args.retry_interval)
     raise FetchError(f"Failed to fetch `{fetcher}` after {_RETRY_LIMIT} retries.")
 
 
 def _update_sha256_check_hash_var(
-    recipe_parser: RecipeParser, retry_interval: float, fetcher_tbl: dict[str, BaseArtifactFetcher]
+    recipe_parser: RecipeParser, fetcher_tbl: dict[str, BaseArtifactFetcher], cli_args: _CliArgs
 ) -> bool:
     """
     Helper function that checks if the SHA-256 is stored in a variable. If it does, it performs the update.
 
     :param recipe_parser: Recipe file to update.
-    :param retry_interval: Scalable interval between fetch requests.
     :param fetcher_tbl: Table of artifact source locations to corresponding ArtifactFetcher instances.
+    :param cli_args: Immutable CLI arguments from the user.
     :returns: True if `_update_sha256()` should return early. False otherwise.
     """
     # Check to see if the SHA-256 hash might be set in a variable. In extremely rare cases, we log warnings to indicate
@@ -218,16 +250,16 @@ def _update_sha256_check_hash_var(
     hash_vars_set: Final[set[str]] = _COMMON_HASH_VAR_NAMES & set(recipe_parser.list_variables())
     if len(hash_vars_set) == 1 and len(fetcher_tbl) == 1:
         hash_var: Final[str] = next(iter(hash_vars_set))
-        src_fetcher: Final[Optional[BaseArtifactFetcher]] = fetcher_tbl.get(RecipePaths.SOURCE, None)
+        src_fetcher: Final[Optional[BaseArtifactFetcher]] = fetcher_tbl.get(_RecipePaths.SOURCE, None)
         # By far, this is the most commonly seen case when a hash variable name is used.
         if (
             src_fetcher
             and isinstance(src_fetcher, HttpArtifactFetcher)
             # NOTE: This is a linear search on a small list.
-            and RecipePaths.SINGLE_SHA_256 in recipe_parser.get_variable_references(hash_var)
+            and _RecipePaths.SINGLE_SHA_256 in recipe_parser.get_variable_references(hash_var)
         ):
             try:
-                recipe_parser.set_variable(hash_var, _get_sha256(src_fetcher, retry_interval))
+                recipe_parser.set_variable(hash_var, _get_sha256(src_fetcher, cli_args))
             except FetchError:
                 _exit_on_failed_fetch(src_fetcher)
             return True
@@ -247,21 +279,21 @@ def _update_sha256_check_hash_var(
     return False
 
 
-def _update_sha256_fetch_one(src_path: str, fetcher: HttpArtifactFetcher, retry_interval: float) -> tuple[str, str]:
+def _update_sha256_fetch_one(src_path: str, fetcher: HttpArtifactFetcher, cli_args: _CliArgs) -> tuple[str, str]:
     """
     Helper function that retrieves a single HTTP source artifact, so that we can parallelize network requests.
 
     :param src_path: Recipe key path to the applicable artifact source.
     :param fetcher: Artifact fetching instance to use.
-    :param retry_interval: Scalable interval between fetch requests.
+    :param cli_args: Immutable CLI arguments from the user.
     :raises FetchError: In the event that the retry mechanism failed to fetch a source artifact.
     :returns: A tuple containing the path to and the actual SHA-256 value to be updated.
     """
-    sha = _get_sha256(fetcher, retry_interval)
+    sha = _get_sha256(fetcher, cli_args)
     return (RecipeParser.append_to_path(src_path, "/sha256"), sha)
 
 
-def _update_sha256(recipe_parser: RecipeParser, retry_interval: float) -> None:
+def _update_sha256(recipe_parser: RecipeParser, cli_args: _CliArgs) -> None:
     """
     Attempts to update the SHA-256 hash(s) in the `/source` section of a recipe file, if applicable. Note that this is
     only required for build artifacts that are hosted as compressed software archives. If this field must be updated,
@@ -270,14 +302,14 @@ def _update_sha256(recipe_parser: RecipeParser, retry_interval: float) -> None:
     NOTE: For this to make any meaningful changes, the `version` field will need to be updated first.
 
     :param recipe_parser: Recipe file to update.
-    :param retry_interval: Scalable interval between fetch requests.
+    :param cli_args: Immutable CLI arguments from the user.
     """
     fetcher_tbl = af_from_recipe(recipe_parser, True)
     if not fetcher_tbl:
         log.warning("`/source` is missing or does not contain a supported source type.")
         return
 
-    if _update_sha256_check_hash_var(recipe_parser, retry_interval, fetcher_tbl):
+    if _update_sha256_check_hash_var(recipe_parser, fetcher_tbl, cli_args):
         return
 
     # NOTE: Each source _might_ have a different SHA-256 hash. This is the case for the `cctools-ld64` feedstock. That
@@ -297,7 +329,7 @@ def _update_sha256(recipe_parser: RecipeParser, retry_interval: float) -> None:
     sha_path_to_sha_tbl: dict[str, str] = {}
     with cf.ThreadPoolExecutor() as executor:
         artifact_futures_tbl = {
-            executor.submit(_update_sha256_fetch_one, src_path, fetcher, retry_interval): fetcher
+            executor.submit(_update_sha256_fetch_one, src_path, fetcher, cli_args): fetcher
             for src_path, fetcher in http_fetcher_tbl.items()
         }
         for future in cf.as_completed(artifact_futures_tbl):
@@ -381,15 +413,25 @@ def bump_recipe(
 
     RECIPE_FILE_PATH: Path to the target recipe file
     """
+    # Typed, immutable, convenience data structure that contains all CLI arguments for ease of passing new options
+    # to existing functions.
+    cli_args = _CliArgs(
+        recipe_file_path,
+        build_num,
+        dry_run,
+        target_version,
+        retry_interval,
+        save_on_failure,
+    )
 
     if not build_num and target_version is None:
         log.error("The `--target-version` option must be set if `--build-num` is not specified.")
         sys.exit(ExitCode.CLICK_USAGE)
 
     try:
-        recipe_content = Path(recipe_file_path).read_text(encoding="utf-8")
+        recipe_content = Path(cli_args.recipe_file_path).read_text(encoding="utf-8")
     except IOError:
-        log.error("Couldn't read the given recipe file: %s", recipe_file_path)
+        log.error("Couldn't read the given recipe file: %s", cli_args.recipe_file_path)
         sys.exit(ExitCode.IO_ERROR)
 
     # Attempt to remove problematic recipe patterns that cause issues for the parser.
@@ -402,21 +444,20 @@ def bump_recipe(
         sys.exit(ExitCode.PARSE_EXCEPTION)
 
     # Attempt to update fields
-    _update_build_num(recipe_parser, build_num)
+    _update_build_num(recipe_parser, cli_args)
 
     # NOTE: We check if `target_version` is specified to perform a "full bump" for type checking reasons. Also note that
     # the `build_num` flag is invalidated if we are bumping to a new version. The build number must be reset to 0 in
     # this case.
-    if target_version is not None:
-        if target_version == recipe_parser.get_value(RecipePaths.VERSION, default=None, sub_vars=True):
-            log.warning("The provided target version is the same value found in the recipe file: %s", target_version)
+    if cli_args.target_version is not None:
+        if cli_args.target_version == recipe_parser.get_value(_RecipePaths.VERSION, default=None, sub_vars=True):
+            log.warning(
+                "The provided target version is the same value found in the recipe file: %s", cli_args.target_version
+            )
 
         # Version must be updated before hash to ensure the correct artifact is hashed.
-        _update_version(recipe_parser, target_version)
-        _update_sha256(recipe_parser, retry_interval)
+        _update_version(recipe_parser, cli_args)
+        _update_sha256(recipe_parser, cli_args)
 
-    if dry_run:
-        print(recipe_parser.render())
-    else:
-        Path(recipe_file_path).write_text(recipe_parser.render(), encoding="utf-8")
+    _save_or_print(recipe_parser, cli_args)
     sys.exit(ExitCode.SUCCESS)
