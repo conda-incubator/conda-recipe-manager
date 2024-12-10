@@ -79,9 +79,11 @@ Usage: crm [OPTIONS] COMMAND [ARGS]...
   Command line interface for conda recipe management commands.
 
 Options:
-  --help  Show this message and exit.
+  -v, --verbose  Enables verbose logging (for commands that use the logger).
+  --help         Show this message and exit.
 
 Commands:
+  bump-recipe         Bumps a recipe file to a new version.
   convert             Converts a `meta.yaml` formatted-recipe file to the new
                       `recipe.yaml` format.
   graph               Interactive CLI for examining recipe dependency graphs.
