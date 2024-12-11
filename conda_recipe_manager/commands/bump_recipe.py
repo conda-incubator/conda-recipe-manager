@@ -111,28 +111,36 @@ def _save_or_print(recipe_parser: RecipeParser, cli_args: _CliArgs) -> None:
     Path(cli_args.recipe_file_path).write_text(recipe_parser.render(), encoding="utf-8")
 
 
-def _exit_on_failed_patch(recipe_parser: RecipeParser, patch_blob: JsonPatchType) -> None:
+def _exit_on_failed_patch(recipe_parser: RecipeParser, patch_blob: JsonPatchType, cli_args: _CliArgs) -> None:
     """
     Convenience function that exits the program when a patch operation fails. This standardizes how we handle patch
     failures across all patch operations performed in this program.
 
     :param recipe_parser: Recipe file to update.
     :param patch_blob: Recipe patch to execute.
+    :param cli_args: Immutable CLI arguments from the user.
     """
     if recipe_parser.patch(patch_blob):
         log.debug("Executed patch: %s", patch_blob)
         return
 
+    if cli_args.save_on_failure:
+        _save_or_print(recipe_parser, cli_args)
+
     log.error("Couldn't perform the patch: %s", patch_blob)
     sys.exit(ExitCode.PATCH_ERROR)
 
 
-def _exit_on_failed_fetch(fetcher: BaseArtifactFetcher) -> NoReturn:
+def _exit_on_failed_fetch(recipe_parser: RecipeParser, fetcher: BaseArtifactFetcher, cli_args: _CliArgs) -> NoReturn:
     """
     Exits the script upon a failed fetch.
 
+    :param recipe_parser: Recipe file to update.
     :param fetcher: ArtifactFetcher instance used in the fetch attempt.
+    :param cli_args: Immutable CLI arguments from the user.
     """
+    if cli_args.save_on_failure:
+        _save_or_print(recipe_parser, cli_args)
     log.error("Failed to fetch `%s` after %s retries.", fetcher, _RETRY_LIMIT)
     sys.exit(ExitCode.HTTP_ERROR)
 
@@ -158,6 +166,8 @@ def _update_build_num(recipe_parser: RecipeParser, cli_args: _CliArgs) -> None:
     """
 
     def _exit_on_build_num_failure(msg: str) -> NoReturn:
+        if cli_args.save_on_failure:
+            _save_or_print(recipe_parser, cli_args)
         log.error(msg)
         sys.exit(ExitCode.ILLEGAL_OPERATION)
 
@@ -179,10 +189,13 @@ def _update_build_num(recipe_parser: RecipeParser, cli_args: _CliArgs) -> None:
         _exit_on_failed_patch(
             recipe_parser,
             cast(JsonPatchType, {"op": "replace", "path": _RecipePaths.BUILD_NUM, "value": build_number + 1}),
+            cli_args,
         )
         return
 
-    _exit_on_failed_patch(recipe_parser, cast(JsonPatchType, {"op": "add", "path": _RecipePaths.BUILD_NUM, "value": 0}))
+    _exit_on_failed_patch(
+        recipe_parser, cast(JsonPatchType, {"op": "add", "path": _RecipePaths.BUILD_NUM, "value": 0}), cli_args
+    )
 
 
 def _update_version(recipe_parser: RecipeParser, cli_args: _CliArgs) -> None:
@@ -206,7 +219,9 @@ def _update_version(recipe_parser: RecipeParser, cli_args: _CliArgs) -> None:
         return
 
     op: Final[str] = "replace" if recipe_parser.contains_value(_RecipePaths.VERSION) else "add"
-    _exit_on_failed_patch(recipe_parser, {"op": op, "path": _RecipePaths.VERSION, "value": cli_args.target_version})
+    _exit_on_failed_patch(
+        recipe_parser, {"op": op, "path": _RecipePaths.VERSION, "value": cli_args.target_version}, cli_args
+    )
 
 
 def _get_sha256(fetcher: HttpArtifactFetcher, cli_args: _CliArgs) -> str:
@@ -261,7 +276,7 @@ def _update_sha256_check_hash_var(
             try:
                 recipe_parser.set_variable(hash_var, _get_sha256(src_fetcher, cli_args))
             except FetchError:
-                _exit_on_failed_fetch(src_fetcher)
+                _exit_on_failed_fetch(recipe_parser, src_fetcher, cli_args)
             return True
 
         log.warning(
@@ -338,13 +353,13 @@ def _update_sha256(recipe_parser: RecipeParser, cli_args: _CliArgs) -> None:
                 resolved_tuple = future.result()
                 sha_path_to_sha_tbl[resolved_tuple[0]] = resolved_tuple[1]
             except FetchError:
-                _exit_on_failed_fetch(fetcher)
+                _exit_on_failed_fetch(recipe_parser, fetcher, cli_args)
 
     for sha_path, sha in sha_path_to_sha_tbl.items():
         unique_hashes.add(sha)
         # Guard against the unlikely scenario that the `sha256` field is missing.
         patch_op = "replace" if recipe_parser.contains_value(sha_path) else "add"
-        _exit_on_failed_patch(recipe_parser, {"op": patch_op, "path": sha_path, "value": sha})
+        _exit_on_failed_patch(recipe_parser, {"op": patch_op, "path": sha_path, "value": sha}, cli_args)
 
     log.info(
         "Found %d unique SHA-256 hash(es) out of a total of %d hash(es) in %d sources.",
