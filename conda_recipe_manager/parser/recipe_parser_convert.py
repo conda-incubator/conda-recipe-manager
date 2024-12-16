@@ -132,7 +132,10 @@ class RecipeParserConvert(RecipeParser):
                 self._msg_tbl.add_message(MessageCategory.WARNING, f"The variable `{name}` is an unsupported type.")
                 continue
             # Function calls need to preserve JINJA escaping or else they turn into unevaluated strings.
-            if isinstance(value, str) and search_any_regex(Regex.JINJA_FUNCTIONS_SET, value):
+            # See issue #271 for details about env.get( string here.
+            if isinstance(value, str) and (
+                search_any_regex(Regex.JINJA_FUNCTIONS_SET, value) or value.startswith("env.get(")
+            ):
                 value = "{{" + value + "}}"
             context_obj[name] = value
         # Ensure that we do not include an empty context object (which is forbidden by the schema).
@@ -728,7 +731,7 @@ class RecipeParserConvert(RecipeParser):
         #   - This is mostly used by Bioconda recipes and R-based-packages in the `license_file` field.
         #   - From our search, it looks like we never deal with more than one set of outer quotes within the brackets
         replacements: list[tuple[str, str]] = []
-        for groups in cast(list[str], Regex.PRE_PROCESS_ENVIRON.findall(content)):
+        for groups in cast(list[tuple[str, ...]], Regex.PRE_PROCESS_ENVIRON.findall(content)):
             # Each match should return ["<quote char>", "<key>", "<quote_char>"]
             quote_char = groups[0]
             key = groups[1]
@@ -738,6 +741,18 @@ class RecipeParserConvert(RecipeParser):
                     f"env.get({quote_char}{key}{quote_char})",
                 )
             )
+
+        for groups in cast(list[tuple[str, ...]], Regex.PRE_PROCESS_ENVIRON_GET.findall(content)):
+            environ_key = f"{groups[0]}{groups[1]}{groups[2]}"
+            environ_default = f"{groups[3]}{groups[4]}{groups[5]}"
+
+            replacements.append(
+                (
+                    f"environ | get({environ_key}, {environ_default})",
+                    f"env.get({environ_key}, default={environ_default})",
+                )
+            )
+
         for old, new in replacements:
             content = content.replace(old, new, 1)
 

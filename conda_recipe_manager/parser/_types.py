@@ -132,6 +132,13 @@ class Regex:
     # Finds `environ[]` used by a some recipe files. Requires a whitespace character to prevent matches with
     # `os.environ[]`, which is very rare.
     PRE_PROCESS_ENVIRON: Final[re.Pattern[str]] = re.compile(r"\s+environ\[(\"|')(.*)(\"|')\]")
+
+    # Finds `environ.get` which is used in a closed source community of which the author of this comment
+    # participates in. See Issue #271.
+    PRE_PROCESS_ENVIRON_GET: Final[re.Pattern[str]] = re.compile(
+        r"\s+environ \| get\((\"|')(.*)(\"|'), *(\"|')(.*)(\"|')\)"
+    )
+
     # Finds commonly used variants of `{{ hash_type }}:` which is a substitution for the `sha256` field
     PRE_PROCESS_JINJA_HASH_TYPE_KEY: Final[re.Pattern[str]] = re.compile(
         r"'{0,1}\{\{ (hash_type|hash|hashtype) \}\}'{0,1}:"
