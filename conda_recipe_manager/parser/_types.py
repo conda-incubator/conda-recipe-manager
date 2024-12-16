@@ -134,7 +134,7 @@ class Regex:
     PRE_PROCESS_ENVIRON: Final[re.Pattern[str]] = re.compile(r"\s+environ\[(\"|')(.*)(\"|')\]")
 
     # Finds `environ.get` which is used in a closed source community of which the author of this comment
-    # participates in.
+    # participates in. See Issue #271.
     PRE_PROCESS_ENVIRON_GET: Final[re.Pattern[str]] = re.compile(
         r"\s+environ \| get\((\"|')(.*)(\"|'), *(\"|')(.*)(\"|')\)"
     )

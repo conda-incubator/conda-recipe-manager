@@ -703,7 +703,7 @@ class RecipeReader(IsModifiable):
         # `/context`.
         if self._schema_version == SchemaVersion.V0:
             for key, val in self._vars_tbl.items():
-                # Double quote strings
+                # Double quote strings, except for when we detect a env.get() expression. See issue #271.
                 if isinstance(val, str) and not val.startswith("env.get("):
                     val = f'"{val}"'
                 lines.append(f"{{% set {key} = {val} %}}")

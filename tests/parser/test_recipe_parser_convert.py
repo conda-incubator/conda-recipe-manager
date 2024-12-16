@@ -22,6 +22,8 @@ from tests.file_loading import load_file, load_recipe
         ("dot_function_replacement.yaml", "pre_processor/pp_dot_function_replacement.yaml"),
         # Upgrading multiline quoted strings
         ("quoted_multiline_str.yaml", "pre_processor/pp_quoted_multiline_str.yaml"),
+        # Issue #271 environ.get() conversions
+        ("unprocessed_environ_get.yaml", "pre_processor/pp_environ_get.yaml"),
         # Unchanged file
         ("simple-recipe.yaml", "simple-recipe.yaml"),
     ],
