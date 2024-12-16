@@ -730,7 +730,7 @@ class RecipeParserConvert(RecipeParser):
         #   - This is mostly used by Bioconda recipes and R-based-packages in the `license_file` field.
         #   - From our search, it looks like we never deal with more than one set of outer quotes within the brackets
         replacements: list[tuple[str, str]] = []
-        for groups in cast(list[str], Regex.PRE_PROCESS_ENVIRON.findall(content)):
+        for groups in cast(list[tuple[str, ...]], Regex.PRE_PROCESS_ENVIRON.findall(content)):
             # Each match should return ["<quote char>", "<key>", "<quote_char>"]
             quote_char = groups[0]
             key = groups[1]
@@ -741,7 +741,7 @@ class RecipeParserConvert(RecipeParser):
                 )
             )
 
-        for groups in cast(list[str], Regex.PRE_PROCESS_ENVIRON_GET.findall(content)):
+        for groups in cast(list[tuple[str, ...]], Regex.PRE_PROCESS_ENVIRON_GET.findall(content)):
             key_quote_char, key, _, default_quote_char, default, _ = groups
             replacements.append(
                 (
