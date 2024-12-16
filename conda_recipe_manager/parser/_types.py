@@ -135,7 +135,9 @@ class Regex:
 
     # Finds `environ.get` which is used in a closed source community of which the author of this comment
     # participates in.
-    PRE_PROCESS_ENVIRON_GET: Final[re.Pattern[str]] = re.compile(r"\s+environ \| get\((\"|')(.*)(\"|'), *(\"|')(.*)(\"|')\)")
+    PRE_PROCESS_ENVIRON_GET: Final[re.Pattern[str]] = re.compile(
+        r"\s+environ \| get\((\"|')(.*)(\"|'), *(\"|')(.*)(\"|')\)"
+    )
 
     # Finds commonly used variants of `{{ hash_type }}:` which is a substitution for the `sha256` field
     PRE_PROCESS_JINJA_HASH_TYPE_KEY: Final[re.Pattern[str]] = re.compile(

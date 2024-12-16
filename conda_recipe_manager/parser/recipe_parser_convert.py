@@ -132,7 +132,9 @@ class RecipeParserConvert(RecipeParser):
                 self._msg_tbl.add_message(MessageCategory.WARNING, f"The variable `{name}` is an unsupported type.")
                 continue
             # Function calls need to preserve JINJA escaping or else they turn into unevaluated strings.
-            if isinstance(value, str) and (search_any_regex(Regex.JINJA_FUNCTIONS_SET, value) or value.startswith("env.get")):
+            if isinstance(value, str) and (
+                search_any_regex(Regex.JINJA_FUNCTIONS_SET, value) or value.startswith("env.get")
+            ):
                 value = "{{" + value + "}}"
             context_obj[name] = value
         # Ensure that we do not include an empty context object (which is forbidden by the schema).
@@ -744,7 +746,7 @@ class RecipeParserConvert(RecipeParser):
             replacements.append(
                 (
                     f"environ | get({key_quote_char}{key}{key_quote_char}, {default_quote_char}{default}{default_quote_char})",
-                    f"env.get({key_quote_char}{key}{key_quote_char}, default={default_quote_char}{default}{default_quote_char})"
+                    f"env.get({key_quote_char}{key}{key_quote_char}, default={default_quote_char}{default}{default_quote_char})",
                 )
             )
 
