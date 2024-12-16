@@ -173,6 +173,12 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
                 "Field at `/about/license_family` is no longer supported.",
             ],
         ),
+        # Issue #271 properly elevate environ.get() into context
+        (
+            "environ_get.yaml",
+            [],
+            [],
+        ),
         # TODO complete: The `rust.yaml` test contains many edge cases and selectors that aren't directly supported in
         # the V1 recipe format
         # (
