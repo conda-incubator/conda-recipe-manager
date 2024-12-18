@@ -295,7 +295,9 @@ def test_bump_recipe_save_on_failure(
     start_mod_time: Final[float] = recipe_file_path.stat().st_mtime
 
     with patch("requests.get", new=mock_requests_get):
-        result = runner.invoke(bump_recipe.bump_recipe, ["--save-on-failure", "-t", version, str(recipe_file_path)])
+        result = runner.invoke(
+            bump_recipe.bump_recipe, ["--save-on-failure", "-i", "0.01", "-t", version, str(recipe_file_path)]
+        )
 
     # Ensure the file was written by checking the modification timestamp. Some tests may not have any changes if the
     # error occurred too soon.
