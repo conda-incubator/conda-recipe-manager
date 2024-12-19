@@ -265,3 +265,43 @@ def test_bump_recipe_increment_no_build_key_found(fs: FakeFilesystem) -> None:
     recipe_file_path: Final[Path] = get_test_path() / "bump_recipe/no_build_key.yaml"
     result = runner.invoke(bump_recipe.bump_recipe, ["--build-num", str(recipe_file_path)])
     assert result.exit_code == ExitCode.ILLEGAL_OPERATION
+
+
+@pytest.mark.parametrize(
+    "recipe_file,version,expected_recipe_file",
+    [
+        ("bump_recipe/types-toml_bad_url.yaml", "0.10.8.20240310", "bump_recipe/types-toml_bad_url_partial_save.yaml"),
+        # Build number is the first thing attempted, so no changes will be made to the file. Instead will check the
+        # modification time.
+        ("bump_recipe/no_build_key.yaml", "0.10.8.20240310", "bump_recipe/no_build_key.yaml"),
+    ],
+)
+def test_bump_recipe_save_on_failure(
+    fs: FakeFilesystem, recipe_file: str, version: str, expected_recipe_file: str
+) -> None:
+    """
+    Ensures that recipes that encounter a problem can be partially saved with the `--save-on-failure` option.
+
+    :param fs: `pyfakefs` Fixture used to replace the file system
+    :param recipe_file: Target recipe file to update
+    :param version: Version to bump to
+    :param expected_recipe_file: Expected resulting recipe file
+    """
+    runner = CliRunner()
+    fs.add_real_directory(get_test_path(), read_only=False)
+
+    recipe_file_path: Final[Path] = get_test_path() / recipe_file
+    expected_recipe_file_path: Final[Path] = get_test_path() / expected_recipe_file
+    start_mod_time: Final[float] = recipe_file_path.stat().st_mtime
+
+    with patch("requests.get", new=mock_requests_get):
+        result = runner.invoke(
+            bump_recipe.bump_recipe, ["--save-on-failure", "-i", "0.01", "-t", version, str(recipe_file_path)]
+        )
+
+    # Ensure the file was written by checking the modification timestamp. Some tests may not have any changes if the
+    # error occurred too soon.
+    assert recipe_file_path.stat().st_mtime > start_mod_time
+    # Read the edited file and check it against the expected file. We don't parse the recipe file as it isn't necessary.
+    assert load_file(recipe_file_path) == load_file(expected_recipe_file_path)
+    assert result.exit_code != ExitCode.SUCCESS
