@@ -8,19 +8,23 @@ from __future__ import annotations
 
 from typing import Final, Optional, cast
 
+from conda.models.match_spec import MatchSpec
+
 from conda_recipe_manager.licenses.spdx_utils import SpdxUtils
 from conda_recipe_manager.parser._types import ROOT_NODE_VALUE, CanonicalSortOrder, Regex
 from conda_recipe_manager.parser._utils import search_any_regex, set_key_conditionally, stack_path_to_str
-from conda_recipe_manager.parser.enums import SchemaVersion
+from conda_recipe_manager.parser.dependency import Dependency, DependencyConflictMode
+from conda_recipe_manager.parser.enums import SchemaVersion, SelectorConflictMode
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
+from conda_recipe_manager.parser.recipe_parser_deps import RecipeParserDeps
 from conda_recipe_manager.parser.types import CURRENT_RECIPE_SCHEMA_FORMAT
 from conda_recipe_manager.types import JsonPatchType, JsonType, MessageCategory, MessageTable, Primitives, SentinelType
 
 
-class RecipeParserConvert(RecipeParser):
+class RecipeParserConvert(RecipeParserDeps):
     """
-    Extension of the base RecipeParser class that enables upgrading recipes from the old to V1 format.
-    This was originally part of the RecipeParser class but was broken-out for easier maintenance.
+    Extension of the base RecipeParseDeps class that enables upgrading recipes from the old to V1 format.
+    This was originally part of the RecipeParserDeps class but was broken-out for easier maintenance.
     """
 
     def __init__(self, content: str):
@@ -34,7 +38,7 @@ class RecipeParserConvert(RecipeParser):
         # `copy.deepcopy()` produced some bizarre artifacts, namely single-line comments were being incorrectly rendered
         # as list members. Although inefficient, we have tests that validate round-tripping the parser and there
         # is no development cost in utilizing tools we already must maintain.
-        self._v1_recipe: RecipeParser = RecipeParser(self.render())
+        self._v1_recipe: RecipeParserDeps = RecipeParserDeps(self.render())
 
         self._spdx_utils = SpdxUtils()
         self._msg_tbl = MessageTable()
@@ -172,6 +176,63 @@ class RecipeParserConvert(RecipeParser):
             # Safely replace `{{` but not any existing `${{` instances
             value = Regex.JINJA_REPLACE_V0_STARTING_MARKER.sub("${{", value)
             self._patch_and_log({"op": "replace", "path": path, "value": value})
+
+    def _upgrade_ambiguous_deps(self) -> None:
+        """
+        Attempts to update all dependency sections to use unambiguous version constraints. This uses the dependency
+        tooling to prevent repeated logic. See Issue #276 and PR prefix-dev/rattler-build#1271 for more details.
+
+        This must be run before selectors are upgraded to the V1 format, as V1 support for dependency management is not
+        yet available.
+        """
+        try:
+            dep_map = self._v1_recipe.get_all_dependencies()
+        except (KeyError, ValueError):
+            self._msg_tbl.add_message(
+                MessageCategory.ERROR,
+                "Could not parse dependencies when attempting to upgrade ambiguous version numbers.",
+            )
+            return
+
+        for _, deps in dep_map.items():
+            for dep in deps:
+                # Warn and quit-early if there is a potential for a ambiguous version variable.
+                if not isinstance(dep.data, MatchSpec):  # type: ignore[misc]
+                    # TODO: Reduce spammy-ness by looking at the variables table
+                    self._msg_tbl.add_message(
+                        MessageCategory.WARNING,
+                        (
+                            "Recipe upgrades cannot currently upgrade ambiguous version constraints on dependencies"
+                            f" that use variables: {dep.data.name}"
+                        ),
+                    )
+                    continue
+                # Eliminate dependencies that are not ambiguous. This is not that easy as `VersionSpec` does not make
+                # a difference between a version that contains a `==` operator and a version with no operator (which is
+                # ambiguous per the V1 specification).
+                if (
+                    dep.data.version is None  # type: ignore[misc]
+                    or not cast(bool, dep.data.version.is_exact())  # type: ignore[misc]
+                    or not isinstance(dep.data.original_spec_str, str)  # type: ignore[misc]
+                    or "=" in dep.data.original_spec_str
+                ):
+                    continue
+
+                # TODO add IGNORE conflict mode for selectors???
+                self._v1_recipe.add_dependency(
+                    Dependency(
+                        required_by=dep.required_by,
+                        path=dep.path,
+                        type=dep.type,
+                        data=MatchSpec(f"{dep.data.original_spec_str}.*"),
+                        selector=dep.selector,
+                    ),
+                    dep_mode=DependencyConflictMode.EXACT_POSITION,
+                    sel_mode=SelectorConflictMode.OR,
+                )
+                self._msg_tbl.add_message(
+                    MessageCategory.WARNING, f"Ambiguous version on dependency changed to: {dep.data.original_spec_str}"
+                )
 
     def _upgrade_selectors_to_conditionals(self) -> None:
         """
@@ -466,7 +527,7 @@ class RecipeParserConvert(RecipeParser):
             if not self._v1_recipe.contains_value(requirements_path):
                 continue
 
-            # Simple transformations
+            # Renames `run_constrained` to the new equivalent name
             self._patch_move_base_path(requirements_path, "/run_constrained", "/run_constraints")
 
     def _fix_bad_licenses(self, about_path: str) -> None:
@@ -778,6 +839,9 @@ class RecipeParserConvert(RecipeParser):
 
         # Log the original comments
         old_comments: Final[dict[str, str]] = self._v1_recipe.get_comments_table()
+
+        # Attempts to update ambiguous dependency constraints. See function comments for more details.
+        self._upgrade_ambiguous_deps()
 
         # Convert selectors into ternary statements or `if` blocks. We process selectors first so that there is no
         # chance of selector comments getting accidentally wiped by patch or other operations.

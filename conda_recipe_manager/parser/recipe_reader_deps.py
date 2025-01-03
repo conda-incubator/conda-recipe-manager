@@ -52,6 +52,7 @@ class RecipeReaderDeps(RecipeReader):
         if dep is None:
             return None
 
+        # TODO V1 support missing here: V1 selectors return an `if/then` dictionary, not a string!
         dep = dep.strip()
         if not dep:
             return None

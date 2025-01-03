@@ -53,7 +53,7 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
         ),
         (
             "multi-output.yaml",
-            [],
+            ["Could not parse dependencies when attempting to upgrade ambiguous version numbers."],
             [],
         ),
         (
@@ -85,6 +85,39 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
             "google-cloud-cpp.yaml",
             [],
             [
+                "Recipe upgrades cannot currently upgrade ambiguous version constraints on "
+                "dependencies that use variables: ${{ compiler('c') }}",
+                "Recipe upgrades cannot currently upgrade ambiguous version constraints on "
+                "dependencies that use variables: ${{ compiler('cxx') }}",
+                "Recipe upgrades cannot currently upgrade ambiguous version constraints on "
+                "dependencies that use variables: ${{ compiler('c') }}",
+                "Recipe upgrades cannot currently upgrade ambiguous version constraints on "
+                "dependencies that use variables: ${{ compiler('cxx') }}",
+                "Recipe upgrades cannot currently upgrade ambiguous version constraints on "
+                "dependencies that use variables: ${{ compiler('c') }}",
+                "Recipe upgrades cannot currently upgrade ambiguous version constraints on "
+                "dependencies that use variables: ${{ compiler('cxx') }}",
+                "Recipe upgrades cannot currently upgrade ambiguous version constraints on "
+                "dependencies that use variables: ${{ compiler('c') }}",
+                "Recipe upgrades cannot currently upgrade ambiguous version constraints on "
+                "dependencies that use variables: ${{ compiler('cxx') }}",
+                "Recipe upgrades cannot currently upgrade ambiguous version constraints on "
+                'dependencies that use variables: ${{ pin_subpackage("libgoogle-cloud-all", '
+                "exact=True) }}",
+                "Recipe upgrades cannot currently upgrade ambiguous version constraints on "
+                "dependencies that use variables: ${{ compiler('c') }}",
+                "Recipe upgrades cannot currently upgrade ambiguous version constraints on "
+                "dependencies that use variables: ${{ compiler('cxx') }}",
+                "Recipe upgrades cannot currently upgrade ambiguous version constraints on "
+                "dependencies that use variables: ${{ "
+                'pin_subpackage("libgoogle-cloud-all-devel", exact=True) }}',
+                "Recipe upgrades cannot currently upgrade ambiguous version constraints on "
+                "dependencies that use variables: ${{ "
+                'pin_subpackage("libgoogle-cloud-all-devel", exact=True) }}',
+                "Recipe upgrades cannot currently upgrade ambiguous version constraints on "
+                "dependencies that use variables: ${{ compiler('c') }}",
+                "Recipe upgrades cannot currently upgrade ambiguous version constraints on "
+                "dependencies that use variables: ${{ compiler('cxx') }}",
                 "A non-list item had a selector at: /outputs/0/script",
                 "A non-list item had a selector at: /outputs/1/script",
                 "A non-list item had a selector at: /outputs/0/script",
@@ -126,6 +159,10 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
             "regression_jinja_sub.yaml",
             [],
             [
+                (
+                    "Recipe upgrades cannot currently upgrade ambiguous version constraints on dependencies that"
+                    ' use variables: ${{ pin_subpackage("libnvpl-fft" ~ somajor ) }}'
+                ),
                 "The following key(s) contain unsupported syntax: soversion",
                 "No `license` provided in `/about`",
             ],
@@ -171,6 +208,10 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
             "sub_vars.yaml",
             [],
             [
+                (
+                    "Recipe upgrades cannot currently upgrade ambiguous version constraints on dependencies that"
+                    " use variables: ${{ compiler('rust') }} >=1.65.0"
+                ),
                 "Could not patch unrecognized license: `Apache-2.0 AND MIT`",
                 "Field at `/about/license_family` is no longer supported.",
             ],
