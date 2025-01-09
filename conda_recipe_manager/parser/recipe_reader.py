@@ -301,6 +301,8 @@ class RecipeReader(IsModifiable):
         return s
 
     def _render_jinja_vars(self, s: str) -> JsonType:
+        # pylint: disable=too-complex
+        # TODO Refactor and simplify ^
         """
         Helper function that replaces Jinja substitutions with their actual set values.
 
@@ -332,6 +334,8 @@ class RecipeReader(IsModifiable):
             elif key in self._vars_tbl:
                 # Replace value as a string. Re-interpret the entire value before returning.
                 value = str(self._vars_tbl[key])
+                if Regex.JINJA_VAR_VALUE_TERNARY.match(value):
+                    value = "${{" + value + "}}"
                 if lower_match:
                     value = value.lower()
                 if upper_match:
