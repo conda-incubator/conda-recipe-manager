@@ -127,7 +127,7 @@ class RecipeReaderDeps(RecipeReader):
             for section_str, deps in requirements.items():
                 section = str_to_dependency_section(section_str)
                 # Unrecognized sections will be skipped as "junk" data
-                if section is None:
+                if section is None or deps is None:
                     continue
 
                 for i, dep in enumerate(deps):
