@@ -960,7 +960,7 @@ def test_find_value_raises(file: str, value: Primitives) -> None:
     assert not parser.is_modified()
 
 
-## Dependencies ##
+## Convenience Functions ##
 
 
 @pytest.mark.parametrize(
@@ -968,8 +968,14 @@ def test_find_value_raises(file: str, value: Primitives) -> None:
     [
         ("multi-output.yaml", True),
         ("simple-recipe.yaml", False),
+        ("types-toml.yaml", False),
+        ("boto.yaml", False),
+        ("cctools-ld64.yaml", True),
         ("v1_format/v1_multi-output.yaml", True),
         ("v1_format/v1_simple-recipe.yaml", False),
+        ("v1_format/v1_types-toml.yaml", False),
+        ("v1_format/v1_boto.yaml", False),
+        ("v1_format/v1_cctools-ld64.yaml", True),
     ],
 )
 def test_is_multi_output(file: str, expected: bool) -> None:
@@ -980,6 +986,31 @@ def test_is_multi_output(file: str, expected: bool) -> None:
     :param expected: Expected output
     """
     assert load_recipe(file, RecipeReader).is_multi_output() == expected
+
+@pytest.mark.parametrize(
+    "file,expected",
+    [
+        ("multi-output.yaml", False),
+        ("simple-recipe.yaml", False),
+        ("types-toml.yaml", True),
+        ("boto.yaml", True),
+        ("cctools-ld64.yaml", False),
+        ("v1_format/v1_multi-output.yaml", False),
+        ("v1_format/v1_types-toml.yaml", True),
+        ("v1_format/v1_boto.yaml", True),
+        # TODO add V1 selector support for `RecipeReader::is_python_recipe()`
+        #("v1_format/v1_simple-recipe.yaml", False),
+        #("v1_format/v1_cctools-ld64.yaml", False),
+    ],
+)
+def test_is_python_recipe(file: str, expected: bool) -> None:
+    """
+    Validates if a recipe is a "pure Python" package.
+
+    :param file: File to test against
+    :param expected: Expected output
+    """
+    assert load_recipe(file, RecipeReader).is_python_recipe() == expected
 
 
 @pytest.mark.parametrize(

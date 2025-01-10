@@ -35,7 +35,11 @@ from conda_recipe_manager.parser._utils import (
     stringify_yaml,
     substitute_markers,
 )
-from conda_recipe_manager.parser.dependency import DependencySection, dependency_section_to_str
+from conda_recipe_manager.parser.dependency import (
+    DependencySection,
+    dependency_data_from_str,
+    dependency_section_to_str,
+)
 from conda_recipe_manager.parser.enums import SchemaVersion
 from conda_recipe_manager.parser.types import TAB_AS_SPACES, TAB_SPACE_COUNT, MultilineVariant
 from conda_recipe_manager.types import PRIMITIVES_TUPLE, JsonType, Primitives, SentinelType
@@ -948,6 +952,25 @@ class RecipeReader(IsModifiable):
         :returns: True if the recipe produces multiple outputs. False otherwise.
         """
         return self.contains_value("/outputs")
+
+    def is_python_recipe(self) -> bool:
+        """
+        Indicates if a recipe is a "pure Python" recipe.
+
+        :return: True if the recipe is a "pure Python recipe". False otherwise.
+        """
+        # TODO cache this or otherwise find a way to reduce the computation complexity.
+        # TODO consider making a single query interface similar to `RecipeReaderDeps::get_all_dependencies()`
+        # TODO improve definition/validation of "pure Python". Right now, we simply check if Python is a host dependency
+        # which will likely be sufficient for the vast majority of cases.
+        for base_path in self.get_package_paths():
+            host_deps = cast(
+                list[str], self.get_value(RecipeReader.append_to_path(base_path, "/requirements/host"), default=[])
+            )
+            for dep in host_deps:
+                if "python" == dependency_data_from_str(dep).name.lower():
+                    return True
+        return False
 
     def get_package_paths(self) -> list[str]:
         """
