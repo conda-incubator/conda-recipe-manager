@@ -968,7 +968,7 @@ class RecipeReader(IsModifiable):
                 list[str], self.get_value(RecipeReader.append_to_path(base_path, "/requirements/host"), default=[])
             )
             for dep in host_deps:
-                if "python" == dependency_data_from_str(dep).name.lower():
+                if "python" == cast(str, dependency_data_from_str(dep).name).lower():
                     return True
         return False
 

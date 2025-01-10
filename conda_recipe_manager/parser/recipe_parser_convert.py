@@ -13,7 +13,7 @@ from conda.models.match_spec import MatchSpec
 from conda_recipe_manager.licenses.spdx_utils import SpdxUtils
 from conda_recipe_manager.parser._types import ROOT_NODE_VALUE, CanonicalSortOrder, Regex
 from conda_recipe_manager.parser._utils import search_any_regex, set_key_conditionally, stack_path_to_str
-from conda_recipe_manager.parser.dependency import Dependency, DependencyConflictMode, dependency_data_from_str
+from conda_recipe_manager.parser.dependency import Dependency, DependencyConflictMode
 from conda_recipe_manager.parser.enums import SchemaVersion, SelectorConflictMode
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
 from conda_recipe_manager.parser.recipe_parser_deps import RecipeParserDeps
@@ -606,11 +606,10 @@ class RecipeParserConvert(RecipeParserDeps):
             # Remove deprecated `about` fields
             self._patch_deprecated_fields(about_path, about_deprecated)
 
-    def _upgrade_test_pip_check(self, base_path: str, test_path: str) -> None:
+    def _upgrade_test_pip_check(self, test_path: str) -> None:
         """
         Replaces the commonly used `pip check` test-case with the new `python/pip_check` attribute, if applicable.
 
-        :param base_path: Base path for the build target to upgrade
         :param test_path: Test path for the build target to upgrade
         """
         pip_check_variants: Final[set[str]] = {
@@ -689,7 +688,7 @@ class RecipeParserConvert(RecipeParserDeps):
             self._patch_move_base_path(test_path, "/requires", "/requirements/run")
 
             # Upgrade `pip-check`, if applicable
-            self._upgrade_test_pip_check(base_path, test_path)
+            self._upgrade_test_pip_check(test_path)
 
             self._patch_move_base_path(test_path, "/commands", "/script")
             if self._v1_recipe.contains_value(RecipeParser.append_to_path(test_path, "/imports")):

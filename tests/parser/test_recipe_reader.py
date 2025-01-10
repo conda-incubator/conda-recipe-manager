@@ -987,6 +987,7 @@ def test_is_multi_output(file: str, expected: bool) -> None:
     """
     assert load_recipe(file, RecipeReader).is_multi_output() == expected
 
+
 @pytest.mark.parametrize(
     "file,expected",
     [
@@ -999,8 +1000,8 @@ def test_is_multi_output(file: str, expected: bool) -> None:
         ("v1_format/v1_types-toml.yaml", True),
         ("v1_format/v1_boto.yaml", True),
         # TODO add V1 selector support for `RecipeReader::is_python_recipe()`
-        #("v1_format/v1_simple-recipe.yaml", False),
-        #("v1_format/v1_cctools-ld64.yaml", False),
+        # ("v1_format/v1_simple-recipe.yaml", False),
+        # ("v1_format/v1_cctools-ld64.yaml", False),
     ],
 )
 def test_is_python_recipe(file: str, expected: bool) -> None:
