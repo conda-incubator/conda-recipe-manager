@@ -13,7 +13,7 @@ from conda.models.match_spec import MatchSpec
 from conda_recipe_manager.licenses.spdx_utils import SpdxUtils
 from conda_recipe_manager.parser._types import ROOT_NODE_VALUE, CanonicalSortOrder, Regex
 from conda_recipe_manager.parser._utils import search_any_regex, set_key_conditionally, stack_path_to_str
-from conda_recipe_manager.parser.dependency import Dependency, DependencyConflictMode
+from conda_recipe_manager.parser.dependency import Dependency, DependencyConflictMode, dependency_data_from_str
 from conda_recipe_manager.parser.enums import SchemaVersion, SelectorConflictMode
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
 from conda_recipe_manager.parser.recipe_parser_deps import RecipeParserDeps
@@ -620,10 +620,7 @@ class RecipeParserConvert(RecipeParserDeps):
         }
         # Replace `- pip check` in `commands` with the new flag. If not found, set the flag to `False` (as the
         # flag defaults to `True`). DO NOT ADD THIS FLAG IF THE RECIPE IS NOT A "PYTHON RECIPE".
-        if "python" not in cast(
-            list[str],
-            self._v1_recipe.get_value(RecipeParser.append_to_path(base_path, "/requirements/host"), default=[]),
-        ):
+        if not self._v1_recipe.is_python_recipe():
             return
 
         commands_path: Final[str] = RecipeParser.append_to_path(test_path, "/commands")
