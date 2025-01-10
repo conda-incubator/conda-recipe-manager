@@ -222,6 +222,17 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
             [],
             [],
         ),
+        # Issue #276 ambiguous dependency upgrade now required by rattler-build. Also checks against a regression for
+        # determining if a recipe is for a python package. The previous check was too specific.
+        (
+            "types-toml_ambiguous_deps.yaml",
+            [],
+            [
+                "Ambiguous version on dependency changed to: python 3.11",
+                "Could not patch unrecognized license: `Apache-2.0 AND MIT`",
+                "Field at `/about/license_family` is no longer supported.",
+            ],
+        ),
         # TODO complete: The `rust.yaml` test contains many edge cases and selectors that aren't directly supported in
         # the V1 recipe format
         # (
