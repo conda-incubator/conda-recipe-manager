@@ -965,7 +965,10 @@ class RecipeReader(IsModifiable):
         # which will likely be sufficient for the vast majority of cases.
         for base_path in self.get_package_paths():
             host_path = RecipeReader.append_to_path(base_path, "/requirements/host")
-            host_deps = cast(list[str | dict[str, str]], self.get_value(host_path, default=[]))
+            host_deps = cast(Optional[list[str | dict[str, str]]], self.get_value(host_path, default=[]))
+            # Skip the rare edge case where the list may be null (usually caused by commented-out code)
+            if host_deps is None:
+                continue
             for i, dep in enumerate(host_deps):
                 # If we find a selector on a line, ignore it. Conditionalized `python` inclusion does not indicate
                 # something that is "pure Python". We check for V1 selectors first as it is cheaper and prevents a

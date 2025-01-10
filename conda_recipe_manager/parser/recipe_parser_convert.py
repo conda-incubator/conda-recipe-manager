@@ -623,7 +623,10 @@ class RecipeParserConvert(RecipeParserDeps):
             return
 
         commands_path: Final[str] = RecipeParser.append_to_path(test_path, "/commands")
-        commands = cast(list[str], self._v1_recipe.get_value(commands_path, []))
+        commands = cast(Optional[list[str]], self._v1_recipe.get_value(commands_path, []))
+        # Normalize the rare edge case where the list may be null (usually caused by commented-out code)
+        if commands is None:
+            commands = []
         pip_check = False
         for i, command in enumerate(commands):
             # TODO Future: handle selector cases (pip check will be in the `then` section of a dictionary object)
