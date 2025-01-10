@@ -964,11 +964,21 @@ class RecipeReader(IsModifiable):
         # TODO improve definition/validation of "pure Python". Right now, we simply check if Python is a host dependency
         # which will likely be sufficient for the vast majority of cases.
         for base_path in self.get_package_paths():
-            host_deps = cast(
-                list[str], self.get_value(RecipeReader.append_to_path(base_path, "/requirements/host"), default=[])
-            )
-            for dep in host_deps:
+            host_path = RecipeReader.append_to_path(base_path, "/requirements/host")
+            host_deps = cast(list[str | dict[str, str]], self.get_value(host_path, default=[]))
+            for i, dep in enumerate(host_deps):
+                # If we find a selector on a line, ignore it. Conditionalized `python` inclusion does not indicate
+                # something that is "pure Python". We check for V1 selectors first as it is cheaper and prevents a
+                # a type issue. We do not check which schema the current recipe for the sake of the recipe converter,
+                # which uses this function in the upgrade process.
+                # TODO Improve V1 selector check (when more utilities are built). Checking for
+                if not isinstance(dep, str):
+                    continue
                 if "python" == cast(str, dependency_data_from_str(dep).name).lower():
+                    # The V0 selector check is more costly and it can be delayed until we've determined we have found
+                    # a python host dependency.
+                    if self.contains_selector_at_path(RecipeReader.append_to_path(host_path, f"/{i}")):
+                        continue
                     return True
         return False
 
