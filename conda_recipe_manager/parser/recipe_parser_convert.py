@@ -653,6 +653,8 @@ class RecipeParserConvert(RecipeParserDeps):
         )
 
     def _upgrade_test_section(self, base_package_paths: list[str]) -> None:
+        # pylint: disable=too-complex
+        # TODO Refactor and simplify ^
         """
         Upgrades/converts the `test` section(s) of a recipe file.
 
@@ -706,7 +708,10 @@ class RecipeParserConvert(RecipeParserDeps):
 
             # Move `test` to `tests` and encapsulate the pre-existing object into a list
             new_test_path = f"{test_path}s"
-            test_element = cast(dict[str, JsonType], self._v1_recipe.get_value(test_path))
+            test_element = cast(Optional[dict[str, JsonType]], self._v1_recipe.get_value(test_path, default=None))
+            # Handle empty test sections (commonly seen in bioconda and R recipes)
+            if test_element is None:
+                continue
             test_array: list[JsonType] = []
             # There are 3 types of test elements. We break them out of the original object, if they exist.
             # `Python` Test Element

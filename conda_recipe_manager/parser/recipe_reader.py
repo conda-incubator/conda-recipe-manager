@@ -554,7 +554,9 @@ class RecipeReader(IsModifiable):
         s += f"{self.__class__.__name__} Instance\n"
         s += f"- Schema Version: {self._schema_version}\n"
         s += "- Variables Table:\n"
-        s += json.dumps(self._vars_tbl, indent=TAB_AS_SPACES) + "\n"
+        # If we run into an unserializable type (like data that might be interpreted as a date object), attempt to
+        # the data render as a string
+        s += json.dumps(self._vars_tbl, indent=TAB_AS_SPACES, default=str) + "\n"
         s += "- Selectors Table:\n"
         for key, val in self._selector_tbl.items():
             s += f"{TAB_AS_SPACES}{key}\n"

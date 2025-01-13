@@ -120,9 +120,12 @@ class RecipeReaderDeps(RecipeReader):
                 root_package = package
 
             requirements = cast(
-                dict[str, list[Optional[str]]],
+                Optional[str | dict[str, list[Optional[str]]]],
                 self.get_value(RecipeReader.append_to_path(path, "/requirements"), default={}, sub_vars=True),
             )
+            # Skip over empty/malformed requirements sections
+            if requirements is None or isinstance(requirements, str):
+                continue
             dep_map[package] = []
             for section_str, deps in requirements.items():
                 section = str_to_dependency_section(section_str)
