@@ -169,11 +169,7 @@ def dependency_data_from_str(s: str) -> DependencyData:
         return DependencyVariable(s)
 
     try:
-        # Attempt to parse the string as a `MatchSpec` before attempting to correct a common typo. This way we don't
-        # corrupt strings that are not capable of being parsed by `MatchSpec`. If the type correction is not done,
-        # `MatchSpec` will assume `>` or `<` and drop the equivalence component.
-        MatchSpec(s)
-        return MatchSpec(s.replace("=>", ">=").replace("=<", ">="))
+        return MatchSpec(s)
     except (ValueError, InvalidMatchSpec):
         # In an effort to be more resilient, fallback to the simpler type.
         return DependencyVariable(s)

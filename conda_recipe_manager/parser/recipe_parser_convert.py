@@ -207,15 +207,32 @@ class RecipeParserConvert(RecipeParserDeps):
                         ),
                     )
                     continue
-                # Eliminate dependencies that are not ambiguous. This is not that easy as `VersionSpec` does not make
-                # a difference between a version that contains a `==` operator and a version with no operator (which is
-                # ambiguous per the V1 specification).
+
+                if dep.data.version is None or not isinstance(dep.data.original_spec_str, str):  # type: ignore[misc]
+                    continue
+
+                spec_str = dep.data.original_spec_str
+                # Corrects fairly common typos when dealing with >= and <= operators in dependency version selection
+                # statements.
+                spec_str = Regex.AMBIGUOUS_DEP_VERSION_GE_TYPO.sub(r"\1>=\2", spec_str)
+                spec_str = Regex.AMBIGUOUS_DEP_VERSION_LE_TYPO.sub(r"\1<=\2", spec_str)
+                # Corrects cases where two operators are used (i.e. `foo >=1.2.*`). We can't rely on MatchSpec to detect
+                # multiple operators, so we fall back to using a regular expression. We drop the trailing `.*` to be
+                # in alignment with `rattler-build`'s preferences:
+                # https://github.com/conda/rattler/blob/main/crates/rattler_conda_types/src/version_spec/parse.rs#L224
+                spec_str = Regex.AMBIGUOUS_DEP_MULTI_OPERATOR.sub(r"\1\2\3", spec_str)
+
+                # Add a trailing `.*` to ambiguous dependencies that lack an operator. This is not that easy as
+                # `VersionSpec` does not make a distinction between a version that contains a `==` operator and a
+                # version with no operator (which is ambiguous per the V1 specification).
                 if (
-                    dep.data.version is None  # type: ignore[misc]
-                    or not cast(bool, dep.data.version.is_exact())  # type: ignore[misc]
-                    or not isinstance(dep.data.original_spec_str, str)  # type: ignore[misc]
-                    or "=" in dep.data.original_spec_str
+                    cast(bool, dep.data.version.is_exact())  # type: ignore[misc]
+                    and "=" not in dep.data.original_spec_str
                 ):
+                    spec_str = f"{spec_str}.*"
+
+                # Only commit changes to modified dependencies.
+                if dep.data.original_spec_str == spec_str:
                     continue
 
                 # TODO add IGNORE conflict mode for selectors???
@@ -224,15 +241,13 @@ class RecipeParserConvert(RecipeParserDeps):
                         required_by=dep.required_by,
                         path=dep.path,
                         type=dep.type,
-                        data=MatchSpec(f"{dep.data.original_spec_str}.*"),
+                        data=MatchSpec(spec_str),
                         selector=dep.selector,
                     ),
                     dep_mode=DependencyConflictMode.EXACT_POSITION,
                     sel_mode=SelectorConflictMode.OR,
                 )
-                self._msg_tbl.add_message(
-                    MessageCategory.WARNING, f"Ambiguous version on dependency changed to: {dep.data.original_spec_str}"
-                )
+                self._msg_tbl.add_message(MessageCategory.WARNING, f"Version on dependency changed to: {spec_str}")
 
     def _upgrade_selectors_to_conditionals(self) -> None:
         """

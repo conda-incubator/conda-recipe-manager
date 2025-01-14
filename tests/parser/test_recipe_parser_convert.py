@@ -228,7 +228,10 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
             "types-toml_ambiguous_deps.yaml",
             [],
             [
-                "Ambiguous version on dependency changed to: python 3.11",
+                "Version on dependency changed to: python 3.11.*",
+                "Version on dependency changed to: bar-bar >=1.2",
+                "Version on dependency changed to: typo-1 <= 1.2.3",
+                "Version on dependency changed to: typo-2 >=1.2.3",
                 "Could not patch unrecognized license: `Apache-2.0 AND MIT`",
                 "Field at `/about/license_family` is no longer supported.",
             ],
