@@ -161,9 +161,20 @@ class Regex:
     PRE_PROCESS_MIN_PIN_REPLACEMENT: Final[re.Pattern[str]] = re.compile(r"min_pin=")
     PRE_PROCESS_MAX_PIN_REPLACEMENT: Final[re.Pattern[str]] = re.compile(r"max_pin=")
 
+    ## Ambiguous Dependency Corrections ##
+    # Regular expressions used to modify problematic dependencies in the upgrade path. Note this have to account for
+    # the dependency name as `VersionSpec`.raw_value does not actually contain the original, unmodified version string.
+    AMBIGUOUS_DEP_VERSION_GE_TYPO: Final[re.Pattern[str]] = re.compile(r"([\w+\-]+\s*)=>(\s*[\d|.]+)")
+    AMBIGUOUS_DEP_VERSION_LE_TYPO: Final[re.Pattern[str]] = re.compile(r"([\w+\-]+\s*)=<(\s*[\d|.]+)")
+    AMBIGUOUS_DEP_MULTI_OPERATOR: Final[re.Pattern[str]] = re.compile(
+        r"([\w|\-]+\s*)(~|<|>|<=|>=|==|!=|~=)(\s*[\d|\.]+)(\.\*)"
+    )
+
     ## Selector Replacements ##
     # Replaces Python version expressions with the newer V1 `match()` function
-    SELECTOR_PYTHON_VERSION_REPLACEMENT: Final[re.Pattern[str]] = re.compile(r"py\s*(<|>|<=|>=|==|!=)\s*(3|2)([0-9]+)")
+    SELECTOR_PYTHON_VERSION_REPLACEMENT: Final[re.Pattern[str]] = re.compile(
+        r"py\s*(<|>|<=|>=|==|!=|~=)\s*(3|2)([0-9]+)"
+    )
     SELECTOR_PYTHON_VERSION_EQ_REPLACEMENT: Final[re.Pattern[str]] = re.compile(r"py(3|2)([0-9]+)")
     SELECTOR_PYTHON_VERSION_NE_REPLACEMENT: Final[re.Pattern[str]] = re.compile(r"not py(3|2)([0-9]+)")
     SELECTOR_PYTHON_VERSION_PY2K_REPLACEMENT: Final[re.Pattern[str]] = re.compile(r"py2k")
@@ -200,6 +211,10 @@ class Regex:
         JINJA_FUNCTION_ADD_CONCAT,
         JINJA_FUNCTION_MATCH,
     }
+
+    # Matches a JINJA variable's value that contains a ternary operation. Example value: 'm2-' if win else ''
+    # Full support for evaluating is tracked in #285, but it is unclear if support for this in V1 is needed.
+    JINJA_VAR_VALUE_TERNARY: Final[re.Pattern[str]] = re.compile(r"^.*\s+if\s+(\w|-)+\s+else\s+.*")
 
     SELECTOR: Final[re.Pattern[str]] = re.compile(r"\[.*\]")
     # Detects the 6 common variants (3 |'s, 3 >'s). See this guide for more info:

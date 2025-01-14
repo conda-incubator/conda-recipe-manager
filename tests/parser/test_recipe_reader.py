@@ -628,23 +628,23 @@ def test_contains_value(file: str, path: str, expected: bool) -> None:
             },
         ),
         # Add/concat cases
-        ("sub_vars.yaml", "/requirements/run_constrained/0", True, 43),
-        ("sub_vars.yaml", "/requirements/run_constrained/1", True, 43.3),
-        ("sub_vars.yaml", "/requirements/run_constrained/2", True, "421"),
-        ("sub_vars.yaml", "/requirements/run_constrained/3", True, "421.3"),
-        ("sub_vars.yaml", "/requirements/run_constrained/4", True, 43),
-        ("sub_vars.yaml", "/requirements/run_constrained/5", True, 43.3),
-        ("sub_vars.yaml", "/requirements/run_constrained/6", True, "142"),
-        ("sub_vars.yaml", "/requirements/run_constrained/7", True, "1.342"),
-        ("sub_vars.yaml", "/requirements/run_constrained/8", True, "0.10.8.61.3"),
-        ("sub_vars.yaml", "/requirements/run_constrained/9", True, "0.10.8.61.3"),
-        ("sub_vars.yaml", "/requirements/run_constrained/10", True, "1.30.10.8.6"),
-        ("sub_vars.yaml", "/requirements/run_constrained/11", True, "1.30.10.8.6"),
-        ("sub_vars.yaml", "/requirements/run_constrained/12", True, 6),
-        ("sub_vars.yaml", "/requirements/run_constrained/13", True, "42"),
-        ("sub_vars.yaml", "/requirements/run_constrained/14", True, "dne42"),
-        ("sub_vars.yaml", "/requirements/run_constrained/15", True, 'foo > "42"'),
-        ("sub_vars.yaml", "/requirements/run_constrained/16", True, "foo > 6"),
+        ("sub_vars.yaml", "/requirements/fake_run_constrained/0", True, 43),
+        ("sub_vars.yaml", "/requirements/fake_run_constrained/1", True, 43.3),
+        ("sub_vars.yaml", "/requirements/fake_run_constrained/2", True, "421"),
+        ("sub_vars.yaml", "/requirements/fake_run_constrained/3", True, "421.3"),
+        ("sub_vars.yaml", "/requirements/fake_run_constrained/4", True, 43),
+        ("sub_vars.yaml", "/requirements/fake_run_constrained/5", True, 43.3),
+        ("sub_vars.yaml", "/requirements/fake_run_constrained/6", True, "142"),
+        ("sub_vars.yaml", "/requirements/fake_run_constrained/7", True, "1.342"),
+        ("sub_vars.yaml", "/requirements/fake_run_constrained/8", True, "0.10.8.61.3"),
+        ("sub_vars.yaml", "/requirements/fake_run_constrained/9", True, "0.10.8.61.3"),
+        ("sub_vars.yaml", "/requirements/fake_run_constrained/10", True, "1.30.10.8.6"),
+        ("sub_vars.yaml", "/requirements/fake_run_constrained/11", True, "1.30.10.8.6"),
+        ("sub_vars.yaml", "/requirements/fake_run_constrained/12", True, 6),
+        ("sub_vars.yaml", "/requirements/fake_run_constrained/13", True, "42"),
+        ("sub_vars.yaml", "/requirements/fake_run_constrained/14", True, "dne42"),
+        ("sub_vars.yaml", "/requirements/fake_run_constrained/15", True, 'foo > "42"'),
+        ("sub_vars.yaml", "/requirements/fake_run_constrained/16", True, "foo > 6"),
         ## v1_simple-recipe.yaml ##
         ("v1_format/v1_simple-recipe.yaml", "/build/number", False, 0),
         ("v1_format/v1_simple-recipe.yaml", "/build/number/", False, 0),
@@ -783,23 +783,23 @@ def test_contains_value(file: str, path: str, expected: bool) -> None:
             },
         ),
         # Add/concat cases
-        ("v1_format/v1_sub_vars.yaml", "/requirements/run_constraints/0", True, 43),
-        ("v1_format/v1_sub_vars.yaml", "/requirements/run_constraints/1", True, 43.3),
-        ("v1_format/v1_sub_vars.yaml", "/requirements/run_constraints/2", True, "421"),
-        ("v1_format/v1_sub_vars.yaml", "/requirements/run_constraints/3", True, "421.3"),
-        ("v1_format/v1_sub_vars.yaml", "/requirements/run_constraints/4", True, 43),
-        ("v1_format/v1_sub_vars.yaml", "/requirements/run_constraints/5", True, 43.3),
-        ("v1_format/v1_sub_vars.yaml", "/requirements/run_constraints/6", True, "142"),
-        ("v1_format/v1_sub_vars.yaml", "/requirements/run_constraints/7", True, "1.342"),
-        ("v1_format/v1_sub_vars.yaml", "/requirements/run_constraints/8", True, "0.10.8.61.3"),
-        ("v1_format/v1_sub_vars.yaml", "/requirements/run_constraints/9", True, "0.10.8.61.3"),
-        ("v1_format/v1_sub_vars.yaml", "/requirements/run_constraints/10", True, "1.30.10.8.6"),
-        ("v1_format/v1_sub_vars.yaml", "/requirements/run_constraints/11", True, "1.30.10.8.6"),
-        ("v1_format/v1_sub_vars.yaml", "/requirements/run_constraints/12", True, 6),
-        ("v1_format/v1_sub_vars.yaml", "/requirements/run_constraints/13", True, "42"),
-        ("v1_format/v1_sub_vars.yaml", "/requirements/run_constraints/14", True, "dne42"),
-        ("v1_format/v1_sub_vars.yaml", "/requirements/run_constraints/15", True, 'foo > "42"'),
-        ("v1_format/v1_sub_vars.yaml", "/requirements/run_constraints/16", True, "foo > 6"),
+        ("v1_format/v1_sub_vars.yaml", "/requirements/fake_run_constrained/0", True, 43),
+        ("v1_format/v1_sub_vars.yaml", "/requirements/fake_run_constrained/1", True, 43.3),
+        ("v1_format/v1_sub_vars.yaml", "/requirements/fake_run_constrained/2", True, "421"),
+        ("v1_format/v1_sub_vars.yaml", "/requirements/fake_run_constrained/3", True, "421.3"),
+        ("v1_format/v1_sub_vars.yaml", "/requirements/fake_run_constrained/4", True, 43),
+        ("v1_format/v1_sub_vars.yaml", "/requirements/fake_run_constrained/5", True, 43.3),
+        ("v1_format/v1_sub_vars.yaml", "/requirements/fake_run_constrained/6", True, "142"),
+        ("v1_format/v1_sub_vars.yaml", "/requirements/fake_run_constrained/7", True, "1.342"),
+        ("v1_format/v1_sub_vars.yaml", "/requirements/fake_run_constrained/8", True, "0.10.8.61.3"),
+        ("v1_format/v1_sub_vars.yaml", "/requirements/fake_run_constrained/9", True, "0.10.8.61.3"),
+        ("v1_format/v1_sub_vars.yaml", "/requirements/fake_run_constrained/10", True, "1.30.10.8.6"),
+        ("v1_format/v1_sub_vars.yaml", "/requirements/fake_run_constrained/11", True, "1.30.10.8.6"),
+        ("v1_format/v1_sub_vars.yaml", "/requirements/fake_run_constrained/12", True, 6),
+        ("v1_format/v1_sub_vars.yaml", "/requirements/fake_run_constrained/13", True, "42"),
+        ("v1_format/v1_sub_vars.yaml", "/requirements/fake_run_constrained/14", True, "dne42"),
+        ("v1_format/v1_sub_vars.yaml", "/requirements/fake_run_constrained/15", True, 'foo > "42"'),
+        ("v1_format/v1_sub_vars.yaml", "/requirements/fake_run_constrained/16", True, "foo > 6"),
         ## multi-output.yaml ##
         ("multi-output.yaml", "/outputs/0/build/run_exports/0", False, "bar"),
         ("multi-output.yaml", "/outputs/0/build/run_exports", False, ["bar"]),
@@ -960,7 +960,7 @@ def test_find_value_raises(file: str, value: Primitives) -> None:
     assert not parser.is_modified()
 
 
-## Dependencies ##
+## Convenience Functions ##
 
 
 @pytest.mark.parametrize(
@@ -968,8 +968,14 @@ def test_find_value_raises(file: str, value: Primitives) -> None:
     [
         ("multi-output.yaml", True),
         ("simple-recipe.yaml", False),
+        ("types-toml.yaml", False),
+        ("boto.yaml", False),
+        ("cctools-ld64.yaml", True),
         ("v1_format/v1_multi-output.yaml", True),
         ("v1_format/v1_simple-recipe.yaml", False),
+        ("v1_format/v1_types-toml.yaml", False),
+        ("v1_format/v1_boto.yaml", False),
+        ("v1_format/v1_cctools-ld64.yaml", True),
     ],
 )
 def test_is_multi_output(file: str, expected: bool) -> None:
@@ -980,6 +986,31 @@ def test_is_multi_output(file: str, expected: bool) -> None:
     :param expected: Expected output
     """
     assert load_recipe(file, RecipeReader).is_multi_output() == expected
+
+
+@pytest.mark.parametrize(
+    "file,expected",
+    [
+        ("multi-output.yaml", False),
+        ("simple-recipe.yaml", False),
+        ("types-toml.yaml", True),
+        ("boto.yaml", True),
+        ("cctools-ld64.yaml", False),
+        ("v1_format/v1_multi-output.yaml", False),
+        ("v1_format/v1_simple-recipe.yaml", False),
+        ("v1_format/v1_types-toml.yaml", True),
+        ("v1_format/v1_boto.yaml", True),
+        ("v1_format/v1_cctools-ld64.yaml", False),
+    ],
+)
+def test_is_python_recipe(file: str, expected: bool) -> None:
+    """
+    Validates if a recipe is a "pure Python" package.
+
+    :param file: File to test against
+    :param expected: Expected output
+    """
+    assert load_recipe(file, RecipeReader).is_python_recipe() == expected
 
 
 @pytest.mark.parametrize(
