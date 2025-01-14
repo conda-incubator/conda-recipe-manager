@@ -331,12 +331,27 @@ class RecipeParserConvert(RecipeParserDeps):
         """
         for base_path in base_package_paths:
             build_path = RecipeParser.append_to_path(base_path, "/build")
+            about_path = RecipeParser.append_to_path(base_path, "/about")
             # "If I had a nickel for every time `skip` was misspelled, I would have several nickels. Which isn't a lot,
             #  but it is weird that it has happened multiple times."
             #                                                             - Dr. Doofenshmirtz, probably
             self._patch_move_base_path(build_path, "skipt", "skip")
             self._patch_move_base_path(build_path, "skips", "skip")
             self._patch_move_base_path(build_path, "Skip", "skip")
+
+            # Various misspellings of "license_file" and "license_family". Note that `license_family` is deprecated,
+            # but we fix the spelling so it can be removed at a later phase.
+            self._patch_move_base_path(about_path, "licence_file", "license_file")
+            self._patch_move_base_path(about_path, "licensse_file", "license_file")
+            self._patch_move_base_path(about_path, "license_filte", "license_file")
+            self._patch_move_base_path(about_path, "licsense_file", "license_file")
+            self._patch_move_base_path(about_path, "icense_file", "license_file")
+            self._patch_move_base_path(about_path, "licence_family", "license_family")
+            self._patch_move_base_path(about_path, "license_familiy", "license_family")
+            self._patch_move_base_path(about_path, "license_familly", "license_family")
+
+            # Other about fields
+            self._patch_move_base_path(about_path, "Description", "description")
 
             # `/extras` -> `/extra`
             self._patch_move_base_path(base_path, "extras", "extra")
