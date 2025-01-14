@@ -244,7 +244,7 @@ def _collect_issue_stats(project_name: str, issues: list[str], hist: dict[str, i
 
 
 @click.command(short_help="Converts a `meta.yaml` formatted-recipe file to the new `recipe.yaml` format.")
-@click.argument("path", type=click.Path(exists=True, path_type=Path))  # type: ignore[misc]
+@click.argument("path", type=click.Path(exists=True, path_type=Path))
 @click.option(
     "--output",
     "-o",
