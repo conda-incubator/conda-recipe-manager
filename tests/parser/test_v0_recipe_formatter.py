@@ -55,12 +55,15 @@ def test_is_v0_recipe(file: str, expected: bool) -> None:
 @pytest.mark.parametrize(
     "file,expected_file",
     [
-        # No change tests
+        ## No change tests ##
         ("types-toml.yaml", "types-toml.yaml"),
         ("boto.yaml", "boto.yaml"),
         ("cctools-ld64.yaml", "cctools-ld64.yaml"),
-        # Formatter changed the file contents tests
+        ## Formatter changed the file contents tests ##
+        # Comments indented in really strange ways
         ("v0_formatter/types-toml_bad_comment_indent.yaml", "v0_formatter/types-toml_bad_comment_indent_fixed.yaml"),
+        # Lists under `/test/commands` are unintended entirely
+        ("v0_formatter/types-toml_bad_commands.yaml", "v0_formatter/types-toml_bad_commands_fixed.yaml"),
     ],
 )
 def test_fmt_text(file: str, expected_file: str) -> None:

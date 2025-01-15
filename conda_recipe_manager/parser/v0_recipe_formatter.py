@@ -11,6 +11,7 @@ from __future__ import annotations
 from typing import Final
 
 from conda_recipe_manager.parser._utils import num_tab_spaces
+from conda_recipe_manager.parser.types import TAB_SPACE_COUNT
 
 
 class V0RecipeFormatter:
@@ -58,14 +59,28 @@ class V0RecipeFormatter:
         num_lines: Final[int] = len(self._lines)
         while idx < num_lines:
             line = self._lines[idx]
-            clean_line = line.strip()
+            clean_line = line.lstrip()
 
+            if not clean_line or not 0 < idx < num_lines - 1:
+                idx += 1
+                continue
+
+            prev_cntr = num_tab_spaces(self._lines[idx - 1])
+            cur_cntr = num_tab_spaces(line)
+            next_cntr = num_tab_spaces(self._lines[idx + 1])
+            # TODO does the previous line really need to be checked? Shouldn't a comment-only line match the next line?
+            # Maybe only when the next line isn't blank?
             # Attempt to correct mis-matched comment indentations
-            if clean_line and 0 < idx < num_lines - 1 and clean_line[0] == "#":
-                prev_cntr = num_tab_spaces(self._lines[idx - 1])
-                cur_cntr = num_tab_spaces(line)
-                next_cntr = num_tab_spaces(self._lines[idx + 1])
+            if clean_line[0] == "#":
                 if prev_cntr == next_cntr and cur_cntr != next_cntr:
                     self._lines[idx] = (" " * next_cntr) + clean_line
+
+            # There are a number of recipe files in the ecosystem that don't indent the `/tests/commands` section, for
+            # whatever reason.
+            # TODO multiple lines unindented list items
+            # TODO format all poorly indented lists? Risk needs to be determined before proceeding.
+            next_clean_line = self._lines[idx + 1].lstrip()
+            if clean_line.startswith("commands:") and cur_cntr == next_cntr and next_clean_line.startswith("-"):
+                self._lines[idx + 1] = (" " * (cur_cntr + TAB_SPACE_COUNT)) + next_clean_line
 
             idx += 1
