@@ -42,6 +42,7 @@ from conda_recipe_manager.parser.dependency import (
 )
 from conda_recipe_manager.parser.enums import SchemaVersion
 from conda_recipe_manager.parser.types import TAB_AS_SPACES, TAB_SPACE_COUNT, MultilineVariant
+from conda_recipe_manager.parser.v0_recipe_formatter import V0RecipeFormatter
 from conda_recipe_manager.types import PRIMITIVES_TUPLE, JsonType, Primitives, SentinelType
 from conda_recipe_manager.utils.cryptography.hashing import hash_str
 from conda_recipe_manager.utils.typing import optional_str
@@ -416,8 +417,14 @@ class RecipeReader(IsModifiable):
 
         # Root of the parse tree
         self._root = Node(ROOT_NODE_VALUE)
-        # Start by removing all Jinja lines. Then traverse line-by-line
-        sanitized_yaml = Regex.JINJA_V0_LINE.sub("", self._init_content)
+
+        # Format the text for V0 recipe files in an attempt to improve compatibility with our whitespace-delimited
+        # parser.
+        fmt: Final[V0RecipeFormatter] = V0RecipeFormatter(self._init_content)
+        if fmt.is_v0_recipe():
+            fmt.fmt_text()
+        # Replace all Jinja lines. Then traverse line-by-line
+        sanitized_yaml = Regex.JINJA_V0_LINE.sub("", str(fmt))
 
         # Read the YAML line-by-line, maintaining a stack to manage the last owning node in the tree.
         node_stack: list[Node] = [self._root]
