@@ -57,6 +57,7 @@ class V0RecipeFormatter:
         """
         idx = 0
         num_lines: Final[int] = len(self._lines)
+        is_comment_block = False
         while idx < num_lines:
             line = self._lines[idx]
             clean_line = line.lstrip()
@@ -65,21 +66,26 @@ class V0RecipeFormatter:
                 idx += 1
                 continue
 
-            prev_cntr = num_tab_spaces(self._lines[idx - 1])
             cur_cntr = num_tab_spaces(line)
             next_cntr = num_tab_spaces(self._lines[idx + 1])
-            # TODO does the previous line really need to be checked? Shouldn't a comment-only line match the next line?
-            # Maybe only when the next line isn't blank?
-            # Attempt to correct mis-matched comment indentations
-            if clean_line[0] == "#":
-                if prev_cntr == next_cntr and cur_cntr != next_cntr:
+            next_clean_line = self._lines[idx + 1].lstrip()
+
+            # Attempt to correct mis-matched comment indentations by looking at the next line. This does not change
+            # indentation when the following line is another comment (as to not mess with multi-line comment blocks).
+            # This also does not change the indentation when the next line is blank.
+            if clean_line.startswith("#"):
+                if next_clean_line.startswith("#"):
+                    is_comment_block = True
+                if cur_cntr != next_cntr and next_clean_line and not is_comment_block:
                     self._lines[idx] = (" " * next_cntr) + clean_line
+            # Reset comment block flag
+            else:
+                is_comment_block = False
 
             # There are a number of recipe files in the ecosystem that don't indent the `/tests/commands` section, for
             # whatever reason.
             # TODO multiple lines unindented list items
             # TODO format all poorly indented lists? Risk needs to be determined before proceeding.
-            next_clean_line = self._lines[idx + 1].lstrip()
             if clean_line.startswith("commands:") and cur_cntr == next_cntr and next_clean_line.startswith("-"):
                 self._lines[idx + 1] = (" " * (cur_cntr + TAB_SPACE_COUNT)) + next_clean_line
 

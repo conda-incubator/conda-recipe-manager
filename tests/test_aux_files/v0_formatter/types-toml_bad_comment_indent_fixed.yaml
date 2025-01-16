@@ -26,8 +26,11 @@ requirements:
 test:
   imports:
     - types
+  # Comment is indented in a dumb way
   requires:
     - pip
+    # Comment is indented in a dumb way but let's not risk destroying
+    # any intended multi-line comment blocks.
   commands:
     - pip check
     # Comment is indented in a dumb way
