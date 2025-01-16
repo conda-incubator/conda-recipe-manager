@@ -3,6 +3,14 @@ NOTES:
 - Version releases in the 0.x.y range may introduce breaking changes.
 - See the auto-generated release notes for more details.
 
+## 0.4.1
+- `crm convert` now prints stacktraces when the `--debug` flag is used.
+- `crm bump-recipe` now includes a `--save-on-failure` flag that can save the
+  contents of a bumped recipe if the bump fails to fully complete.
+- Significant recipe compatibility improvements, brought on by changes made in
+  `rattler-build @0.34.1`.
+- Several community-reported bug fixes.
+
 ## 0.4.0
 - Introduces MVP for the `bump-recipe` command. This command should be able to update the
   version number, build number, and SHA-256 hash for most simple recipe files.
