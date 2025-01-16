@@ -58,6 +58,11 @@ class V0RecipeFormatter:
         idx = 0
         num_lines: Final[int] = len(self._lines)
         is_comment_block = False
+        bad_block_indent_map: dict[str, int] = {
+            "commands": -1,
+            "imports": -1,
+            "requires": -1,
+        }
         while idx < num_lines:
             line = self._lines[idx]
             clean_line = line.lstrip()
@@ -82,11 +87,27 @@ class V0RecipeFormatter:
             else:
                 is_comment_block = False
 
-            # There are a number of recipe files in the ecosystem that don't indent the `/tests/commands` section, for
-            # whatever reason.
-            # TODO multiple lines unindented list items
+            # There are a number of recipe files in the ecosystem that don't indent sections under `/test` correctly,
+            # for whatever reason. The rest of the file is fine, but some `/test/*` subsection(s) are poorly maintained.
+            # This attempts to fix the most common occurrences without being overly prescriptive.
             # TODO format all poorly indented lists? Risk needs to be determined before proceeding.
-            if clean_line.startswith("commands:") and cur_cntr == next_cntr and next_clean_line.startswith("-"):
-                self._lines[idx + 1] = (" " * (cur_cntr + TAB_SPACE_COUNT)) + next_clean_line
+            expected_lst_indent = cur_cntr + TAB_SPACE_COUNT
+
+            def _correct_section(section: str) -> None:
+                if (
+                    clean_line.startswith(f"{section}:")
+                    and next_clean_line.startswith("-")
+                    and next_cntr != expected_lst_indent
+                ):
+                    bad_block_indent_map[section] = expected_lst_indent
+                elif bad_block_indent_map[section] > 0 and clean_line.startswith("-"):
+                    self._lines[idx] = (" " * bad_block_indent_map[section]) + clean_line
+                # Reset block indentation tracker
+                else:
+                    bad_block_indent_map[section] = -1
+
+            _correct_section("commands")
+            _correct_section("imports")
+            _correct_section("requires")
 
             idx += 1
