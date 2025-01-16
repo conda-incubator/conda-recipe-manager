@@ -62,8 +62,8 @@ def test_is_v0_recipe(file: str, expected: bool) -> None:
         ## Formatter changed the file contents tests ##
         # Comments indented in really strange ways
         ("v0_formatter/types-toml_bad_comment_indent.yaml", "v0_formatter/types-toml_bad_comment_indent_fixed.yaml"),
-        # Lists under `/test/commands` are unintended entirely
-        ("v0_formatter/types-toml_bad_commands.yaml", "v0_formatter/types-toml_bad_commands_fixed.yaml"),
+        # Lists with really bad indentations entirely
+        ("v0_formatter/types-toml_bad_indents.yaml", "v0_formatter/types-toml_bad_indents_fixed.yaml"),
     ],
 )
 def test_fmt_text(file: str, expected_file: str) -> None:

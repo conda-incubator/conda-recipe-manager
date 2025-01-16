@@ -16,12 +16,13 @@ build:
 
 requirements:
   host:
-    - setuptools
-    - wheel
-    - pip
-    - python
+      - setuptools
+           - wheel
+        # One wacky comment to correct
+      - pip
+  - python
   run:
-    - python
+   - python
 
 test:
   imports:

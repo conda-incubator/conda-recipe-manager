@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from typing import Final
 
+from conda_recipe_manager.parser._types import Regex
 from conda_recipe_manager.parser._utils import num_tab_spaces
 from conda_recipe_manager.parser.types import TAB_SPACE_COUNT
 
@@ -58,11 +59,7 @@ class V0RecipeFormatter:
         idx = 0
         num_lines: Final[int] = len(self._lines)
         is_comment_block = False
-        bad_block_indent_map: dict[str, int] = {
-            "commands": -1,
-            "imports": -1,
-            "requires": -1,
-        }
+        bad_lst_block_indent_tracker = -1
         while idx < num_lines:
             line = self._lines[idx]
             clean_line = line.lstrip()
@@ -87,27 +84,23 @@ class V0RecipeFormatter:
             else:
                 is_comment_block = False
 
-            # There are a number of recipe files in the ecosystem that don't indent sections under `/test` correctly,
-            # for whatever reason. The rest of the file is fine, but some `/test/*` subsection(s) are poorly maintained.
-            # This attempts to fix the most common occurrences without being overly prescriptive.
-            # TODO format all poorly indented lists? Risk needs to be determined before proceeding.
+            # This logic attempts to correct list sections that are poorly indented and can handle indenting comments
+            # so long as the comment is followed by another list item. It is not a perfect algorithm, but it should be
+            # "good enough" for the most common indentation issues without a huge risk to corrupting currently
+            # compatible files.
             expected_lst_indent = cur_cntr + TAB_SPACE_COUNT
-
-            def _correct_section(section: str) -> None:
-                if (
-                    clean_line.startswith(f"{section}:")
-                    and next_clean_line.startswith("-")
-                    and next_cntr != expected_lst_indent
-                ):
-                    bad_block_indent_map[section] = expected_lst_indent
-                elif bad_block_indent_map[section] > 0 and clean_line.startswith("-"):
-                    self._lines[idx] = (" " * bad_block_indent_map[section]) + clean_line
-                # Reset block indentation tracker
-                else:
-                    bad_block_indent_map[section] = -1
-
-            _correct_section("commands")
-            _correct_section("imports")
-            _correct_section("requires")
+            if (
+                Regex.V0_FMT_SECTION_HEADER.match(clean_line)
+                and next_clean_line.startswith("-")
+                and next_cntr != expected_lst_indent
+            ):
+                bad_lst_block_indent_tracker = expected_lst_indent
+            elif bad_lst_block_indent_tracker > 0 and (
+                clean_line.startswith("-") or (clean_line.startswith("#") and next_clean_line.startswith("-"))
+            ):
+                self._lines[idx] = (" " * bad_lst_block_indent_tracker) + clean_line
+            # Reset block indentation tracker
+            else:
+                bad_lst_block_indent_tracker = -1
 
             idx += 1
