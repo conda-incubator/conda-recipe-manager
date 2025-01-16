@@ -642,15 +642,16 @@ class RecipeParserConvert(RecipeParserDeps):
 
         :param test_path: Test path for the build target to upgrade
         """
+        # Replace `- pip check` in `commands` with the new flag. If not found, set the flag to `False` (as the
+        # flag defaults to `True`). DO NOT ADD THIS FLAG IF THE RECIPE IS NOT A "PYTHON RECIPE".
+        if not self._v1_recipe.is_python_recipe():
+            return
+
         pip_check_variants: Final[set[str]] = {
             "pip check",
             "python -m pip check",
             "python3 -m pip check",
         }
-        # Replace `- pip check` in `commands` with the new flag. If not found, set the flag to `False` (as the
-        # flag defaults to `True`). DO NOT ADD THIS FLAG IF THE RECIPE IS NOT A "PYTHON RECIPE".
-        if not self._v1_recipe.is_python_recipe():
-            return
 
         commands_path: Final[str] = RecipeParser.append_to_path(test_path, "/commands")
         commands = cast(Optional[list[str]], self._v1_recipe.get_value(commands_path, []))

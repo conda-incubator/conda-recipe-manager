@@ -970,9 +970,16 @@ class RecipeReader(IsModifiable):
         """
         # TODO cache this or otherwise find a way to reduce the computation complexity.
         # TODO consider making a single query interface similar to `RecipeReaderDeps::get_all_dependencies()`
-        # TODO improve definition/validation of "pure Python". Right now, we simply check if Python is a host dependency
-        # which will likely be sufficient for the vast majority of cases.
+        # TODO improve definition/validation of "pure Python"
         for base_path in self.get_package_paths():
+            # A "pure python" package shouldn't need a `build` dependencies.
+            build_deps = cast(
+                Optional[list[str | dict[str, str]]],
+                self.get_value(RecipeReader.append_to_path(base_path, "/requirements/build"), default=[]),
+            )
+            if build_deps:
+                return False
+
             host_path = RecipeReader.append_to_path(base_path, "/requirements/host")
             host_deps = cast(Optional[list[str | dict[str, str]]], self.get_value(host_path, default=[]))
             # Skip the rare edge case where the list may be null (usually caused by commented-out code)

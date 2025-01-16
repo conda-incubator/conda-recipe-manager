@@ -1001,6 +1001,9 @@ def test_is_multi_output(file: str, expected: bool) -> None:
         ("v1_format/v1_types-toml.yaml", True),
         ("v1_format/v1_boto.yaml", True),
         ("v1_format/v1_cctools-ld64.yaml", False),
+        # Regression test for Issue 289. Compiled projects that use Python are not "pure python" packages.
+        ("issue_289_regression.yaml", False),
+        ("v1_format/v1_issue_289_regression.yaml", False),
     ],
 )
 def test_is_python_recipe(file: str, expected: bool) -> None:

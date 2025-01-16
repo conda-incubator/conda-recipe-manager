@@ -24,6 +24,8 @@ from tests.file_loading import load_file, load_recipe
         ("quoted_multiline_str.yaml", "pre_processor/pp_quoted_multiline_str.yaml"),
         # Issue #271 environ.get() conversions
         ("unprocessed_environ_get.yaml", "pre_processor/pp_environ_get.yaml"),
+        # Min/max pin upgrades to new upper/lower bound syntax
+        ("min_max_pin.yaml", "pre_processor/pp_min_max_pin.yaml"),
         # Unchanged file
         ("simple-recipe.yaml", "simple-recipe.yaml"),
     ],
@@ -233,6 +235,21 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
                 "Version on dependency changed to: typo-1 <= 1.2.3",
                 "Version on dependency changed to: typo-2 >=1.2.3",
                 "Could not patch unrecognized license: `Apache-2.0 AND MIT`",
+                "Field at `/about/license_family` is no longer supported.",
+            ],
+        ),
+        # Issue #289: Compiled projects that use Python are not "pure python" packages. Such packages should not receive
+        # a Python section with a `pip_check: False` field
+        (
+            "issue_289_regression.yaml",
+            [],
+            [
+                "Recipe upgrades cannot currently upgrade ambiguous version constraints on dependencies that"
+                " use variables: ${{ stdlib('c') }}",
+                "Recipe upgrades cannot currently upgrade ambiguous version constraints on dependencies that"
+                " use variables: ${{ compiler('c') }}",
+                "Recipe upgrades cannot currently upgrade ambiguous version constraints on dependencies that"
+                " use variables: ${{ compiler('cxx') }}",
                 "Field at `/about/license_family` is no longer supported.",
             ],
         ),
