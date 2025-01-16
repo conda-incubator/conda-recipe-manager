@@ -236,6 +236,21 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
                 "Field at `/about/license_family` is no longer supported.",
             ],
         ),
+        # Regression test for Issue 289. Compiled projects that use Python are not "pure python" packages. Such packages
+        # should not receive a Python section with a `pip_check: False` field
+        (
+            "issue_289_regression.yaml",
+            [],
+            [
+                "Recipe upgrades cannot currently upgrade ambiguous version constraints on dependencies that"
+                " use variables: ${{ stdlib('c') }}",
+                "Recipe upgrades cannot currently upgrade ambiguous version constraints on dependencies that"
+                " use variables: ${{ compiler('c') }}",
+                "Recipe upgrades cannot currently upgrade ambiguous version constraints on dependencies that"
+                " use variables: ${{ compiler('cxx') }}",
+                "Field at `/about/license_family` is no longer supported.",
+            ],
+        ),
         # TODO complete: The `rust.yaml` test contains many edge cases and selectors that aren't directly supported in
         # the V1 recipe format
         # (
