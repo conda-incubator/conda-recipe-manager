@@ -24,6 +24,7 @@ from conda_recipe_manager.commands.rattler_bulk_build import rattler_bulk_build
     show_default=True,
     help="Enables verbose logging (for commands that use the logger).",
 )
+@click.version_option()
 def conda_recipe_manager(verbose: bool) -> None:
     """
     Command line interface for conda recipe management commands.
