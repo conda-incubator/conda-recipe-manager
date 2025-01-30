@@ -49,6 +49,7 @@ class _CliArgs(NamedTuple):
     recipe_file_path: str
     # Slightly less confusing name for internal use. If we change the flag, we break users.
     increment_build_num: bool
+    override_build_num: int
     dry_run: bool
     target_version: Optional[str]
     retry_interval: float
@@ -196,6 +197,20 @@ def _update_build_num(recipe_parser: RecipeParser, cli_args: _CliArgs) -> None:
     _exit_on_failed_patch(
         recipe_parser, cast(JsonPatchType, {"op": "add", "path": _RecipePaths.BUILD_NUM, "value": 0}), cli_args
     )
+
+    if cli_args.override_build_num and recipe_parser.contains_value(_RecipePaths.BUILD_NUM):
+        build_number = recipe_parser.get_value(_RecipePaths.BUILD_NUM)
+        if not isinstance(build_number, int):
+            _exit_on_build_num_failure("Build number is not an integer.")
+
+        _exit_on_failed_patch(
+            recipe_parser,
+            cast(
+                JsonPatchType, {"op": "replace", "path": _RecipePaths.BUILD_NUM, "value": cli_args.override_build_num}
+            ),
+            cli_args,
+        )
+        return
 
 
 def _update_version(recipe_parser: RecipeParser, cli_args: _CliArgs) -> None:
@@ -376,6 +391,13 @@ def _update_sha256(recipe_parser: RecipeParser, cli_args: _CliArgs) -> None:
 @click.command(short_help="Bumps a recipe file to a new version.")
 @click.argument("recipe_file_path", type=click.Path(exists=True, path_type=str))
 @click.option(
+    "-o",
+    "--override-build-num",
+    nargs=1,
+    type=int,
+    help="Reset the build number to a custom number.",
+)
+@click.option(
     "-b",
     "--build-num",
     is_flag=True,
@@ -418,6 +440,7 @@ def _update_sha256(recipe_parser: RecipeParser, cli_args: _CliArgs) -> None:
 def bump_recipe(
     recipe_file_path: str,
     build_num: bool,
+    override_build_num: int,
     dry_run: bool,
     target_version: Optional[str],
     retry_interval: float,
@@ -433,14 +456,17 @@ def bump_recipe(
     cli_args = _CliArgs(
         recipe_file_path,
         build_num,
+        override_build_num,
         dry_run,
         target_version,
         retry_interval,
         save_on_failure,
     )
 
-    if not build_num and target_version is None:
-        log.error("The `--target-version` option must be set if `--build-num` is not specified.")
+    if not (build_num or override_build_num) and target_version is None:
+        log.error(
+            "The `--target-version` option must be set if `--build-num`, or `--override-build-num` is not specified."
+        )
         sys.exit(ExitCode.CLICK_USAGE)
 
     try:
