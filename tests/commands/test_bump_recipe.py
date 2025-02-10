@@ -156,6 +156,38 @@ def test_bump_recipe_cli(
 
 
 @pytest.mark.parametrize(
+    "recipe_file, version, expected_recipe_file",
+    [
+        ## Single-output Recipes##
+        # NOTE: The SHA-256 hashes will be of the mocked archive files, not of the actual source code being referenced.
+        ("simple-recipe.yaml", "0.10.8.6", "bump_recipe/build_num_100.yaml")
+    ],
+)
+def test_bump_cli_override_build_num(
+    fs: FakeFilesystem, recipe_file: str, version: str, expected_recipe_file: str
+) -> None:
+    """
+    Test that the override flag works
+    """
+    runner = CliRunner()
+    fs.add_real_directory(get_test_path(), read_only=False)
+
+    recipe_file_path: Final[Path] = get_test_path() / recipe_file
+    expected_recipe_file_path: Final[Path] = get_test_path() / expected_recipe_file
+
+    cli_args: Final[list[str]] = ["--override-build-num", "100", "-t", version, str(recipe_file_path)]
+
+    with patch("requests.get", new=mock_requests_get):
+        result = runner.invoke(bump_recipe.bump_recipe, cli_args)
+
+    # Ensure that we don't check against the file that was edited.
+    assert recipe_file_path != expected_recipe_file_path
+    # Read the edited file and check it against the expected file. We don't parse the recipe file as it isn't necessary.
+    assert load_file(recipe_file_path) == load_file(expected_recipe_file_path)
+    assert result.exit_code == ExitCode.SUCCESS
+
+
+@pytest.mark.parametrize(
     "recipe_file,version,expected_retries",
     [
         ("bump_recipe/types-toml_bad_url.yaml", "0.10.8.20240310", 5),

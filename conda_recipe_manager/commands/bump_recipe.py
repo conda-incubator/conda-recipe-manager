@@ -473,6 +473,10 @@ def bump_recipe(
         log.error("The `--build-num` and `--override-build-num` flags cannot be used together.")
         sys.exit(ExitCode.CLICK_USAGE)
 
+    if override_build_num and target_version is None:
+        log.error("The `--target-version` option must be set with `--override-build-num` flag.")
+        sys.exit(ExitCode.CLICK_USAGE)
+
     try:
         recipe_content = Path(cli_args.recipe_file_path).read_text(encoding="utf-8")
     except IOError:
