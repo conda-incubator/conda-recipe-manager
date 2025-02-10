@@ -394,7 +394,7 @@ def _update_sha256(recipe_parser: RecipeParser, cli_args: _CliArgs) -> None:
     "-o",
     "--override-build-num",
     nargs=1,
-    type=int,
+    type=click.IntRange(0),
     help="Reset the build number to a custom number.",
 )
 @click.option(
