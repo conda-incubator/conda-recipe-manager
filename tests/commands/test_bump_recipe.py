@@ -167,8 +167,14 @@ def test_bump_recipe_override_build_num(
     fs: FakeFilesystem, recipe_file: str, version: str, expected_recipe_file: str
 ) -> None:
     """
-    Test that the override flag works
+    Test that the `--override-build-num` flag works
+
+    :param fs: `pyfakefs` Fixture used to replace the file system
+    :param recipe_file: Target recipe file to update
+    :param version: Target version number
+    :param expected_recipe_file: Expected resulting recipe file
     """
+
     runner = CliRunner()
     fs.add_real_directory(get_test_path(), read_only=False)
 
