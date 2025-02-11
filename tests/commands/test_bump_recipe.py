@@ -207,7 +207,7 @@ def test_bump_recipe_override_build_num_exits_if_target_version_missing() -> Non
 
 def test_bump_recipe_exit_if_override_build_num_and_build_num_used_together() -> None:
     """
-    Ensures that the `--build_num` and `--override-build-num` flags are not used.
+    Ensures that the `--build_num` and `--override-build-num` flags can't be used together.
     """
     runner = CliRunner()
     cli_args: Final[list[str]] = [
