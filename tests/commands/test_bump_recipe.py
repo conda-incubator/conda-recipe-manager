@@ -158,8 +158,6 @@ def test_bump_recipe_cli(
 @pytest.mark.parametrize(
     "recipe_file, version, expected_recipe_file",
     [
-        ## Single-output Recipes##
-        # NOTE: The SHA-256 hashes will be of the mocked archive files, not of the actual source code being referenced.
         ("simple-recipe.yaml", "0.10.8.6", "bump_recipe/build_num_100.yaml")
     ],
 )
