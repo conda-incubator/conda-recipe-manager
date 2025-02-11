@@ -193,7 +193,7 @@ def test_bump_recipe_override_build_num(
 
 def test_bump_recipe_override_build_num_exits_if_target_version_missing() -> None:
     """
-    Ensures that the `--target-version` flag is required when `--override-build-num` flag is used.
+    Ensures that the `--target-version` flag must be specified when `--override-build-num` flag is used.
     """
     runner = CliRunner()
     cli_args: Final[list[str]] = ["--override-build-num", "100", str(get_test_path() / "simple-recipe.yaml")]
