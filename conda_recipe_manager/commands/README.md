@@ -73,7 +73,7 @@ crm bump-recipe --build-num types-toml-feedstock/recipe/meta.yaml
 
 ## `convert`
 This tool converts one or more recipe files from the V0 recipe format to the
-[V1 recipe format](https://github.com/conda/ceps/blob/main/cep-14.md).
+[V1 recipe format](https://github.com/conda/ceps/blob/main/cep-0014.md).
 
 In single file mode, a converted recipe file is dumped to `STDOUT` or can be written to a specified file using the `-o`
 option. Warnings and errors are printed to `STDERR`
