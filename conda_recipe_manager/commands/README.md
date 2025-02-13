@@ -14,6 +14,9 @@ to unique error cases.
 
 - [Conda Recipe Manager CLI Overview](#conda-recipe-manager-cli-overview)
 - [List of Tools](#list-of-tools)
+    - [bump-recipe](#bump-recipe)
+        - [Usage](#usage)
+        - [Example](#example)
     - [convert](#convert)
         - [Usage](#usage)
     - [graph](#graph)
