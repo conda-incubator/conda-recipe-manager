@@ -156,11 +156,15 @@ def test_bump_recipe_cli(
 
 
 @pytest.mark.parametrize(
-    "recipe_file, version, expected_recipe_file",
-    [("simple-recipe.yaml", "0.10.8.6", "bump_recipe/build_num_100.yaml")],
+    "recipe_file, version, build_num, expected_recipe_file",
+    [
+        ("simple-recipe.yaml", "0.10.8.6", "100", "bump_recipe/build_num_100.yaml"),
+        ("simple-recipe.yaml", "0.10.8.6", "42", "bump_recipe/build_num_42.yaml"),
+        ("simple-recipe.yaml", "0.10.8.6", "0", "bump_recipe/build_num_0.yaml"),
+    ],
 )
 def test_bump_recipe_override_build_num(
-    fs: FakeFilesystem, recipe_file: str, version: str, expected_recipe_file: str
+    fs: FakeFilesystem, recipe_file: str, version: str, build_num: str, expected_recipe_file: str
 ) -> None:
     """
     Test that the `--override-build-num` flag works
@@ -177,7 +181,7 @@ def test_bump_recipe_override_build_num(
     recipe_file_path: Final[Path] = get_test_path() / recipe_file
     expected_recipe_file_path: Final[Path] = get_test_path() / expected_recipe_file
 
-    cli_args: Final[list[str]] = ["--override-build-num", "100", "-t", version, str(recipe_file_path)]
+    cli_args: Final[list[str]] = ["--override-build-num", build_num, "-t", version, str(recipe_file_path)]
 
     with patch("requests.get", new=mock_requests_get):
         result = runner.invoke(bump_recipe.bump_recipe, cli_args)
