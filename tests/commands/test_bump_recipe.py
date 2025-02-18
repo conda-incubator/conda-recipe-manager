@@ -193,6 +193,24 @@ def test_bump_recipe_override_build_num(
     assert result.exit_code == ExitCode.SUCCESS
 
 
+def test_bump_recipe_override_build_num_negative() -> None:
+    """
+    Ensures that negative ints are not allowed with the `--override-build-num` flag.
+    """
+    runner = CliRunner()
+    cli_args: Final[list[str]] = [
+        "--override-build-num",
+        "-1",
+        "-t",
+        "0.10.8.7",
+        str(get_test_path() / "simple-recipe.yaml"),
+    ]
+
+    with patch("requests.get", new=mock_requests_get):
+        result = runner.invoke(bump_recipe.bump_recipe, cli_args)
+    assert result.exit_code == ExitCode.CLICK_USAGE
+
+
 def test_bump_recipe_override_build_num_exits_if_target_version_missing() -> None:
     """
     Ensures that the `--target-version` flag must be specified when `--override-build-num` flag is used.
