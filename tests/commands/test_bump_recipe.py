@@ -157,9 +157,7 @@ def test_bump_recipe_cli(
 
 @pytest.mark.parametrize(
     "recipe_file, version, expected_recipe_file",
-    [
-        ("simple-recipe.yaml", "0.10.8.6", "bump_recipe/build_num_100.yaml")
-    ],
+    [("simple-recipe.yaml", "0.10.8.6", "bump_recipe/build_num_100.yaml")],
 )
 def test_bump_recipe_override_build_num(
     fs: FakeFilesystem, recipe_file: str, version: str, expected_recipe_file: str

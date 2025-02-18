@@ -193,24 +193,26 @@ def _update_build_num(recipe_parser: RecipeParser, cli_args: _CliArgs) -> None:
             cli_args,
         )
         return
-
+    # `override_build_num`` defaults to 0
     _exit_on_failed_patch(
-        recipe_parser, cast(JsonPatchType, {"op": "add", "path": _RecipePaths.BUILD_NUM, "value": 0}), cli_args
+        recipe_parser,
+        cast(JsonPatchType, {"op": "add", "path": _RecipePaths.BUILD_NUM, "value": cli_args.override_build_num}),
+        cli_args,
     )
 
-    if cli_args.override_build_num and recipe_parser.contains_value(_RecipePaths.BUILD_NUM):
-        build_number = recipe_parser.get_value(_RecipePaths.BUILD_NUM)
-        if not isinstance(build_number, int):
-            _exit_on_build_num_failure("Build number is not an integer.")
+    # if cli_args.override_build_num and recipe_parser.contains_value(_RecipePaths.BUILD_NUM):
+    #     build_number = recipe_parser.get_value(_RecipePaths.BUILD_NUM)
+    #     if not isinstance(build_number, int):
+    #         _exit_on_build_num_failure("Build number is not an integer.")
 
-        _exit_on_failed_patch(
-            recipe_parser,
-            cast(
-                JsonPatchType, {"op": "replace", "path": _RecipePaths.BUILD_NUM, "value": cli_args.override_build_num}
-            ),
-            cli_args,
-        )
-        return
+    #     _exit_on_failed_patch(
+    #         recipe_parser,
+    #         cast(
+    #             JsonPatchType, {"op": "replace", "path": _RecipePaths.BUILD_NUM, "value": cli_args.override_build_num}
+    #         ),
+    #         cli_args,
+    #     )
+    #     return
 
 
 def _update_version(recipe_parser: RecipeParser, cli_args: _CliArgs) -> None:
@@ -393,6 +395,7 @@ def _update_sha256(recipe_parser: RecipeParser, cli_args: _CliArgs) -> None:
 @click.option(
     "-o",
     "--override-build-num",
+    default=0,
     nargs=1,
     type=click.IntRange(0),
     help="Reset the build number to a custom number.",
@@ -453,6 +456,7 @@ def bump_recipe(
     """
     # Typed, immutable, convenience data structure that contains all CLI arguments for ease of passing new options
     # to existing functions.
+    print(override_build_num)
     cli_args = _CliArgs(
         recipe_file_path,
         build_num,
