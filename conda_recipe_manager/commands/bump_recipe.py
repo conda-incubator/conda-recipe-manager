@@ -381,7 +381,7 @@ def _update_sha256(recipe_parser: RecipeParser, cli_args: _CliArgs) -> None:
 @click.option(
     "-o",
     "--override-build-num",
-    default=0,
+    default=None,
     nargs=1,
     type=click.IntRange(0),
     help="Reset the build number to a custom number.",
@@ -429,7 +429,7 @@ def _update_sha256(recipe_parser: RecipeParser, cli_args: _CliArgs) -> None:
 def bump_recipe(
     recipe_file_path: str,
     build_num: bool,
-    override_build_num: int,
+    override_build_num: Optional[int],
     dry_run: bool,
     target_version: Optional[str],
     retry_interval: float,
@@ -440,31 +440,32 @@ def bump_recipe(
 
     RECIPE_FILE_PATH: Path to the target recipe file
     """
-    # Typed, immutable, convenience data structure that contains all CLI arguments for ease of passing new options
-    # to existing functions.
-    cli_args = _CliArgs(
-        recipe_file_path,
-        build_num,
-        override_build_num,
-        dry_run,
-        target_version,
-        retry_interval,
-        save_on_failure,
-    )
-
-    if not (build_num or override_build_num) and target_version is None:
-        log.error(
-            "The `--target-version` option must be set if `--build-num`, or `--override-build-num` is not specified."
-        )
+    # Performs additional validation on CLI arguments.
+    if override_build_num is not None and target_version is None:
+        log.error("The `--target-version` option must be provided when using the `--override-build-num` flag.")
         sys.exit(ExitCode.CLICK_USAGE)
 
-    if build_num and override_build_num:
+    if not build_num and target_version is None:
+        log.error("The `--target-version` option must be provided if `--build-num` is not provided.")
+        sys.exit(ExitCode.CLICK_USAGE)
+
+    if build_num and override_build_num is not None:
         log.error("The `--build-num` and `--override-build-num` flags cannot be used together.")
         sys.exit(ExitCode.CLICK_USAGE)
 
-    if override_build_num and target_version is None:
-        log.error("The `--target-version` option must be set with `--override-build-num` flag.")
-        sys.exit(ExitCode.CLICK_USAGE)
+    # Typed, immutable, convenience data structure that contains all CLI arguments for ease of passing new options
+    # to existing functions.
+    cli_args = _CliArgs(
+        recipe_file_path=recipe_file_path,
+        increment_build_num=build_num,
+        # By this point, we have validated the input. We do not need to discern between if the `--override-build-num`
+        # flag was provided or not. To render the optional, we default `None` to `0`.
+        override_build_num=0 if override_build_num is None else override_build_num,
+        dry_run=dry_run,
+        target_version=target_version,
+        retry_interval=retry_interval,
+        save_on_failure=save_on_failure,
+    )
 
     try:
         recipe_content = Path(cli_args.recipe_file_path).read_text(encoding="utf-8")
