@@ -167,7 +167,7 @@ def test_bump_recipe_override_build_num(
     fs: FakeFilesystem, recipe_file: str, version: str, build_num: str, expected_recipe_file: str
 ) -> None:
     """
-    Test that the `--override-build-num` flag works
+    Test that the `--override-build-num` flag allows users to set the `/build/number` field to a positive integer.
 
     :param fs: `pyfakefs` Fixture used to replace the file system
     :param recipe_file: Target recipe file to update
@@ -195,7 +195,7 @@ def test_bump_recipe_override_build_num(
 
 def test_bump_recipe_override_build_num_negative() -> None:
     """
-    Ensures that negative ints are not allowed with the `--override-build-num` flag.
+    Ensures that negative integers are not allowed with the `--override-build-num` flag.
     """
     runner = CliRunner()
     cli_args: Final[list[str]] = [
