@@ -372,6 +372,36 @@ def _update_sha256(recipe_parser: RecipeParser, cli_args: _CliArgs) -> None:
     )
 
 
+def _validate_interop_flags(build_num: bool, override_build_num: Optional[int], target_version: Optional[str]) -> None:
+    """
+    Performs additional validation on CLI flags that interact with each other/are invalid in certain combinations.
+    This function does call `sys.exit()` in the event of an error.
+
+    :param build_num: Flag indicating if the user wants `bump-recipe` to increment the `/build/number` field
+        automatically.
+    :param override_build_num: Indicates if the user wants `bump-recipe` to reset the `/build/number` field to a custom
+        value.
+    :param target_version: Version of software that `bump-recipe` is upgrading too.
+    """
+    if override_build_num is not None and target_version is None:
+        log.error("The `--target-version` option must be provided when using the `--override-build-num` flag.")
+        sys.exit(ExitCode.CLICK_USAGE)
+
+    if not build_num and target_version is None:
+        log.error("The `--target-version` option must be provided if `--build-num` is not provided.")
+        sys.exit(ExitCode.CLICK_USAGE)
+
+    if build_num and override_build_num is not None:
+        log.error("The `--build-num` and `--override-build-num` flags cannot be used together.")
+        sys.exit(ExitCode.CLICK_USAGE)
+
+    # Incrementing the version number while simultaneously updating the recipe does not make sense. The value should be
+    # reset from the starting point (usually 0) that the maintainer specifies.
+    if build_num and target_version is not None:
+        log.error("The `--build-num` and `--target-version` flags cannot be used together.")
+        sys.exit(ExitCode.CLICK_USAGE)
+
+
 # TODO Improve. In order for `click` to play nice with `pyfakefs`, we set `path_type=str` and delay converting to a
 # `Path` instance. This is caused by how `click` uses decorators. See these links for more detail:
 # - https://pytest-pyfakefs.readthedocs.io/en/latest/troubleshooting.html#pathlib-path-objects-created-outside-of-tests
@@ -440,18 +470,8 @@ def bump_recipe(
 
     RECIPE_FILE_PATH: Path to the target recipe file
     """
-    # Performs additional validation on CLI arguments.
-    if override_build_num is not None and target_version is None:
-        log.error("The `--target-version` option must be provided when using the `--override-build-num` flag.")
-        sys.exit(ExitCode.CLICK_USAGE)
-
-    if not build_num and target_version is None:
-        log.error("The `--target-version` option must be provided if `--build-num` is not provided.")
-        sys.exit(ExitCode.CLICK_USAGE)
-
-    if build_num and override_build_num is not None:
-        log.error("The `--build-num` and `--override-build-num` flags cannot be used together.")
-        sys.exit(ExitCode.CLICK_USAGE)
+    # Ensure the user does not use flags in an invalid manner.
+    _validate_interop_flags(build_num, override_build_num, target_version)
 
     # Typed, immutable, convenience data structure that contains all CLI arguments for ease of passing new options
     # to existing functions.

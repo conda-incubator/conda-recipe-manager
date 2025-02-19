@@ -281,6 +281,17 @@ def test_bump_recipe_exits_if_target_version_missing() -> None:
     assert result.exit_code == ExitCode.CLICK_USAGE
 
 
+def test_bump_recipe_exits_if_target_version_and_build_num_are_used_together() -> None:
+    """
+    Ensures that the `--target-version` flag can't be used with `--build-num`.
+    """
+    runner = CliRunner()
+    result = runner.invoke(
+        bump_recipe.bump_recipe, ["--build-num", "-t", "1.2.3.4", str(get_test_path() / "types-toml.yaml")]
+    )
+    assert result.exit_code == ExitCode.CLICK_USAGE
+
+
 def test_bump_recipe_increment_build_number_key_missing(fs: FakeFilesystem) -> None:
     """
     Test that a `/build/number` key is added and set to 0 when it's missing.
