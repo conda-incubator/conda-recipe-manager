@@ -49,6 +49,7 @@ class _CliArgs(NamedTuple):
     recipe_file_path: str
     # Slightly less confusing name for internal use. If we change the flag, we break users.
     increment_build_num: bool
+    override_build_num: int
     dry_run: bool
     target_version: Optional[str]
     retry_interval: float
@@ -192,9 +193,11 @@ def _update_build_num(recipe_parser: RecipeParser, cli_args: _CliArgs) -> None:
             cli_args,
         )
         return
-
+    # `override_build_num`` defaults to 0
     _exit_on_failed_patch(
-        recipe_parser, cast(JsonPatchType, {"op": "add", "path": _RecipePaths.BUILD_NUM, "value": 0}), cli_args
+        recipe_parser,
+        cast(JsonPatchType, {"op": "add", "path": _RecipePaths.BUILD_NUM, "value": cli_args.override_build_num}),
+        cli_args,
     )
 
 
@@ -369,12 +372,50 @@ def _update_sha256(recipe_parser: RecipeParser, cli_args: _CliArgs) -> None:
     )
 
 
+def _validate_interop_flags(build_num: bool, override_build_num: Optional[int], target_version: Optional[str]) -> None:
+    """
+    Performs additional validation on CLI flags that interact with each other/are invalid in certain combinations.
+    This function does call `sys.exit()` in the event of an error.
+
+    :param build_num: Flag indicating if the user wants `bump-recipe` to increment the `/build/number` field
+        automatically.
+    :param override_build_num: Indicates if the user wants `bump-recipe` to reset the `/build/number` field to a custom
+        value.
+    :param target_version: Version of software that `bump-recipe` is upgrading too.
+    """
+    if override_build_num is not None and target_version is None:
+        log.error("The `--target-version` option must be provided when using the `--override-build-num` flag.")
+        sys.exit(ExitCode.CLICK_USAGE)
+
+    if not build_num and target_version is None:
+        log.error("The `--target-version` option must be provided if `--build-num` is not provided.")
+        sys.exit(ExitCode.CLICK_USAGE)
+
+    if build_num and override_build_num is not None:
+        log.error("The `--build-num` and `--override-build-num` flags cannot be used together.")
+        sys.exit(ExitCode.CLICK_USAGE)
+
+    # Incrementing the version number while simultaneously updating the recipe does not make sense. The value should be
+    # reset from the starting point (usually 0) that the maintainer specifies.
+    if build_num and target_version is not None:
+        log.error("The `--build-num` and `--target-version` flags cannot be used together.")
+        sys.exit(ExitCode.CLICK_USAGE)
+
+
 # TODO Improve. In order for `click` to play nice with `pyfakefs`, we set `path_type=str` and delay converting to a
 # `Path` instance. This is caused by how `click` uses decorators. See these links for more detail:
 # - https://pytest-pyfakefs.readthedocs.io/en/latest/troubleshooting.html#pathlib-path-objects-created-outside-of-tests
 # - https://github.com/pytest-dev/pyfakefs/discussions/605
 @click.command(short_help="Bumps a recipe file to a new version.")
 @click.argument("recipe_file_path", type=click.Path(exists=True, path_type=str))
+@click.option(
+    "-o",
+    "--override-build-num",
+    default=None,
+    nargs=1,
+    type=click.IntRange(0),
+    help="Reset the build number to a custom number.",
+)
 @click.option(
     "-b",
     "--build-num",
@@ -418,6 +459,7 @@ def _update_sha256(recipe_parser: RecipeParser, cli_args: _CliArgs) -> None:
 def bump_recipe(
     recipe_file_path: str,
     build_num: bool,
+    override_build_num: Optional[int],
     dry_run: bool,
     target_version: Optional[str],
     retry_interval: float,
@@ -428,20 +470,22 @@ def bump_recipe(
 
     RECIPE_FILE_PATH: Path to the target recipe file
     """
+    # Ensure the user does not use flags in an invalid manner.
+    _validate_interop_flags(build_num, override_build_num, target_version)
+
     # Typed, immutable, convenience data structure that contains all CLI arguments for ease of passing new options
     # to existing functions.
     cli_args = _CliArgs(
-        recipe_file_path,
-        build_num,
-        dry_run,
-        target_version,
-        retry_interval,
-        save_on_failure,
+        recipe_file_path=recipe_file_path,
+        increment_build_num=build_num,
+        # By this point, we have validated the input. We do not need to discern between if the `--override-build-num`
+        # flag was provided or not. To render the optional, we default `None` to `0`.
+        override_build_num=0 if override_build_num is None else override_build_num,
+        dry_run=dry_run,
+        target_version=target_version,
+        retry_interval=retry_interval,
+        save_on_failure=save_on_failure,
     )
-
-    if not build_num and target_version is None:
-        log.error("The `--target-version` option must be set if `--build-num` is not specified.")
-        sys.exit(ExitCode.CLICK_USAGE)
 
     try:
         recipe_content = Path(cli_args.recipe_file_path).read_text(encoding="utf-8")

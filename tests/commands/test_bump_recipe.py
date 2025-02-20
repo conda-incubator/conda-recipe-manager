@@ -156,6 +156,91 @@ def test_bump_recipe_cli(
 
 
 @pytest.mark.parametrize(
+    "recipe_file, version, build_num, expected_recipe_file",
+    [
+        ("simple-recipe.yaml", "0.10.8.6", "100", "bump_recipe/build_num_100.yaml"),
+        ("simple-recipe.yaml", "0.10.8.6", "42", "bump_recipe/build_num_42.yaml"),
+        ("simple-recipe.yaml", "0.10.8.6", "0", "bump_recipe/build_num_0.yaml"),
+    ],
+)
+def test_bump_recipe_override_build_num(
+    fs: FakeFilesystem, recipe_file: str, version: str, build_num: str, expected_recipe_file: str
+) -> None:
+    """
+    Test that the `--override-build-num` flag allows users to set the `/build/number` field to a positive integer.
+
+    :param fs: `pyfakefs` Fixture used to replace the file system
+    :param recipe_file: Target recipe file to update
+    :param version: Target version number
+    :param expected_recipe_file: Expected resulting recipe file
+    """
+
+    runner = CliRunner()
+    fs.add_real_directory(get_test_path(), read_only=False)
+
+    recipe_file_path: Final[Path] = get_test_path() / recipe_file
+    expected_recipe_file_path: Final[Path] = get_test_path() / expected_recipe_file
+
+    cli_args: Final[list[str]] = ["--override-build-num", build_num, "-t", version, str(recipe_file_path)]
+
+    with patch("requests.get", new=mock_requests_get):
+        result = runner.invoke(bump_recipe.bump_recipe, cli_args)
+
+    # Ensure that we don't check against the file that was edited.
+    assert recipe_file_path != expected_recipe_file_path
+    # Read the edited file and check it against the expected file. We don't parse the recipe file as it isn't necessary.
+    assert load_file(recipe_file_path) == load_file(expected_recipe_file_path)
+    assert result.exit_code == ExitCode.SUCCESS
+
+
+def test_bump_recipe_override_build_num_negative() -> None:
+    """
+    Ensures that negative integers are not allowed with the `--override-build-num` flag.
+    """
+    runner = CliRunner()
+    cli_args: Final[list[str]] = [
+        "--override-build-num",
+        "-1",
+        "-t",
+        "0.10.8.7",
+        str(get_test_path() / "simple-recipe.yaml"),
+    ]
+
+    with patch("requests.get", new=mock_requests_get):
+        result = runner.invoke(bump_recipe.bump_recipe, cli_args)
+    assert result.exit_code == ExitCode.CLICK_USAGE
+
+
+def test_bump_recipe_override_build_num_exits_if_target_version_missing() -> None:
+    """
+    Ensures that the `--target-version` flag must be specified when `--override-build-num` flag is used.
+    """
+    runner = CliRunner()
+    cli_args: Final[list[str]] = ["--override-build-num", "100", str(get_test_path() / "simple-recipe.yaml")]
+
+    with patch("requests.get", new=mock_requests_get):
+        result = runner.invoke(bump_recipe.bump_recipe, cli_args)
+    assert result.exit_code == ExitCode.CLICK_USAGE
+
+
+def test_bump_recipe_exit_if_override_build_num_and_build_num_used_together() -> None:
+    """
+    Ensures that the `--build_num` and `--override-build-num` flags can't be used together.
+    """
+    runner = CliRunner()
+    cli_args: Final[list[str]] = [
+        "--build_num",
+        "--override-build-num",
+        "100",
+        str(get_test_path() / "simple-recipe.yaml"),
+    ]
+
+    with patch("requests.get", new=mock_requests_get):
+        result = runner.invoke(bump_recipe.bump_recipe, cli_args)
+    assert result.exit_code == ExitCode.CLICK_USAGE
+
+
+@pytest.mark.parametrize(
     "recipe_file,version,expected_retries",
     [
         ("bump_recipe/types-toml_bad_url.yaml", "0.10.8.20240310", 5),
@@ -193,6 +278,17 @@ def test_bump_recipe_exits_if_target_version_missing() -> None:
     """
     runner = CliRunner()
     result = runner.invoke(bump_recipe.bump_recipe, [str(get_test_path() / "types-toml.yaml")])
+    assert result.exit_code == ExitCode.CLICK_USAGE
+
+
+def test_bump_recipe_exits_if_target_version_and_build_num_are_used_together() -> None:
+    """
+    Ensures that the `--target-version` flag can't be used with `--build-num`.
+    """
+    runner = CliRunner()
+    result = runner.invoke(
+        bump_recipe.bump_recipe, ["--build-num", "-t", "1.2.3.4", str(get_test_path() / "types-toml.yaml")]
+    )
     assert result.exit_code == ExitCode.CLICK_USAGE
 
 
