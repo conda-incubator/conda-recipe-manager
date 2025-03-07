@@ -5,7 +5,7 @@
 from __future__ import annotations
 
 from enum import Enum, auto
-from typing import NamedTuple, Optional, cast
+from typing import NamedTuple, Optional, cast, Final
 
 from conda.models.match_spec import InvalidMatchSpec, MatchSpec
 
@@ -117,76 +117,85 @@ def str_to_dependency_section(s: str) -> Optional[DependencySection]:
         case _:
             return None
 
-
-class DependencyVariable:
+class DependencyData:
     """
-    Represents a dependency that contains a JINJA variable that is unable to be resolved by the recipe's variable table.
+    Augments the dependency string found in a list of dependencies. This attempts to discern between dependencies that
+    we can evaluate and render and dependencies that we cannot.
     """
 
-    def __init__(self, s: str):
+    def __init__(self, raw_s: str, sub_s: Optional[str]=None):
         """
-        Constructs a DependencyVariable instance.
+        Constructs a DependencyData instance.
 
-        :param s: String to initialize the instance with.
+        :param raw_s: "Raw"/original string from the recipe file to process.
+        :param sub_s: (Optional) If provided, this is a string containing the variable-substituted version of the
+            dependency string. For example, the line `python {{ python_min }}` would be passed-in (by the recipe parser)
+            as `raw_str = "python {{ python_min }}"` and `sub_s = python 3.7`. Substitutions MUST be handled by a
+            recipe parser!
         """
-        # Using `name` allows this class to be used trivially with MatchSpec without type guards. We sanitize the name
-        # for leading/trailing whitespace as a precaution.
-        # TODO normalize common JINJA functions for quote usage
-        self.name = s.strip()
+        self._raw_s: Final[str] = raw_s
+        self._sub_s: Final[Optional[str]] = None if sub_s is None else sub_s
+
+        # Helper function to perform a one-time initialization of `MatchSpec`, if possible.
+        def _set_match_spec() -> Optional[MatchSpec]:
+            # Use the variable-substituted string when possible. This should have greater compatibility with `MatchSpec`
+            # than an unrendered string.
+            s: Final[str] = raw_s if sub_s is None else sub_s
+            if Regex.JINJA_V0_SUB.search(s) or Regex.JINJA_V1_SUB.search(s):
+                return None
+            try:
+                return MatchSpec(s)
+            except (ValueError, InvalidMatchSpec):
+                # In an effort to be more resilient, fallback to a less powerful variant of this class.
+                return None
+        self._match_spec: Final[Optional[MatchSpec]] = _set_match_spec()
+
+
+    def get_original_dependency_str(self) -> str:
+        """
+        TODO
+        """
+        return self._raw_s
+
+    def get_rendered_dependency_str(self) -> str:
+        """
+        TODO
+        """
+        return self._raw_s if self._sub_s is None else self._sub_s
+
+    def has_match_spec(self) -> bool:
+        """
+        TODO
+        """
+        return self._match_spec is not None
+
+    def get_match_spec(self) -> MatchSpec:
+        """
+        TODO
+        :raises KeyError: If an underlying `MatchSpec` instance cannot be created for this dependency.
+        """
+        if self._match_spec is None:
+            raise KeyError
+        return self._match_spec
 
     def __eq__(self, o: object) -> bool:
         """
         Checks to see if two objects are equivalent.
 
         :param o: Other instance to check.
-        :returns: True if two DependencyVariable instances are equivalent. False otherwise.
+        :returns: True if two `DependencyData` instances are equivalent. False otherwise.
         """
-        if not isinstance(o, DependencyVariable):
+        if not isinstance(o, DependencyData):
             return False
-        return self.name == o.name
+        return self._raw_s == o._raw_s and self._sub_s == self._sub_s
 
     def __hash__(self) -> int:
         """
-        Hashes this `DependencyVariable` instance.
+        Hashes this `DependencyData` instance.
 
         :returns: The hash value of this object.
         """
-        return hash(self.name)
-
-
-# Type alias for types allowed in a Dependency's `data` field.
-DependencyData = MatchSpec | DependencyVariable
-
-
-def dependency_data_from_str(s: str) -> DependencyData:
-    """
-    Constructs a `DependencyData` object from a dependency string in a recipe file.
-
-    :param s: String to process.
-    :returns: A `DependencyData` instance.
-    """
-    if Regex.JINJA_V0_SUB.search(s) or Regex.JINJA_V1_SUB.search(s):
-        return DependencyVariable(s)
-
-    try:
-        return MatchSpec(s)
-    except (ValueError, InvalidMatchSpec):
-        # In an effort to be more resilient, fallback to the simpler type.
-        return DependencyVariable(s)
-
-
-def dependency_data_render_as_str(data: DependencyData) -> str:
-    """
-    Given a `DependencyData` instance, derive the original string found in the recipe.
-
-    :param data: Target `DependencyData`
-    :return s: The original (raw) string found in the recipe file.
-    """
-    match data:
-        case MatchSpec():
-            return cast(str, data.original_spec_str)
-        case DependencyVariable():
-            return data.name
+        return hash(self._raw_s)
 
 
 class Dependency(NamedTuple):

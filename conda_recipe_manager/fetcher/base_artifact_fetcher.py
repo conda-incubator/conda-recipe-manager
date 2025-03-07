@@ -22,6 +22,8 @@ class BaseArtifactFetcher(metaclass=ABCMeta):
 
     Files retrieved from any artifact fetcher are stored in a secure temporary directory. That directory is deleted
     when the Artifact Fetcher instance falls out of scope.
+
+    TODO should this be a context manager? That would be the correct way to "fall out of scope ^"
     """
 
     def __init__(self, name: str) -> None:

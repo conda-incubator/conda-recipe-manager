@@ -9,8 +9,8 @@ from typing import Final, Optional, cast
 from conda_recipe_manager.parser._types import ROOT_NODE_VALUE
 from conda_recipe_manager.parser.dependency import (
     Dependency,
+    DependencyData,
     DependencyMap,
-    dependency_data_from_str,
     str_to_dependency_section,
 )
 from conda_recipe_manager.parser.recipe_reader import RecipeReader
@@ -121,7 +121,7 @@ class RecipeReaderDeps(RecipeReader):
 
             requirements = cast(
                 Optional[str | dict[str, list[Optional[str]]]],
-                self.get_value(RecipeReader.append_to_path(path, "/requirements"), default={}, sub_vars=True),
+                self.get_value(RecipeReader.append_to_path(path, "/requirements"), default={}, sub_vars=False),
             )
             # Skip over empty/malformed requirements sections
             if requirements is None or isinstance(requirements, str):
@@ -133,19 +133,20 @@ class RecipeReaderDeps(RecipeReader):
                 if section is None or deps is None:
                     continue
 
-                for i, dep in enumerate(deps):
-                    dep = RecipeReaderDeps._sanitize_dep(dep)
-                    if dep is None:
+                for i, raw_dep in enumerate(deps):
+                    raw_dep = RecipeReaderDeps._sanitize_dep(raw_dep)
+                    if raw_dep is None:
                         continue
 
                     # NOTE: `get_dependency_paths()` uses the same approach for calculating dependency paths.
                     dep_path = RecipeReader.append_to_path(path, f"/requirements/{section_str}/{i}")
+                    rendered_dep = self.get_value(dep_path, default=None, sub_vars=True)
                     dep_map[package].append(
                         Dependency(
                             required_by=package,
                             path=dep_path,
                             type=section,
-                            data=dependency_data_from_str(dep),
+                            data=DependencyData(raw_dep, rendered_dep),
                             selector=self._fetch_optional_selector(dep_path),
                         )
                     )

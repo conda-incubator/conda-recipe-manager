@@ -981,6 +981,7 @@ class RecipeReader(IsModifiable):
                 return False
 
             host_path = RecipeReader.append_to_path(base_path, "/requirements/host")
+            # TODO: Does not handle case where python is in a variable
             host_deps = cast(Optional[list[str | dict[str, str]]], self.get_value(host_path, default=[]))
             # Skip the rare edge case where the list may be null (usually caused by commented-out code)
             if host_deps is None:
