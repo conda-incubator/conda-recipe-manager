@@ -33,7 +33,7 @@ requirements:
     - python_ver0 ${{ python_min }}.*
     - python_ver1 ==${{ python_min }}
     - python_ver2 >=${{ python_min }}
-    - python_ver3 <=${{ python_min }}.*
+    - python_ver3 <= ${{ python_min }}.*
 
 tests:
   - python:
