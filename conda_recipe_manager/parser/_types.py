@@ -167,10 +167,10 @@ class Regex:
     ## Ambiguous Dependency Corrections ##
     # Regular expressions used to modify problematic dependencies in the upgrade path. Note this have to account for
     # the dependency name as `VersionSpec`.raw_value does not actually contain the original, unmodified version string.
-    AMBIGUOUS_DEP_VERSION_GE_TYPO: Final[re.Pattern[str]] = re.compile(r"([\w+\-]+\s*)=>(\s*[\d|.]+)")
-    AMBIGUOUS_DEP_VERSION_LE_TYPO: Final[re.Pattern[str]] = re.compile(r"([\w+\-]+\s*)=<(\s*[\d|.]+)")
+    AMBIGUOUS_DEP_VERSION_GE_TYPO: Final[re.Pattern[str]] = re.compile(r"((?:\{\{\s*)?[\w+\-]+\s*(?:\}\}\s*)?)=>(\s*[\d|.]+)")
+    AMBIGUOUS_DEP_VERSION_LE_TYPO: Final[re.Pattern[str]] = re.compile(r"((?:\{\{\s*)?[\w+\-]+\s*(?:\}\}\s*)?)=<(\s*[\d|.]+)")
     AMBIGUOUS_DEP_MULTI_OPERATOR: Final[re.Pattern[str]] = re.compile(
-        r"([\w|\-]+\s*)(~|<|>|<=|>=|==|!=|~=)(\s*[\d|\.]+)(\.\*)"
+        r"((?:\{\{\s*)?[\w|\-]+\s*(?:\}\}\s*)?)(~|<|>|<=|>=|==|!=|~=)(\s*[\d|\.]+)(\.\*)"
     )
 
     ## Selector Replacements ##

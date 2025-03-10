@@ -161,10 +161,6 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
             "regression_jinja_sub.yaml",
             [],
             [
-                (
-                    "Recipe upgrades cannot currently upgrade ambiguous version constraints on dependencies that"
-                    ' use variables: ${{ pin_subpackage("libnvpl-fft" ~ somajor ) }}'
-                ),
                 "The following key(s) contain unsupported syntax: soversion",
                 "No `license` provided in `/about`",
             ],
@@ -210,10 +206,6 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
             "sub_vars.yaml",
             [],
             [
-                (
-                    "Recipe upgrades cannot currently upgrade ambiguous version constraints on dependencies that"
-                    " use variables: ${{ compiler('rust') }} >=1.65.0"
-                ),
                 "Could not patch unrecognized license: `Apache-2.0 AND MIT`",
                 "Field at `/about/license_family` is no longer supported.",
             ],
@@ -244,12 +236,6 @@ def test_pre_process_recipe_text(input_file: str, expected_file: str) -> None:
             "issue_289_regression.yaml",
             [],
             [
-                "Recipe upgrades cannot currently upgrade ambiguous version constraints on dependencies that"
-                " use variables: ${{ stdlib('c') }}",
-                "Recipe upgrades cannot currently upgrade ambiguous version constraints on dependencies that"
-                " use variables: ${{ compiler('c') }}",
-                "Recipe upgrades cannot currently upgrade ambiguous version constraints on dependencies that"
-                " use variables: ${{ compiler('cxx') }}",
                 "Field at `/about/license_family` is no longer supported.",
             ],
         ),

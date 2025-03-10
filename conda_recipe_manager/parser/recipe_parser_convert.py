@@ -8,12 +8,10 @@ from __future__ import annotations
 
 from typing import Final, Optional, cast
 
-from conda.models.match_spec import MatchSpec
-
 from conda_recipe_manager.licenses.spdx_utils import SpdxUtils
 from conda_recipe_manager.parser._types import ROOT_NODE_VALUE, CanonicalSortOrder, Regex
 from conda_recipe_manager.parser._utils import search_any_regex, set_key_conditionally, stack_path_to_str
-from conda_recipe_manager.parser.dependency import Dependency, DependencyConflictMode
+from conda_recipe_manager.parser.dependency import Dependency, DependencyConflictMode, DependencyData
 from conda_recipe_manager.parser.enums import SchemaVersion, SelectorConflictMode
 from conda_recipe_manager.parser.recipe_parser import RecipeParser
 from conda_recipe_manager.parser.recipe_parser_deps import RecipeParserDeps
@@ -194,45 +192,45 @@ class RecipeParserConvert(RecipeParserDeps):
             )
             return
 
+        # Helper function that corrects fairly common typos when dealing with >= and <= operators in dependency version
+        # selection statements.
+        def _regex_corrections(s: str) -> str:
+            # Corrects wrong greater/less than equal operators
+            s = Regex.AMBIGUOUS_DEP_VERSION_GE_TYPO.sub(r"\1>=\2", s)
+            s = Regex.AMBIGUOUS_DEP_VERSION_LE_TYPO.sub(r"\1<=\2", s)
+            # Corrects cases where two operators are used (i.e. `foo >=1.2.*`). We can't rely on MatchSpec to detect
+            # multiple operators, so we fall back to using a regular expression. We drop the trailing `.*` to be
+            # in alignment with `rattler-build`'s preferences:
+            # https://github.com/conda/rattler/blob/main/crates/rattler_conda_types/src/version_spec/parse.rs#L224
+            s = Regex.AMBIGUOUS_DEP_MULTI_OPERATOR.sub(r"\1\2\3", s)
+            return s
+
         for _, deps in dep_map.items():
             for dep in deps:
-                # Warn and quit-early if there is a potential for a ambiguous version variable.
-                if not isinstance(dep.data, MatchSpec):  # type: ignore[misc]
-                    # TODO: Reduce spammy-ness by looking at the variables table
-                    self._msg_tbl.add_message(
-                        MessageCategory.WARNING,
-                        (
-                            "Recipe upgrades cannot currently upgrade ambiguous version constraints on dependencies"
-                            f" that use variables: {dep.data.get_original_dependency_str()}"
-                        ),
-                    )
+                # Ensure that we can process the version spec.
+                if not dep.data.has_match_spec():
+                    continue
+                match_spec = dep.data.get_match_spec()
+                if match_spec.version is None:
                     continue
 
-                if dep.data.version is None or not isinstance(dep.data.original_spec_str, str):  # type: ignore[misc]
-                    continue
-
-                spec_str = dep.data.original_spec_str
-                # Corrects fairly common typos when dealing with >= and <= operators in dependency version selection
-                # statements.
-                spec_str = Regex.AMBIGUOUS_DEP_VERSION_GE_TYPO.sub(r"\1>=\2", spec_str)
-                spec_str = Regex.AMBIGUOUS_DEP_VERSION_LE_TYPO.sub(r"\1<=\2", spec_str)
-                # Corrects cases where two operators are used (i.e. `foo >=1.2.*`). We can't rely on MatchSpec to detect
-                # multiple operators, so we fall back to using a regular expression. We drop the trailing `.*` to be
-                # in alignment with `rattler-build`'s preferences:
-                # https://github.com/conda/rattler/blob/main/crates/rattler_conda_types/src/version_spec/parse.rs#L224
-                spec_str = Regex.AMBIGUOUS_DEP_MULTI_OPERATOR.sub(r"\1\2\3", spec_str)
+                # Update both the raw value found in the recipe file and the variable-substituted version with various
+                # corrective actions.
+                raw_dep = _regex_corrections(dep.data.get_original_dependency_str())
+                sub_dep = _regex_corrections(dep.data.get_rendered_dependency_str())
 
                 # Add a trailing `.*` to ambiguous dependencies that lack an operator. This is not that easy as
                 # `VersionSpec` does not make a distinction between a version that contains a `==` operator and a
                 # version with no operator (which is ambiguous per the V1 specification).
                 if (
-                    cast(bool, dep.data.version.is_exact())  # type: ignore[misc]
-                    and "=" not in dep.data.original_spec_str
+                    cast(bool, match_spec.version.is_exact())  # type: ignore[misc]
+                    and "=" not in sub_dep
                 ):
-                    spec_str = f"{spec_str}.*"
+                    raw_dep = f"{raw_dep}.*"
+                    sub_dep = f"{sub_dep}.*"
 
                 # Only commit changes to modified dependencies.
-                if dep.data.original_spec_str == spec_str:
+                if dep.data.get_original_dependency_str() == raw_dep:
                     continue
 
                 # TODO add IGNORE conflict mode for selectors???
@@ -241,13 +239,13 @@ class RecipeParserConvert(RecipeParserDeps):
                         required_by=dep.required_by,
                         path=dep.path,
                         type=dep.type,
-                        data=MatchSpec(spec_str),
+                        data=DependencyData(raw_dep, sub_s=sub_dep),
                         selector=dep.selector,
                     ),
                     dep_mode=DependencyConflictMode.EXACT_POSITION,
                     sel_mode=SelectorConflictMode.OR,
                 )
-                self._msg_tbl.add_message(MessageCategory.WARNING, f"Version on dependency changed to: {spec_str}")
+                self._msg_tbl.add_message(MessageCategory.WARNING, f"Version on dependency changed to: {raw_dep}")
 
     def _upgrade_selectors_to_conditionals(self) -> None:
         """
