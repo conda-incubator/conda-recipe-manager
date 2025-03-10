@@ -5,7 +5,7 @@
 from __future__ import annotations
 
 from enum import Enum, auto
-from typing import NamedTuple, Optional, cast, Final
+from typing import Final, NamedTuple, Optional, cast
 
 from conda.models.match_spec import InvalidMatchSpec, MatchSpec
 
@@ -117,13 +117,14 @@ def str_to_dependency_section(s: str) -> Optional[DependencySection]:
         case _:
             return None
 
+
 class DependencyData:
     """
     Augments the dependency string found in a list of dependencies. This attempts to discern between dependencies that
     we can evaluate and render and dependencies that we cannot.
     """
 
-    def __init__(self, raw_s: str, sub_s: Optional[str]=None):
+    def __init__(self, raw_s: str, sub_s: Optional[str] = None):
         """
         Constructs a DependencyData instance.
 
@@ -148,8 +149,8 @@ class DependencyData:
             except (ValueError, InvalidMatchSpec):
                 # In an effort to be more resilient, fallback to a less powerful variant of this class.
                 return None
-        self._match_spec: Final[Optional[MatchSpec]] = _set_match_spec()
 
+        self._match_spec: Final[Optional[MatchSpec]] = _set_match_spec()
 
     def get_original_dependency_str(self) -> str:
         """

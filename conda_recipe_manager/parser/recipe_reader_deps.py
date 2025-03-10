@@ -7,12 +7,7 @@ from __future__ import annotations
 from typing import Final, Optional, cast
 
 from conda_recipe_manager.parser._types import ROOT_NODE_VALUE
-from conda_recipe_manager.parser.dependency import (
-    Dependency,
-    DependencyData,
-    DependencyMap,
-    str_to_dependency_section,
-)
+from conda_recipe_manager.parser.dependency import Dependency, DependencyData, DependencyMap, str_to_dependency_section
 from conda_recipe_manager.parser.recipe_reader import RecipeReader
 from conda_recipe_manager.parser.selector_parser import SelectorParser
 from conda_recipe_manager.parser.types import SchemaVersion
@@ -146,7 +141,7 @@ class RecipeReaderDeps(RecipeReader):
                             required_by=package,
                             path=dep_path,
                             type=section,
-                            data=DependencyData(raw_dep, rendered_dep),
+                            data=DependencyData(raw_dep, sub_s=rendered_dep),
                             selector=self._fetch_optional_selector(dep_path),
                         )
                     )

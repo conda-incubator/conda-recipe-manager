@@ -9,8 +9,7 @@ from typing import Final, Optional, cast
 from conda_recipe_manager.parser.dependency import (
     Dependency,
     DependencyConflictMode,
-    dependency_data_from_str,
-    dependency_data_render_as_str,
+    DependencyData,
     str_to_dependency_section,
 )
 from conda_recipe_manager.parser.enums import SelectorConflictMode
@@ -121,7 +120,7 @@ class RecipeParserDeps(RecipeParser, RecipeReaderDeps):
             except KeyError:
                 pass
 
-        value: JsonType = dependency_data_render_as_str(dep.data)
+        value: JsonType = dep.data.get_original_dependency_str()
         # This allows us to create new lists for dependency sections that do not currently exist.
         if is_new_section:
             value = [value]
@@ -180,8 +179,10 @@ class RecipeParserDeps(RecipeParser, RecipeReaderDeps):
                 if cur_dep is None:
                     continue
 
-                cur_data = dependency_data_from_str(cur_dep)
-                if cast(str, cur_data.name) != cast(str, dep.data.name):
+                dep_path = RecipeReaderDeps.append_to_path(base_path, f"/{i}")
+                rendered_cur_dep = self.get_value(dep_path, default=None, sub_vars=True)
+                cur_data = DependencyData(cur_dep, sub_s=rendered_cur_dep)
+                if cur_data != dep.data:
                     continue
 
                 # If we have a name match, act according to the conflict mode

@@ -35,11 +35,7 @@ from conda_recipe_manager.parser._utils import (
     stringify_yaml,
     substitute_markers,
 )
-from conda_recipe_manager.parser.dependency import (
-    DependencySection,
-    dependency_data_from_str,
-    dependency_section_to_str,
-)
+from conda_recipe_manager.parser.dependency import DependencyData, DependencySection, dependency_section_to_str
 from conda_recipe_manager.parser.enums import SchemaVersion
 from conda_recipe_manager.parser.types import TAB_AS_SPACES, TAB_SPACE_COUNT, MultilineVariant
 from conda_recipe_manager.parser.v0_recipe_formatter import V0RecipeFormatter
@@ -994,7 +990,10 @@ class RecipeReader(IsModifiable):
                 # TODO Improve V1 selector check (when more utilities are built). Checking for
                 if not isinstance(dep, str):
                     continue
-                if "python" == cast(str, dependency_data_from_str(dep).name).lower():
+                if (
+                    "python"
+                    == DependencyData(dep, sub_s=self._render_jinja_vars(dep)).get_rendered_dependency_str().lower()
+                ):
                     # The V0 selector check is more costly and it can be delayed until we've determined we have found
                     # a python host dependency.
                     if self.contains_selector_at_path(RecipeReader.append_to_path(host_path, f"/{i}")):

@@ -7,7 +7,7 @@ from __future__ import annotations
 from abc import ABCMeta, abstractmethod
 from typing import NamedTuple
 
-from conda_recipe_manager.parser.dependency import DependencyData, DependencySection, dependency_data_from_str
+from conda_recipe_manager.parser.dependency import DependencyData, DependencySection
 from conda_recipe_manager.types import MessageTable
 
 
@@ -33,7 +33,9 @@ def new_project_dependency(s: str, t: DependencySection) -> ProjectDependency:
     :returns: A newly constructed `ProjectDependency` instance.
     """
     return ProjectDependency(
-        data=dependency_data_from_str(s),
+        # NOTE: There is no such thing as a "rendered" dependency in this context. We are scanning source code, there
+        # are no JINJA/recipe variables at play in this context.
+        data=DependencyData(s),
         type=t,
     )
 

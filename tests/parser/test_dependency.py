@@ -10,9 +10,6 @@ from conda.models.match_spec import MatchSpec
 from conda_recipe_manager.parser.dependency import (
     DependencyData,
     DependencySection,
-    DependencyVariable,
-    dependency_data_from_str,
-    dependency_data_render_as_str,
     dependency_section_to_str,
     str_to_dependency_section,
 )
@@ -72,6 +69,9 @@ def test_str_to_dependency_section(s: str, expected: DependencySection) -> None:
     :param expected: Expected value to return
     """
     assert str_to_dependency_section(s) == expected
+
+
+## `DependencyData` Class ##
 
 
 @pytest.mark.parametrize(

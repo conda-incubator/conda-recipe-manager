@@ -203,7 +203,7 @@ class RecipeParserConvert(RecipeParserDeps):
                         MessageCategory.WARNING,
                         (
                             "Recipe upgrades cannot currently upgrade ambiguous version constraints on dependencies"
-                            f" that use variables: {dep.data.name}"
+                            f" that use variables: {dep.data.get_original_dependency_str()}"
                         ),
                     )
                     continue
