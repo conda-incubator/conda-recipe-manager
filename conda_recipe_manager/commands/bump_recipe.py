@@ -174,46 +174,51 @@ def _update_build_num(recipe_parser: RecipeParser, cli_args: _CliArgs) -> None:
         sys.exit(ExitCode.ILLEGAL_OPERATION)
 
     # List of possible names for the build number variable as seen in some recipes
-    build_num_possible_variants=["build_number", "buildnumber", "build"]
-    
+    build_num_possible_variants = ["build_number", "buildnumber", "build"]
+
     # Check if any of the possible names for the build number variable are found in the recipe
     for bn in build_num_possible_variants:
         if RecipeReader.get_variable(bn):
-            build_num_variable = RecipeReader.get_variable(bn)
+            build_num_variable = bn
+            build_num_variable_value = RecipeReader.get_variable(bn)
 
-    if not build_num_variable:
-        # Try to get "build" key from the recipe, exit if not found
-        try:
-            recipe_parser.get_value("/build")
-        except KeyError:
-            _exit_on_build_num_failure("`/build` key could not be found in the recipe.")
-
-        # From the previous check, we know that `/build` exists. If `/build/number` is missing, it'll be added by
-        # a patch-add operation and set to a default value of 0. Otherwise, we attempt to increment the build number, if
-        # requested.
-        if cli_args.increment_build_num and recipe_parser.contains_value(_RecipePaths.BUILD_NUM):
-            build_number = recipe_parser.get_value(_RecipePaths.BUILD_NUM)
-
-            if not isinstance(build_number, int):
-                _exit_on_build_num_failure("Build number is not an integer.")
-
-            _exit_on_failed_patch(
-                recipe_parser,
-                cast(JsonPatchType, {"op": "replace", "path": _RecipePaths.BUILD_NUM, "value": build_number + 1}),
-                cli_args,
-            )
-            return
-        # `override_build_num`` defaults to 0
-        _exit_on_failed_patch(
-            recipe_parser,
-            cast(JsonPatchType, {"op": "add", "path": _RecipePaths.BUILD_NUM, "value": cli_args.override_build_num}),
-            cli_args,
-        )
-    else:
-        if not isinstance(build_num_variable, int):
+    if build_num_variable:
+        if not isinstance(build_num_variable_value, int):
             _exit_on_build_num_failure("Build number is not an integer.")
+
+        if not RecipeReader.get_variable_references(build_num_variable):
+            ...  # TODO: Add warning message
+
         if cli_args.increment_build_num:
             ...
+
+    # Try to get "build" key from the recipe, exit if not found
+    try:
+        recipe_parser.get_value("/build")
+    except KeyError:
+        _exit_on_build_num_failure("`/build` key could not be found in the recipe.")
+
+    # From the previous check, we know that `/build` exists. If `/build/number` is missing, it'll be added by
+    # a patch-add operation and set to a default value of 0. Otherwise, we attempt to increment the build number, if
+    # requested.
+    if cli_args.increment_build_num and recipe_parser.contains_value(_RecipePaths.BUILD_NUM):
+        build_number = recipe_parser.get_value(_RecipePaths.BUILD_NUM)
+
+        if not isinstance(build_number, int):
+            _exit_on_build_num_failure("Build number is not an integer.")
+
+        _exit_on_failed_patch(
+            recipe_parser,
+            cast(JsonPatchType, {"op": "replace", "path": _RecipePaths.BUILD_NUM, "value": build_number + 1}),
+            cli_args,
+        )
+        return
+    # `override_build_num`` defaults to 0
+    _exit_on_failed_patch(
+        recipe_parser,
+        cast(JsonPatchType, {"op": "add", "path": _RecipePaths.BUILD_NUM, "value": cli_args.override_build_num}),
+        cli_args,
+    )
 
 
 def _update_version(recipe_parser: RecipeParser, cli_args: _CliArgs) -> None:
