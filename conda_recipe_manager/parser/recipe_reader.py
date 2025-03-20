@@ -246,7 +246,14 @@ class RecipeReader(IsModifiable):
     @staticmethod
     def _set_key_and_matches(
         key: str,
-    ) -> tuple[str, Optional[re.Match[str]], Optional[re.Match[str]], Optional[re.Match[str]], Optional[re.Match[str]]]:
+    ) -> tuple[
+        str,
+        Optional[re.Match[str]],
+        Optional[re.Match[str]],
+        Optional[re.Match[str]],
+        Optional[re.Match[str]],
+        Optional[re.Match[str]],
+    ]:
         """
         Helper function for `_render_jinja_vars()` that takes a JINJA statement (string inside the braces) and attempts
         to match and apply any currently supported "JINJA functions" to the statement.
@@ -266,6 +273,11 @@ class RecipeReader(IsModifiable):
         if upper_match:
             key = key.replace(upper_match.group(), "").strip()
 
+        # Example: {{ name | replace('-', '_') }
+        replace_match = Regex.JINJA_FUNCTION_REPLACE.search(key)
+        if replace_match:
+            key = key.replace(replace_match.group(), "").strip()
+
         # Example: {{ name[0] }}
         idx_match = Regex.JINJA_FUNCTION_IDX_ACCESS.search(key)
         if idx_match:
@@ -276,7 +288,7 @@ class RecipeReader(IsModifiable):
         # Example: {{ version + ".1" }}
         add_concat_match = Regex.JINJA_FUNCTION_ADD_CONCAT.search(key)
 
-        return key, lower_match, upper_match, idx_match, add_concat_match
+        return key, lower_match, upper_match, replace_match, idx_match, add_concat_match
 
     def _eval_jinja_token(self, s: str) -> JsonType:
         """
@@ -325,7 +337,9 @@ class RecipeReader(IsModifiable):
             # The regex guarantees the string starts and ends with double braces
             key = match[start_idx:-2].strip()
             # Check for and interpret common JINJA functions
-            key, lower_match, upper_match, idx_match, add_concat_match = RecipeReader._set_key_and_matches(key)
+            key, lower_match, upper_match, replace_match, idx_match, add_concat_match = (
+                RecipeReader._set_key_and_matches(key)
+            )
 
             if add_concat_match:
                 lhs = self._eval_jinja_token(cast(str, add_concat_match.group(1)))
@@ -352,6 +366,8 @@ class RecipeReader(IsModifiable):
                     # variable's value as a fall-back.
                     if 0 <= idx < len(value):
                         value = value[idx]
+                if replace_match:
+                    value = value.replace(replace_match.group(2), replace_match.group(3))
                 s = s.replace(match, value)
             # $-Escaping the unresolved variable does a few things:
             #   - Clearly identifies the value as an unresolved variable

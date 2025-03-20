@@ -645,6 +645,12 @@ def test_contains_value(file: str, path: str, expected: bool) -> None:
         ("sub_vars.yaml", "/requirements/fake_run_constrained/14", True, "dne42"),
         ("sub_vars.yaml", "/requirements/fake_run_constrained/15", True, 'foo > "42"'),
         ("sub_vars.yaml", "/requirements/fake_run_constrained/16", True, "foo > 6"),
+        # Replace cases
+        ("sub_vars.yaml", "/requirements/fake_run_constrained/17", True, "TYPES_toml"),
+        ("sub_vars.yaml", "/requirements/fake_run_constrained/18", True, "types_toml"),
+        ("sub_vars.yaml", "/requirements/fake_run_constrained/19", True, "TYPES_toml"),
+        ("sub_vars.yaml", "/requirements/fake_run_constrained/20", True, "types_toml"),
+        ("sub_vars.yaml", "/requirements/fake_run_constrained/21", True, "TYPES_TOML"),
         ## v1_simple-recipe.yaml ##
         ("v1_format/v1_simple-recipe.yaml", "/build/number", False, 0),
         ("v1_format/v1_simple-recipe.yaml", "/build/number/", False, 0),
@@ -800,6 +806,12 @@ def test_contains_value(file: str, path: str, expected: bool) -> None:
         ("v1_format/v1_sub_vars.yaml", "/requirements/fake_run_constrained/14", True, "dne42"),
         ("v1_format/v1_sub_vars.yaml", "/requirements/fake_run_constrained/15", True, 'foo > "42"'),
         ("v1_format/v1_sub_vars.yaml", "/requirements/fake_run_constrained/16", True, "foo > 6"),
+        ("v1_format/v1_sub_vars.yaml", "/requirements/fake_run_constrained/17", True, "TYPES_toml"),
+        ("v1_format/v1_sub_vars.yaml", "/requirements/fake_run_constrained/18", True, "types_toml"),
+        ("v1_format/v1_sub_vars.yaml", "/requirements/fake_run_constrained/19", True, "TYPES_toml"),
+        ("v1_format/v1_sub_vars.yaml", "/requirements/fake_run_constrained/20", True, "types_toml"),
+        ("v1_format/v1_sub_vars.yaml", "/requirements/fake_run_constrained/21", True, "TYPES_TOML"),
+        # Replace cases
         ## multi-output.yaml ##
         ("multi-output.yaml", "/outputs/0/build/run_exports/0", False, "bar"),
         ("multi-output.yaml", "/outputs/0/build/run_exports", False, ["bar"]),
