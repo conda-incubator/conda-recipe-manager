@@ -47,6 +47,8 @@ requirements:
     - ${{ dne + 42 }}
     - foo > ${{ '4' + "2" }}
     - foo > ${{ 4 + 2 }}
+    - ${{ name|replace("-", "_")}}
+    - ${{ name | lower | replace('-', '_')}}
 
 tests:
   - python:
