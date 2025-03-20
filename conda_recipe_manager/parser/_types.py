@@ -197,10 +197,12 @@ class Regex:
 
     # All recognized JINJA functions are kept in a set for the convenience of trying to match against all of them.
     # Group 1 contains the function or variable name, Group 2 contains the arguments, if any.
+    # NOTE: `| replace()` and `.replace()` are both valid in V0 and common. `.upper()` and `.lower()` are VERY uncommon,
+    # but are trivial to support. In V1, `| <func>` is the only acceptable form.
     JINJA_FUNCTION_LOWER: Final[re.Pattern[str]] = re.compile(r"\|\s*(lower)")
     JINJA_FUNCTION_UPPER: Final[re.Pattern[str]] = re.compile(r"\|\s*(upper)")
     JINJA_FUNCTION_REPLACE: Final[re.Pattern[str]] = re.compile(
-        r"""\|\s*(replace)\(['"](.*)['"]\s*,\s*['"](.*)['"]\)"""
+        r"""[\|\.]\s*(replace)\(['"](.*)['"]\s*,\s*['"](.*)['"]\)"""
     )
     JINJA_FUNCTION_IDX_ACCESS: Final[re.Pattern[str]] = re.compile(r"(\w+)\[(\d+)\]")
     JINJA_FUNCTION_ADD_CONCAT: Final[re.Pattern[str]] = re.compile(
