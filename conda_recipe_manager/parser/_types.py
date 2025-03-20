@@ -199,7 +199,9 @@ class Regex:
     # Group 1 contains the function or variable name, Group 2 contains the arguments, if any.
     JINJA_FUNCTION_LOWER: Final[re.Pattern[str]] = re.compile(r"\|\s*(lower)")
     JINJA_FUNCTION_UPPER: Final[re.Pattern[str]] = re.compile(r"\|\s*(upper)")
-    JINJA_FUNCTION_REPLACE: Final[re.Pattern[str]] = re.compile(r"\|\s*(replace)\((.*)\)")
+    JINJA_FUNCTION_REPLACE: Final[re.Pattern[str]] = re.compile(
+        r"""\|\s*(replace)\(['"](.*)['"]\s*,\s*['"](.*)['"]\)"""
+    )
     JINJA_FUNCTION_IDX_ACCESS: Final[re.Pattern[str]] = re.compile(r"(\w+)\[(\d+)\]")
     JINJA_FUNCTION_ADD_CONCAT: Final[re.Pattern[str]] = re.compile(
         r"([\"\']?[\w\.]+[\"\']?)\s*\+\s*([\"\']?[\w\.]+[\"\']?)"
