@@ -47,6 +47,8 @@ requirements:
     - {{ name|replace("-", "_") }}
     - {{ name | lower | replace('-', '_') }}
     - {{ name.replace('-', '_') }}
+    - {{ name.lower().replace('-', '_') }}
+    - {{ name.upper().replace('-', '_') }}
 
 test:
   imports:
