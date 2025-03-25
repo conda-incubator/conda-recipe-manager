@@ -261,22 +261,28 @@ class RecipeReader(IsModifiable):
         :param key: Sanitized key to perform JINJA functions on.
         :returns: The modified key, if any JINJA functions apply. Also returns any applicable match objects.
         """
-        # TODO add support for REPLACE
+
+        # Helper function that strips-out JINJA ops out of the string, `key`.
+        def _strip_op(k: str, m: Optional[re.Match[str]]) -> str:
+            if not m:
+                return k
+            return k.replace(m.group(), "").strip()
 
         # Example: {{ name | lower }}
         lower_match = Regex.JINJA_FUNCTION_LOWER.search(key)
-        if lower_match:
-            key = key.replace(lower_match.group(), "").strip()
+        key = _strip_op(key, lower_match)
 
         # Example: {{ name | upper }}
         upper_match = Regex.JINJA_FUNCTION_UPPER.search(key)
-        if upper_match:
-            key = key.replace(upper_match.group(), "").strip()
+        key = _strip_op(key, upper_match)
 
         # Example: {{ name | replace('-', '_') }
         replace_match = Regex.JINJA_FUNCTION_REPLACE.search(key)
-        if replace_match:
-            key = key.replace(replace_match.group(), "").strip()
+        key = _strip_op(key, replace_match)
+
+        # Example: {{ name | split('.') }
+        split_match = Regex.JINJA_FUNCTION_SPLIT.search(key)
+        key = _strip_op(key, split_match)
 
         # Example: {{ name[0] }}
         idx_match = Regex.JINJA_FUNCTION_IDX_ACCESS.search(key)

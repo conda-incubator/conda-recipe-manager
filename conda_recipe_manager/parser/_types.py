@@ -204,6 +204,8 @@ class Regex:
     JINJA_FUNCTION_REPLACE: Final[re.Pattern[str]] = re.compile(
         r"""[\|\.]\s*(replace)\(['"](.*)['"]\s*,\s*['"](.*)['"]\)"""
     )
+    JINJA_FUNCTION_SPLIT: Final[re.Pattern[str]] = re.compile(r"""[\|\.]\s*(split)\(['"](.*)['"]\)""")
+    JINJA_FUNCTION_JOIN: Final[re.Pattern[str]] = re.compile(r"""[\|\.]\s*(join)\(['"](.*)['"]\)""")
     JINJA_FUNCTION_IDX_ACCESS: Final[re.Pattern[str]] = re.compile(r"(\w+)\[(\d+)\]")
     JINJA_FUNCTION_ADD_CONCAT: Final[re.Pattern[str]] = re.compile(
         r"([\"\']?[\w\.]+[\"\']?)\s*\+\s*([\"\']?[\w\.]+[\"\']?)"
@@ -214,6 +216,8 @@ class Regex:
         JINJA_FUNCTION_LOWER,
         JINJA_FUNCTION_UPPER,
         JINJA_FUNCTION_REPLACE,
+        JINJA_FUNCTION_SPLIT,
+        JINJA_FUNCTION_JOIN,
         JINJA_FUNCTION_IDX_ACCESS,
         JINJA_FUNCTION_ADD_CONCAT,
         JINJA_FUNCTION_MATCH,
