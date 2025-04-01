@@ -657,9 +657,15 @@ def test_contains_value(file: str, path: str, expected: bool) -> None:
         ("sub_vars.yaml", "/requirements/fake_run_constrained/24", True, "TYPES.toml"),
         ("sub_vars.yaml", "/requirements/fake_run_constrained/25", True, "TYPES"),
         ("sub_vars.yaml", "/requirements/fake_run_constrained/26", True, "TYPES.toml"),
+        # Complex indexing
         ("sub_vars.yaml", "/requirements/fake_run_constrained/27", True, "l"),
         ("sub_vars.yaml", "/requirements/fake_run_constrained/28", True, "T"),
         ("sub_vars.yaml", "/requirements/fake_run_constrained/29", True, "TYPES-toml"),
+        ("sub_vars.yaml", "/requirements/fake_run_constrained/30", True, "YPES-toml"),
+        ("sub_vars.yaml", "/requirements/fake_run_constrained/31", True, "TY"),
+        ("sub_vars.yaml", "/requirements/fake_run_constrained/32", True, "YP"),
+        ("sub_vars.yaml", "/requirements/fake_run_constrained/33", True, "om"),
+        # VERY complex compound statements
         ## v1_simple-recipe.yaml ##
         ("v1_format/v1_simple-recipe.yaml", "/build/number", False, 0),
         ("v1_format/v1_simple-recipe.yaml", "/build/number/", False, 0),
@@ -827,9 +833,15 @@ def test_contains_value(file: str, path: str, expected: bool) -> None:
         ("v1_format/v1_sub_vars.yaml", "/requirements/fake_run_constrained/24", True, "TYPES.toml"),
         ("v1_format/v1_sub_vars.yaml", "/requirements/fake_run_constrained/25", True, "TYPES"),
         ("v1_format/v1_sub_vars.yaml", "/requirements/fake_run_constrained/26", True, "TYPES.toml"),
+        # Complex indexing
         ("v1_format/v1_sub_vars.yaml", "/requirements/fake_run_constrained/27", True, "l"),
         ("v1_format/v1_sub_vars.yaml", "/requirements/fake_run_constrained/28", True, "T"),
         ("v1_format/v1_sub_vars.yaml", "/requirements/fake_run_constrained/29", True, "TYPES-toml"),
+        ("v1_format/v1_sub_vars.yaml", "/requirements/fake_run_constrained/30", True, "YPES-toml"),
+        ("v1_format/v1_sub_vars.yaml", "/requirements/fake_run_constrained/31", True, "TY"),
+        ("v1_format/v1_sub_vars.yaml", "/requirements/fake_run_constrained/32", True, "YP"),
+        ("v1_format/v1_sub_vars.yaml", "/requirements/fake_run_constrained/33", True, "om"),
+        # VERY complex compound statements
         ## multi-output.yaml ##
         ("multi-output.yaml", "/outputs/0/build/run_exports/0", False, "bar"),
         ("multi-output.yaml", "/outputs/0/build/run_exports", False, ["bar"]),

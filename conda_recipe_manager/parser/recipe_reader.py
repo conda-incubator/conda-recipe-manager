@@ -289,7 +289,10 @@ class RecipeReader(IsModifiable):
 
         # Example: {{ name[0] }}
         idx_match = Regex.JINJA_FUNCTION_IDX_ACCESS.search(key)
+        print(f"TODO rm: {idx_match} | {key}")
         if idx_match:
+            print("TODO rm got match!")
+            # TODO this needs to be upgraded
             key = key.replace(f"[{cast(str, idx_match.group(2))}]", "").strip()
 
         # NOTE: `split` and `join` are special. `split` changes the type from a string to a list and `join` requires
@@ -351,6 +354,34 @@ class RecipeReader(IsModifiable):
             return s[1:-1]
         return s
 
+    @staticmethod
+    def _eval_jinja_idx(idx_match: re.Match[str], value: list[str] | str) -> list[str] | str:
+        """
+        TODO
+        """
+        l_idx: Optional[int] = None if idx_match.groups()[1] is None else int(cast(str, idx_match.group(2)))
+        r_idx: Optional[int] = None if idx_match.groups()[3] is None else int(cast(str, idx_match.group(4)))
+
+        print(f"TODO rm: {l_idx} | {r_idx}")
+
+        # Bail early and don't evaluate further if indexing is invalid.
+        if l_idx is not None and (l_idx < -len(value) or l_idx >= len(value)):
+            return value
+        if r_idx is not None and (r_idx < -len(value) or r_idx >= len(value)):
+            return value
+        if l_idx is None and r_idx is None:
+            return value
+
+        # Cover all logical paths
+        if l_idx is not None:
+            if r_idx is None:
+                # Check if the colon operator is present
+                if idx_match.groups()[2] is not None:
+                    return value[l_idx:]
+                return value[l_idx]
+            return value[l_idx:r_idx]
+        return value[:r_idx]
+
     def _render_jinja_vars(self, s: str) -> JsonType:
         # pylint: disable=too-complex
         # TODO Refactor and simplify. We should really consider using a proper parser over REGEX soup.
@@ -404,12 +435,7 @@ class RecipeReader(IsModifiable):
                     join_str_idx = 3 if join_match.groups()[2] is not None else 2
                     value = join_match.group(join_str_idx).join(value)
                 if idx_match:
-                    idx = int(cast(str, idx_match.group(2)))
-                    # From our research, it looks like string indexing on JINJA variables is almost exclusively used
-                    # get the first character in a string. If the index is out of bounds, we will default to the
-                    # variable's value as a fall-back. Although rare, negative indexing is supported.
-                    if -len(value) <= idx < len(value):
-                        value = value[idx]
+                    value = RecipeReader._eval_jinja_idx(idx_match, value)
                 if replace_match:
                     value = value.replace(replace_match.group(2), replace_match.group(3))
                 s = s.replace(match, value)
