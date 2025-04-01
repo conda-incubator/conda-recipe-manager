@@ -202,9 +202,15 @@ class Regex:
     JINJA_FUNCTION_LOWER: Final[re.Pattern[str]] = re.compile(r"\|\s*(lower)|\.(lower)\(\)")
     JINJA_FUNCTION_UPPER: Final[re.Pattern[str]] = re.compile(r"\|\s*(upper)|\.(upper)\(\)")
     JINJA_FUNCTION_REPLACE: Final[re.Pattern[str]] = re.compile(
-        r"""[\|\.]\s*(replace)\(['"](.*)['"]\s*,\s*['"](.*)['"]\)"""
+        r"""[\|\.]\s*(replace)\(['"]([^'"]*)['"]\s*,\s*['"]([^'"]*)['"]\)"""
     )
-    JINJA_FUNCTION_IDX_ACCESS: Final[re.Pattern[str]] = re.compile(r"(\w+)\[(\d+)\]")
+    JINJA_FUNCTION_SPLIT: Final[re.Pattern[str]] = re.compile(r"""[\|\.]\s*(split)\(['"]([^'"]*)['"]\)""")
+    # NOTE: `join` doesn't follow the same pattern as the other JINJA regular expressions. The function name can be in
+    # one of two group locations.
+    JINJA_FUNCTION_JOIN: Final[re.Pattern[str]] = re.compile(
+        r"""\|\s*(join)\(['"]([^'"]*)['"]\)|['"]([^'"]*)['"]\.(join)\((.*)\)"""
+    )
+    JINJA_FUNCTION_IDX_ACCESS: Final[re.Pattern[str]] = re.compile(r"(.+)\[(-?\d+)\]")
     JINJA_FUNCTION_ADD_CONCAT: Final[re.Pattern[str]] = re.compile(
         r"([\"\']?[\w\.]+[\"\']?)\s*\+\s*([\"\']?[\w\.]+[\"\']?)"
     )
@@ -214,6 +220,11 @@ class Regex:
         JINJA_FUNCTION_LOWER,
         JINJA_FUNCTION_UPPER,
         JINJA_FUNCTION_REPLACE,
+        # TODO FIX: Adding `split` and `join` to this list causes some odd bracket-escaping in the
+        # `regression_jinja_sub.yaml` upgrade test. This will require additional investigation, but for now, IMO the
+        # old behavior is a little less wrong, so we'll leave it as is.
+        # JINJA_FUNCTION_SPLIT,
+        # JINJA_FUNCTION_JOIN,
         JINJA_FUNCTION_IDX_ACCESS,
         JINJA_FUNCTION_ADD_CONCAT,
         JINJA_FUNCTION_MATCH,
