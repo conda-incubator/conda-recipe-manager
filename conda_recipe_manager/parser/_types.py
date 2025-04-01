@@ -220,8 +220,11 @@ class Regex:
         JINJA_FUNCTION_LOWER,
         JINJA_FUNCTION_UPPER,
         JINJA_FUNCTION_REPLACE,
-        JINJA_FUNCTION_SPLIT,
-        JINJA_FUNCTION_JOIN,
+        # TODO FIX: Adding `split` and `join` to this list causes some odd bracket-escaping in the
+        # `regression_jinja_sub.yaml` upgrade test. This will require additional investigation, but for now, IMO the
+        # old behavior is a little less wrong, so we'll leave it as is.
+        # JINJA_FUNCTION_SPLIT,
+        # JINJA_FUNCTION_JOIN,
         JINJA_FUNCTION_IDX_ACCESS,
         JINJA_FUNCTION_ADD_CONCAT,
         JINJA_FUNCTION_MATCH,
