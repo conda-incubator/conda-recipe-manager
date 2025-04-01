@@ -407,8 +407,8 @@ class RecipeReader(IsModifiable):
                     idx = int(cast(str, idx_match.group(2)))
                     # From our research, it looks like string indexing on JINJA variables is almost exclusively used
                     # get the first character in a string. If the index is out of bounds, we will default to the
-                    # variable's value as a fall-back.
-                    if 0 <= idx < len(value):
+                    # variable's value as a fall-back. Although rare, negative indexing is supported.
+                    if -len(value) <= idx < len(value):
                         value = value[idx]
                 if replace_match:
                     value = value.replace(replace_match.group(2), replace_match.group(3))

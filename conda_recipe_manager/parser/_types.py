@@ -210,7 +210,7 @@ class Regex:
     JINJA_FUNCTION_JOIN: Final[re.Pattern[str]] = re.compile(
         r"""\|\s*(join)\(['"]([^'"]*)['"]\)|['"]([^'"]*)['"]\.(join)\((.*)\)"""
     )
-    JINJA_FUNCTION_IDX_ACCESS: Final[re.Pattern[str]] = re.compile(r"(.+)\[(\d+)\]")
+    JINJA_FUNCTION_IDX_ACCESS: Final[re.Pattern[str]] = re.compile(r"(.+)\[(-?\d+)\]")
     JINJA_FUNCTION_ADD_CONCAT: Final[re.Pattern[str]] = re.compile(
         r"([\"\']?[\w\.]+[\"\']?)\s*\+\s*([\"\']?[\w\.]+[\"\']?)"
     )

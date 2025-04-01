@@ -54,6 +54,9 @@ requirements:
     - {{ '.'.join(name.split('-')) }}
     - {{ name.split('-')[0] }}
     - {{ name | split('-') | join('.') }}
+    - {{ name[-1] }}
+    - {{ name[-10] }}
+    - {{ name[-11] }}
 
 test:
   imports:
