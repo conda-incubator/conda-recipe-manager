@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import concurrent.futures as cf
 import logging
+import re
 import sys
 import time
 from pathlib import Path
@@ -54,6 +55,19 @@ class _CliArgs(NamedTuple):
     target_version: Optional[str]
     retry_interval: float
     save_on_failure: bool
+
+
+class _Regex:
+    """
+    Namespace that contains all pre-compiled regular expressions used in this tool.
+    """
+
+    # Attempts to match PyPi source archive URLs. Here is a mapping of the groupings:
+    # Group:      1                2                          3                         4                   5
+    #        | Base URL | Package Name (in URL) | Package name (in archive) | Version (in archive) | Archive extension |
+    PYPI_URL: Final[re.Pattern[str]] = re.compile(
+        r"(https?://pypi\.io/packages/source/[a-z]/)([\w-]*)/([\w-]*)-([\d\.]*)(\.tar\.gz|\.zip)"
+    )
 
 
 # Common variable names used for source artifact hashes.
@@ -236,6 +250,61 @@ def _update_version(recipe_parser: RecipeParser, cli_args: _CliArgs) -> None:
     )
 
 
+def _fetch_archive(fetcher: HttpArtifactFetcher, cli_args: _CliArgs) -> HttpArtifactFetcher:
+    """
+    Fetches the target source archive for future use. If a correction needs to be made, this function returns a new
+    Artifact Fetcher instance.
+
+    For example, many PyPi archives (as of approximately 2024) now use underscores in the archive file name even though
+    the package name still uses hyphens.
+
+    :param fetcher: Artifact fetching instance to use.
+    :param cli_args: Immutable CLI arguments from the user.
+    :raises FetchError: If an issue occurred while downloading or extracting the archive.
+    :returns: The original fetcher or a new fetcher instance if a correction needed to be made.
+    """
+    # NOTE: This is the most I/O-bound operation in `bump-recipe` by a country mile. At the time of writing,
+    # running this operation in the background will not make any significant improvements to performance. Every other
+    # operation is so fast in comparison, any gains would likely be lost with the additional overhead. This op is
+    # also inherently reliant on having the version change performed ahead of time. In addition, parallelizing the
+    # retries defeats the point of having a back-off timer.
+
+    pypi_correct_attempts = 0
+    for retry_id in range(1, _RETRY_LIMIT + 1):
+        try:
+            log.info("Fetching artifact `%s`, attempt #%d", fetcher, retry_id)
+            fetcher.fetch()
+            return fetcher
+        except FetchError:
+            # Only attempt the correction once. All other retries will be on the original URL and will skip the attempt
+            # logic.
+            if pypi_correct_attempts > 0:
+                time.sleep(retry_id * cli_args.retry_interval)
+                continue
+
+            # On first failure, attempt to correct the URL, if it is something we know how to try to fix.
+            pypi_match = _Regex.PYPI_URL.match(fetcher.get_archive_url())
+            pypi_correct_attempts += 1
+            # If the PyPi correction fails, we still want to wait the intended time before the next retry.
+            if pypi_match is None:
+                time.sleep(retry_id * cli_args.retry_interval)
+                continue
+
+            corrected_archive = cast(str, pypi_match.group(3).replace("-", "_"))
+            corrected_url = _Regex.PYPI_URL.sub(r"\1\2/" + corrected_archive + r"-\4\5", fetcher.get_archive_url())
+            # TODO update recipe file
+            # TODO add unit tests
+            log.warning("Archive found at %s. Will attempt to update recipe file.", corrected_url)
+            new_fetcher = HttpArtifactFetcher(str(fetcher), corrected_url)
+            try:
+                new_fetcher.fetch()
+                return new_fetcher
+            except FetchError:
+                continue
+
+    raise FetchError(f"Failed to fetch `{fetcher}` after {_RETRY_LIMIT} retries.")
+
+
 def _get_sha256(fetcher: HttpArtifactFetcher, cli_args: _CliArgs) -> str:
     """
     Wrapping function that attempts to retrieve an HTTP/HTTPS artifact with a retry mechanism.
@@ -245,26 +314,15 @@ def _get_sha256(fetcher: HttpArtifactFetcher, cli_args: _CliArgs) -> str:
     :raises FetchError: If an issue occurred while downloading or extracting the archive.
     :returns: The SHA-256 hash of the artifact, if it was able to be downloaded.
     """
-    # NOTE: This is the most I/O-bound operation in `bump-recipe` by a country mile. At the time of writing,
-    # running this operation in the background will not make any significant improvements to performance. Every other
-    # operation is so fast in comparison, any gains would likely be lost with the additional overhead. This op is
-    # also inherently reliant on having the version change performed ahead of time. In addition, parallelizing the
-    # retries defeats the point of having a back-off timer.
-    for retry_id in range(1, _RETRY_LIMIT + 1):
-        try:
-            log.info("Fetching artifact `%s`, attempt #%d", fetcher, retry_id)
-            fetcher.fetch()
-            return fetcher.get_archive_sha256()
-        except FetchError:
-            time.sleep(retry_id * cli_args.retry_interval)
-    raise FetchError(f"Failed to fetch `{fetcher}` after {_RETRY_LIMIT} retries.")
+    # TODO eliminate this function
+    return _fetch_archive(fetcher, cli_args).get_archive_sha256()
 
 
 def _update_sha256_check_hash_var(
     recipe_parser: RecipeParser, fetcher_tbl: dict[str, BaseArtifactFetcher], cli_args: _CliArgs
 ) -> bool:
     """
-    Helper function that checks if the SHA-256 is stored in a variable. If it does, it performs the update.
+    Helper function that checks if the SHA-256 is stored in a variable. If it is, it performs the update.
 
     :param recipe_parser: Recipe file to update.
     :param fetcher_tbl: Table of artifact source locations to corresponding ArtifactFetcher instances.
